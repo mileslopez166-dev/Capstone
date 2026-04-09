@@ -1,0 +1,125 @@
+<?php
+
+use App\Http\Controllers\AssessmentController;
+use App\Models\User;
+use App\Models\Assessment;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route(auth()->user()->dashboardRouteName());
+    }
+
+    return redirect()->route('login');
+});
+
+Route::get('/dashboard', function () {
+    return redirect()->route(auth()->user()->dashboardRouteName());
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/teacher/dashboard', function () {
+    $students = User::query()
+        ->where('role', 'student')
+        ->orderBy('name')
+        ->get();
+
+    $assessmentCount = Assessment::query()
+        ->where('created_by', auth()->id())
+        ->count();
+
+    return view('dashboard', [
+        'students' => $students,
+        'assessmentCount' => $assessmentCount,
+    ]);
+})->middleware(['auth', 'verified'])->name('teacher.dashboard');
+
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('admin.dashboard');
+
+Route::get('/student/dashboard', function () {
+    return view('student.dashboard');
+})->middleware(['auth', 'verified'])->name('student.dashboard');
+
+Route::get('/student/activities', function () {
+    $pendingAssessments = Assessment::query()
+        ->where('status', 'published')
+        ->latest()
+        ->get();
+
+    return view('student.activities', [
+        'pendingAssessments' => $pendingAssessments,
+    ]);
+})->middleware(['auth', 'verified'])->name('student.activities');
+
+Route::get('/student/rewards', function () {
+    return view('student.rewards');
+})->middleware(['auth', 'verified'])->name('student.rewards');
+
+Route::get('/teacher/students', function () {
+    $students = User::query()
+        ->where('role', 'student')
+        ->orderBy('name')
+        ->get();
+
+    return view('students.index', [
+        'students' => $students,
+    ]);
+})->middleware(['auth', 'verified'])->name('students.index');
+
+Route::get('/teacher/students/{student}', function (User $student) {
+    abort_unless($student->isStudent(), 404);
+
+    return view('students.show', [
+        'student' => $student,
+    ]);
+})->middleware(['auth', 'verified'])->name('students.show');
+
+Route::get('/teacher/reports', function () {
+    return view('reports.index');
+})->middleware(['auth', 'verified'])->name('reports.index');
+
+Route::get('/teacher/reports/juan-dela-cruz', function () {
+    return view('reports.student', [
+        'student' => [
+            'name' => 'Juan Dela Cruz',
+            'grade' => 'Grade 6-B',
+            'student_id' => '#2024-0082',
+            'points' => '12,450',
+            'level' => 'Level 24',
+            'xp_to_next' => '850 XP to next level',
+            'literacy' => 88,
+            'numeracy' => 72,
+            'accuracy' => '90%',
+            'response_time' => '14.2s',
+        ],
+    ]);
+})->middleware(['auth', 'verified'])->name('reports.student');
+
+Route::get('/teacher/assessments', [AssessmentController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('assessments.index');
+
+Route::post('/teacher/assessments', [AssessmentController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('assessments.store');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
