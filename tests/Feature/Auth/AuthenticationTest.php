@@ -15,6 +15,8 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertStatus(200);
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
@@ -51,7 +53,7 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'student',
+            'role' => 'admin',
             'password' => 'password',
         ]);
 
@@ -111,5 +113,69 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertRedirect('/');
+    }
+
+    public function test_pending_teachers_can_not_log_in_until_approved(): void
+    {
+        $user = User::factory()->teacher()->pendingApproval()->create();
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'role' => 'teacher',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
+    public function test_pending_students_can_not_log_in_until_approved(): void
+    {
+        $user = User::factory()->pendingApproval()->create();
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'role' => 'student',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
+    public function test_admin_login_bootstraps_the_default_admin_when_missing(): void
+    {
+        User::query()->where('email', 'admin@aipgaals.com')->delete();
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'admin@aipgaals.com',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'admin@aipgaals.com',
+            'role' => 'admin',
+            'password' => 'admin123',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'admin@aipgaals.com',
+            'role' => 'admin',
+            'approval_status' => 'approved',
+        ]);
+    }
+
+    public function test_authenticated_users_are_redirected_away_from_the_login_screen(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/login');
+
+        $response->assertRedirect(route('student.dashboard'));
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
     }
 }

@@ -20,7 +20,16 @@
 
                     <input type="hidden" name="role" x-model="role">
 
-                    <div class="mb-4 grid grid-cols-2 gap-4 rounded-lg bg-surface-container-low p-1">
+                    <div class="mb-4 grid grid-cols-1 gap-3 rounded-lg bg-surface-container-low p-1 sm:grid-cols-3">
+                        <button
+                            class="flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-all active:scale-95"
+                            type="button"
+                            :class="role === 'admin' ? 'bg-surface-container-lowest font-bold text-primary shadow-sm' : 'font-medium text-on-surface-variant hover:bg-surface-container-high/50'"
+                            @click="role = 'admin'"
+                        >
+                            <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+                            <span>Admin</span>
+                        </button>
                         <button
                             class="flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-all active:scale-95"
                             type="button"

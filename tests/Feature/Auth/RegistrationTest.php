@@ -9,13 +9,6 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        config(['auth.teacher_registration_code' => 'TEACHER2026']);
-    }
-
     public function test_registration_screen_can_be_rendered(): void
     {
         $response = $this->get('/register');
@@ -29,7 +22,7 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'teacher',
-            'teacher_registration_code' => 'TEACHER2026',
+            'section' => 'Grade 6-A',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -40,6 +33,7 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'role' => 'teacher',
+            'approval_status' => 'pending',
         ]);
     }
 
@@ -49,6 +43,7 @@ class RegistrationTest extends TestCase
             'name' => 'Student User',
             'email' => 'student@example.com',
             'role' => 'student',
+            'section' => 'Grade 6-B',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -59,6 +54,7 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'student@example.com',
             'role' => 'student',
+            'approval_status' => 'pending',
         ]);
     }
 
@@ -68,6 +64,7 @@ class RegistrationTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'role' => 'admin',
+            'section' => 'Admin-Section',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -79,21 +76,22 @@ class RegistrationTest extends TestCase
         ]);
     }
 
-    public function test_teacher_registration_requires_the_correct_access_code(): void
+    public function test_teacher_registration_no_longer_requires_an_access_code(): void
     {
-        $response = $this->from('/register')->post('/register', [
+        $response = $this->post('/register', [
             'name' => 'Teacher User',
             'email' => 'teacher@example.com',
             'role' => 'teacher',
-            'teacher_registration_code' => 'WRONGCODE',
+            'section' => 'Grade 6-C',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        $response->assertRedirect('/register');
-        $response->assertSessionHasErrors('teacher_registration_code');
-        $this->assertDatabaseMissing('users', [
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('status');
+        $this->assertDatabaseHas('users', [
             'email' => 'teacher@example.com',
+            'approval_status' => 'pending',
         ]);
     }
 }

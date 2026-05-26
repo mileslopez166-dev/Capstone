@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TokenRequestController;
 use App\Http\Controllers\AssessmentController;
 use App\Models\User;
 use App\Models\Assessment;
@@ -45,9 +47,21 @@ Route::get('/teacher/dashboard', function () {
     ]);
 })->middleware(['auth', 'verified'])->name('teacher.dashboard');
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->middleware(['auth', 'verified'])->name('admin.dashboard');
+Route::get('/admin/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('admin.dashboard');
+
+Route::get('/admin/token-requests', [TokenRequestController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.token-requests.index');
+
+Route::post('/admin/token-requests/{user}/approve', [TokenRequestController::class, 'approve'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.token-requests.approve');
+
+Route::post('/admin/token-requests/{user}/decline', [TokenRequestController::class, 'decline'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.token-requests.decline');
 
 Route::get('/student/dashboard', function () {
     return view('student.dashboard');

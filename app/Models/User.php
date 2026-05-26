@@ -22,6 +22,11 @@ class User extends Authenticatable
         'name',
         'email',
         'role',
+        'section',
+        'teacher_token',
+        'approval_status',
+        'approved_at',
+        'approved_by',
         'password',
     ];
 
@@ -42,12 +47,23 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'approved_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    public function isPendingApproval(): bool
+    {
+        return $this->approval_status === 'pending';
     }
 
     public function isTeacher(): bool

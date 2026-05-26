@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Support\AdminAccountBootstrapper;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'email' => ['required', 'string', 'email'],
-            'role' => ['required', 'string', 'in:student,teacher'],
+            'role' => ['required', 'string', 'in:admin,student,teacher'],
             'password' => ['required', 'string'],
         ];
     }
@@ -43,12 +44,48 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+        app(AdminAccountBootstrapper::class)->ensureExists();
 
         $email = $this->string('email')->toString();
         $password = $this->string('password')->toString();
-        $selectedRole = $this->string('role')->toString();
         $remember = $this->boolean('remember');
 
+        // First, check if the user is an admin trying to log in.
+        $user = User::where('email', $email)->first();
+
+        // DEBUG: If you are still having issues, uncomment the following line to inspect the user data.
+        // if ($user && $email === 'admin@aipgaals.com') {
+        //     dd($user->toArray(), $user->isAdmin(), Hash::check($password, $user->password));
+        // }
+
+        if ($user && $user->isAdmin() && Hash::check($password, $user->password)) {
+            Auth::login($user, $remember);
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        if ($user && ! $user->isAdmin() && ! $user->isApproved() && Hash::check($password, $user->password)) {
+            $roleLabel = $user->isTeacher() ? 'teacher' : 'student';
+            $message = $user->approval_status === 'rejected'
+                ? "Your {$roleLabel} account request was declined. Please contact the administrator."
+                : "Your {$roleLabel} account is still pending administrator approval.";
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
+
+        $selectedRole = $this->string('role')->toString();
+
+        // Repair legacy accounts that predate role enforcement by adopting the selected role on login.
+        if ($user && blank($user->role) && Hash::check($password, $user->password)) {
+            $user->forceFill(['role' => $selectedRole])->save();
+            Auth::login($user, $remember);
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        // If not an admin, proceed with role-based authentication.
         $credentials = [
             'email' => $email,
             'password' => $password,
@@ -56,28 +93,6 @@ class LoginRequest extends FormRequest
         ];
 
         if (! Auth::attempt($credentials, $remember)) {
-            $user = User::where('email', $email)->first();
-
-            // Repair legacy accounts created before role-based auth was enforced.
-            if ($user && blank($user->role) && Hash::check($password, $user->password)) {
-                $user->forceFill(['role' => $selectedRole])->save();
-                Auth::login($user, $remember);
-
-                RateLimiter::clear($this->throttleKey());
-
-                return;
-            }
-
-            if (Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
-                if (Auth::user()?->isAdmin()) {
-                    RateLimiter::clear($this->throttleKey());
-
-                    return;
-                }
-
-                Auth::logout();
-            }
-
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

@@ -20,6 +20,15 @@ return [
 
     'teacher_registration_code' => env('TEACHER_REGISTRATION_CODE'),
 
+    'bootstrap_admin' => [
+        'enabled' => env('ADMIN_BOOTSTRAP_ENABLED', true),
+        'name' => env('ADMIN_NAME', 'System Administrator'),
+        'email' => env('ADMIN_EMAIL', 'admin@aipgaals.com'),
+        'password' => env('ADMIN_PASSWORD', 'admin123'),
+        'section' => env('ADMIN_SECTION', 'Admin-Office'),
+        'sync_password' => env('ADMIN_SYNC_PASSWORD', false),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards

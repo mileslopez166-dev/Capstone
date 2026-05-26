@@ -115,22 +115,34 @@
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="group" x-show="role === 'teacher'" x-transition>
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="teacher_registration_code">Teacher Access Code</label>
+                        <div class="group">
+                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="section">Section</label>
                             <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">vpn_key</span>
-                                <input
-                                    id="teacher_registration_code"
-                                    name="teacher_registration_code"
-                                    type="password"
-                                    value="{{ old('teacher_registration_code') }}"
-                                    autocomplete="off"
-                                    placeholder="Enter teacher access code"
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">class</span>
+                                <select
+                                    id="section"
+                                    name="section"
+                                    required
+                                    class="w-full appearance-none rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-12 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
                                 >
+                                    <option value="" disabled selected>Select your section</option>
+                                    <option value="Grade 6-A" {{ old('section') == 'Grade 6-A' ? 'selected' : '' }}>Grade 6-A</option>
+                                    <option value="Grade 6-B" {{ old('section') == 'Grade 6-B' ? 'selected' : '' }}>Grade 6-B</option>
+                                    <option value="Grade 6-C" {{ old('section') == 'Grade 6-C' ? 'selected' : '' }}>Grade 6-C</option>
+                                </select>
+                                <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant">expand_more</span>
                             </div>
-                            <p class="mt-2 px-1 text-xs text-on-surface-variant">This code is required for teacher account creation.</p>
-                            <x-input-error :messages="$errors->get('teacher_registration_code')" class="mt-2 text-sm text-error" />
+                            <x-input-error :messages="$errors->get('section')" class="mt-2 text-sm text-error" />
+                        </div>
+
+                        <div class="rounded-xl border border-primary/10 bg-primary/5 p-4 text-sm text-on-surface-variant" x-show="role === 'teacher' || role === 'student'" x-transition>
+                            <div class="flex items-start gap-3">
+                                <span class="material-symbols-outlined mt-0.5 text-primary">pending_actions</span>
+                                <div>
+                                    <p class="font-semibold text-on-surface" x-text="role === 'teacher' ? 'Teacher accounts require administrator approval.' : 'Student accounts require administrator approval.'"></p>
+                                    <p class="mt-1">After registration, your request will be reviewed in the admin token request queue before you can sign in.</p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="group">
