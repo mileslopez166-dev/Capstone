@@ -22,7 +22,7 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'role' => 'teacher',
-            'section' => 'Grade 6-A',
+            'section' => 'Section A',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -33,6 +33,7 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'role' => 'teacher',
+            'section' => 'Section A',
             'approval_status' => 'pending',
         ]);
     }
@@ -43,7 +44,7 @@ class RegistrationTest extends TestCase
             'name' => 'Student User',
             'email' => 'student@example.com',
             'role' => 'student',
-            'section' => 'Grade 6-B',
+            'section' => 'Section B',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -82,7 +83,7 @@ class RegistrationTest extends TestCase
             'name' => 'Teacher User',
             'email' => 'teacher@example.com',
             'role' => 'teacher',
-            'section' => 'Grade 6-C',
+            'section' => 'Section C',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -91,6 +92,7 @@ class RegistrationTest extends TestCase
         $response->assertSessionHas('status');
         $this->assertDatabaseHas('users', [
             'email' => 'teacher@example.com',
+            'section' => 'Section C',
             'approval_status' => 'pending',
         ]);
     }

@@ -35,16 +35,35 @@ class AdminTokenRequestTest extends TestCase
     public function test_admin_can_approve_a_pending_teacher_request(): void
     {
         $admin = User::factory()->admin()->create();
-        $teacher = User::factory()->teacher()->pendingApproval()->create();
+        $teacher = User::factory()->teacher()->pendingApproval()->create([
+            'section' => 'Section A',
+        ]);
 
-        $response = $this->actingAs($admin)->post(route('admin.token-requests.approve', $teacher));
+        $response = $this->actingAs($admin)->post(route('admin.token-requests.approve', $teacher), [
+            'section' => 'Section B',
+        ]);
 
         $response->assertRedirect(route('admin.token-requests.index'));
         $this->assertDatabaseHas('users', [
             'id' => $teacher->id,
+            'section' => 'Section B',
             'approval_status' => 'approved',
             'approved_by' => $admin->id,
         ]);
+    }
+
+    public function test_pending_teacher_request_displays_an_editable_section(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $teacher = User::factory()->teacher()->pendingApproval()->create([
+            'section' => 'Section A',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.token-requests.index'));
+
+        $response->assertOk();
+        $response->assertSee('form="approve-request-'.$teacher->id.'"', false);
+        $response->assertSee('value="Section A" selected', false);
     }
 
     public function test_admin_can_decline_a_pending_teacher_request(): void

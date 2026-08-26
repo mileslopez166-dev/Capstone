@@ -13,27 +13,7 @@
 
     <div class="min-h-screen bg-background font-body text-on-surface">
         @if ($isStudent)
-            <nav class="sticky top-0 z-50 bg-white/80 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
-                <div class="mx-auto flex w-full items-center justify-between px-6 py-4">
-                    <div class="text-2xl font-extrabold italic text-blue-600">AI-PGAALS</div>
-
-                    <div class="hidden items-center gap-8 md:flex">
-                        <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.dashboard') }}">Home</a>
-                        <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.activities') }}">Activities</a>
-                        <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.rewards') }}">Rewards</a>
-                        <a class="border-b-4 border-blue-500 font-bold font-headline text-blue-700 transition-colors hover:text-blue-500" href="{{ route('profile.edit') }}">Profile</a>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <button class="text-on-surface-variant transition-colors hover:text-primary" type="button">
-                            <span class="material-symbols-outlined">notifications</span>
-                        </button>
-                        <a class="text-on-surface-variant transition-colors hover:text-primary" href="{{ route('profile.edit') }}">
-                            <span class="material-symbols-outlined">account_circle</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
+            <x-student-nav active="profile" />
         @endif
 
         <main class="mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6">
@@ -222,25 +202,5 @@
             </div>
         </main>
 
-        @if ($isStudent)
-            <nav class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[2.5rem] bg-white/80 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl md:hidden dark:bg-slate-900/80">
-                <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.dashboard') }}">
-                    <span class="material-symbols-outlined">home</span>
-                    <span class="text-[10px] font-bold lowercase">Home</span>
-                </a>
-                <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.activities') }}">
-                    <span class="material-symbols-outlined">rocket_launch</span>
-                    <span class="text-[10px] font-bold lowercase">Activities</span>
-                </a>
-                <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.rewards') }}">
-                    <span class="material-symbols-outlined">backpack</span>
-                    <span class="text-[10px] font-bold lowercase">Rewards</span>
-                </a>
-                <div class="flex scale-110 flex-col items-center justify-center rounded-[2rem] bg-blue-100 px-6 py-2 text-blue-700 shadow-inner dark:bg-blue-900/40 dark:text-blue-300">
-                    <span class="material-symbols-outlined">face</span>
-                    <span class="text-[10px] font-bold lowercase">Profile</span>
-                </div>
-            </nav>
-        @endif
     </div>
 </x-app-layout>

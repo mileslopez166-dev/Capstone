@@ -1,0 +1,66 @@
+AI-PGAALS - reusable project memory prompt for ChatGPT/Codex
+
+Use this as context when I ask about "this project", "this repo", "AI-PGAALS", or "the school app".
+
+Project identity
+- Name: AI-PGAALS.
+- Local path: C:\laragon\www\AI-PGAALS.
+- Environment: Windows with Laragon; shell is usually PowerShell.
+- App type: Laravel web application for a school/learning platform with admin, teacher, and student roles.
+- Main stack: PHP 8.1+, Laravel 10, Laravel Breeze-style auth, Sanctum, Composer, PHPUnit, Node/npm, Vite, Tailwind CSS, Alpine.js.
+
+What the app currently does
+- Users have roles: admin, teacher, student.
+- Users also have section, teacher_token, approval_status, approved_at, approved_by, and soft deletes.
+- User dashboard routing is role-based:
+  - admin -> admin.dashboard
+  - teacher -> teacher.dashboard
+  - student/default -> student.dashboard
+- Admin features include dashboard, token request approval/decline, user edit/update/delete, trash, restore, force delete, and empty trash.
+- Teacher features include dashboard, student roster/detail pages, reports, and assessment creation/viewing.
+- Student features include dashboard, activities, published assessment view, and rewards.
+- Assessments belong to a teacher through created_by and include title, subject, quiz_type, delivery_method, target_section, focus_areas, asset_path, manual_questions, instructions, and status.
+
+Important files and folders
+- Routes: routes\web.php, routes\auth.php.
+- Models: app\Models\User.php, app\Models\Assessment.php.
+- Controllers: app\Http\Controllers\AssessmentController.php, app\Http\Controllers\Admin\DashboardController.php, app\Http\Controllers\Admin\TokenRequestController.php, app\Http\Controllers\Admin\UserManagementController.php.
+- Views: resources\views\dashboard.blade.php, resources\views\student\, resources\views\students\, resources\views\reports\, resources\views\assessments\, resources\views\admin\.
+- Layout/components: resources\views\layouts\, resources\views\components\teacher-sidebar.blade.php, resources\views\components\teacher-topbar.blade.php, resources\views\components\student-nav.blade.php.
+- Migrations: database\migrations\.
+- Tests: tests\Feature\ and tests\Unit\.
+- There is also a my-obsidian-vault folder containing a duplicate/snapshot-like copy of many project files; focus on the root app unless I explicitly ask about that folder.
+
+Current known project details
+- app\Models\User.php uses SoftDeletes and has helper methods isAdmin(), isTeacher(), isStudent(), isApproved(), isPendingApproval(), and dashboardRouteName().
+- app\Models\Assessment.php casts focus_areas and manual_questions to arrays.
+- database\seeders\AdminSeeder.php creates/updates the bootstrap admin using config('auth.bootstrap_admin').
+- Key migrations include role support, assessment creation, user section/token fields, approval status, assessment builder fields, and soft deletes for users.
+
+How I want future assistants to work
+- Assume I want practical implementation help unless I ask only for explanation or brainstorming.
+- Inspect the relevant files before changing code.
+- Keep patches focused and consistent with existing Laravel conventions.
+- Do not overwrite unrelated user changes.
+- Prefer apply_patch-style edits for manual changes.
+- Use Windows/PowerShell-aware commands.
+- When running checks, prefer:
+  - php artisan test
+  - npm run build
+  - php artisan migrate/status or migrations only when relevant
+- If a command fails because of local environment setup, explain the failure and the next exact command to try.
+- Be concise but specific: include changed files, what changed, and what was verified.
+- Ask clarifying questions only when a safe assumption is not possible.
+
+Useful commands
+- Install PHP deps: composer install
+- Install JS deps: npm install
+- Build assets: npm run build
+- Run tests: php artisan test
+- Start Laravel locally: php artisan serve
+- Run Vite locally: npm run dev
+
+Important caution
+- Do not expose or quote secrets from .env.
+- Do not make destructive git or filesystem changes unless I explicitly ask.
+- Treat the root project as the source of truth unless I name another folder.

@@ -4,32 +4,7 @@
     @endphp
 
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface selection:bg-primary-container/30">
-        <nav class="sticky top-0 z-50 flex w-full items-center justify-between bg-white/80 px-6 py-4 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
-            <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-3xl text-primary">rocket_launch</span>
-                <h1 class="font-headline text-lg font-bold tracking-tight text-blue-600">AI-PGAALS</h1>
-            </div>
-
-            <div class="hidden items-center gap-8 md:flex">
-                <a class="font-medium text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.dashboard') }}">Home</a>
-                <a class="border-b-4 border-blue-500 font-bold text-blue-700 transition-colors hover:text-blue-500" href="{{ route('student.activities') }}">Activities</a>
-                <a class="font-medium text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.rewards') }}">Rewards</a>
-                <a class="font-medium text-slate-500 transition-colors hover:text-blue-500" href="{{ route('profile.edit') }}">Profile</a>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-1.5 shadow-sm">
-                    <span class="material-symbols-outlined text-primary">assignment</span>
-                    <span class="font-headline font-bold text-on-surface">Student Portal</span>
-                </div>
-                <button class="text-on-surface-variant transition-colors hover:text-primary" type="button">
-                    <span class="material-symbols-outlined text-2xl">notifications</span>
-                </button>
-                <a class="text-on-surface-variant transition-colors hover:text-primary" href="{{ route('profile.edit') }}">
-                    <span class="material-symbols-outlined text-2xl">account_circle</span>
-                </a>
-            </div>
-        </nav>
+        <x-student-nav active="activities" />
 
         <main class="min-h-screen px-4 pb-32 pt-6 md:px-0">
             <div class="mx-auto max-w-5xl space-y-8">
@@ -75,26 +50,86 @@
                                 <p class="mt-2 text-on-surface-variant">Select an assessment below to begin. Questions will open after you choose one.</p>
                             </div>
 
-                            <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-5">
                                 @foreach ($pendingAssessments as $assessment)
-                                    <button class="rounded-xl border border-outline-variant/20 bg-surface-container-low p-6 text-left transition-all hover:-translate-y-1 hover:border-primary-container hover:bg-primary/5" type="button">
-                                        <div class="mb-4 flex items-start justify-between gap-4">
-                                            <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
-                                                {{ $assessment->subject }}
-                                            </span>
-                                            <span class="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                                                Published
-                                            </span>
+                                    @php
+                                        $assetPath = $assessment->asset_path;
+                                        $assetExtension = $assetPath ? strtolower(pathinfo($assetPath, PATHINFO_EXTENSION)) : null;
+                                        $isImageAsset = in_array($assetExtension, ['jpg', 'jpeg', 'png'], true);
+                                        $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
+                                        $targetLabel = str($assessment->target_section ?? 'all')->replace('_', ' ')->title();
+                                        $quizLabel = str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title();
+                                        $focusLabel = collect($assessment->focus_areas ?? [])->join(', ');
+                                    @endphp
+
+                                    <a class="group block overflow-hidden rounded-2xl border border-outline-variant/15 bg-white text-left shadow-[0_20px_55px_rgba(0,94,159,0.08)] transition-all hover:-translate-y-1 hover:border-primary-container hover:shadow-[0_24px_70px_rgba(0,94,159,0.14)]" href="{{ route('student.assessments.show', $assessment) }}">
+                                        <div class="grid gap-0 lg:grid-cols-[18rem_1fr]">
+                                            <div class="relative min-h-56 overflow-hidden bg-gradient-to-br from-primary to-primary-container lg:min-h-full">
+                                                @if ($isImageAsset)
+                                                    <img class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" src="{{ $assetUrl }}" alt="{{ $assessment->title }} assessment image">
+                                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
+                                                @else
+                                                    <div class="absolute inset-0" style="background: radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 32%), linear-gradient(135deg, #005e9f, #44a5ff);"></div>
+                                                    <div class="absolute inset-0 flex items-center justify-center">
+                                                        <div class="rounded-2xl bg-white/15 p-6 text-white backdrop-blur-sm">
+                                                            <span class="material-symbols-outlined text-6xl">{{ $assessment->subject === 'literacy' ? 'auto_stories' : 'calculate' }}</span>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                                                    <p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/70">Published Assessment</p>
+                                                    <p class="mt-1 font-headline text-2xl font-black leading-tight">{{ ucfirst($assessment->subject) }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex flex-col justify-between p-6 lg:p-8">
+                                                <div>
+                                                    <div class="mb-4 flex flex-wrap gap-2">
+                                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
+                                                            {{ $assessment->subject }}
+                                                        </span>
+                                                        <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                                                            {{ $quizLabel }}
+                                                        </span>
+                                                        <span class="rounded-full bg-secondary-container/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">
+                                                            Published
+                                                        </span>
+                                                    </div>
+
+                                                    <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment->title }}</h4>
+                                                    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
+                                                        {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
+                                                    </p>
+
+                                                    <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-3">
+                                                        <div class="rounded-xl bg-surface-container-low p-4">
+                                                            <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Target</dt>
+                                                            <dd class="mt-1 font-bold text-on-surface">{{ $targetLabel }}</dd>
+                                                        </div>
+                                                        <div class="rounded-xl bg-surface-container-low p-4">
+                                                            <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Focus</dt>
+                                                            <dd class="mt-1 font-bold text-on-surface">{{ $focusLabel ?: 'General Skills' }}</dd>
+                                                        </div>
+                                                        <div class="rounded-xl bg-surface-container-low p-4">
+                                                            <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Material</dt>
+                                                            <dd class="mt-1 font-bold text-on-surface">{{ $assetPath ? strtoupper($assetExtension) : 'Activity Screen' }}</dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+
+                                                <div class="mt-7 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                                    <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                                                        Prepared {{ $assessment->created_at?->format('M d, Y') }}
+                                                    </span>
+                                                    <span class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition-colors group-hover:bg-primary-dim">
+                                                        Open Assessment
+                                                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h4 class="font-headline text-xl font-bold text-on-surface">{{ $assessment->title }}</h4>
-                                        <p class="mt-3 text-sm text-on-surface-variant">
-                                            {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Click to open and begin once the question flow is ready.' }}
-                                        </p>
-                                        <div class="mt-5 flex items-center justify-between text-sm font-bold">
-                                            <span class="text-on-surface-variant">Prepared by teacher</span>
-                                            <span class="text-primary">Open Assessment</span>
-                                        </div>
-                                    </button>
+                                    </a>
                                 @endforeach
                             </div>
                         </div>
@@ -144,23 +179,5 @@
             </div>
         </main>
 
-        <div class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around bg-white/80 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl md:hidden dark:bg-slate-900/80">
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.dashboard') }}">
-                <span class="material-symbols-outlined text-2xl">home</span>
-                <span class="text-[10px] font-bold lowercase">Home</span>
-            </a>
-            <div class="flex scale-110 flex-col items-center justify-center rounded-[2rem] bg-blue-100 px-6 py-2 text-blue-700 shadow-inner dark:bg-blue-900/40 dark:text-blue-300">
-                <span class="material-symbols-outlined text-2xl">rocket_launch</span>
-                <span class="text-[10px] font-bold lowercase">Activities</span>
-            </div>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.rewards') }}">
-                <span class="material-symbols-outlined text-2xl">backpack</span>
-                <span class="text-[10px] font-bold lowercase">Rewards</span>
-            </a>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('profile.edit') }}">
-                <span class="material-symbols-outlined text-2xl">face</span>
-                <span class="text-[10px] font-bold lowercase">Profile</span>
-            </a>
-        </div>
     </div>
 </x-app-layout>

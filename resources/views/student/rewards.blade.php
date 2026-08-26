@@ -9,27 +9,7 @@
     @endphp
 
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface">
-        <nav class="sticky top-0 z-50 bg-white/80 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
-            <div class="mx-auto flex w-full items-center justify-between px-6 py-4">
-                <div class="text-2xl font-extrabold italic text-blue-600">AI-PGAALS</div>
-
-                <div class="hidden items-center gap-8 md:flex">
-                    <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-300" href="{{ route('student.dashboard') }}">Home</a>
-                    <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-300" href="{{ route('student.activities') }}">Activities</a>
-                    <a class="border-b-4 border-blue-500 font-bold font-headline text-blue-700 transition-colors hover:text-blue-500 dark:text-blue-300 dark:hover:text-blue-300" href="{{ route('student.rewards') }}">Rewards</a>
-                    <a class="font-medium font-headline text-slate-500 transition-colors hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-300" href="{{ route('profile.edit') }}">Profile</a>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <button class="text-on-surface-variant transition-colors hover:text-primary" type="button">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
-                    <a class="text-on-surface-variant transition-colors hover:text-primary" href="{{ route('profile.edit') }}">
-                        <span class="material-symbols-outlined">account_circle</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
+        <x-student-nav active="rewards" />
 
         <main class="relative mx-auto max-w-6xl px-4 pb-32 pt-8 md:pt-16">
             <div class="pointer-events-none absolute inset-0 opacity-15" style="background-image: radial-gradient(circle, #44a5ff 10%, transparent 10.5%), radial-gradient(circle, #ffeb3b 10%, transparent 10.5%), radial-gradient(circle, #91f78e 10%, transparent 10.5%); background-size: 40px 40px, 60px 60px, 50px 50px; background-position: 0 0, 20px 30px, 40px 10px;"></div>
@@ -114,23 +94,5 @@
             </section>
         </main>
 
-        <footer class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around bg-white/80 px-4 pb-6 pt-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-2xl md:hidden dark:bg-slate-900/80">
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.dashboard') }}">
-                <span class="material-symbols-outlined">home</span>
-                <span class="text-[10px] font-bold lowercase">Home</span>
-            </a>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.activities') }}">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
-                <span class="text-[10px] font-bold lowercase">activities</span>
-            </a>
-            <div class="flex scale-110 flex-col items-center justify-center rounded-[2rem] bg-blue-100 px-6 py-2 text-blue-700 shadow-inner dark:bg-blue-900/40 dark:text-blue-300">
-                <span class="material-symbols-outlined">backpack</span>
-                <span class="text-[10px] font-bold lowercase">rewards</span>
-            </div>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('profile.edit') }}">
-                <span class="material-symbols-outlined">face</span>
-                <span class="text-[10px] font-bold lowercase">Profile</span>
-            </a>
-        </footer>
     </div>
 </x-app-layout>

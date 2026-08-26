@@ -13,9 +13,20 @@ class Assessment extends Model
     protected $fillable = [
         'title',
         'subject',
+        'quiz_type',
+        'delivery_method',
+        'target_section',
+        'focus_areas',
+        'asset_path',
+        'manual_questions',
         'instructions',
         'status',
         'created_by',
+    ];
+
+    protected $casts = [
+        'focus_areas' => 'array',
+        'manual_questions' => 'array',
     ];
 
     public function teacher(): BelongsTo

@@ -29,7 +29,7 @@ class AdminAccountBootstrapper
             return;
         }
 
-        $user = User::query()->where('email', $config['email'])->first();
+        $user = User::withTrashed()->where('email', $config['email'])->first();
 
         if (! $user) {
             User::create([
@@ -47,6 +47,10 @@ class AdminAccountBootstrapper
         }
 
         $updates = [];
+
+        if ($user->trashed()) {
+            $user->restore();
+        }
 
         if ($user->role !== 'admin') {
             $updates['role'] = 'admin';

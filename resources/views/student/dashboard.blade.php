@@ -2,42 +2,10 @@
     @php
         $student = Auth::user();
         $firstName = str($student->name)->before(' ')->title();
-        $navLinks = [
-            ['label' => 'home', 'active' => true, 'href' => route('student.dashboard')],
-            ['label' => 'activities', 'active' => false, 'href' => route('student.activities')],
-            ['label' => 'rewards', 'active' => false, 'href' => route('student.rewards')],
-            ['label' => 'profile', 'active' => false, 'href' => route('profile.edit')],
-        ];
     @endphp
 
     <div class="min-h-screen bg-background font-body text-on-surface">
-        <nav class="sticky top-0 z-50 bg-white/80 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
-            <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-                <div class="flex items-center gap-4">
-                    <span class="text-2xl font-extrabold italic text-blue-600">AI-PGAALS</span>
-                </div>
-
-                <div class="hidden items-center gap-8 md:flex">
-                    @foreach ($navLinks as $link)
-                        <a
-                            class="{{ $link['active'] ? 'border-b-4 border-blue-500 font-bold text-blue-700 dark:text-blue-300' : 'font-medium text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-300' }} transition-colors"
-                            href="{{ $link['href'] }}"
-                        >
-                            {{ $link['label'] }}
-                        </a>
-                    @endforeach
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <button class="text-slate-500 transition-colors hover:text-primary" type="button">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
-                    <a class="text-slate-500 transition-colors hover:text-primary" href="{{ route('profile.edit') }}">
-                        <span class="material-symbols-outlined">account_circle</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
+        <x-student-nav active="home" />
 
         <main class="mx-auto max-w-7xl px-6 py-8 pb-32">
             <section class="relative mb-12 overflow-visible">
@@ -137,23 +105,5 @@
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[2.5rem] bg-white/80 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl md:hidden dark:bg-slate-900/80">
-            <div class="flex scale-110 flex-col items-center justify-center rounded-[2rem] bg-blue-100 px-6 py-2 text-blue-700 shadow-inner dark:bg-blue-900/40 dark:text-blue-300">
-                <span class="material-symbols-outlined">home</span>
-                <span class="font-body text-[10px] font-bold lowercase">Home</span>
-            </div>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.activities') }}">
-                <span class="material-symbols-outlined">rocket_launch</span>
-                <span class="font-body text-[10px] font-bold lowercase">Activities</span>
-            </a>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('student.rewards') }}">
-                <span class="material-symbols-outlined">backpack</span>
-                <span class="font-body text-[10px] font-bold lowercase">Rewards</span>
-            </a>
-            <a class="flex flex-col items-center justify-center px-4 py-2 text-slate-400 transition-transform hover:scale-105 dark:text-slate-500" href="{{ route('profile.edit') }}">
-                <span class="material-symbols-outlined">face</span>
-                <span class="font-body text-[10px] font-bold lowercase">Profile</span>
-            </a>
-        </nav>
     </div>
 </x-app-layout>

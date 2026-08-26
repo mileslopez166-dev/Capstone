@@ -123,6 +123,8 @@ class DashboardController extends Controller
 
         $activityFeed = $this->buildActivityFeed();
 
+        $trashedCount = User::onlyTrashed()->count();
+
         $roleDistribution = collect([
             ['label' => 'Admins', 'count' => $adminCount, 'color' => '#005e9f'],
             ['label' => 'Teachers', 'count' => $teacherCount, 'color' => '#006b1b'],
@@ -170,6 +172,37 @@ class DashboardController extends Controller
             ],
         ];
 
+        $userFilters = [
+            'search' => trim((string) $request->query('search', '')),
+            'role' => (string) $request->query('role', ''),
+            'status' => (string) $request->query('status', ''),
+            'section' => (string) $request->query('section', ''),
+        ];
+
+        $managedUsersQuery = User::query()
+            ->when($userFilters['search'] !== '', function ($query) use ($userFilters): void {
+                $query->where(function ($query) use ($userFilters): void {
+                    $query->where('name', 'like', '%'.$userFilters['search'].'%')
+                        ->orWhere('email', 'like', '%'.$userFilters['search'].'%');
+                });
+            })
+            ->when(in_array($userFilters['role'], ['admin', 'teacher', 'student'], true), function ($query) use ($userFilters): void {
+                $query->where('role', $userFilters['role']);
+            })
+            ->when(in_array($userFilters['status'], ['approved', 'pending', 'rejected'], true), function ($query) use ($userFilters): void {
+                $query->where('approval_status', $userFilters['status']);
+            })
+            ->when($userFilters['section'] !== '', function ($query) use ($userFilters): void {
+                $query->where('section', $userFilters['section']);
+            })
+            ->latest();
+
+        $managedUsers = $managedUsersQuery
+            ->paginate(10, ['*'], 'users_page')
+            ->withQueryString();
+
+        $sections = collect(['Section A', 'Section B', 'Section C']);
+
         return view('admin.dashboard', [
             'adminUser' => $adminUser,
             'adminInitials' => $this->initials($adminUser->name),
@@ -182,6 +215,10 @@ class DashboardController extends Controller
             'roleDonutStyle' => $roleDonutStyle,
             'totalUsers' => $totalUsers,
             'assessmentPipeline' => $assessmentPipeline,
+            'managedUsers' => $managedUsers,
+            'sections' => $sections,
+            'userFilters' => $userFilters,
+            'trashedCount' => $trashedCount,
         ]);
     }
 

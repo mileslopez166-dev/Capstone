@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TokenRequestController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
 use App\Models\User;
 use App\Models\Assessment;
@@ -63,6 +64,34 @@ Route::post('/admin/token-requests/{user}/decline', [TokenRequestController::cla
     ->middleware(['auth', 'verified'])
     ->name('admin.token-requests.decline');
 
+Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.edit');
+
+Route::patch('/admin/users/{user}', [UserManagementController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.update');
+
+Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.destroy');
+
+Route::get('/admin/users/trash', [UserManagementController::class, 'trash'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.trash');
+
+Route::delete('/admin/users/trash', [UserManagementController::class, 'emptyTrash'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.trash.empty');
+
+Route::post('/admin/users/{id}/restore', [UserManagementController::class, 'restore'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.restore');
+
+Route::delete('/admin/users/{id}/force-delete', [UserManagementController::class, 'forceDelete'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.force-delete');
+
 Route::get('/student/dashboard', function () {
     return view('student.dashboard');
 })->middleware(['auth', 'verified'])->name('student.dashboard');
@@ -77,6 +106,15 @@ Route::get('/student/activities', function () {
         'pendingAssessments' => $pendingAssessments,
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');
+
+Route::get('/student/assessments/{assessment}', function (Assessment $assessment) {
+    abort_unless(auth()->user()?->isStudent(), 403);
+    abort_unless($assessment->status === 'published', 404);
+
+    return view('student.assessment', [
+        'assessment' => $assessment,
+    ]);
+})->middleware(['auth', 'verified'])->name('student.assessments.show');
 
 Route::get('/student/rewards', function () {
     return view('student.rewards');
@@ -129,6 +167,10 @@ Route::get('/teacher/assessments', [AssessmentController::class, 'index'])
 Route::post('/teacher/assessments', [AssessmentController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('assessments.store');
+
+Route::get('/teacher/assessments/{assessment}', [AssessmentController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('assessments.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

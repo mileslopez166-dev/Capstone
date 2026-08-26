@@ -87,7 +87,7 @@
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden bg-surface text-on-surface">
-    <div class="min-h-screen lg:flex">
+    <div id="admin-page-shell" class="min-h-screen transition-[filter] duration-200 ease-out lg:flex">
         <nav class="w-full border-b border-surface-variant/20 bg-surface-container-low p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] lg:fixed lg:left-0 lg:top-0 lg:h-full lg:w-64 lg:border-b-0 lg:border-r">
             <div class="mb-8 pl-2">
                 <h2 class="font-headline text-2xl font-bold text-primary">AI-PGAALS</h2>
@@ -105,13 +105,21 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <a class="flex items-center gap-3 rounded-lg bg-surface-container-high px-4 py-3 font-bold text-primary transition-transform transition-colors active:scale-95" href="{{ route('admin.dashboard') }}">
+                <a id="admin-overview-nav" class="flex items-center gap-3 rounded-lg bg-surface-container-high px-4 py-3 font-bold text-primary transition-transform transition-colors active:scale-95" href="{{ route('admin.dashboard') }}">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
                     <span class="text-sm uppercase tracking-wide">Overview</span>
                 </a>
                 <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-transform transition-colors hover:bg-surface-container active:scale-95" href="{{ route('admin.token-requests.index') }}">
                     <span class="material-symbols-outlined">confirmation_number</span>
                     <span class="text-sm uppercase tracking-wide">Token Requests</span>
+                </a>
+                <a id="admin-users-nav" class="flex items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-transform transition-colors hover:bg-surface-container active:scale-95" href="{{ route('admin.dashboard') }}#user-management">
+                    <span class="material-symbols-outlined">group</span>
+                    <span class="text-sm uppercase tracking-wide">User Management</span>
+                </a>
+                <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-transform transition-colors hover:bg-surface-container active:scale-95" href="{{ route('admin.users.trash') }}">
+                    <span class="material-symbols-outlined">delete</span>
+                    <span class="text-sm uppercase tracking-wide">Trash</span>
                 </a>
             </div>
 
@@ -172,6 +180,187 @@
                         <button class="rounded-lg bg-surface-container-low px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-on-surface transition-colors hover:bg-surface-container" type="button">Export Data</button>
                     </div>
                 </header>
+
+                @if (session('status'))
+                    <div class="mb-6 rounded-DEFAULT border border-secondary/10 bg-secondary-container/35 px-5 py-4 text-sm font-medium text-on-surface">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                <section id="user-management" class="mb-8 scroll-mt-24 rounded-DEFAULT bg-surface-container-lowest shadow-[0_4px_24px_rgba(0,94,159,0.03)]">
+                    <div class="border-b border-outline-variant/15 p-6">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                            <div>
+                                <p class="text-sm font-bold uppercase tracking-wider text-primary">User Management</p>
+                                <h2 class="mt-2 font-headline text-3xl font-bold text-on-surface">Manage Accounts</h2>
+                                <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Review student, teacher, and administrator accounts from one place.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <a class="inline-flex items-center gap-2 rounded-lg bg-surface-container-low px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-on-surface transition-colors hover:bg-surface-container" href="{{ route('admin.token-requests.index') }}">
+                                    <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+                                    Token Requests
+                                </a>
+                                <a class="inline-flex items-center gap-2 rounded-lg bg-surface-container-low px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-on-surface transition-colors hover:bg-surface-container" href="{{ route('admin.users.trash') }}">
+                                    <span class="material-symbols-outlined text-[18px]">delete_outline</span>
+                                    Trash
+                                    @if(isset($trashedCount) && $trashedCount > 0)
+                                        <span class="ml-2 inline-flex items-center justify-center rounded-full bg-error/10 px-2 py-0.5 text-xs font-semibold text-error">{{ $trashedCount }}</span>
+                                    @endif
+                                </a>
+                                <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary transition-colors hover:bg-primary-dim" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">person_add</span>
+                                    Create User
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="flex flex-col gap-4 border-b border-outline-variant/15 bg-surface-container-low p-4 lg:flex-row lg:items-center lg:justify-between" method="GET" action="{{ route('admin.dashboard') }}#user-management">
+                        <div class="grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                                <input class="w-full rounded-lg border-none bg-surface-container-lowest py-2.5 pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary" name="search" placeholder="Search users..." type="search" value="{{ $userFilters['search'] }}">
+                            </div>
+                            <select class="rounded-lg border-none bg-surface-container-lowest py-2.5 pl-3 pr-8 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary" name="role">
+                                <option value="">All Roles</option>
+                                <option value="admin" @selected($userFilters['role'] === 'admin')>Admin</option>
+                                <option value="teacher" @selected($userFilters['role'] === 'teacher')>Teacher</option>
+                                <option value="student" @selected($userFilters['role'] === 'student')>Student</option>
+                            </select>
+                            <select class="rounded-lg border-none bg-surface-container-lowest py-2.5 pl-3 pr-8 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="approved" @selected($userFilters['status'] === 'approved')>Approved</option>
+                                <option value="pending" @selected($userFilters['status'] === 'pending')>Pending</option>
+                                <option value="rejected" @selected($userFilters['status'] === 'rejected')>Declined</option>
+                            </select>
+                            <select class="rounded-lg border-none bg-surface-container-lowest py-2.5 pl-3 pr-8 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary" name="section">
+                                <option value="">All Sections</option>
+                                @foreach ($sections as $section)
+                                    <option value="{{ $section }}" @selected($userFilters['section'] === $section)>{{ $section }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex shrink-0 gap-3">
+                            <a class="inline-flex items-center justify-center rounded-lg bg-surface-container-lowest px-4 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors hover:text-primary" href="{{ route('admin.dashboard') }}#user-management">Clear</a>
+                            <button class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-dim" type="submit">
+                                <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[900px] border-collapse text-left">
+                            <thead>
+                                <tr class="bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant">
+                                    <th class="px-6 py-4 font-semibold">User</th>
+                                    <th class="px-6 py-4 font-semibold">Role</th>
+                                    <th class="px-6 py-4 font-semibold">Section</th>
+                                    <th class="px-6 py-4 font-semibold">Status</th>
+                                    <th class="px-6 py-4 font-semibold">Joined</th>
+                                    <th class="px-6 py-4 text-right font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/15 text-sm">
+                                @forelse ($managedUsers as $managedUser)
+                                    @php
+                                        $initials = \Illuminate\Support\Str::of($managedUser->name)->explode(' ')->filter()->take(2)->map(fn ($segment) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($segment, 0, 1)))->implode('');
+                                        $roleClasses = match ($managedUser->role) {
+                                            'admin' => 'bg-primary-container/30 text-primary',
+                                            'teacher' => 'bg-secondary-container text-secondary-dim',
+                                            default => 'bg-surface-container-high text-on-surface-variant',
+                                        };
+                                        $status = $managedUser->approval_status ?? 'approved';
+                                        $statusClasses = match ($status) {
+                                            'pending' => 'bg-tertiary-container text-on-tertiary-container',
+                                            'rejected' => 'bg-error-container/20 text-error',
+                                            default => 'bg-secondary-container text-secondary-dim',
+                                        };
+                                        $statusLabel = $status === 'rejected' ? 'Declined' : ucfirst($status);
+                                        $isSystemAdministrator = $managedUser->isSystemAdministrator();
+                                    @endphp
+                                    <tr class="transition-colors hover:bg-surface-bright">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container/30 text-xs font-bold text-primary">
+                                                    {{ $initials ?: 'U' }}
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-on-surface">{{ $managedUser->name }}</p>
+                                                    <p class="text-xs text-on-surface-variant">{{ $managedUser->email }}</p>
+                                                    @if($isSystemAdministrator)
+                                                        <span class="mt-1 inline-flex rounded-full bg-primary-container/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">Fixed System User</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $roleClasses }}">{{ $managedUser->role }}</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-medium text-on-surface">{{ $managedUser->section ?: 'Unassigned' }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $statusClasses }}">{{ $statusLabel }}</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-on-surface-variant">{{ $managedUser->created_at?->format('M d, Y') ?? 'Unknown' }}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="inline-flex items-center gap-3 justify-end">
+                                                @if($isSystemAdministrator)
+                                                    <span class="inline-flex items-center gap-1 text-sm font-semibold text-on-surface-variant">
+                                                        <span class="material-symbols-outlined text-[18px]">lock</span>
+                                                        Fixed
+                                                    </span>
+                                                @else
+                                                    <button
+                                                        class="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors hover:text-primary-dim"
+                                                        type="button"
+                                                        data-edit-user
+                                                        data-user-id="{{ $managedUser->id }}"
+                                                        data-update-url="{{ route('admin.users.update', $managedUser) }}"
+                                                        data-name="{{ $managedUser->name }}"
+                                                        data-email="{{ $managedUser->email }}"
+                                                        data-role="{{ $managedUser->role }}"
+                                                        data-section="{{ $managedUser->section }}"
+                                                        data-status="{{ $managedUser->approval_status ?? 'approved' }}"
+                                                        data-initials="{{ $initials ?: 'U' }}"
+                                                    >
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                        Edit
+                                                    </button>
+                                                @endif
+
+                                                @if(! $isSystemAdministrator && $managedUser->role !== 'admin')
+                                                    <form method="POST" action="{{ route('admin.users.destroy', $managedUser) }}" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="inline-flex items-center gap-1 text-sm font-semibold text-error transition-colors hover:text-error-dim" type="submit">
+                                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="px-6 py-10 text-center text-sm text-on-surface-variant" colspan="6">No users match the selected filters.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="border-t border-outline-variant/15 p-4">
+                        <div class="flex flex-col gap-4 text-sm text-on-surface-variant lg:flex-row lg:items-center lg:justify-between">
+                            <p>
+                                Showing {{ $managedUsers->firstItem() ?? 0 }} to {{ $managedUsers->lastItem() ?? 0 }} of {{ $managedUsers->total() }} users
+                            </p>
+                            <div>
+                                {{ $managedUsers->fragment('user-management')->links() }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-12">
                     <div class="col-span-12 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -311,7 +500,7 @@
                                         <div class="h-2 w-full overflow-hidden rounded-full bg-surface-container-high">
                                             <div class="h-full rounded-full {{ $metric['bar_class'] }}" style="width: {{ $metric['percentage'] }}%"></div>
                                         </div>
-                                        <p class="mt-1 text-xs text-on-surface-variant">{{ $metric['badge'] }} · {{ $metric['percentage'] }}%</p>
+                                        <p class="mt-1 text-xs text-on-surface-variant">{{ $metric['badge'] }} - {{ $metric['percentage'] }}%</p>
                                     </div>
                                 @endforeach
                             </div>
@@ -321,5 +510,277 @@
             </main>
         </div>
     </div>
+    <div id="edit-user-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6 opacity-0 transition-opacity duration-200 ease-out sm:px-6" aria-labelledby="edit-user-modal-title" aria-modal="true" role="dialog">
+        <button id="edit-user-backdrop" class="absolute inset-0 bg-on-surface/35 opacity-0 backdrop-blur-sm transition-opacity duration-200 ease-out" type="button" aria-label="Close edit user modal"></button>
+
+        <section id="edit-user-panel" class="relative max-h-[90vh] w-full max-w-3xl translate-y-4 scale-[0.98] overflow-y-auto rounded-DEFAULT bg-surface-container-lowest opacity-0 shadow-[0_30px_90px_rgba(0,46,81,0.28)] transition duration-200 ease-out">
+            <div class="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-outline-variant/15 bg-surface-container-lowest px-6 py-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">User Management</p>
+                    <h2 id="edit-user-modal-title" class="mt-1 font-headline text-2xl font-bold text-on-surface">Edit Profile</h2>
+                    <p class="mt-1 text-sm text-on-surface-variant">Update account details without leaving the dashboard.</p>
+                </div>
+                <button id="edit-user-close" class="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary" type="button" aria-label="Close edit form">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <div class="mb-6 flex flex-col gap-4 rounded-lg bg-surface-container-low p-5 sm:flex-row sm:items-center">
+                    <div id="modal-user-initials" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-container/30 text-xl font-bold text-primary shadow-sm">U</div>
+                    <div class="min-w-0">
+                        <h3 id="modal-user-name" class="truncate font-headline text-xl font-bold text-on-surface">Selected user</h3>
+                        <p id="modal-user-email" class="truncate text-sm text-on-surface-variant">user@example.com</p>
+                    </div>
+                </div>
+
+                @if ($errors->any())
+                    <div class="mb-6 rounded-lg border border-error/20 bg-error-container/10 px-4 py-3 text-sm text-error">
+                        Please review the highlighted fields and try again.
+                    </div>
+                @endif
+
+                <form id="edit-user-form" class="space-y-6" method="POST" action="">
+                    @csrf
+                    @method('PATCH')
+                    <input id="edit-user-id" name="edit_user_id" type="hidden" value="{{ old('edit_user_id') }}">
+
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-name">Full Name</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">person</span>
+                                <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="edit-name" name="name" type="text" required>
+                            </div>
+                            @error('name')
+                                <p class="text-sm text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-email">Email Address</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">mail</span>
+                                <input class="w-full cursor-not-allowed rounded-sm border-none bg-surface-container py-3 pl-12 pr-12 text-on-surface-variant" id="edit-email" type="email" readonly>
+                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-sm text-outline-variant">lock</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-role">Role</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">badge</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="edit-role" name="role">
+                                    <option value="student">Student</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            @error('role')
+                                <p class="text-sm text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-section">Section Assignment</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">class</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="edit-section" name="section">
+                                    <option value="">Unassigned</option>
+                                    @foreach ($sections as $section)
+                                        <option value="{{ $section }}">{{ $section }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('section')
+                                <p class="text-sm text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-approval-status">Account Status</label>
+                            <div class="relative max-w-md">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">verified_user</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="edit-approval-status" name="approval_status">
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="rejected">Declined</option>
+                                </select>
+                            </div>
+                            @error('approval_status')
+                                <p class="text-sm text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <div class="rounded-lg bg-surface-container-low p-5">
+                                <div class="mb-5">
+                                    <h3 class="font-headline text-lg font-bold text-on-surface">Change Password</h3>
+                                    <p class="mt-1 text-sm text-on-surface-variant">Leave these fields blank to keep the current password.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-password">New Password</label>
+                                        <div class="relative">
+                                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
+                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password" name="password" type="password" autocomplete="new-password" placeholder="Enter new password">
+                                        </div>
+                                        @error('password')
+                                            <p class="text-sm text-error">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-password-confirmation">Confirm Password</label>
+                                        <div class="relative">
+                                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">verified_user</span>
+                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password-confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Re-enter password">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col-reverse gap-3 border-t border-outline-variant/15 pt-6 sm:flex-row sm:justify-end">
+                        <button id="edit-user-cancel" class="rounded-sm border border-outline-variant/30 bg-surface px-6 py-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant transition-colors hover:bg-surface-container-low" type="button">
+                            Cancel
+                        </button>
+                        <button class="rounded-sm bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-on-primary shadow-sm transition-colors hover:bg-primary-dim" type="submit">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    @php
+        $oldEditValues = [
+            'name' => old('name'),
+            'role' => old('role'),
+            'section' => old('section'),
+            'approval_status' => old('approval_status'),
+        ];
+    @endphp
+
+    <script>
+        const overviewNav = document.getElementById('admin-overview-nav');
+        const usersNav = document.getElementById('admin-users-nav');
+        const pageShell = document.getElementById('admin-page-shell');
+        const editUserModal = document.getElementById('edit-user-modal');
+        const editUserBackdrop = document.getElementById('edit-user-backdrop');
+        const editUserPanel = document.getElementById('edit-user-panel');
+        const editUserForm = document.getElementById('edit-user-form');
+        const editUserButtons = document.querySelectorAll('[data-edit-user]');
+        const modalUserInitials = document.getElementById('modal-user-initials');
+        const modalUserName = document.getElementById('modal-user-name');
+        const modalUserEmail = document.getElementById('modal-user-email');
+        const editUserId = document.getElementById('edit-user-id');
+        const editName = document.getElementById('edit-name');
+        const editEmail = document.getElementById('edit-email');
+        const editRole = document.getElementById('edit-role');
+        const editSection = document.getElementById('edit-section');
+        const editApprovalStatus = document.getElementById('edit-approval-status');
+        const editPassword = document.getElementById('edit-password');
+        const editPasswordConfirmation = document.getElementById('edit-password-confirmation');
+        const oldEditUserId = @json(old('edit_user_id'));
+        const oldEditValues = @json($oldEditValues);
+        let editUserCloseTimer;
+
+        function setAdminNavState() {
+            const userManagementActive = window.location.hash === '#user-management';
+
+            overviewNav.classList.toggle('bg-surface-container-high', !userManagementActive);
+            overviewNav.classList.toggle('font-bold', !userManagementActive);
+            overviewNav.classList.toggle('text-primary', !userManagementActive);
+            overviewNav.classList.toggle('text-on-surface-variant', userManagementActive);
+            overviewNav.classList.toggle('hover:bg-surface-container', userManagementActive);
+            overviewNav.querySelector('.material-symbols-outlined').style.fontVariationSettings = userManagementActive ? '' : "'FILL' 1";
+
+            usersNav.classList.toggle('bg-surface-container-high', userManagementActive);
+            usersNav.classList.toggle('font-bold', userManagementActive);
+            usersNav.classList.toggle('text-primary', userManagementActive);
+            usersNav.classList.toggle('text-on-surface-variant', !userManagementActive);
+            usersNav.classList.toggle('hover:bg-surface-container', !userManagementActive);
+            usersNav.querySelector('.material-symbols-outlined').style.fontVariationSettings = userManagementActive ? "'FILL' 1" : '';
+        }
+
+        window.addEventListener('hashchange', setAdminNavState);
+        setAdminNavState();
+
+        function openEditUserModal(button, values = {}) {
+            const dataset = button.dataset;
+
+            clearTimeout(editUserCloseTimer);
+            editUserForm.action = dataset.updateUrl;
+            editUserId.value = dataset.userId;
+            editName.value = values.name ?? dataset.name ?? '';
+            editEmail.value = dataset.email ?? '';
+            editRole.value = values.role ?? dataset.role ?? 'student';
+            editSection.value = values.section ?? dataset.section ?? '';
+            editApprovalStatus.value = values.approval_status ?? dataset.status ?? 'approved';
+            editPassword.value = '';
+            editPasswordConfirmation.value = '';
+            modalUserInitials.textContent = dataset.initials || 'U';
+            modalUserName.textContent = editName.value || 'Selected user';
+            modalUserEmail.textContent = dataset.email || '';
+
+            editUserModal.classList.remove('hidden');
+            editUserModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+
+            requestAnimationFrame(() => {
+                editUserModal.classList.remove('opacity-0');
+                editUserBackdrop.classList.remove('opacity-0');
+                editUserPanel.classList.remove('translate-y-4', 'scale-[0.98]', 'opacity-0');
+                editUserPanel.classList.add('translate-y-0', 'scale-100', 'opacity-100');
+                pageShell.classList.add('blur-sm', 'pointer-events-none', 'select-none');
+            });
+
+            setTimeout(() => editName.focus(), 180);
+        }
+
+        function closeEditUserModal() {
+            editUserModal.classList.add('opacity-0');
+            editUserBackdrop.classList.add('opacity-0');
+            editUserPanel.classList.add('translate-y-4', 'scale-[0.98]', 'opacity-0');
+            editUserPanel.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+            pageShell.classList.remove('blur-sm', 'pointer-events-none', 'select-none');
+            document.body.classList.remove('overflow-hidden');
+
+            editUserCloseTimer = setTimeout(() => {
+                editUserModal.classList.add('hidden');
+                editUserModal.classList.remove('flex');
+            }, 200);
+        }
+
+        editUserButtons.forEach((button) => {
+            button.addEventListener('click', () => openEditUserModal(button));
+        });
+
+        editUserBackdrop.addEventListener('click', closeEditUserModal);
+        document.getElementById('edit-user-close').addEventListener('click', closeEditUserModal);
+        document.getElementById('edit-user-cancel').addEventListener('click', closeEditUserModal);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && ! editUserModal.classList.contains('hidden')) {
+                closeEditUserModal();
+            }
+        });
+
+        editName.addEventListener('input', () => {
+            modalUserName.textContent = editName.value || 'Selected user';
+        });
+
+        if (oldEditUserId) {
+            const button = document.querySelector(`[data-edit-user][data-user-id="${oldEditUserId}"]`);
+
+            if (button) {
+                openEditUserModal(button, oldEditValues);
+            }
+        }
+    </script>
 </body>
 </html>

@@ -113,6 +113,14 @@
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
                     <span class="text-sm uppercase tracking-wide">Token Requests</span>
                 </a>
+                <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-transform transition-colors hover:bg-surface-container active:scale-95" href="{{ route('admin.dashboard') }}#user-management">
+                    <span class="material-symbols-outlined">group</span>
+                    <span class="text-sm uppercase tracking-wide">User Management</span>
+                </a>
+                <a class="flex items-center gap-3 rounded-lg {{ request()->routeIs('admin.users.trash') ? 'bg-surface-container-high font-bold text-primary' : 'text-on-surface-variant hover:bg-surface-container' }} px-4 py-3 transition-transform transition-colors active:scale-95" href="{{ route('admin.users.trash') }}">
+                    <span class="material-symbols-outlined">delete</span>
+                    <span class="text-sm uppercase tracking-wide">Trash</span>
+                </a>
             </div>
 
             <div class="mt-8 border-t border-surface-variant/30 pt-6 lg:mt-auto">
@@ -274,7 +282,21 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-on-surface">{{ $requestUser->section }}</td>
+                                    <td class="px-6 py-4 text-on-surface">
+                                        @if($requestUser->isTeacher())
+                                            <select
+                                                class="w-full min-w-36 rounded-sm border-none bg-surface-container-low px-3 py-2 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary"
+                                                form="approve-request-{{ $requestUser->id }}"
+                                                name="section"
+                                            >
+                                                @foreach (["Section A", "Section B", "Section C"] as $section)
+                                                    <option value="{{ $section }}" @selected($requestUser->section === $section)>{{ $section }}</option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            {{ $requestUser->section ?: 'Unassigned' }}
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 text-right">
                                         <span class="inline-flex items-center justify-center rounded-full bg-surface-container px-3 py-1 text-sm font-semibold text-on-surface">
                                             {{ ucfirst($requestUser->role) }} Approval
@@ -283,13 +305,16 @@
                                     <td class="px-6 py-4 text-sm text-on-surface-variant">{{ $requestUser->created_at?->format('M d, h:i A') }}</td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-2">
+                                            <a class="rounded-DEFAULT px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary-container/20" href="{{ route('admin.users.edit', $requestUser) }}">
+                                                Edit
+                                            </a>
                                             <form method="POST" action="{{ route('admin.token-requests.decline', $requestUser) }}">
                                                 @csrf
                                                 <button class="rounded-DEFAULT px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error-container/20" type="submit">
                                                     Decline
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ route('admin.token-requests.approve', $requestUser) }}">
+                                            <form id="approve-request-{{ $requestUser->id }}" method="POST" action="{{ route('admin.token-requests.approve', $requestUser) }}">
                                                 @csrf
                                                 <button class="rounded-DEFAULT bg-secondary px-4 py-2 text-sm font-bold text-surface-container-lowest shadow-sm transition-colors hover:bg-secondary-dim" type="submit">
                                                     Approve

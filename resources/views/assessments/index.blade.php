@@ -6,13 +6,9 @@
             ->take(2)
             ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
             ->implode('');
-
-        $literacyCount = $assessments->where('subject', 'literacy')->count();
-        $numeracyCount = $assessments->where('subject', 'numeracy')->count();
-        $publishedCount = $assessments->where('status', 'published')->count();
     @endphp
 
-    <div class="min-h-screen lg:flex" x-data="{ mobileMenuOpen: false }">
+    <div class="min-h-screen bg-surface lg:flex" x-data="{ mobileMenuOpen: false }">
         <div class="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full transition-transform duration-300 lg:translate-x-0" :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'">
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="assessments" />
         </div>
@@ -33,140 +29,513 @@
                 </x-slot:mobileTrigger>
             </x-teacher-topbar>
 
-            <div class="mx-auto max-w-7xl space-y-8 p-5 sm:p-8">
-                <section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                    <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
-                        <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Assessment Builder</p>
-                        <h1 class="mt-3 font-headline text-4xl font-extrabold text-on-surface">Create literacy and numeracy assessments</h1>
-                        <p class="mt-4 max-w-2xl text-on-surface-variant">Teachers can prepare assessment titles, set the subject area, and publish them to the student activity queue. Published items become visible on the student side immediately.</p>
-                    </div>
+            <div class="mx-auto max-w-6xl p-5 sm:p-8">
+                <form id="assessment-builder-form" class="space-y-8" method="POST" action="{{ route('assessments.store') }}" enctype="multipart/form-data">
+                    @csrf
+                    <input id="assessment-status" name="status" type="hidden" value="{{ old('status', 'published') }}">
+                    <input id="delivery-method" name="delivery_method" type="hidden" value="{{ old('delivery_method', 'upload') }}">
 
-                    <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
-                            <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Total</p>
-                            <p class="mt-3 font-headline text-4xl font-black text-on-surface">{{ $assessments->count() }}</p>
+                    <header class="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                        <div>
+                            <span class="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-primary">Curriculum Builder</span>
+                            <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
+                            <p class="mt-2 max-w-xl text-on-surface-variant">Configure a student-ready assessment. Choose the focus area, add instructions, then save it as a draft or publish it to the student activity queue.</p>
                         </div>
-                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
-                            <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Literacy</p>
-                            <p class="mt-3 font-headline text-4xl font-black text-primary">{{ $literacyCount }}</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="rounded-full border border-outline-variant px-6 py-2.5 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
+                                Save Draft
+                            </button>
+                            <button class="rounded-full bg-primary px-8 py-2.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" type="submit" data-submit-status="published">
+                                Publish Assessment
+                            </button>
                         </div>
-                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
-                            <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Published</p>
-                            <p class="mt-3 font-headline text-4xl font-black text-secondary">{{ $publishedCount }}</p>
+                    </header>
+
+                    @if (session('status'))
+                        <div class="rounded-lg border border-secondary/20 bg-secondary-container/30 px-4 py-3 text-sm font-medium text-on-surface">
+                            {{ session('status') }}
                         </div>
-                    </div>
-                </section>
+                    @endif
 
-                <section class="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-                    <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
-                        <div class="mb-6">
-                            <h2 class="font-headline text-2xl font-extrabold text-on-surface">Make a new assessment</h2>
-                            <p class="mt-2 text-sm text-on-surface-variant">Use this form to create a literacy or numeracy assessment. Draft stays teacher-only, while published makes it visible to students.</p>
-                        </div>
+                    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <div class="space-y-6 lg:col-span-2">
+                            <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                                <h2 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
+                                    <span class="material-symbols-outlined text-primary">category</span>
+                                    1. Assessment Foundation
+                                </h2>
 
-                        @if (session('status'))
-                            <div class="mb-6 rounded-lg border border-secondary/20 bg-secondary-container/30 px-4 py-3 text-sm font-medium text-on-surface">
-                                {{ session('status') }}
-                            </div>
-                        @endif
-
-                        <form class="space-y-6" method="POST" action="{{ route('assessments.store') }}">
-                            @csrf
-
-                            <div>
-                                <label class="mb-2 block text-xs font-black uppercase tracking-widest text-on-surface-variant" for="title">Assessment Title</label>
-                                <input class="w-full rounded-lg border-outline-variant/20 bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary/20" id="title" name="title" type="text" value="{{ old('title') }}" placeholder="Quarter 1 Reading Check" required>
-                                @error('title')
-                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <p class="mb-3 text-xs font-black uppercase tracking-widest text-on-surface-variant">Subject Area</p>
-                                <div class="grid gap-3 sm:grid-cols-2">
-                                    @foreach (['literacy' => 'Literacy', 'numeracy' => 'Numeracy'] as $value => $label)
-                                        <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-low px-4 py-4 transition-all hover:border-primary-container hover:bg-primary/5">
-                                            <input class="h-4 w-4 border-outline text-primary focus:ring-primary/20" name="subject" type="radio" value="{{ $value }}" {{ old('subject', 'literacy') === $value ? 'checked' : '' }}>
-                                            <div>
-                                                <p class="font-headline font-bold text-on-surface">{{ $label }}</p>
-                                                <p class="text-sm text-on-surface-variant">{{ $value === 'literacy' ? 'Reading, language, and comprehension tasks' : 'Math, number sense, and problem-solving tasks' }}</p>
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <label class="group relative cursor-pointer">
+                                        <input class="peer sr-only" name="subject" type="radio" value="literacy" {{ old('subject', 'literacy') === 'literacy' ? 'checked' : '' }} data-subject-choice="literacy">
+                                                <div class="rounded-lg border-2 border-transparent bg-surface-container-low p-6 transition-all group-hover:bg-surface-container-high peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-lg peer-checked:shadow-primary/10">
+                                            <div class="mb-4 flex items-start justify-between">
+                                                <div class="rounded-lg bg-white p-3 shadow-sm">
+                                                    <span class="material-symbols-outlined text-3xl text-primary">auto_stories</span>
+                                                </div>
+                                                <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary">
+                                                    <span class="h-2 w-2 rounded-full bg-white"></span>
+                                                </span>
                                             </div>
-                                        </label>
-                                    @endforeach
+                                            <h3 class="mb-1 text-lg font-bold">Literacy</h3>
+                                            <p class="text-sm leading-relaxed text-on-surface-variant">Reading, comprehension, vocabulary, and fluency development.</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="group relative cursor-pointer">
+                                        <input class="peer sr-only" name="subject" type="radio" value="numeracy" {{ old('subject') === 'numeracy' ? 'checked' : '' }} data-subject-choice="numeracy">
+                                                <div class="rounded-lg border-2 border-transparent bg-surface-container-low p-6 transition-all group-hover:bg-surface-container-high peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-lg peer-checked:shadow-primary/10">
+                                            <div class="mb-4 flex items-start justify-between">
+                                                <div class="rounded-lg bg-white p-3 shadow-sm">
+                                                    <span class="material-symbols-outlined text-3xl text-primary">calculate</span>
+                                                </div>
+                                                <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary">
+                                                    <span class="h-2 w-2 rounded-full bg-white"></span>
+                                                </span>
+                                            </div>
+                                            <h3 class="mb-1 text-lg font-bold">Numeracy</h3>
+                                            <p class="text-sm leading-relaxed text-on-surface-variant">Arithmetic, number sense, spatial reasoning, and problem solving.</p>
+                                        </div>
+                                    </label>
                                 </div>
                                 @error('subject')
-                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                    <p class="mt-3 text-sm text-error">{{ $message }}</p>
+                                @enderror
+
+                                <div class="mt-8">
+                                    <label class="mb-4 block text-sm font-bold text-on-surface-variant">Choose Quiz Type</label>
+                                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                        @foreach ([
+                                            ['value' => 'multiple_choice', 'icon' => 'checklist', 'label' => 'Multiple Choice'],
+                                            ['value' => 'data_egg', 'icon' => 'egg_alt', 'label' => 'Interactive Egg'],
+                                            ['value' => 'flashcards', 'icon' => 'style', 'label' => 'Flashcards'],
+                                        ] as $quizType)
+                                            <label class="group relative cursor-pointer">
+                                                <input class="peer sr-only" name="quiz_type" type="radio" value="{{ $quizType['value'] }}" {{ old('quiz_type', 'multiple_choice') === $quizType['value'] ? 'checked' : '' }}>
+                                                <div class="flex min-h-28 flex-col items-center justify-center rounded-lg border-2 border-transparent bg-surface-container-low p-4 text-center transition-all group-hover:bg-surface-container-high peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-checked:shadow-lg peer-checked:shadow-primary/10">
+                                                    <span class="material-symbols-outlined mb-2 text-primary">{{ $quizType['icon'] }}</span>
+                                                    <span class="text-sm font-bold">{{ $quizType['label'] }}</span>
+                                                </div>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    @error('quiz_type')
+                                        <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="mt-8 space-y-4">
+                                    <div>
+                                        <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="title">Assessment Title</label>
+                                        <input class="w-full rounded-sm border-none bg-surface-container-low px-4 py-3 text-lg font-medium focus:ring-2 focus:ring-primary" id="title" name="title" placeholder="e.g., Mid-Term Reading Fluency Diagnostic" type="text" value="{{ old('title') }}" required>
+                                        @error('title')
+                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="instructions">Detailed Description</label>
+                                        <textarea class="w-full rounded-sm border-none bg-surface-container-low px-4 py-3 focus:ring-2 focus:ring-primary" id="instructions" name="instructions" placeholder="Provide context or instructions for the students..." rows="4">{{ old('instructions') }}</textarea>
+                                        @error('instructions')
+                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                                <h2 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
+                                    <span class="material-symbols-outlined text-primary">upload_file</span>
+                                    2. Delivery Method
+                                </h2>
+
+                                <div class="mb-6 flex gap-4">
+                                    <button class="flex-1 rounded-full bg-primary px-4 py-3 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" id="btn-upload" type="button" data-input-mode="upload">Upload Assets</button>
+                                    <button class="flex-1 rounded-full bg-surface-container-high px-4 py-3 font-bold text-on-surface-variant transition-all hover:bg-primary/5 hover:text-primary" id="btn-manual" type="button" data-input-mode="manual">Manual Entry</button>
+                                </div>
+
+                                <div class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline-variant bg-surface p-10 text-center transition-all hover:border-primary hover:bg-primary/5" id="input-upload">
+                                    <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-container/20 transition-transform">
+                                        <span class="material-symbols-outlined text-3xl text-primary">cloud_upload</span>
+                                    </div>
+                                    <p class="mb-1 text-lg font-bold">Drag and drop assessment files</p>
+                                    <p class="mb-4 text-sm text-on-surface-variant">Supports CSV, PDF, and JSON formats</p>
+                                    <label class="cursor-pointer text-sm font-bold text-primary underline underline-offset-4">
+                                        <input class="sr-only" name="assessment_asset" type="file" accept=".csv,.pdf,.json,.jpg,.jpeg,.png" data-file-input>
+                                        <span id="asset-file-label">Browse local files</span>
+                                    </label>
+                                    @error('assessment_asset')
+                                        <p class="mt-3 text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="hidden space-y-4" id="input-manual">
+                                    @php
+                                        $oldManualQuestions = old('manual_questions', [[
+                                            'question' => '',
+                                            'answers' => ['A' => '', 'B' => '', 'C' => '', 'D' => ''],
+                                            'correct_answer' => 'A',
+                                        ]]);
+                                    @endphp
+
+                                    <div id="manual-questions" class="space-y-4">
+                                        @foreach ($oldManualQuestions as $questionIndex => $manualQuestion)
+                                            <div class="manual-question-card rounded-lg border border-outline-variant/20 bg-surface p-6" data-question-card>
+                                                <div class="mb-4 flex items-center gap-4">
+                                                    <div class="question-number flex h-10 w-10 shrink-0 items-center justify-center rounded border border-outline-variant/30 bg-white font-bold">Q{{ $questionIndex + 1 }}</div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <p class="font-bold">Manual Question</p>
+                                                        <p class="text-xs text-on-surface-variant">This question will be saved with the assessment.</p>
+                                                    </div>
+                                                    <button class="remove-question rounded-full p-2 text-on-surface-variant transition-colors hover:bg-error-container/20 hover:text-error" type="button" aria-label="Remove question">
+                                                        <span class="material-symbols-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                                <div class="space-y-4">
+                                                    <div>
+                                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Question</label>
+                                                        <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[{{ $questionIndex }}][question]" rows="3" placeholder="Type the question here...">{{ $manualQuestion['question'] ?? '' }}</textarea>
+                                                        @error("manual_questions.{$questionIndex}.question")
+                                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="grid gap-3 sm:grid-cols-2">
+                                                        @foreach (['A', 'B', 'C', 'D'] as $answer)
+                                                            <div>
+                                                                <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Answer {{ $answer }}</label>
+                                                                <input class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[{{ $questionIndex }}][answers][{{ $answer }}]" type="text" value="{{ $manualQuestion['answers'][$answer] ?? '' }}" placeholder="Option {{ $answer }}">
+                                                                @error("manual_questions.{$questionIndex}.answers.{$answer}")
+                                                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                                @enderror
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                    <div>
+                                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Correct Answer</label>
+                                                        <select class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[{{ $questionIndex }}][correct_answer]">
+                                                            @foreach (['A', 'B', 'C', 'D'] as $answer)
+                                                                <option value="{{ $answer }}" @selected(($manualQuestion['correct_answer'] ?? 'A') === $answer)>Answer {{ $answer }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error("manual_questions.{$questionIndex}.correct_answer")
+                                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    @error('manual_questions')
+                                        <p class="text-sm text-error">{{ $message }}</p>
+                                    @enderror
+
+                                    <button id="add-question-button" class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-outline-variant py-4 font-bold text-on-surface-variant transition-all hover:bg-surface-container-high" type="button">
+                                        <span class="material-symbols-outlined">add_circle</span>
+                                        Add Question
+                                    </button>
+                                </div>
+                                @error('delivery_method')
+                                    <p class="mt-3 text-sm text-error">{{ $message }}</p>
                                 @enderror
                             </div>
-
-                            <div>
-                                <label class="mb-2 block text-xs font-black uppercase tracking-widest text-on-surface-variant" for="instructions">Instructions</label>
-                                <textarea class="min-h-[10rem] w-full rounded-lg border-outline-variant/20 bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary/20" id="instructions" name="instructions" placeholder="Add a short teacher note so students know what to expect.">{{ old('instructions') }}</textarea>
-                                @error('instructions')
-                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="mb-2 block text-xs font-black uppercase tracking-widest text-on-surface-variant" for="status">Publish State</label>
-                                <select class="w-full rounded-lg border-outline-variant/20 bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary/20" id="status" name="status">
-                                    <option value="published" {{ old('status', 'published') === 'published' ? 'selected' : '' }}>Published</option>
-                                    <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                                </select>
-                                @error('status')
-                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <button class="inline-flex items-center rounded-lg bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-on-primary transition-colors hover:bg-primary-dim" type="submit">
-                                Create Assessment
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
-                        <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                            <div>
-                                <h2 class="font-headline text-2xl font-extrabold text-on-surface">Created assessments</h2>
-                                <p class="mt-2 text-sm text-on-surface-variant">This list shows what you have already prepared for students.</p>
-                            </div>
-                            <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ $numeracyCount }} Numeracy</span>
                         </div>
 
-                        @if ($assessments->isEmpty())
-                            <div class="flex min-h-[24rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-8 text-center">
-                                <span class="material-symbols-outlined text-6xl text-outline-variant">note_add</span>
-                                <h3 class="mt-4 font-headline text-2xl font-bold text-on-surface">No assessments yet</h3>
-                                <p class="mt-2 max-w-xl text-sm text-on-surface-variant">Your assessment maker is ready. Create your first literacy or numeracy assessment to start filling the student activity queue.</p>
-                            </div>
-                        @else
-                            <div class="space-y-4">
-                                @foreach ($assessments as $assessment)
-                                    <div class="rounded-xl border border-outline-variant/15 bg-surface-container-low p-5">
-                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                            <div>
-                                                <div class="mb-3 flex flex-wrap gap-2">
-                                                    <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
-                                                        {{ $assessment->subject }}
-                                                    </span>
-                                                    <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->status === 'published' ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant' }}">
-                                                        {{ $assessment->status }}
-                                                    </span>
-                                                </div>
-                                                <h3 class="font-headline text-xl font-bold text-on-surface">{{ $assessment->title }}</h3>
-                                                <p class="mt-2 text-sm text-on-surface-variant">{{ $assessment->instructions ?: 'No instructions added yet.' }}</p>
-                                            </div>
-                                            <div class="text-sm text-on-surface-variant">
-                                                {{ $assessment->created_at->format('M d, Y') }}
-                                            </div>
+                        <aside class="space-y-6">
+                            <div class="relative overflow-hidden rounded-lg border border-outline-variant/10 bg-surface-container-low p-6">
+                                <div class="absolute right-0 top-0 p-4 opacity-10">
+                                    <span class="material-symbols-outlined text-7xl text-primary" id="bg-icon">menu_book</span>
+                                </div>
+                                <h2 class="relative z-10 mb-4 font-headline text-lg font-bold">Advanced Specs</h2>
+                                <div class="relative z-10 space-y-5">
+                                    <div>
+                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Grade Level</label>
+                                        <div class="flex items-center gap-2 rounded-sm border border-outline-variant/20 bg-white p-3">
+                                            <span class="material-symbols-outlined text-sm text-primary">school</span>
+                                            <span class="font-bold">Grade 6</span>
+                                            <span class="ml-auto text-xs text-on-surface-variant">Primary Standard</span>
                                         </div>
                                     </div>
-                                @endforeach
+
+                                    <div>
+                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Target Section</label>
+                                        <select class="w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" name="target_section">
+                                            <option value="all" @selected(old('target_section', 'all') === 'all')>All Grade 6 Sections</option>
+                                            <option value="section_a" @selected(old('target_section') === 'section_a')>Section A</option>
+                                            <option value="section_b" @selected(old('target_section') === 'section_b')>Section B</option>
+                                            <option value="section_c" @selected(old('target_section') === 'section_c')>Section C</option>
+                                        </select>
+                                        @error('target_section')
+                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <hr class="border-outline-variant/20">
+
+                                    <div class="space-y-3" id="literacy-options">
+                                        <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Literacy Focus</label>
+                                        @foreach (['Reading Fluency', 'Comprehension Depth', 'Spelling & Vocabulary'] as $focus)
+                                            <label class="flex cursor-pointer items-center gap-3 rounded-sm border border-transparent bg-white p-3 transition-all hover:border-primary/20 hover:bg-primary/5" data-focus-choice>
+                                                <input class="rounded-sm text-primary focus:ring-primary" name="focus_areas[]" value="{{ $focus }}" type="checkbox" data-focus-input="literacy" @checked(in_array($focus, old('focus_areas', ['Reading Fluency']), true))>
+                                                <span class="text-sm font-medium">{{ $focus }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="hidden space-y-3" id="numeracy-options">
+                                        <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Numeracy Focus</label>
+                                        @foreach (['Mental Arithmetic', 'Problem Solving', 'Data Interpretation'] as $focus)
+                                            <label class="flex cursor-pointer items-center gap-3 rounded-sm border border-transparent bg-white p-3 transition-all hover:border-primary/20 hover:bg-primary/5" data-focus-choice>
+                                                <input class="rounded-sm text-primary focus:ring-primary" name="focus_areas[]" value="{{ $focus }}" type="checkbox" data-focus-input="numeracy" @checked(in_array($focus, old('focus_areas', []), true))>
+                                                <span class="text-sm font-medium">{{ $focus }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    @error('focus_areas')
+                                        <p class="text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
-                        @endif
+
+                            <div class="overflow-hidden rounded-lg shadow-lg">
+                                <div class="relative h-48 bg-gradient-to-br from-primary to-primary-container">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                    <div class="absolute inset-x-0 bottom-0 p-6">
+                                        <span class="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Student Preview</span>
+                                        <p class="font-bold leading-tight text-white">Students will see a friendly, focused activity screen built from this assessment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </section>
+                </form>
+
+                <section class="mt-8 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                    <div class="mb-6">
+                        <h2 class="font-headline text-2xl font-extrabold text-on-surface">Created Assessments</h2>
+                        <p class="mt-2 text-sm text-on-surface-variant">Your prepared assessments stay here for quick review.</p>
                     </div>
+
+                    @if ($assessments->isEmpty())
+                        <div class="flex min-h-[16rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-8 text-center">
+                            <span class="material-symbols-outlined text-6xl text-outline-variant">note_add</span>
+                            <h3 class="mt-4 font-headline text-2xl font-bold text-on-surface">No assessments yet</h3>
+                            <p class="mt-2 max-w-xl text-sm text-on-surface-variant">Create your first literacy or numeracy assessment to start filling the student activity queue.</p>
+                        </div>
+                    @else
+                        <div class="grid gap-4 md:grid-cols-2">
+                            @foreach ($assessments as $assessment)
+                                <article class="rounded-xl border border-outline-variant/15 bg-surface-container-low p-5">
+                                    <div class="mb-3 flex flex-wrap gap-2">
+                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
+                                            {{ $assessment->subject }}
+                                        </span>
+                                        <span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                                            {{ str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title() }}
+                                        </span>
+                                        <span class="rounded-full bg-primary-container/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
+                                            {{ str($assessment->delivery_method ?? 'upload')->title() }}
+                                        </span>
+                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->status === 'published' ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant' }}">
+                                            {{ $assessment->status }}
+                                        </span>
+                                    </div>
+                                    <h3 class="font-headline text-xl font-bold text-on-surface">{{ $assessment->title }}</h3>
+                                    <p class="mt-2 text-sm text-on-surface-variant">{{ $assessment->instructions ?: 'No instructions added yet.' }}</p>
+                                    <dl class="mt-4 grid gap-3 text-xs text-on-surface-variant sm:grid-cols-2">
+                                        <div>
+                                            <dt class="font-black uppercase tracking-widest">Target</dt>
+                                            <dd class="mt-1 font-medium text-on-surface">{{ str($assessment->target_section ?? 'all')->replace('_', ' ')->title() }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="font-black uppercase tracking-widest">Focus</dt>
+                                            <dd class="mt-1 font-medium text-on-surface">{{ collect($assessment->focus_areas ?? [])->join(', ') ?: 'None selected' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="font-black uppercase tracking-widest">Asset</dt>
+                                            <dd class="mt-1 font-medium text-on-surface">{{ $assessment->asset_path ? basename($assessment->asset_path) : 'No file uploaded' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="font-black uppercase tracking-widest">Manual Questions</dt>
+                                            <dd class="mt-1 font-medium text-on-surface">{{ count($assessment->manual_questions ?? []) }}</dd>
+                                        </div>
+                                    </dl>
+                                    <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">{{ $assessment->created_at->format('M d, Y') }}</p>
+                                        <a class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-on-primary transition-colors hover:bg-primary-dim" href="{{ route('assessments.show', $assessment) }}">
+                                            View Details
+                                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </a>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
                 </section>
             </div>
         </main>
     </div>
+
+    <script>
+        const subjectChoices = document.querySelectorAll('[data-subject-choice]');
+        const literacyOptions = document.getElementById('literacy-options');
+        const numeracyOptions = document.getElementById('numeracy-options');
+        const bgIcon = document.getElementById('bg-icon');
+        const uploadSection = document.getElementById('input-upload');
+        const manualSection = document.getElementById('input-manual');
+        const uploadButton = document.getElementById('btn-upload');
+        const manualButton = document.getElementById('btn-manual');
+        const statusInput = document.getElementById('assessment-status');
+        const statusButtons = document.querySelectorAll('[data-submit-status]');
+        const deliveryMethodInput = document.getElementById('delivery-method');
+        const fileInput = document.querySelector('[data-file-input]');
+        const fileLabel = document.getElementById('asset-file-label');
+        const focusInputs = document.querySelectorAll('[data-focus-input]');
+        const focusChoices = document.querySelectorAll('[data-focus-choice]');
+        const manualQuestions = document.getElementById('manual-questions');
+        const addQuestionButton = document.getElementById('add-question-button');
+        const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
+        const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
+        const activeChoiceClasses = ['border-primary', 'bg-primary/10', 'text-primary', 'shadow-sm'];
+        const inactiveChoiceClasses = ['border-transparent', 'bg-white'];
+
+        function toggleSpecifics(type) {
+            const isLiteracy = type === 'literacy';
+            literacyOptions.classList.toggle('hidden', !isLiteracy);
+            numeracyOptions.classList.toggle('hidden', isLiteracy);
+            bgIcon.textContent = isLiteracy ? 'menu_book' : 'grid_view';
+            bgIcon.classList.toggle('text-primary', isLiteracy);
+            bgIcon.classList.toggle('text-secondary', !isLiteracy);
+            focusInputs.forEach((input) => {
+                input.disabled = input.dataset.focusInput !== type;
+            });
+            updateFocusHighlights();
+        }
+
+        function switchInput(mode) {
+            const uploadActive = mode === 'upload';
+            uploadSection.classList.toggle('hidden', !uploadActive);
+            manualSection.classList.toggle('hidden', uploadActive);
+            setButtonActive(uploadButton, uploadActive);
+            setButtonActive(manualButton, !uploadActive);
+            deliveryMethodInput.value = mode;
+        }
+
+        function setButtonActive(button, isActive) {
+            button.classList.toggle('hover:bg-primary-dim', isActive);
+            button.classList.toggle('hover:text-primary', !isActive);
+            button.classList.toggle('hover:bg-primary/5', !isActive);
+            activeButtonClasses.forEach((className) => button.classList.toggle(className, isActive));
+            inactiveButtonClasses.forEach((className) => button.classList.toggle(className, !isActive));
+        }
+
+        function updateFocusHighlights() {
+            focusChoices.forEach((choice) => {
+                const input = choice.querySelector('[data-focus-input]');
+                const isActive = input.checked && ! input.disabled;
+                activeChoiceClasses.forEach((className) => choice.classList.toggle(className, isActive));
+                inactiveChoiceClasses.forEach((className) => choice.classList.toggle(className, !isActive));
+            });
+        }
+
+        function updateSubmitHighlights(status) {
+            statusButtons.forEach((button) => {
+                const isActive = button.dataset.submitStatus === status;
+                setButtonActive(button, isActive);
+                button.classList.toggle('border-primary', isActive);
+                button.classList.toggle('border-outline-variant', !isActive);
+            });
+        }
+
+        function questionTemplate(index) {
+            return `
+                <div class="manual-question-card rounded-lg border border-outline-variant/20 bg-surface p-6" data-question-card>
+                    <div class="mb-4 flex items-center gap-4">
+                        <div class="question-number flex h-10 w-10 shrink-0 items-center justify-center rounded border border-outline-variant/30 bg-white font-bold">Q${index + 1}</div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold">Manual Question</p>
+                            <p class="text-xs text-on-surface-variant">This question will be saved with the assessment.</p>
+                        </div>
+                        <button class="remove-question rounded-full p-2 text-on-surface-variant transition-colors hover:bg-error-container/20 hover:text-error" type="button" aria-label="Remove question">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Question</label>
+                            <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][question]" rows="3" placeholder="Type the question here..."></textarea>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            ${['A', 'B', 'C', 'D'].map((answer) => `
+                                <div>
+                                    <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Answer ${answer}</label>
+                                    <input class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][answers][${answer}]" type="text" placeholder="Option ${answer}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Correct Answer</label>
+                            <select class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][correct_answer]">
+                                ${['A', 'B', 'C', 'D'].map((answer) => `<option value="${answer}">Answer ${answer}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renumberQuestions() {
+            manualQuestions.querySelectorAll('[data-question-card]').forEach((card, index) => {
+                card.querySelector('.question-number').textContent = `Q${index + 1}`;
+                card.querySelectorAll('[name]').forEach((field) => {
+                    field.name = field.name.replace(/manual_questions\[\d+\]/, `manual_questions[${index}]`);
+                });
+                const removeButton = card.querySelector('.remove-question');
+                removeButton.classList.toggle('hidden', manualQuestions.querySelectorAll('[data-question-card]').length === 1);
+            });
+        }
+
+        subjectChoices.forEach((choice) => {
+            choice.addEventListener('change', () => toggleSpecifics(choice.value));
+        });
+
+        uploadButton.addEventListener('click', () => switchInput('upload'));
+        manualButton.addEventListener('click', () => switchInput('manual'));
+        fileInput.addEventListener('change', () => {
+            fileLabel.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'Browse local files';
+        });
+        statusButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                statusInput.value = button.dataset.submitStatus;
+                updateSubmitHighlights(button.dataset.submitStatus);
+            });
+        });
+        focusInputs.forEach((input) => {
+            input.addEventListener('change', updateFocusHighlights);
+        });
+        addQuestionButton.addEventListener('click', () => {
+            const index = manualQuestions.querySelectorAll('[data-question-card]').length;
+            manualQuestions.insertAdjacentHTML('beforeend', questionTemplate(index));
+            renumberQuestions();
+        });
+        manualQuestions.addEventListener('click', (event) => {
+            const button = event.target.closest('.remove-question');
+
+            if (! button) {
+                return;
+            }
+
+            if (manualQuestions.querySelectorAll('[data-question-card]').length === 1) {
+                return;
+            }
+
+            button.closest('[data-question-card]').remove();
+            renumberQuestions();
+        });
+        toggleSpecifics(document.querySelector('[data-subject-choice]:checked')?.value || 'literacy');
+        switchInput(deliveryMethodInput.value || 'upload');
+        updateSubmitHighlights(statusInput.value || 'published');
+        updateFocusHighlights();
+        renumberQuestions();
+    </script>
 </x-app-layout>

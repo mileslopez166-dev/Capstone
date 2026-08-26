@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class TokenRequestController extends Controller
 {
@@ -71,11 +72,25 @@ class TokenRequestController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
         abort_unless(in_array($user->role, ['student', 'teacher'], true) && $user->isPendingApproval(), 404);
 
-        $user->forceFill([
+        $validated = $request->validate([
+            'section' => [
+                $user->isTeacher() ? 'required' : 'nullable',
+                'string',
+                Rule::in(['Section A', 'Section B', 'Section C']),
+            ],
+        ]);
+
+        $changes = [
             'approval_status' => 'approved',
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
-        ])->save();
+        ];
+
+        if ($user->isTeacher()) {
+            $changes['section'] = $validated['section'];
+        }
+
+        $user->forceFill($changes)->save();
 
         return redirect()
             ->route('admin.token-requests.index')

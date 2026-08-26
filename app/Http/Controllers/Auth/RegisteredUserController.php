@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -28,11 +29,14 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:student,teacher'],
-            'section' => ['required', 'string', 'max:255'],
+            'section' => ['required_if:role,teacher', 'nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.not_regex' => 'The full name must not contain numbers.',
+            'section.required_if' => 'Please choose the section you are assigned to.',
         ]);
 
         $selectedRole = $request->role;
@@ -43,7 +47,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'role' => $selectedRole,
-            'section' => $request->section,
+            'section' => $selectedRole === 'teacher' ? $request->section : null,
             'teacher_token' => null,
             'approval_status' => $requiresApproval ? 'pending' : 'approved',
             'approved_at' => $requiresApproval ? null : now(),
