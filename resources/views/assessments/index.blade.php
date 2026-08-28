@@ -33,17 +33,17 @@
                 <form id="assessment-builder-form" class="space-y-8" method="POST" action="{{ route('assessments.store') }}" enctype="multipart/form-data">
                     @csrf
                     <input id="assessment-status" name="status" type="hidden" value="{{ old('status', 'published') }}">
-                    <input id="delivery-method" name="delivery_method" type="hidden" value="{{ old('delivery_method', 'upload') }}">
+                    <input id="delivery-method" name="delivery_method" type="hidden" value="manual">
 
                     <header class="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                         <div>
                             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-primary">Curriculum Builder</span>
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
-                            <p class="mt-2 max-w-xl text-on-surface-variant">Configure a student-ready assessment. Choose the focus area, add instructions, then save it as a draft or publish it to the student activity queue.</p>
+                            <p class="mt-2 max-w-xl text-on-surface-variant">Configure a student-ready assessment. Choose the focus area, add instructions, then save it locked or publish it to the student activity queue.</p>
                         </div>
                         <div class="flex flex-wrap gap-3">
                             <button class="rounded-full border border-outline-variant px-6 py-2.5 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
-                                Save Draft
+                                Save Locked
                             </button>
                             <button class="rounded-full bg-primary px-8 py-2.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" type="submit" data-submit-status="published">
                                 Publish Assessment
@@ -145,31 +145,13 @@
 
                             <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
                                 <h2 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
-                                    <span class="material-symbols-outlined text-primary">upload_file</span>
-                                    2. Delivery Method
+                                    <span class="material-symbols-outlined text-primary">edit_note</span>
+                                    2. Story & Questions
                                 </h2>
 
-                                <div class="mb-6 flex gap-4">
-                                    <button class="flex-1 rounded-full bg-primary px-4 py-3 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" id="btn-upload" type="button" data-input-mode="upload">Upload Assets</button>
-                                    <button class="flex-1 rounded-full bg-surface-container-high px-4 py-3 font-bold text-on-surface-variant transition-all hover:bg-primary/5 hover:text-primary" id="btn-manual" type="button" data-input-mode="manual">Manual Entry</button>
-                                </div>
 
-                                <div class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline-variant bg-surface p-10 text-center transition-all hover:border-primary hover:bg-primary/5" id="input-upload">
-                                    <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-container/20 transition-transform">
-                                        <span class="material-symbols-outlined text-3xl text-primary">cloud_upload</span>
-                                    </div>
-                                    <p class="mb-1 text-lg font-bold">Drag and drop assessment files</p>
-                                    <p class="mb-4 text-sm text-on-surface-variant">Supports CSV, PDF, and JSON formats</p>
-                                    <label class="cursor-pointer text-sm font-bold text-primary underline underline-offset-4">
-                                        <input class="sr-only" name="assessment_asset" type="file" accept=".csv,.pdf,.json,.jpg,.jpeg,.png" data-file-input>
-                                        <span id="asset-file-label">Browse local files</span>
-                                    </label>
-                                    @error('assessment_asset')
-                                        <p class="mt-3 text-sm text-error">{{ $message }}</p>
-                                    @enderror
-                                </div>
 
-                                <div class="hidden space-y-4" id="input-manual">
+                                <div class="space-y-4" id="input-manual">
                                     @php
                                         $oldManualQuestions = old('manual_questions', [[
                                             'question' => '',
@@ -177,6 +159,76 @@
                                             'correct_answer' => 'A',
                                         ]]);
                                     @endphp
+
+                                    <div class="rounded-lg border border-outline-variant/20 bg-surface p-6">
+                                        <div class="mb-5 flex items-center gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded bg-primary-container/20 text-primary">
+                                                <span class="material-symbols-outlined">auto_stories</span>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-headline text-lg font-bold text-on-surface">Story Details</h3>
+                                                <p class="text-sm text-on-surface-variant">Add the story students will read before answering.</p>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-4">
+
+                                            <div>
+                                                <label class="mb-3 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Assessment Type</label>
+                                                <div class="grid gap-3 md:grid-cols-2">
+                                                    @foreach ([
+                                                        'silent_reading' => 'Silent Reading',
+                                                        'oral_reading' => 'Oral Reading Assessment',
+                                                        'listening_comprehension' => 'Listening Comprehension Assessment',
+                                                        'group_screening' => 'Group Screening Test',
+                                                    ] as $typeValue => $typeLabel)
+                                                        <label class="flex cursor-pointer items-center gap-3 rounded-lg bg-white p-4 text-sm font-bold text-on-surface shadow-sm ring-1 ring-outline-variant/20 transition-all hover:ring-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-primary has-[:checked]:ring-primary">
+                                                            <input class="text-primary focus:ring-primary" name="assessment_type" type="radio" value="{{ $typeValue }}" @checked(old('assessment_type', 'silent_reading') === $typeValue)>
+                                                            <span>{{ $typeLabel }}</span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                                @error('assessment_type')
+                                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="overflow-hidden rounded-lg bg-surface-container-low text-xs shadow-sm ring-1 ring-outline-variant/15">
+                                                <div class="grid grid-cols-4 gap-0 bg-surface-container-high px-3 py-2 font-black uppercase tracking-wider text-on-surface-variant">
+                                                    <span>Assessment Type</span>
+                                                    <span>Reading Mode</span>
+                                                    <span>Main Purpose</span>
+                                                    <span>Output</span>
+                                                </div>
+                                                @foreach ([
+                                                    ['Oral Reading Assessment', 'Read aloud', 'Measure fluency + accuracy', 'Reading errors, WCPM, comprehension'],
+                                                    ['Silent Reading Assessment', 'Read silently', 'Measure comprehension', 'Score and reading level'],
+                                                    ['Listening Comprehension Assessment', 'Listen only', 'Measure understanding', 'Listening score'],
+                                                    ['Group Screening Test', 'Class activity', 'Identify struggling readers', 'Students for further testing'],
+                                                ] as $row)
+                                                    <div class="grid grid-cols-4 gap-0 px-3 py-2 text-on-surface-variant odd:bg-white even:bg-surface-container-lowest">
+                                                        @foreach ($row as $cell)
+                                                            <span class="pr-3">{{ $cell }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <div>
+                                                <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="story_title">Story Title</label>
+                                                <input class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" id="story_title" name="story_title" type="text" value="{{ old('story_title') }}" placeholder="Enter story title">
+                                                @error('story_title')
+                                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="story_description">Story Description</label>
+                                                <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" id="story_description" name="story_description" rows="7" placeholder="Write the story or reading passage here...">{{ old('story_description') }}</textarea>
+                                                @error('story_description')
+                                                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div id="manual-questions" class="space-y-4">
                                         @foreach ($oldManualQuestions as $questionIndex => $manualQuestion)
@@ -248,19 +300,11 @@
                                 </div>
                                 <h2 class="relative z-10 mb-4 font-headline text-lg font-bold">Advanced Specs</h2>
                                 <div class="relative z-10 space-y-5">
-                                    <div>
-                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Grade Level</label>
-                                        <div class="flex items-center gap-2 rounded-sm border border-outline-variant/20 bg-white p-3">
-                                            <span class="material-symbols-outlined text-sm text-primary">school</span>
-                                            <span class="font-bold">Grade 6</span>
-                                            <span class="ml-auto text-xs text-on-surface-variant">Primary Standard</span>
-                                        </div>
-                                    </div>
 
                                     <div>
                                         <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Target Section</label>
                                         <select class="w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" name="target_section">
-                                            <option value="all" @selected(old('target_section', 'all') === 'all')>All Grade 6 Sections</option>
+                                            <option value="all" @selected(old('target_section', 'all') === 'all')>All Sections</option>
                                             <option value="section_a" @selected(old('target_section') === 'section_a')>Section A</option>
                                             <option value="section_b" @selected(old('target_section') === 'section_b')>Section B</option>
                                             <option value="section_c" @selected(old('target_section') === 'section_c')>Section C</option>
@@ -325,6 +369,16 @@
                     @else
                         <div class="grid gap-4 md:grid-cols-2">
                             @foreach ($assessments as $assessment)
+                                @php
+                                    $isPublished = $assessment->status === 'published';
+                                    $availabilityLabel = $isPublished ? 'Unlocked' : 'Locked';
+                                    $nextAvailability = $isPublished ? 'draft' : 'published';
+                                    $availabilityButtonLabel = $isPublished ? 'Lock' : 'Unlock';
+                                    $availabilityIcon = $isPublished ? 'lock' : 'lock_open';
+                                    $availabilityConfirm = $isPublished
+                                        ? 'Lock this assessment? Students will no longer be able to answer it.'
+                                        : 'Unlock this assessment? Students will be able to answer it.';
+                                @endphp
                                 <article class="rounded-xl border border-outline-variant/15 bg-surface-container-low p-5">
                                     <div class="mb-3 flex flex-wrap gap-2">
                                         <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
@@ -334,10 +388,10 @@
                                             {{ str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title() }}
                                         </span>
                                         <span class="rounded-full bg-primary-container/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
-                                            {{ str($assessment->delivery_method ?? 'upload')->title() }}
+                                            Story Assessment
                                         </span>
-                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->status === 'published' ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant' }}">
-                                            {{ $assessment->status }}
+                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $isPublished ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-error-container/30 text-error' }}">
+                                            {{ $availabilityLabel }}
                                         </span>
                                     </div>
                                     <h3 class="font-headline text-xl font-bold text-on-surface">{{ $assessment->title }}</h3>
@@ -362,10 +416,29 @@
                                     </dl>
                                     <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-4 sm:flex-row sm:items-center sm:justify-between">
                                         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">{{ $assessment->created_at->format('M d, Y') }}</p>
-                                        <a class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-on-primary transition-colors hover:bg-primary-dim" href="{{ route('assessments.show', $assessment) }}">
-                                            View Details
-                                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                                        </a>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-on-primary transition-colors hover:bg-primary-dim" href="{{ route('assessments.show', $assessment) }}">
+                                                View Details
+                                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                            </a>
+                                            <form method="POST" action="{{ route('assessments.availability', $assessment) }}" data-confirm-message="{{ $availabilityConfirm }}" onsubmit="return confirm(this.dataset.confirmMessage);">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input name="status" type="hidden" value="{{ $nextAvailability }}">
+                                                <button class="inline-flex items-center justify-center gap-2 rounded-full {{ $isPublished ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest' : 'bg-secondary px-4 text-on-secondary hover:bg-secondary-dim' }} px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors" type="submit">
+                                                    {{ $availabilityButtonLabel }}
+                                                    <span class="material-symbols-outlined text-sm">{{ $availabilityIcon }}</span>
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('assessments.destroy', $assessment) }}" onsubmit="return confirm('Delete this assessment? Student submissions for this assessment will also be removed.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="inline-flex items-center justify-center gap-2 rounded-full bg-error px-4 py-2 text-xs font-black uppercase tracking-widest text-on-error transition-colors hover:bg-red-700" type="submit">
+                                                    Delete
+                                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </article>
                             @endforeach
@@ -381,19 +454,13 @@
         const literacyOptions = document.getElementById('literacy-options');
         const numeracyOptions = document.getElementById('numeracy-options');
         const bgIcon = document.getElementById('bg-icon');
-        const uploadSection = document.getElementById('input-upload');
-        const manualSection = document.getElementById('input-manual');
-        const uploadButton = document.getElementById('btn-upload');
-        const manualButton = document.getElementById('btn-manual');
         const statusInput = document.getElementById('assessment-status');
         const statusButtons = document.querySelectorAll('[data-submit-status]');
-        const deliveryMethodInput = document.getElementById('delivery-method');
-        const fileInput = document.querySelector('[data-file-input]');
-        const fileLabel = document.getElementById('asset-file-label');
         const focusInputs = document.querySelectorAll('[data-focus-input]');
         const focusChoices = document.querySelectorAll('[data-focus-choice]');
         const manualQuestions = document.getElementById('manual-questions');
         const addQuestionButton = document.getElementById('add-question-button');
+        const assessmentTypeInputs = document.querySelectorAll('input[name="assessment_type"]');
         const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
         const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
         const activeChoiceClasses = ['border-primary', 'bg-primary/10', 'text-primary', 'shadow-sm'];
@@ -412,14 +479,6 @@
             updateFocusHighlights();
         }
 
-        function switchInput(mode) {
-            const uploadActive = mode === 'upload';
-            uploadSection.classList.toggle('hidden', !uploadActive);
-            manualSection.classList.toggle('hidden', uploadActive);
-            setButtonActive(uploadButton, uploadActive);
-            setButtonActive(manualButton, !uploadActive);
-            deliveryMethodInput.value = mode;
-        }
 
         function setButtonActive(button, isActive) {
             button.classList.toggle('hover:bg-primary-dim', isActive);
@@ -484,6 +543,16 @@
             `;
         }
 
+        function toggleQuestionBuilder() {
+            const selectedType = document.querySelector('input[name="assessment_type"]:checked')?.value || 'silent_reading';
+            const isOralReading = selectedType === 'oral_reading';
+            manualQuestions.classList.toggle('hidden', isOralReading);
+            addQuestionButton.classList.toggle('hidden', isOralReading);
+            manualQuestions.querySelectorAll('input, textarea, select, button').forEach((field) => {
+                field.disabled = isOralReading;
+            });
+        }
+
         function renumberQuestions() {
             manualQuestions.querySelectorAll('[data-question-card]').forEach((card, index) => {
                 card.querySelector('.question-number').textContent = `Q${index + 1}`;
@@ -499,11 +568,6 @@
             choice.addEventListener('change', () => toggleSpecifics(choice.value));
         });
 
-        uploadButton.addEventListener('click', () => switchInput('upload'));
-        manualButton.addEventListener('click', () => switchInput('manual'));
-        fileInput.addEventListener('change', () => {
-            fileLabel.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'Browse local files';
-        });
         statusButtons.forEach((button) => {
             button.addEventListener('click', () => {
                 statusInput.value = button.dataset.submitStatus;
@@ -512,6 +576,9 @@
         });
         focusInputs.forEach((input) => {
             input.addEventListener('change', updateFocusHighlights);
+        });
+        assessmentTypeInputs.forEach((input) => {
+            input.addEventListener('change', toggleQuestionBuilder);
         });
         addQuestionButton.addEventListener('click', () => {
             const index = manualQuestions.querySelectorAll('[data-question-card]').length;
@@ -533,9 +600,9 @@
             renumberQuestions();
         });
         toggleSpecifics(document.querySelector('[data-subject-choice]:checked')?.value || 'literacy');
-        switchInput(deliveryMethodInput.value || 'upload');
         updateSubmitHighlights(statusInput.value || 'published');
         updateFocusHighlights();
         renumberQuestions();
+        toggleQuestionBuilder();
     </script>
 </x-app-layout>

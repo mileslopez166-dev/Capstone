@@ -99,4 +99,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Assessment::class, 'created_by');
     }
+
+    public function assessmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssessmentSubmission::class);
+    }
 }

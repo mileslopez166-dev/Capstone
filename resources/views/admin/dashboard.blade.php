@@ -207,7 +207,7 @@
                                         <span class="ml-2 inline-flex items-center justify-center rounded-full bg-error/10 px-2 py-0.5 text-xs font-semibold text-error">{{ $trashedCount }}</span>
                                     @endif
                                 </a>
-                                <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary transition-colors hover:bg-primary-dim" type="button">
+                                <button id="create-user-open" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary transition-colors hover:bg-primary-dim" type="button">
                                     <span class="material-symbols-outlined text-[18px]">person_add</span>
                                     Create User
                                 </button>
@@ -510,6 +510,167 @@
             </main>
         </div>
     </div>
+    <div id="create-user-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6 opacity-0 transition-opacity duration-200 ease-out sm:px-6" aria-labelledby="create-user-modal-title" aria-modal="true" role="dialog">
+        <button id="create-user-backdrop" class="absolute inset-0 bg-on-surface/35 opacity-0 backdrop-blur-sm transition-opacity duration-200 ease-out" type="button" aria-label="Close create user modal"></button>
+
+        <section id="create-user-panel" class="relative max-h-[90vh] w-full max-w-3xl translate-y-4 scale-[0.98] overflow-y-auto rounded-DEFAULT bg-surface-container-lowest opacity-0 shadow-[0_30px_90px_rgba(0,46,81,0.28)] transition duration-200 ease-out">
+            <div class="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-outline-variant/15 bg-surface-container-lowest px-6 py-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">User Management</p>
+                    <h2 id="create-user-modal-title" class="mt-1 font-headline text-2xl font-bold text-on-surface">Create User</h2>
+                    <p class="mt-1 text-sm text-on-surface-variant">Add a student, teacher, or administrator account.</p>
+                </div>
+                <button id="create-user-close" class="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary" type="button" aria-label="Close create form">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <form id="create-user-form" class="space-y-6" method="POST" action="{{ route('admin.users.store') }}">
+                    @csrf
+                    <input name="create_user_form" type="hidden" value="1">
+
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div class="space-y-4 md:col-span-2">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-first-name">First Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">person</span>
+                                    <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-first-name" name="first_name" type="text" value="{{ old('create_user_form') ? old('first_name') : '' }}" required>
+                                </div>
+                                @if(old('create_user_form'))
+                                    @error('first_name')
+                                        <p class="text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                @endif
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-middle-name">Middle Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">person</span>
+                                    <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-middle-name" name="middle_name" type="text" value="{{ old('create_user_form') ? old('middle_name') : '' }}">
+                                </div>
+                                @if(old('create_user_form'))
+                                    @error('middle_name')
+                                        <p class="text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                @endif
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-last-name">Last Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">person</span>
+                                    <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-last-name" name="last_name" type="text" value="{{ old('create_user_form') ? old('last_name') : '' }}" required>
+                                </div>
+                                @if(old('create_user_form'))
+                                    @error('last_name')
+                                        <p class="text-sm text-error">{{ $message }}</p>
+                                    @enderror
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-email">Email Address</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">mail</span>
+                                <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-email" name="email" type="email" value="{{ old('create_user_form') ? old('email') : '' }}" required>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('email')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-role">Role</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">badge</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-role" name="role" required>
+                                    <option value="student" @selected(old('create_user_form') && old('role') === 'student')>Student</option>
+                                    <option value="teacher" @selected(old('create_user_form') && old('role') === 'teacher')>Teacher</option>
+                                    <option value="admin" @selected(old('create_user_form') && old('role') === 'admin')>Admin</option>
+                                </select>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('role')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-section">Section Assignment</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">class</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-section" name="section">
+                                    <option value="">Unassigned</option>
+                                    @foreach ($sections as $section)
+                                        <option value="{{ $section }}" @selected(old('create_user_form') && old('section') === $section)>{{ $section }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('section')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-approval-status">Account Status</label>
+                            <div class="relative max-w-md">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">verified_user</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-approval-status" name="approval_status" required>
+                                    <option value="approved" @selected(! old('create_user_form') || old('approval_status') === 'approved')>Approved</option>
+                                    <option value="pending" @selected(old('create_user_form') && old('approval_status') === 'pending')>Pending</option>
+                                    <option value="rejected" @selected(old('create_user_form') && old('approval_status') === 'rejected')>Declined</option>
+                                </select>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('approval_status')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-password">Password</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
+                                <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-password" name="password" type="password" autocomplete="new-password" required>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('password')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-password-confirmation">Confirm Password</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">verified_user</span>
+                                <input class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-password-confirmation" name="password_confirmation" type="password" autocomplete="new-password" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col-reverse gap-3 border-t border-outline-variant/15 pt-6 sm:flex-row sm:justify-end">
+                        <button id="create-user-cancel" class="rounded-sm border border-outline-variant/30 bg-surface px-6 py-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant transition-colors hover:bg-surface-container-low" type="button">
+                            Cancel
+                        </button>
+                        <button class="rounded-sm bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-on-primary shadow-sm transition-colors hover:bg-primary-dim" type="submit">
+                            Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
     <div id="edit-user-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6 opacity-0 transition-opacity duration-200 ease-out sm:px-6" aria-labelledby="edit-user-modal-title" aria-modal="true" role="dialog">
         <button id="edit-user-backdrop" class="absolute inset-0 bg-on-surface/35 opacity-0 backdrop-blur-sm transition-opacity duration-200 ease-out" type="button" aria-label="Close edit user modal"></button>
 
@@ -669,6 +830,11 @@
         const overviewNav = document.getElementById('admin-overview-nav');
         const usersNav = document.getElementById('admin-users-nav');
         const pageShell = document.getElementById('admin-page-shell');
+        const createUserOpen = document.getElementById('create-user-open');
+        const createUserModal = document.getElementById('create-user-modal');
+        const createUserBackdrop = document.getElementById('create-user-backdrop');
+        const createUserPanel = document.getElementById('create-user-panel');
+        const createName = document.getElementById('create-first-name');
         const editUserModal = document.getElementById('edit-user-modal');
         const editUserBackdrop = document.getElementById('edit-user-backdrop');
         const editUserPanel = document.getElementById('edit-user-panel');
@@ -687,6 +853,8 @@
         const editPasswordConfirmation = document.getElementById('edit-password-confirmation');
         const oldEditUserId = @json(old('edit_user_id'));
         const oldEditValues = @json($oldEditValues);
+        const shouldOpenCreateUserModal = @json((bool) old('create_user_form'));
+        let createUserCloseTimer;
         let editUserCloseTimer;
 
         function setAdminNavState() {
@@ -710,6 +878,36 @@
         window.addEventListener('hashchange', setAdminNavState);
         setAdminNavState();
 
+        function openCreateUserModal() {
+            clearTimeout(createUserCloseTimer);
+            createUserModal.classList.remove('hidden');
+            createUserModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+
+            requestAnimationFrame(() => {
+                createUserModal.classList.remove('opacity-0');
+                createUserBackdrop.classList.remove('opacity-0');
+                createUserPanel.classList.remove('translate-y-4', 'scale-[0.98]', 'opacity-0');
+                createUserPanel.classList.add('translate-y-0', 'scale-100', 'opacity-100');
+                pageShell.classList.add('blur-sm', 'pointer-events-none', 'select-none');
+            });
+
+            setTimeout(() => createName.focus(), 180);
+        }
+
+        function closeCreateUserModal() {
+            createUserModal.classList.add('opacity-0');
+            createUserBackdrop.classList.add('opacity-0');
+            createUserPanel.classList.add('translate-y-4', 'scale-[0.98]', 'opacity-0');
+            createUserPanel.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+            pageShell.classList.remove('blur-sm', 'pointer-events-none', 'select-none');
+            document.body.classList.remove('overflow-hidden');
+
+            createUserCloseTimer = setTimeout(() => {
+                createUserModal.classList.add('hidden');
+                createUserModal.classList.remove('flex');
+            }, 200);
+        }
         function openEditUserModal(button, values = {}) {
             const dataset = button.dataset;
 
@@ -756,6 +954,11 @@
             }, 200);
         }
 
+        createUserOpen.addEventListener('click', openCreateUserModal);
+        createUserBackdrop.addEventListener('click', closeCreateUserModal);
+        document.getElementById('create-user-close').addEventListener('click', closeCreateUserModal);
+        document.getElementById('create-user-cancel').addEventListener('click', closeCreateUserModal);
+
         editUserButtons.forEach((button) => {
             button.addEventListener('click', () => openEditUserModal(button));
         });
@@ -773,6 +976,10 @@
         editName.addEventListener('input', () => {
             modalUserName.textContent = editName.value || 'Selected user';
         });
+
+        if (shouldOpenCreateUserModal) {
+            openCreateUserModal();
+        }
 
         if (oldEditUserId) {
             const button = document.querySelector(`[data-edit-user][data-user-id="${oldEditUserId}"]`);

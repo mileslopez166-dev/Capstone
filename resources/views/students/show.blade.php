@@ -24,7 +24,7 @@
                         <h1 class="mb-2 font-headline text-5xl font-extrabold tracking-tight text-on-surface md:text-6xl">{{ $student->name }}</h1>
                         <div class="mt-4 flex flex-wrap items-center gap-4">
                             <span class="rounded-full bg-primary-container px-4 py-1.5 text-sm font-bold text-on-primary-container">Student Account</span>
-                            <span class="rounded-full bg-surface-container-high px-4 py-1.5 text-sm font-bold text-on-surface-variant">No activity data yet</span>
+                            <span class="rounded-full bg-surface-container-high px-4 py-1.5 text-sm font-bold text-on-surface-variant">{{ $studentMetrics['completed_count'] }} completed</span>
                             <span class="flex items-center gap-2 text-sm font-medium text-slate-400">
                                 <span class="material-symbols-outlined text-sm">alternate_email</span>{{ $student->email }}
                             </span>
@@ -35,9 +35,9 @@
                         <div class="w-full rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Student Progress</p>
                             <div class="flex items-baseline gap-2">
-                                <span class="font-headline text-4xl font-black text-primary">No Data</span>
+                                <span class="font-headline text-4xl font-black text-primary">{{ $studentMetrics['average_accuracy'] === null ? 'No Data' : $studentMetrics['average_accuracy'].'%' }}</span>
                             </div>
-                            <p class="mt-3 text-sm text-on-surface-variant">This student has not completed any recorded assessments yet.</p>
+                            <p class="mt-3 text-sm text-on-surface-variant">{{ $studentMetrics['completed_count'] > 0 ? number_format($studentMetrics['total_points']).' total points from saved submissions.' : 'This student has not completed any recorded assessments yet.' }}</p>
                         </div>
                     </div>
                 </section>
@@ -47,7 +47,7 @@
                         <div class="mb-8 flex items-start justify-between">
                             <div>
                                 <h3 class="font-headline text-xl font-bold">Score Trends</h3>
-                                <p class="text-sm text-on-surface-variant">No completed activities have been recorded for this student.</p>
+                                <p class="text-sm text-on-surface-variant">{{ $submissions->isEmpty() ? 'No completed activities have been recorded for this student.' : 'Recent completed assessments from this teacher.' }}</p>
                             </div>
                             <span class="material-symbols-outlined text-primary">trending_up</span>
                         </div>
@@ -69,8 +69,8 @@
                                     <circle class="text-secondary" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="12" stroke-dasharray="351.85" stroke-dashoffset="351.85"></circle>
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span class="text-3xl font-black text-on-surface">0%</span>
-                                    <span class="text-[10px] font-bold uppercase text-on-surface-variant">No Data</span>
+                                    <span class="text-3xl font-black text-on-surface">{{ $studentMetrics['average_accuracy'] === null ? '0%' : $studentMetrics['average_accuracy'].'%' }}</span>
+                                    <span class="text-[10px] font-bold uppercase text-on-surface-variant">Average</span>
                                 </div>
                             </div>
                         </div>
@@ -95,19 +95,50 @@
                             <h2 class="font-headline text-2xl font-bold">Completed Activities</h2>
                         </div>
 
-                        <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 text-center shadow-sm">
-                            <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
-                            <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
-                            <p class="mt-2 text-sm text-on-surface-variant">This student page will begin to reflect real progress after assessments are assigned and submitted.</p>
-                        </div>
+                        @if ($submissions->isEmpty())
+                            <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 text-center shadow-sm">
+                                <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
+                                <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
+                                <p class="mt-2 text-sm text-on-surface-variant">This student page will begin to reflect real progress after assessments are assigned and submitted.</p>
+                            </div>
+                        @else
+                            <div class="space-y-3">
+                                @foreach ($submissions as $submission)
+                                    @php
+                                        $accuracy = $submission->question_count > 0 ? (int) round(($submission->correct_count / $submission->question_count) * 100) : 0;
+                                    @endphp
+                                    <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div>
+                                                <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
+                                                <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
+                                            </div>
+                                            <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <div class="space-y-6">
                         <h2 class="font-headline text-2xl font-bold">Skill Breakdown</h2>
-                        <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 text-center shadow-sm">
-                            <span class="material-symbols-outlined text-5xl text-outline-variant">psychology</span>
-                            <p class="mt-4 font-headline text-xl font-bold text-on-surface">No skill data yet</p>
-                            <p class="mt-2 text-sm text-on-surface-variant">Skill progress will correlate to student submissions once the assessment system starts storing results.</p>
+                        <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-sm">
+                            <div class="space-y-4">
+                                @forelse ($subjectBreakdown as $area)
+                                    <div>
+                                        <div class="mb-2 flex justify-between text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                                            <span>{{ $area['label'] }}</span>
+                                            <span>{{ $area['accuracy'] === null ? 'No Data' : $area['accuracy'].'%' }}</span>
+                                        </div>
+                                        <div class="h-3 overflow-hidden rounded-full bg-surface-container-high">
+                                            <div class="h-full rounded-full bg-primary" style="width: {{ $area['accuracy'] ?? 0 }}%"></div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-on-surface-variant">No skill data yet.</p>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>

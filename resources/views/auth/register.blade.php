@@ -78,25 +78,66 @@
                     </div>
 
                     <div class="space-y-4">
-                        <div class="group">
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="name">Full Name</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
-                                <input
-                                    id="name"
-                                    name="name"
-                                    type="text"
-                                    value="{{ old('name') }}"
-                                    required
-                                    autofocus
-                                    autocomplete="name"
-                                    pattern="[^0-9]*"
-                                    title="Full name must not contain numbers."
-                                    placeholder="John Doe"
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                >
+                        <div class="space-y-4">
+                            <div class="group">
+                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="first_name">First Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
+                                    <input
+                                        id="first_name"
+                                        name="first_name"
+                                        type="text"
+                                        value="{{ old('first_name') }}"
+                                        required
+                                        autofocus
+                                        autocomplete="given-name"
+                                        pattern="[^0-9]*"
+                                        title="First name must not contain numbers."
+                                        placeholder="John"
+                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+                                    >
+                                </div>
+                                <x-input-error :messages="$errors->get('first_name')" class="mt-2 text-sm text-error" />
                             </div>
-                            <x-input-error :messages="$errors->get('name')" class="mt-2 text-sm text-error" />
+
+                            <div class="group">
+                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="middle_name">Middle Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
+                                    <input
+                                        id="middle_name"
+                                        name="middle_name"
+                                        type="text"
+                                        value="{{ old('middle_name') }}"
+                                        autocomplete="additional-name"
+                                        pattern="[^0-9]*"
+                                        title="Middle name must not contain numbers."
+                                        placeholder="A."
+                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+                                    >
+                                </div>
+                                <x-input-error :messages="$errors->get('middle_name')" class="mt-2 text-sm text-error" />
+                            </div>
+
+                            <div class="group">
+                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="last_name">Last Name</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
+                                    <input
+                                        id="last_name"
+                                        name="last_name"
+                                        type="text"
+                                        value="{{ old('last_name') }}"
+                                        required
+                                        autocomplete="family-name"
+                                        pattern="[^0-9]*"
+                                        title="Last name must not contain numbers."
+                                        placeholder="Doe"
+                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+                                    >
+                                </div>
+                                <x-input-error :messages="$errors->get('last_name')" class="mt-2 text-sm text-error" />
+                            </div>
                         </div>
 
                         <div class="group">

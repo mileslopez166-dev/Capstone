@@ -58,6 +58,33 @@ class AdminDashboardTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_create_a_user_from_user_management(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'first_name' => 'Created',
+            'middle_name' => 'Middle',
+            'last_name' => 'Teacher',
+            'email' => 'created.teacher@example.com',
+            'role' => 'teacher',
+            'section' => 'Section A',
+            'approval_status' => 'approved',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard').'#user-management');
+        $this->assertDatabaseHas('users', [
+            'name' => 'Created Middle Teacher',
+            'email' => 'created.teacher@example.com',
+            'role' => 'teacher',
+            'section' => 'Section A',
+            'approval_status' => 'approved',
+            'approved_by' => $admin->id,
+        ]);
+    }
+
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void
     {
         config(['auth.bootstrap_admin.email' => 'admin@aipgaals.com']);

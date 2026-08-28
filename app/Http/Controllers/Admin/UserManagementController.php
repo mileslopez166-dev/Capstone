@@ -14,6 +14,60 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
+    public function store(Request $request): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
+            'middle_name' => ['nullable', 'string', 'max:100', 'not_regex:/\d/'],
+            'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
+            'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'first_name.not_regex' => 'The first name must not contain numbers.',
+            'middle_name.not_regex' => 'The middle name must not contain numbers.',
+            'last_name.not_regex' => 'The last name must not contain numbers.',
+        ]);
+
+        $fullName = collect([
+            $validated['first_name'],
+            $validated['middle_name'] ?? null,
+            $validated['last_name'],
+        ])
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->implode(' ');
+
+        $approvalChanges = match ($validated['approval_status']) {
+            'approved' => [
+                'approved_at' => now(),
+                'approved_by' => $request->user()->id,
+            ],
+            default => [
+                'approved_at' => null,
+                'approved_by' => $request->user()->id,
+            ],
+        };
+
+        $user = User::create([
+            'name' => $fullName,
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'section' => filled($validated['section'] ?? null) ? $validated['section'] : null,
+            'approval_status' => $validated['approval_status'],
+            'password' => $validated['password'],
+            ...$approvalChanges,
+        ]);
+
+        return redirect()
+            ->to(route('admin.dashboard').'#user-management')
+            ->with('status', "{$user->name}'s account has been created.");
+    }
+
     public function edit(Request $request, User $user): View|RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);

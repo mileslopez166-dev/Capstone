@@ -19,7 +19,9 @@ class RegistrationTest extends TestCase
     public function test_new_users_can_register(): void
     {
         $response = $this->post('/register', [
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'middle_name' => 'Middle',
+            'last_name' => 'User',
             'email' => 'test@example.com',
             'role' => 'teacher',
             'section' => 'Section A',
@@ -31,6 +33,7 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('status');
         $this->assertDatabaseHas('users', [
+            'name' => 'Test Middle User',
             'email' => 'test@example.com',
             'role' => 'teacher',
             'section' => 'Section A',
@@ -41,7 +44,9 @@ class RegistrationTest extends TestCase
     public function test_student_registration_redirects_to_the_login_screen(): void
     {
         $response = $this->post('/register', [
-            'name' => 'Student User',
+            'first_name' => 'Student',
+            'middle_name' => '',
+            'last_name' => 'User',
             'email' => 'student@example.com',
             'role' => 'student',
             'section' => 'Section B',
@@ -53,6 +58,7 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('status');
         $this->assertDatabaseHas('users', [
+            'name' => 'Student User',
             'email' => 'student@example.com',
             'role' => 'student',
             'approval_status' => 'pending',
@@ -62,7 +68,8 @@ class RegistrationTest extends TestCase
     public function test_admin_role_can_not_be_self_registered(): void
     {
         $response = $this->from('/register')->post('/register', [
-            'name' => 'Admin User',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'admin@example.com',
             'role' => 'admin',
             'section' => 'Admin-Section',
@@ -80,7 +87,8 @@ class RegistrationTest extends TestCase
     public function test_teacher_registration_no_longer_requires_an_access_code(): void
     {
         $response = $this->post('/register', [
-            'name' => 'Teacher User',
+            'first_name' => 'Teacher',
+            'last_name' => 'User',
             'email' => 'teacher@example.com',
             'role' => 'teacher',
             'section' => 'Section C',
@@ -91,6 +99,7 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('status');
         $this->assertDatabaseHas('users', [
+            'name' => 'Teacher User',
             'email' => 'teacher@example.com',
             'section' => 'Section C',
             'approval_status' => 'pending',

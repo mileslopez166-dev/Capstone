@@ -30,7 +30,7 @@
                     <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
                         <div class="border-b border-outline-variant/10 p-8">
                             <h4 class="font-headline text-xl font-extrabold text-on-surface">Student Roster</h4>
-                            <p class="mt-2 text-sm font-medium text-on-surface-variant">Real-time student accounts from the `users` table.</p>
+                            <p class="mt-2 text-sm font-medium text-on-surface-variant">Real-time student accounts with progress from your assessment submissions.</p>
                         </div>
 
                         @if ($students->isEmpty())
@@ -71,7 +71,7 @@
                                                 </td>
                                                 <td class="px-8 py-5 text-sm text-on-surface">{{ $student->email }}</td>
                                                 <td class="px-8 py-5">
-                                                    <span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-black uppercase text-on-surface-variant">No Progress Yet</span>
+                                                    <span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-black uppercase text-on-surface-variant">{{ $student->average_accuracy === null ? 'No Progress Yet' : $student->average_accuracy.'% Avg' }}</span>
                                                 </td>
                                                 <td class="px-8 py-5 text-right">
                                                     <a class="inline-flex p-2 text-on-surface-variant transition-colors hover:text-primary" href="{{ route('students.show', $student) }}">

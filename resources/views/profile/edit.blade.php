@@ -2,6 +2,7 @@
     @php
         $user = $user ?? Auth::user();
         $isStudent = $user->isStudent();
+        $dashboardRoute = route($user->dashboardRouteName());
         $firstName = str($user->name)->before(' ')->title();
         $initials = str($user->name)
             ->explode(' ')
@@ -17,6 +18,12 @@
         @endif
 
         <main class="mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6">
+            <div class="mb-6">
+                <a class="inline-flex items-center gap-2 rounded-xl bg-surface-container-lowest px-4 py-2.5 text-sm font-bold text-primary shadow-[0_12px_30px_rgba(0,94,159,0.06)] transition-colors hover:bg-surface-container-low active:scale-[0.98]" href="{{ $dashboardRoute }}">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    <span>Back to Dashboard</span>
+                </a>
+            </div>
             <section class="mb-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
                 <div class="overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl">
                     <p class="text-sm font-bold uppercase tracking-[0.25em] text-white/70">{{ $isStudent ? 'Student Profile' : 'Account Center' }}</p>

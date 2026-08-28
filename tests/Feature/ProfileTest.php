@@ -21,6 +21,30 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_teacher_profile_has_a_back_link_to_teacher_dashboard(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+
+        $this
+            ->actingAs($teacher)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Back to Dashboard')
+            ->assertSee(route('teacher.dashboard'), false);
+    }
+
+    public function test_student_profile_has_a_back_link_to_student_dashboard(): void
+    {
+        $student = User::factory()->create();
+
+        $this
+            ->actingAs($student)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Back to Dashboard')
+            ->assertSee(route('student.dashboard'), false);
+    }
+
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();

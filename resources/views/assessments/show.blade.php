@@ -11,6 +11,23 @@
         $isImageAsset = in_array($assetExtension, ['jpg', 'jpeg', 'png'], true);
         $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
         $manualQuestions = $assessment->manual_questions ?? [];
+        $storyTitle = $assessment->story_title;
+        $storyDescription = $assessment->story_description;
+        $assessmentTypeLabels = [
+            'silent_reading' => 'Silent Reading',
+            'oral_reading' => 'Oral Reading Assessment',
+            'listening_comprehension' => 'Listening Comprehension Assessment',
+            'group_screening' => 'Group Screening Test',
+        ];
+        $assessmentTypeLabel = $assessmentTypeLabels[$assessment->assessment_type ?? 'silent_reading'] ?? 'Silent Reading';
+        $isPublished = $assessment->status === 'published';
+        $availabilityLabel = $isPublished ? 'Unlocked' : 'Locked';
+        $nextAvailability = $isPublished ? 'draft' : 'published';
+        $availabilityButtonLabel = $isPublished ? 'Lock Assessment' : 'Unlock Assessment';
+        $availabilityIcon = $isPublished ? 'lock' : 'lock_open';
+        $availabilityConfirm = $isPublished
+            ? 'Lock this assessment? Students will no longer be able to answer it.'
+            : 'Unlock this assessment? Students will be able to answer it.';
     @endphp
 
     <div class="min-h-screen bg-surface lg:flex" x-data="{ mobileMenuOpen: false }">
@@ -35,10 +52,31 @@
             </x-teacher-topbar>
 
             <div class="mx-auto max-w-6xl p-5 sm:p-8">
-                <a class="mb-8 inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary-dim" href="{{ route('assessments.index') }}">
-                    <span class="material-symbols-outlined text-lg">arrow_back</span>
-                    Back to Assessment Builder
-                </a>
+                <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                    <a class="inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary-dim" href="{{ route('assessments.index') }}">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span>
+                        Back to Assessment Builder
+                    </a>
+                    <div class="flex flex-wrap gap-2">
+                        <form method="POST" action="{{ route('assessments.availability', $assessment) }}" data-confirm-message="{{ $availabilityConfirm }}" onsubmit="return confirm(this.dataset.confirmMessage);">
+                            @csrf
+                            @method('PATCH')
+                            <input name="status" type="hidden" value="{{ $nextAvailability }}">
+                            <button class="inline-flex items-center justify-center gap-2 rounded-full {{ $isPublished ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest' : 'bg-secondary text-on-secondary hover:bg-secondary-dim' }} px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors" type="submit">
+                                {{ $availabilityButtonLabel }}
+                                <span class="material-symbols-outlined text-sm">{{ $availabilityIcon }}</span>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('assessments.destroy', $assessment) }}" onsubmit="return confirm('Delete this assessment? Student submissions for this assessment will also be removed.');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="inline-flex items-center justify-center gap-2 rounded-full bg-error px-4 py-2 text-xs font-black uppercase tracking-widest text-on-error transition-colors hover:bg-red-700" type="submit">
+                            Delete Assessment
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                        </form>
+                    </div>
+                </div>
 
                 <section class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-lowest shadow-[0_24px_70px_rgba(0,94,159,0.08)]">
                     <div class="grid lg:grid-cols-[22rem_1fr]">
@@ -71,10 +109,10 @@
                                     {{ str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title() }}
                                 </span>
                                 <span class="rounded-full bg-primary-container/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
-                                    {{ str($assessment->delivery_method ?? 'upload')->title() }}
+                                    Story Assessment
                                 </span>
-                                <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->status === 'published' ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant' }}">
-                                    {{ $assessment->status }}
+                                <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $isPublished ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-error-container/30 text-error' }}">
+                                    {{ $availabilityLabel }}
                                 </span>
                             </div>
 
@@ -108,6 +146,19 @@
                 <section class="mt-8 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
                     <div class="rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
                         <h2 class="mb-5 font-headline text-2xl font-extrabold text-on-surface">Assessment Content</h2>
+
+                        @if ($storyTitle || $storyDescription)
+                            <article class="mb-6 rounded-xl bg-surface-container-low p-5">
+                                <p class="text-xs font-black uppercase tracking-widest text-primary">Story</p>
+                                <p class="mt-2 text-sm font-bold text-on-surface-variant">{{ $assessmentTypeLabel }}</p>
+                                @if ($storyTitle)
+                                    <h3 class="mt-2 font-headline text-2xl font-bold text-on-surface">{{ $storyTitle }}</h3>
+                                @endif
+                                @if ($storyDescription)
+                                    <p class="mt-3 whitespace-pre-line leading-relaxed text-on-surface-variant">{{ $storyDescription }}</p>
+                                @endif
+                            </article>
+                        @endif
 
                         @if ($manualQuestions)
                             <div class="space-y-5">
@@ -146,11 +197,11 @@
                         <div class="mt-6 space-y-4">
                             <div class="rounded-xl bg-white p-4">
                                 <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Visibility</p>
-                                <p class="mt-1 font-bold text-on-surface">{{ $assessment->status === 'published' ? 'Visible to students' : 'Teacher draft only' }}</p>
+                                <p class="mt-1 font-bold text-on-surface">{{ $isPublished ? 'Unlocked for students' : 'Locked from student answering' }}</p>
                             </div>
                             <div class="rounded-xl bg-white p-4">
                                 <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Delivery</p>
-                                <p class="mt-1 font-bold text-on-surface">{{ str($assessment->delivery_method ?? 'upload')->title() }}</p>
+                                <p class="mt-1 font-bold text-on-surface">Story Assessment</p>
                             </div>
                             <div class="rounded-xl bg-white p-4">
                                 <p class="text-xs font-black uppercase tracking-widest text-on-surface-variant">Prepared By</p>

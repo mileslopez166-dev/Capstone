@@ -6,6 +6,10 @@
             ->take(2)
             ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
             ->implode('');
+        $submissions = $submissions ?? collect();
+        $studentMetrics = $studentMetrics ?? ['completed_count' => 0, 'average_accuracy' => null, 'total_points' => 0];
+        $subjectBreakdown = $subjectBreakdown ?? collect();
+        $studentInitials = collect(explode(' ', $student->name))->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
     @endphp
 
     <div class="min-h-screen bg-surface">
@@ -21,15 +25,15 @@
                             <nav class="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
                                 <a class="hover:text-primary" href="{{ route('reports.index') }}">Reports</a>
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
-                                <span class="text-primary">{{ $student['name'] }}</span>
+                                <span class="text-primary">{{ $student->name }}</span>
                             </nav>
                             <div class="flex items-center gap-6">
                                 <div class="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-surface-container-lowest bg-primary-container/20 shadow-xl">
-                                    <span class="font-headline text-2xl font-black text-on-primary-container">JD</span>
+                                    <span class="font-headline text-2xl font-black text-on-primary-container">{{ $studentInitials ?: 'S' }}</span>
                                 </div>
                                 <div>
-                                    <h1 class="mb-1 font-headline text-5xl font-extrabold tracking-tight text-on-surface">{{ $student['name'] }}</h1>
-                                    <p class="text-xl font-medium text-on-surface-variant">{{ $student['grade'] }} • ID: {{ $student['student_id'] }}</p>
+                                    <h1 class="mb-1 font-headline text-5xl font-extrabold tracking-tight text-on-surface">{{ $student->name }}</h1>
+                                    <p class="text-xl font-medium text-on-surface-variant">Grade 6{{ $student->section ? ' - '.$student->section : '' }} | ID: #{{ str_pad($student->id, 4, '0', STR_PAD_LEFT) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -50,8 +54,8 @@
                         @foreach ([
                             ['title' => 'Literacy', 'value' => 'No Data', 'note' => 'No completed literacy assessments', 'icon' => 'auto_stories', 'tone' => 'primary'],
                             ['title' => 'Numeracy', 'value' => 'No Data', 'note' => 'No completed numeracy assessments', 'icon' => 'calculate', 'tone' => 'error'],
-                            ['title' => 'Average Accuracy', 'value' => '0%', 'note' => 'Awaiting first submission', 'icon' => 'target', 'tone' => 'secondary'],
-                            ['title' => 'Response Time', 'value' => 'No Data', 'note' => 'Timing starts after first activity', 'icon' => 'timer', 'tone' => 'tertiary'],
+                            ['title' => 'Average Accuracy', 'value' => $studentMetrics['average_accuracy'] === null ? '0%' : $studentMetrics['average_accuracy'].'%', 'note' => $studentMetrics['completed_count'].' completed assessments', 'icon' => 'target', 'tone' => 'secondary'],
+                            ['title' => 'Total Points', 'value' => number_format($studentMetrics['total_points']), 'note' => 'Saved assessment points', 'icon' => 'stars', 'tone' => 'tertiary'],
                         ] as $card)
                             <div class="rounded-sm bg-surface-container-lowest p-8 shadow-sm md:col-span-2 lg:col-span-3">
                                 <div class="mb-6 flex items-center gap-4">
@@ -76,7 +80,7 @@
                                     <h2 class="font-headline text-2xl font-bold tracking-tight">Student Report Status</h2>
                                 </div>
                                 <div class="rounded-sm bg-white/10 p-6 backdrop-blur-md">
-                                    <p class="text-sm leading-relaxed text-on-primary/90">No individual recommendations yet. This report is intentionally empty because it should correlate directly to the student’s real progress, and no completed assessment data exists at the moment.</p>
+                                    <p class="text-sm leading-relaxed text-on-primary/90">{{ $submissions->isEmpty() ? 'No individual recommendations yet. This report will update after this student completes your assessments.' : 'This report is using saved assessment submissions for this student.' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -107,11 +111,30 @@
                             <div class="flex items-center justify-between">
                                 <h2 class="font-headline text-2xl font-bold">Completed Activities</h2>
                             </div>
-                            <div class="rounded-sm bg-surface-container-lowest p-8 text-center shadow-sm">
-                                <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
-                                <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
-                                <p class="mt-2 text-sm text-on-surface-variant">This report page now reflects the same default state shown on the student side.</p>
-                            </div>
+                            @if ($submissions->isEmpty())
+                                <div class="rounded-sm bg-surface-container-lowest p-8 text-center shadow-sm">
+                                    <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
+                                    <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
+                                    <p class="mt-2 text-sm text-on-surface-variant">This report page updates from saved assessment submissions.</p>
+                                </div>
+                            @else
+                                <div class="space-y-3">
+                                    @foreach ($submissions as $submission)
+                                        @php
+                                            $accuracy = $submission->question_count > 0 ? (int) round(($submission->correct_count / $submission->question_count) * 100) : 0;
+                                        @endphp
+                                        <div class="rounded-sm bg-surface-container-lowest p-5 shadow-sm">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <div>
+                                                    <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
+                                                    <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
+                                                </div>
+                                                <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

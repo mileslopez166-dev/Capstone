@@ -2,9 +2,9 @@
     @php
         $student = Auth::user();
         $breakdown = [
-            ['label' => 'Completed Assessments', 'value' => '0', 'tone' => 'text-secondary'],
-            ['label' => 'Saved Results', 'value' => '0', 'tone' => 'text-primary'],
-            ['label' => 'Rewards Available', 'value' => 'None', 'tone' => 'text-tertiary'],
+            ['label' => 'Completed Assessments', 'value' => number_format($studentMetrics['completed_count']), 'tone' => 'text-secondary'],
+            ['label' => 'Saved Results', 'value' => number_format($studentMetrics['saved_results']), 'tone' => 'text-primary'],
+            ['label' => 'Rewards Available', 'value' => $studentMetrics['rewards_available'] > 0 ? number_format($studentMetrics['rewards_available']) : 'None', 'tone' => 'text-tertiary'],
         ];
     @endphp
 
@@ -26,11 +26,11 @@
                         <div class="relative">
                             <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Accuracy Score</span>
                             <div class="mt-4 flex items-baseline gap-2">
-                                <span class="font-headline text-6xl font-black text-primary">0</span>
+                                <span class="font-headline text-6xl font-black text-primary">{{ $studentMetrics['average_accuracy'] ?? 0 }}</span>
                                 <span class="font-headline text-2xl font-bold text-primary-dim">%</span>
                             </div>
                             <div class="mt-6 h-4 w-full overflow-hidden rounded-full bg-surface-container-highest">
-                                <div class="relative h-full w-[0%] rounded-full bg-secondary shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
+                                <div class="relative h-full rounded-full bg-secondary shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]" style="width: {{ $studentMetrics['average_accuracy'] ?? 0 }}%">
                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                                 </div>
                             </div>
@@ -43,9 +43,9 @@
                             <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Saved Results</span>
                             <div class="mt-4 flex items-center gap-3">
                                 <span class="material-symbols-outlined text-4xl text-tertiary">folder</span>
-                                <span class="font-headline text-6xl font-black text-on-surface">0</span>
+                                <span class="font-headline text-6xl font-black text-on-surface">{{ number_format($studentMetrics['saved_results']) }}</span>
                             </div>
-                            <p class="mt-4 text-sm font-medium text-on-surface-variant">No reward totals have been generated yet.</p>
+                            <p class="mt-4 text-sm font-medium text-on-surface-variant">{{ $studentMetrics['saved_results'] > 0 ? number_format($studentMetrics['total_points']).' total points saved.' : 'No reward totals have been generated yet.' }}</p>
                         </div>
                     </div>
 
@@ -53,8 +53,8 @@
                         <img class="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay" alt="Achievement burst" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7BTUqvGq-IdXSn8OHJ6ckGPNIUxTnrUcsJbdoQzC_P2nA-k6_nt6Jabi5OQyc6TyMQYucqLlzSxpoBFS-AeF2w2BgVzSYyuQj1AWwitBk3jkOv9e90KcHg8ctlo6LAIOTDhmJYJkfhKHf0hUA4e7jnsA8ETXgRlipVoyXNctZH2ZwKG-WP-s3BFbFmuZ2A69cLRppnfi3HbtE3s3Y6bSO8IWKw0Q2RbO-Gh5YA8DDt5DNUsTitrNryKxfeS3Udt1nAuY_f85DNmNi">
                         <div class="relative flex flex-col items-center justify-between gap-8 md:flex-row">
                             <div class="text-center md:text-left">
-                                <h3 class="mb-2 font-headline text-3xl font-bold">No Rewards Yet</h3>
-                                <p class="max-w-sm text-lg text-on-primary/80">Once the system records completed activities, this section will display available rewards and recognition.</p>
+                                <h3 class="mb-2 font-headline text-3xl font-bold">{{ $studentMetrics['rewards_available'] > 0 ? 'Rewards Available' : 'No Rewards Yet' }}</h3>
+                                <p class="max-w-sm text-lg text-on-primary/80">{{ $studentMetrics['rewards_available'] > 0 ? 'You earned recognition from completed assessments.' : 'Once the system records completed activities, this section will display available rewards and recognition.' }}</p>
                             </div>
                             <div class="relative flex h-40 w-40 items-center justify-center">
                                 <div class="absolute inset-0 rounded-full bg-tertiary-container opacity-40 blur-2xl"></div>
