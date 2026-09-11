@@ -1,10 +1,10 @@
 <x-guest-layout>
-    <div class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10">
+    <div class="relative flex app-safe-screen items-center justify-center overflow-x-hidden px-4 py-6 sm:px-6 sm:py-10">
         <div class="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-primary-container/20 blur-[120px]"></div>
         <div class="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-secondary-container/20 blur-[120px]"></div>
 
         <main class="relative z-10 w-full max-w-md">
-            <div class="mb-12 text-center">
+            <div class="mb-8 text-center sm:mb-12">
                 <div class="mb-6 inline-flex rotate-[-3deg] items-center justify-center rounded-lg bg-white p-3 shadow-xl">
                     <span class="material-symbols-outlined text-4xl text-primary">school</span>
                 </div>
@@ -12,7 +12,7 @@
                 <p class="font-medium text-on-surface-variant">One sign in for students, teachers, and administrators.</p>
             </div>
 
-            <div class="glass-panel rounded-xl border border-white/40 p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" x-data="{ showPassword: false }">
+            <div class="glass-panel rounded-xl border border-white/40 p-5 sm:p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" x-data="{ showPassword: false }">
                 <x-auth-session-status class="mb-5 rounded-lg bg-secondary-container/40 px-4 py-3 text-sm font-medium text-on-secondary-container" :status="session('status')" />
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-6">
@@ -86,7 +86,7 @@
                         <label class="cursor-pointer text-sm font-medium text-on-surface-variant" for="remember">Keep me logged in</label>
                     </div>
 
-                    <button class="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container py-5 text-lg font-bold text-on-primary shadow-lg transition-all hover:shadow-primary/20 active:scale-[0.98]" type="submit">
+                    <button class="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container py-4 text-base sm:py-5 sm:text-lg font-bold text-on-primary shadow-lg transition-all hover:shadow-primary/20 active:scale-[0.98]" type="submit">
                         <span>Sign In</span>
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>

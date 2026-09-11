@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10">
+    <div class="relative flex app-safe-screen items-center justify-center overflow-x-hidden bg-background px-4 py-6 sm:px-6 sm:py-10">
         <div class="absolute left-20 top-20 -z-10 h-32 w-32 rounded-full bg-primary/5 blur-2xl"></div>
         <div class="absolute bottom-40 right-40 -z-10 h-48 w-48 rounded-full bg-secondary/5 blur-3xl"></div>
         <div class="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_left,rgba(68,165,255,0.15),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(145,247,142,0.15),transparent_30%),radial-gradient(circle_at_top_right,rgba(255,235,59,0.10),transparent_28%)]"></div>
@@ -41,8 +41,8 @@
                 </div>
             </section>
 
-            <section class="flex flex-col justify-center p-8 md:p-12 lg:p-16" x-data="{ role: '{{ old('role', 'student') }}', showPassword: false, showConfirmPassword: false }">
-                <div class="mb-10">
+            <section class="flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16" x-data="{ role: '{{ old('role', 'student') }}', showPassword: false, showConfirmPassword: false }">
+                <div class="mb-8 sm:mb-10">
                     <h2 class="mb-2 font-headline text-3xl font-bold text-on-surface">Create Account</h2>
                     <p class="text-on-surface-variant">Fill in your details to get started with AI-PGAALS.</p>
                 </div>
@@ -54,7 +54,7 @@
 
                     <div class="space-y-3">
                         <span class="px-1 text-sm font-semibold text-on-surface-variant">I am a...</span>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                             <button
                                 type="button"
                                 class="flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all"

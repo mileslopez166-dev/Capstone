@@ -41,14 +41,7 @@
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
                             <p class="mt-2 max-w-xl text-on-surface-variant">Configure a student-ready assessment. Choose the focus area, add instructions, then save it locked or publish it to the student activity queue.</p>
                         </div>
-                        <div class="flex flex-wrap gap-3">
-                            <button class="rounded-full border border-outline-variant px-6 py-2.5 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
-                                Save Locked
-                            </button>
-                            <button class="rounded-full bg-primary px-8 py-2.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" type="submit" data-submit-status="published">
-                                Publish Assessment
-                            </button>
-                        </div>
+
                     </header>
 
                     @if (session('status'))
@@ -367,6 +360,23 @@
                             </div>
                         </aside>
                     </section>
+
+                    <div class="sticky bottom-3 z-20 sm:bottom-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest/95 p-3 sm:rounded-2xl sm:p-4 shadow-[0_20px_50px_rgba(0,46,81,0.18)] backdrop-blur-xl">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-[0.22em] text-primary">Ready to save?</p>
+                                <p class="mt-1 text-sm text-on-surface-variant">Choose locked draft or publish when the assessment is complete.</p>
+                            </div>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <button class="rounded-full border border-outline-variant px-6 py-3 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
+                                    Save Locked
+                                </button>
+                                <button class="rounded-full bg-primary px-8 py-3 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" type="submit" data-submit-status="published">
+                                    Publish Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
 
                 <section class="mt-8 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">

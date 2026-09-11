@@ -124,7 +124,7 @@
         @keyframes tongueShoot { 0% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } 18%, 58% { opacity: 1; } 58% { transform: rotate(var(--tongue-angle)) scaleX(1); } 100% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } }
     </style>
 
-    <div class="h-screen overflow-hidden bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+    <div class="app-safe-screen overflow-hidden bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
         <nav class="sticky top-0 z-50 mx-auto flex w-full max-w-full items-center justify-between bg-white/80 px-5 py-3 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
             <div class="flex items-center gap-4"><span class="font-headline text-xl font-extrabold italic text-blue-600">AI-PGAALS</span></div>
             <div class="hidden items-center gap-8 md:flex">
@@ -139,7 +139,10 @@
         </nav>
 
         @if ($questionCount > 0 || $isOralReading)
-            <main class="mission-canvas relative h-[calc(100vh-64px)] w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }}" id="mission-canvas">
+            <audio id="assessment-game-music" src="{{ asset('audio/assessment-game-music.mp3') }}" preload="auto" loop></audio>
+            <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
+            <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
+            <main class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }}" id="mission-canvas">
                 @if ($isFlashcards)
                     <div class="pointer-events-none absolute inset-0 overflow-hidden">
                         <div class="sky-cloud left-[-3rem] top-20"></div>
@@ -153,7 +156,7 @@
                         <div class="absolute bottom-20 right-[15%] h-96 w-96 rounded-full bg-tertiary-container/10 blur-3xl"></div>
                     </div>
                 @endif
-<div class="pointer-events-none absolute left-5 top-5 z-30 flex w-72 flex-col gap-3 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
+<div class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
                         <div class="glass-hud pointer-events-auto flex items-center gap-4 rounded-lg border border-white/40 p-3 shadow-sm">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-container text-tertiary-dim shadow-sm"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span></div>
@@ -183,7 +186,7 @@
                     </div>
                 </div>
 
-                <div class="pointer-events-none absolute right-5 top-5 z-30 text-right {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
+                <div class="pointer-events-none absolute right-3 top-3 z-30 max-w-[calc(100%-1.5rem)] text-right sm:right-5 sm:top-5 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
                     <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">MISSION: {{ $missionTitle }}</h1>
                     <p class="font-body font-medium text-slate-500">Capture <span class="font-bold text-primary">{{ $questionCount }} Nodes</span> to power the drive.</p>
                 </div>
@@ -204,7 +207,7 @@
                 </div>
 
                                 @if ($isFlashcards && ! $isOralReading)
-                    <div class="absolute inset-x-0 top-0 z-30 px-6 pt-8" id="frog-flashcards-game">
+                    <div class="absolute inset-x-0 top-0 z-30 px-3 pt-4 sm:px-6 sm:pt-8" id="frog-flashcards-game">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2 rounded-full border-2 border-blue-100 bg-white px-4 py-2 shadow-lg shadow-blue-200/50">
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-yellow-500 bg-yellow-400 text-white"><span class="material-symbols-outlined text-lg">stars</span></div>
@@ -219,19 +222,19 @@
                         </div>
                     </div>
 
-                    <section class="absolute inset-x-0 top-28 z-30 mx-auto flex w-full max-w-5xl flex-col items-center px-6" aria-label="Flashcards frog game">
-                        <div class="relative w-full rounded-[2rem] border-b-8 border-blue-100 bg-white px-8 py-6 text-center shadow-xl shadow-blue-200/50 transition-colors duration-300" id="frog-question-card">
+                    <section class="absolute inset-x-0 top-24 z-30 mx-auto flex w-full max-w-5xl flex-col items-center px-3 sm:top-28 sm:px-6" aria-label="Flashcards frog game">
+                        <div class="relative w-full rounded-2xl border-b-4 border-blue-100 bg-white px-4 py-4 sm:rounded-[2rem] sm:border-b-8 sm:px-8 sm:py-6 text-center shadow-xl shadow-blue-200/50 transition-colors duration-300" id="frog-question-card">
                             <div class="absolute -left-4 -top-4 flex h-12 w-12 rotate-[-10deg] items-center justify-center rounded-full border-4 border-white bg-yellow-400 text-2xl font-black text-white shadow-md">?</div>
-                            <h2 class="font-headline text-3xl font-black leading-tight text-blue-900 md:text-4xl" id="frog-question-text">{{ $firstQuestion ? $firstQuestion['text'] : 'Ready?' }}</h2>
+                            <h2 class="font-headline text-xl font-black leading-tight text-blue-900 sm:text-3xl md:text-4xl" id="frog-question-text">{{ $firstQuestion ? $firstQuestion['text'] : 'Ready?' }}</h2>
                         </div>
-                        <div class="relative mt-8 grid min-h-48 w-full grid-cols-2 gap-5 md:grid-cols-4" id="frog-answer-zone">
+                        <div class="relative mt-5 grid min-h-40 w-full grid-cols-2 gap-3 sm:mt-8 sm:min-h-48 sm:gap-5 md:grid-cols-4" id="frog-answer-zone">
                             @foreach (['A', 'B', 'C', 'D'] as $index => $letter)
                                 @php $wingClass = ['red-wings', 'gold-wings', 'purple-wings', 'green-wings'][$index]; @endphp
-                                <button class="frog-answer relative mx-auto flex h-24 w-32 items-center justify-center focus:outline-none focus:ring-4 focus:ring-blue-200" type="button" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
+                                <button class="frog-answer relative mx-auto flex h-20 w-28 items-center justify-center sm:h-24 sm:w-32 focus:outline-none focus:ring-4 focus:ring-blue-200" type="button" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
                                     <span class="dragonfly-wing left {{ $wingClass }}"></span>
                                     <span class="dragonfly-wing right {{ $wingClass }}"></span>
                                     <span class="frog-answer-circle relative z-10 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-600 bg-blue-500 text-xl font-black text-white" data-frog-answer-circle>{{ $letter }}</span>
-                                    <span class="absolute -bottom-4 left-1/2 z-10 w-40 -translate-x-1/2 truncate rounded-full bg-white/90 px-3 py-1 text-xs font-black text-blue-900 shadow-sm" data-frog-answer-label>Answer {{ $letter }}</span>
+                                    <span class="absolute -bottom-4 left-1/2 z-10 w-32 -translate-x-1/2 truncate sm:w-40 rounded-full bg-white/90 px-3 py-1 text-xs font-black text-blue-900 shadow-sm" data-frog-answer-label>Answer {{ $letter }}</span>
                                 </button>
                             @endforeach
                         </div>
@@ -250,33 +253,33 @@
                     </footer>
                 @endif
                 @if (($storyTitle || $storyDescription) && ! $isListeningComprehension)
-                    <div class="absolute inset-0 z-[90] flex items-center justify-center bg-surface/80 p-5 backdrop-blur-xl" id="story-gate">
-                        <section class="glass-hud flex max-h-[84vh] w-full {{ $isOralReading ? 'max-w-6xl' : 'max-w-3xl' }} flex-col rounded-2xl border border-white/70 p-6 shadow-2xl sm:p-8">
+                    <div class="absolute inset-0 z-[90] flex items-center justify-center bg-surface/80 p-3 sm:p-5 backdrop-blur-xl" id="story-gate">
+                        <section class="glass-hud flex max-h-[calc(100dvh-6rem)] w-full {{ $isOralReading ? 'max-w-6xl' : 'max-w-3xl' }} flex-col rounded-2xl border border-white/70 p-4 shadow-2xl sm:p-6 md:p-8">
                             <div class="mb-5 flex items-center gap-3">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg shadow-primary/20">
                                     <span class="material-symbols-outlined">auto_stories</span>
                                 </div>
                                 <div>
                                     <p class="font-label text-[10px] font-black uppercase tracking-[0.24em] text-primary-dim">Read First</p>
-                                    <h1 class="font-headline text-2xl font-black leading-tight text-on-surface sm:text-3xl">{{ $storyTitle ?: $assessment->title }}</h1>
+                                    <h1 class="font-headline text-xl font-black leading-tight text-on-surface sm:text-2xl md:text-3xl">{{ $storyTitle ?: $assessment->title }}</h1>
                                 </div>
                             </div>
 
                             @if ($isOralReading)
-                                <div class="grid min-h-0 flex-1 grid-cols-1 gap-5 md:grid-cols-2">
-                                    <div class="flex min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-primary/15 bg-white/85 shadow-inner">
+                                <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 sm:gap-5 md:grid-cols-2">
+                                    <div class="flex min-h-[220px] sm:min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-primary/15 bg-white/85 shadow-inner">
                                         <div class="border-b border-primary/10 bg-primary/5 px-5 py-3">
                                             <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Reading</p>
                                         </div>
-                                        <div class="min-h-0 flex-1 overflow-y-auto p-5 text-base leading-relaxed text-on-surface-variant" data-sync-scroll="oral-story">
+                                        <div class="min-h-0 flex-1 overflow-y-auto p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant" data-sync-scroll="oral-story">
                                             {!! $storyReadOnlyHtml !!}
                                         </div>
                                     </div>
-                                    <div class="flex min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-secondary/20 bg-white/85 shadow-inner">
+                                    <div class="flex min-h-[220px] sm:min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-secondary/20 bg-white/85 shadow-inner">
                                         <div class="border-b border-secondary/10 bg-secondary/5 px-5 py-3">
                                             <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Teacher Check</p>
                                         </div>
-                                        <div class="min-h-0 flex-1 overflow-y-auto p-5 text-base leading-relaxed text-on-surface-variant" id="story-reader-text" data-sync-scroll="oral-story">
+                                        <div class="min-h-0 flex-1 overflow-y-auto p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant" id="story-reader-text" data-sync-scroll="oral-story">
                                             {!! $storyMarkingHtml !!}
                                         </div>
                                     </div>
@@ -287,7 +290,7 @@
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-yellow-300/80 ring-1 ring-yellow-500/30"></span>Getting Closer</span>
                                 </div>
                             @else
-                                <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-5 text-base leading-relaxed text-on-surface-variant shadow-inner">
+                                <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant shadow-inner">
                                     <div id="story-reader-text">
                                         {!! $storyHtml !!}
                                     </div>
@@ -326,7 +329,7 @@
                     </div>
                 @endif
                 <div class="fixed inset-0 z-[100] hidden overflow-y-auto bg-surface opacity-0 transition-opacity duration-300" id="mission-modal">
-                    <div class="flex min-h-screen flex-col md:flex-row">
+                    <div class="flex app-safe-screen flex-col md:flex-row">
                         <aside class="hidden w-72 shrink-0 flex-col gap-8 bg-surface-container-low p-6 md:flex">
                             <div class="mt-6 flex flex-col items-center gap-2 text-center">
                                 <div class="mb-2 flex h-24 w-24 items-center justify-center rounded-full border-4 border-surface bg-primary-container font-display text-3xl font-black text-on-primary-container shadow-sm">
@@ -341,7 +344,7 @@
                             </nav>
                         </aside>
 
-                        <div class="relative flex min-h-screen flex-1 flex-col">
+                        <div class="relative flex app-safe-screen flex-1 flex-col">
                             <header class="hidden items-center justify-between bg-surface px-8 py-4 shadow-sm md:flex">
                                 <div class="font-display text-2xl font-bold text-primary">AI-PGAALS</div>
                                 <nav class="flex gap-8">
@@ -356,7 +359,7 @@
                                 <div class="result-pattern pointer-events-none absolute inset-0 z-0"></div>
                                 <div class="relative z-10 flex w-full max-w-4xl flex-col gap-8">
                                     <div class="mb-4 text-center">
-                                        <h1 class="font-display text-5xl font-bold tracking-tight text-primary md:text-6xl">Great job!</h1>
+                                        <h1 class="font-display text-4xl font-bold tracking-tight text-primary md:text-6xl">Great job!</h1>
                                         <p class="mt-2 font-body text-xl font-medium text-on-surface-variant" id="result-summary">Checking your real score...</p>
                                     </div>
 
@@ -492,6 +495,9 @@
                     const readingTimerStatus = document.getElementById('reading-timer-status');
                     const resultReadingTimeRow = document.getElementById('result-reading-time-row');
                     const resultReadingTime = document.getElementById('result-reading-time');
+                    const gameMusic = document.getElementById('assessment-game-music');
+                    const frogWrongAnswerSound = document.getElementById('frog-wrong-answer-sound');
+                    const frogCorrectAnswerSound = document.getElementById('frog-correct-answer-sound');
                     const submitUrl = @json(route('student.assessments.submit', $assessment));
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const assessmentType = @json($assessmentType);
@@ -529,6 +535,34 @@
                         const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
                         const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
                         return `${minutes}:${seconds}`;
+                    }
+
+                    function playGameMusic() {
+                        if (!gameMusic || isOralReading) return;
+                        gameMusic.volume = 0.28;
+                        gameMusic.play().catch(() => {});
+                    }
+
+                    function stopGameMusic() {
+                        if (!gameMusic) return;
+                        gameMusic.pause();
+                        gameMusic.currentTime = 0;
+                    }
+
+                    function playFrogWrongAnswerSound() {
+                        if (!frogWrongAnswerSound) return;
+                        frogWrongAnswerSound.pause();
+                        frogWrongAnswerSound.currentTime = 0;
+                        frogWrongAnswerSound.volume = 0.8;
+                        frogWrongAnswerSound.play().catch(() => {});
+                    }
+
+                    function playFrogCorrectAnswerSound() {
+                        if (!frogCorrectAnswerSound) return;
+                        frogCorrectAnswerSound.pause();
+                        frogCorrectAnswerSound.currentTime = 0;
+                        frogCorrectAnswerSound.volume = 0.8;
+                        frogCorrectAnswerSound.play().catch(() => {});
                     }
 
                     function updateReadingTimer() {
@@ -579,6 +613,7 @@
                         if (!missionStarted || isFlashcards) return;
                         if (event.target.closest('.glass-hud')) return;
                         if (isHooking || isHatching || isProcessingCapture) return;
+                        playGameMusic();
                         fireHook();
                     });
 
@@ -677,13 +712,19 @@
 
                     function answerFlashcard(letter, button) {
                         if (!isFlashcards || isProcessingCapture || !questions[currentQuestionIndex]) return;
+                        playGameMusic();
                         isProcessingCapture = true;
                         frogAnswerButtons.forEach((item) => item.disabled = true);
                         const question = questions[currentQuestionIndex];
                         const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
                         caughtCount++;
-                        if (correct) totalScore++;
+                        if (correct) {
+                            totalScore++;
+                            playFrogCorrectAnswerSound();
+                        } else {
+                            playFrogWrongAnswerSound();
+                        }
                         const circle = button?.querySelector('[data-frog-answer-circle]');
                         if (circle) {
                             circle.classList.remove('bg-blue-500', 'border-blue-600');
@@ -949,6 +990,7 @@
                     }
 
                     function victory() {
+                        stopGameMusic();
                         updatePronunciationResults();
                         updateReadingTimeResult();
                         modal.classList.remove('hidden');
@@ -966,7 +1008,7 @@
                         const playableWidth = Math.max(220, window.innerWidth - playableLeft - 160);
                         bubble.style.left = `${playableLeft + Math.random() * playableWidth}px`;
                         bubble.style.bottom = '-150px';
-                        bubble.innerHTML = `<span class="font-headline text-4xl font-black text-on-surface">${escapeHtml(letter)}</span><span class="mt-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Node</span>`;
+                        bubble.innerHTML = `<span class="font-headline text-3xl font-black text-on-surface sm:text-4xl">${escapeHtml(letter)}</span><span class="mt-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Node</span>`;
                         container.appendChild(bubble);
                         const duration = 8000 + Math.random() * 5000;
                         const startTime = Date.now();
@@ -983,6 +1025,7 @@
                         if (isOralReading) return;
                         if (missionStarted && (spawnTimer || isFlashcards)) return;
                         missionStarted = true;
+                        playGameMusic();
                         storyGate?.classList.add('opacity-0', 'pointer-events-none');
                         setTimeout(() => storyGate?.classList.add('hidden'), 300);
                         if (isFlashcards) {
@@ -1011,9 +1054,9 @@
                 })();
             </script>
         @elseif ($assetPath)
-            <main class="relative flex h-[calc(100vh-64px)] w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-8"><div class="glass-hud max-w-xl rounded-2xl border border-white/60 p-10 text-center shadow-xl"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-on-primary"><span class="material-symbols-outlined text-6xl">file_open</span></div><h1 class="font-headline text-4xl font-black text-on-surface">Uploaded Mission</h1><p class="mt-3 font-medium text-slate-500">{{ $assessment->instructions ?: 'Open the uploaded assessment material from your teacher.' }}</p><a class="mt-8 inline-flex rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-primary-dim" href="{{ $assetUrl }}" target="_blank" rel="noopener">Open File</a></div></main>
+            <main class="relative flex app-game-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-on-primary"><span class="material-symbols-outlined text-6xl">file_open</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">Uploaded Mission</h1><p class="mt-3 font-medium text-slate-500">{{ $assessment->instructions ?: 'Open the uploaded assessment material from your teacher.' }}</p><a class="mt-8 inline-flex rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-primary-dim" href="{{ $assetUrl }}" target="_blank" rel="noopener">Open File</a></div></main>
         @else
-            <main class="relative flex h-[calc(100vh-64px)] w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-8"><div class="glass-hud max-w-xl rounded-2xl border border-white/60 p-10 text-center shadow-xl"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-6xl">pending_actions</span></div><h1 class="font-headline text-4xl font-black text-on-surface">No Mission Data</h1><p class="mt-3 font-medium text-slate-500">Your teacher has published this assessment, but no manual questions or uploaded file were attached.</p></div></main>
+            <main class="relative flex app-game-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-6xl">pending_actions</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">No Mission Data</h1><p class="mt-3 font-medium text-slate-500">Your teacher has published this assessment, but no manual questions or uploaded file were attached.</p></div></main>
         @endif
     </div>
 </x-app-layout>

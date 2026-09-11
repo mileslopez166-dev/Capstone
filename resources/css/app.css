@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+    html {
+        min-width: 320px;
+        overflow-x: hidden;
+        text-size-adjust: 100%;
+    }
+
     body {
         @apply bg-background font-body text-on-surface antialiased;
+        min-height: 100dvh;
+        overflow-x: hidden;
+    }
+
+    *, ::before, ::after {
+        min-width: 0;
+    }
+
+    button, input, select, textarea {
+        max-width: 100%;
+    }
+
+    p, h1, h2, h3, h4, h5, h6, a, span, dd, dt, label {
+        overflow-wrap: anywhere;
     }
 }
 
@@ -17,6 +37,17 @@
 
     .auth-input {
         @apply w-full rounded-lg border-none bg-surface-container-low py-4 pl-12 pr-12 font-medium text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary-container;
+    }
+
+    .app-safe-screen {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .app-game-screen {
+        height: calc(100vh - 64px);
+        height: calc(100dvh - 64px);
+        min-height: 520px;
     }
 }
 
