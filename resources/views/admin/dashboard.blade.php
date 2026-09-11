@@ -321,6 +321,7 @@
                                                         data-role="{{ $managedUser->role }}"
                                                         data-section="{{ $managedUser->section }}"
                                                         data-status="{{ $managedUser->approval_status ?? 'approved' }}"
+                                                        data-gender="{{ $managedUser->gender }}"
                                                         data-initials="{{ $initials ?: 'U' }}"
                                                     >
                                                         <span class="material-symbols-outlined text-[18px]">edit</span>
@@ -603,6 +604,23 @@
                         </div>
 
                         <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-gender">Avatar Style</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">face</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-gender" name="gender">
+                                    <option value="">None</option>
+                                    <option value="male" @selected(old('create_user_form') && old('gender') === 'male')>Nova Finch - Boys</option>
+                                    <option value="female" @selected(old('create_user_form') && old('gender') === 'female')>Lyra Vale - Girls</option>
+                                </select>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('gender')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
                             <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-section">Section Assignment</label>
                             <div class="relative">
                                 <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">class</span>
@@ -759,6 +777,21 @@
                         </div>
 
                         <div class="space-y-2 md:col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-gender">Avatar Style</label>
+                            <div class="relative max-w-md">
+                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">face</span>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="edit-gender" name="gender">
+                                    <option value="">None</option>
+                                    <option value="male">Nova Finch - Boys</option>
+                                    <option value="female">Lyra Vale - Girls</option>
+                                </select>
+                            </div>
+                            @error('gender')
+                                <p class="text-sm text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
                             <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-approval-status">Account Status</label>
                             <div class="relative max-w-md">
                                 <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">verified_user</span>
@@ -822,6 +855,7 @@
             'name' => old('name'),
             'role' => old('role'),
             'section' => old('section'),
+            'gender' => old('gender'),
             'approval_status' => old('approval_status'),
         ];
     @endphp
@@ -848,6 +882,7 @@
         const editEmail = document.getElementById('edit-email');
         const editRole = document.getElementById('edit-role');
         const editSection = document.getElementById('edit-section');
+        const editGender = document.getElementById('edit-gender');
         const editApprovalStatus = document.getElementById('edit-approval-status');
         const editPassword = document.getElementById('edit-password');
         const editPasswordConfirmation = document.getElementById('edit-password-confirmation');
@@ -918,6 +953,7 @@
             editEmail.value = dataset.email ?? '';
             editRole.value = values.role ?? dataset.role ?? 'student';
             editSection.value = values.section ?? dataset.section ?? '';
+            editGender.value = values.gender ?? dataset.gender ?? '';
             editApprovalStatus.value = values.approval_status ?? dataset.status ?? 'approved';
             editPassword.value = '';
             editPasswordConfirmation.value = '';

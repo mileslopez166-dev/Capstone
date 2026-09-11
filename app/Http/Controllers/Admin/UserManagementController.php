@@ -25,6 +25,7 @@ class UserManagementController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
             'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
@@ -58,6 +59,7 @@ class UserManagementController extends Controller
             'email' => $validated['email'],
             'role' => $validated['role'],
             'section' => filled($validated['section'] ?? null) ? $validated['section'] : null,
+            'gender' => $validated['role'] === 'student' && filled($validated['gender'] ?? null) ? $validated['gender'] : null,
             'approval_status' => $validated['approval_status'],
             'password' => $validated['password'],
             ...$approvalChanges,
@@ -101,6 +103,7 @@ class UserManagementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
             'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -126,6 +129,7 @@ class UserManagementController extends Controller
             'name' => $validated['name'],
             'role' => $validated['role'],
             'section' => filled($validated['section'] ?? null) ? $validated['section'] : null,
+            'gender' => $validated['role'] === 'student' && filled($validated['gender'] ?? null) ? $validated['gender'] : null,
             'approval_status' => $validated['approval_status'],
             ...$approvalChanges,
         ];

@@ -138,6 +138,24 @@
                                 </div>
                                 <x-input-error :messages="$errors->get('last_name')" class="mt-2 text-sm text-error" />
                             </div>
+                            <div class="group" x-show="role === 'student'" x-transition>
+                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="gender">Avatar Style</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">face</span>
+                                    <select
+                                        id="gender"
+                                        name="gender"
+                                        x-bind:disabled="role !== 'student'"
+                                        x-bind:required="role === 'student'"
+                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-10 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+                                    >
+                                        <option value="" disabled @selected(! old('gender'))>Choose avatar style</option>
+                                        <option value="male" @selected(old('gender') === 'male')>Nova Finch - Boys</option>
+                                        <option value="female" @selected(old('gender') === 'female')>Lyra Vale - Girls</option>
+                                    </select>
+                                </div>
+                                <x-input-error :messages="$errors->get('gender')" class="mt-2 text-sm text-error" />
+                            </div>
                         </div>
 
                         <div class="group">

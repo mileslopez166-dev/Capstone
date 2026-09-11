@@ -19,20 +19,32 @@
         $isOralReading = $assessmentType === 'oral_reading';
         $isSilentReading = $assessmentType === 'silent_reading';
         $isListeningComprehension = $assessmentType === 'listening_comprehension';
+        $isFlashcards = ($assessment->quiz_type ?? 'multiple_choice') === 'flashcards';
         $storyDescription = $assessment->story_description;
         $storyText = $storyDescription ?: $assessment->instructions;
-        $storyHtml = collect(preg_split('/\R{2,}/u', trim($storyText ?? '')))
-            ->filter(fn (string $paragraph): bool => trim($paragraph) !== '')
-            ->map(function (string $paragraph) use ($isOralReading): string {
+        $storyParagraphs = collect(preg_split('/\R{2,}/u', trim($storyText ?? '')))
+            ->filter(fn (string $paragraph): bool => trim($paragraph) !== '');
+        $storyReadOnlyHtml = $storyParagraphs
+            ->map(function (string $paragraph): string {
                 $words = collect(preg_split('/(\s+)/u', $paragraph, -1, PREG_SPLIT_DELIM_CAPTURE))
-                    ->map(fn (string $part): string => trim($part) === ''
-                        ? e($part)
-                        : ($isOralReading ? '<button class="story-word" type="button" data-mark="0">'.e($part).'</button>' : e($part)))
+                    ->map(fn (string $part): string => e($part))
                     ->implode('');
 
                 return '<p class="story-paragraph">'.$words.'</p>';
             })
             ->implode('');
+        $storyMarkingHtml = $storyParagraphs
+            ->map(function (string $paragraph): string {
+                $words = collect(preg_split('/(\s+)/u', $paragraph, -1, PREG_SPLIT_DELIM_CAPTURE))
+                    ->map(fn (string $part): string => trim($part) === ''
+                        ? e($part)
+                        : '<button class="story-word" type="button" data-mark="0">'.e($part).'</button>')
+                    ->implode('');
+
+                return '<p class="story-paragraph">'.$words.'</p>';
+            })
+            ->implode('');
+        $storyHtml = $isOralReading ? $storyMarkingHtml : $storyReadOnlyHtml;
         $gameQuestions = $manualQuestions
             ->map(function (array $question, int $index): array {
                 $answers = collect($question['answers'] ?? [])
@@ -45,6 +57,7 @@
                     'node' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                     'text' => (string) ($question['question'] ?? 'Untitled question'),
                     'options' => $answers,
+                    'correct' => (string) ($question['correct_answer'] ?? 'A'),
                 ];
             })
             ->filter(fn (array $question): bool => filled($question['text']) && count($question['options']) > 0)
@@ -87,6 +100,28 @@
         .story-word-mark-1 { background: rgba(250, 204, 21, 0.32); color: #854d0e; }
         .story-word-mark-2 { background: rgba(248, 113, 113, 0.28); color: #991b1b; }
         .result-pattern { background-image: radial-gradient(circle at 10px 10px, rgba(68, 165, 255, 0.45) 1px, transparent 1px), radial-gradient(circle at 30px 30px, rgba(145, 247, 142, 0.45) 1px, transparent 1px); background-size: 40px 40px; background-position: 0 0, 20px 20px; opacity: 0.2; }
+        .joyful-bg { background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 34%, #bae6fd 66%, #f0f9ff 100%); }
+        .sky-cloud { position: absolute; z-index: 1; width: 12rem; height: 3.5rem; border-radius: 9999px; background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.98) 58%, rgba(224,242,254,.94) 100%); box-shadow: 0 10px 18px rgba(14,116,144,.16), inset 0 -6px 0 rgba(186,230,253,.42); pointer-events: none; }
+        .sky-cloud::before, .sky-cloud::after { content: ''; position: absolute; bottom: .35rem; border-radius: 9999px; background: linear-gradient(180deg, #fff, #e0f2fe); }
+        .sky-cloud::before { left: 1.5rem; width: 5.5rem; height: 5.5rem; }
+        .sky-cloud::after { right: 1.5rem; width: 4.5rem; height: 4.5rem; }
+        .sky-cloud.small { width: 9rem; height: 2.5rem; transform: scale(.9); }
+        .frog-answer { transition: transform .2s ease, filter .2s ease; }
+        .frog-answer:hover { transform: translateY(-4px) scale(1.03); }
+        .frog-answer.is-caught { animation: mosquitoCaught .72s ease-in forwards; pointer-events: none; }
+        .frog-answer-circle { box-shadow: 0 7px 0 rgba(30, 41, 59, .28); }
+        .dragonfly-wing { position: absolute; top: 50%; width: 4.1rem; height: 2.15rem; border: 3px solid rgba(255,255,255,.95); background: linear-gradient(135deg, var(--wing-light), var(--wing-mid) 48%, var(--wing-deep)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 0 10px var(--wing-glow), 0 3px 12px var(--wing-glow); pointer-events: none; z-index: 3; animation: wingFlutter .7s ease-in-out infinite alternate; }
+        .dragonfly-wing.red-wings { --wing-light: rgba(254,202,202,.95); --wing-mid: rgba(251,113,133,.72); --wing-deep: rgba(225,29,72,.5); --wing-glow: rgba(244,63,94,.65); }
+        .dragonfly-wing.gold-wings { --wing-light: rgba(254,249,195,.98); --wing-mid: rgba(251,191,36,.76); --wing-deep: rgba(234,138,0,.5); --wing-glow: rgba(250,204,21,.7); }
+        .dragonfly-wing.purple-wings { --wing-light: rgba(233,213,255,.98); --wing-mid: rgba(129,140,248,.72); --wing-deep: rgba(126,34,206,.5); --wing-glow: rgba(168,85,247,.7); }
+        .dragonfly-wing.green-wings { --wing-light: rgba(220,252,231,.98); --wing-mid: rgba(74,222,128,.72); --wing-deep: rgba(22,163,74,.5); --wing-glow: rgba(34,197,94,.7); }
+        .dragonfly-wing.left { right: 50%; border-radius: 100% 20% 20% 100%; transform: translateY(-50%) rotate(-16deg); }
+        .dragonfly-wing.right { left: 50%; border-radius: 20% 100% 100% 20%; transform: translateY(-50%) rotate(16deg); }
+        @keyframes wingFlutter { from { transform: translateY(-50%) rotate(-12deg) scaleY(.82); } to { transform: translateY(-50%) rotate(12deg) scaleY(1.12); } }
+        @keyframes mosquitoCaught { 0% { transform: scale(1) rotate(0); opacity: 1; } 45% { transform: scale(1.35) rotate(12deg); opacity: 1; } 100% { transform: scale(.05) rotate(-25deg); opacity: 0; } }
+        .frog-tongue { position: absolute; height: 12px; left: var(--tongue-left); top: var(--tongue-top); width: var(--tongue-width); z-index: 45; pointer-events: none; border-radius: 999px; background: linear-gradient(90deg, #fb7185, #ef4444 70%, #be123c); border: 3px solid #be123c; transform-origin: left center; transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; }
+        .frog-tongue.is-catching { animation: tongueShoot .72s cubic-bezier(.2,.8,.25,1) forwards; }
+        @keyframes tongueShoot { 0% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } 18%, 58% { opacity: 1; } 58% { transform: rotate(var(--tongue-angle)) scaleX(1); } 100% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } }
     </style>
 
     <div class="h-screen overflow-hidden bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
@@ -104,13 +139,21 @@
         </nav>
 
         @if ($questionCount > 0 || $isOralReading)
-            <main class="mission-canvas relative h-[calc(100vh-64px)] w-full overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface" id="mission-canvas">
-                <div class="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div class="absolute left-[10%] top-20 h-64 w-64 rounded-full bg-primary-container/10 blur-3xl"></div>
-                    <div class="absolute bottom-20 right-[15%] h-96 w-96 rounded-full bg-tertiary-container/10 blur-3xl"></div>
-                </div>
-
-                <div class="pointer-events-none absolute left-5 top-5 z-30 flex w-72 flex-col gap-3 {{ $isOralReading ? 'hidden' : '' }}">
+            <main class="mission-canvas relative h-[calc(100vh-64px)] w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }}" id="mission-canvas">
+                @if ($isFlashcards)
+                    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+                        <div class="sky-cloud left-[-3rem] top-20"></div>
+                        <div class="sky-cloud small right-[-4rem] top-36"></div>
+                        <div class="sky-cloud left-[18%] top-72"></div>
+                        <div class="sky-cloud small bottom-44 right-[5%]"></div>
+                    </div>
+                @else
+                    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+                        <div class="absolute left-[10%] top-20 h-64 w-64 rounded-full bg-primary-container/10 blur-3xl"></div>
+                        <div class="absolute bottom-20 right-[15%] h-96 w-96 rounded-full bg-tertiary-container/10 blur-3xl"></div>
+                    </div>
+                @endif
+<div class="pointer-events-none absolute left-5 top-5 z-30 flex w-72 flex-col gap-3 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
                         <div class="glass-hud pointer-events-auto flex items-center gap-4 rounded-lg border border-white/40 p-3 shadow-sm">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-container text-tertiary-dim shadow-sm"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span></div>
@@ -140,16 +183,16 @@
                     </div>
                 </div>
 
-                <div class="pointer-events-none absolute right-5 top-5 z-30 text-right {{ $isOralReading ? 'hidden' : '' }}" id="mission-info">
+                <div class="pointer-events-none absolute right-5 top-5 z-30 text-right {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
                     <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">MISSION: {{ $missionTitle }}</h1>
                     <p class="font-body font-medium text-slate-500">Capture <span class="font-bold text-primary">{{ $questionCount }} Nodes</span> to power the drive.</p>
                 </div>
 
-                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center transition-all duration-75 {{ $isOralReading ? 'hidden' : '' }}" id="hook-assembly"><div class="hook-cable" id="hook-cable"></div><div class="relative -mt-1"><div class="flex h-10 w-10 rotate-45 transform items-center justify-center rounded-xl border-2 border-white bg-primary shadow-lg" id="hook-head"><span class="material-symbols-outlined -rotate-45 text-white" style="font-variation-settings: 'FILL' 1;">anchor</span></div></div></div>
+                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center transition-all duration-75 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="hook-assembly"><div class="hook-cable" id="hook-cable"></div><div class="relative -mt-1"><div class="flex h-10 w-10 rotate-45 transform items-center justify-center rounded-xl border-2 border-white bg-primary shadow-lg" id="hook-head"><span class="material-symbols-outlined -rotate-45 text-white" style="font-variation-settings: 'FILL' 1;">anchor</span></div></div></div>
 
-                <div class="absolute inset-0 z-20 {{ $isOralReading ? 'hidden' : '' }}" id="bubbles-container"></div>
+                <div class="absolute inset-0 z-20 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="bubbles-container"></div>
 
-                <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ $isOralReading ? 'hidden' : '' }}" id="egg-wrapper">
+                <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="egg-wrapper">
                     <div class="egg-glow"></div><div class="hatch-light" id="hatch-flash"></div>
                     <div class="data-egg-container pulse-bag" id="power-core" style="--base-scale: 1;">
                         <div class="data-egg" id="shell-main">
@@ -160,9 +203,55 @@
                     </div>
                 </div>
 
-                                @if (($storyTitle || $storyDescription) && ! $isListeningComprehension)
+                                @if ($isFlashcards && ! $isOralReading)
+                    <div class="absolute inset-x-0 top-0 z-30 px-6 pt-8" id="frog-flashcards-game">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 rounded-full border-2 border-blue-100 bg-white px-4 py-2 shadow-lg shadow-blue-200/50">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-yellow-500 bg-yellow-400 text-white"><span class="material-symbols-outlined text-lg">stars</span></div>
+                                <span class="font-headline text-2xl font-black text-blue-900" id="frog-score">0</span>
+                            </div>
+                            <div class="rounded-full border-2 border-blue-100 bg-white px-4 py-2 text-sm font-black uppercase tracking-wider text-blue-800 shadow-lg shadow-blue-200/50" id="frog-level-text">Question 1/{{ $questionCount }}</div>
+                        </div>
+                        <div class="mx-auto mt-5 max-w-4xl">
+                            <div class="h-4 w-full rounded-full border border-blue-100 bg-white p-1 shadow-inner">
+                                <div class="relative h-full w-0 rounded-full bg-gradient-to-r from-green-400 to-lime-500 transition-all duration-500" id="frog-progress-bar"><div class="absolute -right-2 -top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-lime-500 bg-white shadow-sm"><span class="material-symbols-outlined text-xs text-lime-600">pest_control</span></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="absolute inset-x-0 top-28 z-30 mx-auto flex w-full max-w-5xl flex-col items-center px-6" aria-label="Flashcards frog game">
+                        <div class="relative w-full rounded-[2rem] border-b-8 border-blue-100 bg-white px-8 py-6 text-center shadow-xl shadow-blue-200/50 transition-colors duration-300" id="frog-question-card">
+                            <div class="absolute -left-4 -top-4 flex h-12 w-12 rotate-[-10deg] items-center justify-center rounded-full border-4 border-white bg-yellow-400 text-2xl font-black text-white shadow-md">?</div>
+                            <h2 class="font-headline text-3xl font-black leading-tight text-blue-900 md:text-4xl" id="frog-question-text">{{ $firstQuestion ? $firstQuestion['text'] : 'Ready?' }}</h2>
+                        </div>
+                        <div class="relative mt-8 grid min-h-48 w-full grid-cols-2 gap-5 md:grid-cols-4" id="frog-answer-zone">
+                            @foreach (['A', 'B', 'C', 'D'] as $index => $letter)
+                                @php $wingClass = ['red-wings', 'gold-wings', 'purple-wings', 'green-wings'][$index]; @endphp
+                                <button class="frog-answer relative mx-auto flex h-24 w-32 items-center justify-center focus:outline-none focus:ring-4 focus:ring-blue-200" type="button" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
+                                    <span class="dragonfly-wing left {{ $wingClass }}"></span>
+                                    <span class="dragonfly-wing right {{ $wingClass }}"></span>
+                                    <span class="frog-answer-circle relative z-10 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-600 bg-blue-500 text-xl font-black text-white" data-frog-answer-circle>{{ $letter }}</span>
+                                    <span class="absolute -bottom-4 left-1/2 z-10 w-40 -translate-x-1/2 truncate rounded-full bg-white/90 px-3 py-1 text-xs font-black text-blue-900 shadow-sm" data-frog-answer-label>Answer {{ $letter }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <div class="frog-tongue" id="frog-tongue" aria-hidden="true"></div>
+                    <footer class="absolute inset-x-0 bottom-0 z-30 h-56 overflow-hidden">
+                        <div class="absolute bottom-0 h-32 w-full rounded-t-[3rem] bg-gradient-to-b from-blue-300 to-blue-500"></div>
+                        <div class="absolute bottom-8 left-1/2 h-20 w-64 -translate-x-1/2 rounded-[100%] border-b-8 border-green-700 bg-green-500 shadow-xl"></div>
+                        <div class="absolute bottom-4 left-1/2 h-32 w-36 -translate-x-1/2 rounded-t-full rounded-b-[2rem] border-4 border-lime-600 bg-lime-400 shadow-[inset_-10px_-10px_0_0_rgba(0,0,0,0.1)]" id="frog-character">
+                            <div class="absolute -top-10 left-2 flex h-16 w-14 items-center justify-center rounded-full border-4 border-lime-600 bg-lime-400"><span class="h-9 w-8 rounded-full bg-white"><span class="ml-2 mt-2 block h-5 w-4 rounded-full bg-slate-900"></span></span></div>
+                            <div class="absolute -top-10 right-2 flex h-16 w-14 items-center justify-center rounded-full border-4 border-lime-600 bg-lime-400"><span class="h-9 w-8 rounded-full bg-white"><span class="ml-2 mt-2 block h-5 w-4 rounded-full bg-slate-900"></span></span></div>
+                            <div class="absolute left-1/2 top-10 h-8 w-24 -translate-x-1/2 rounded-[50%] border-4 border-lime-700 bg-lime-950"><span class="absolute left-1/2 top-1/2 h-2 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-400"></span></div>
+                            <div class="absolute bottom-0 left-1/2 h-20 w-24 -translate-x-1/2 rounded-t-full rounded-b-xl bg-sky-100/80"></div>
+                        </div>
+                    </footer>
+                @endif
+                @if (($storyTitle || $storyDescription) && ! $isListeningComprehension)
                     <div class="absolute inset-0 z-[90] flex items-center justify-center bg-surface/80 p-5 backdrop-blur-xl" id="story-gate">
-                        <section class="glass-hud flex max-h-[82vh] w-full max-w-3xl flex-col rounded-2xl border border-white/70 p-6 shadow-2xl sm:p-8">
+                        <section class="glass-hud flex max-h-[84vh] w-full {{ $isOralReading ? 'max-w-6xl' : 'max-w-3xl' }} flex-col rounded-2xl border border-white/70 p-6 shadow-2xl sm:p-8">
                             <div class="mb-5 flex items-center gap-3">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg shadow-primary/20">
                                     <span class="material-symbols-outlined">auto_stories</span>
@@ -172,11 +261,39 @@
                                     <h1 class="font-headline text-2xl font-black leading-tight text-on-surface sm:text-3xl">{{ $storyTitle ?: $assessment->title }}</h1>
                                 </div>
                             </div>
-                            <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-5 text-base leading-relaxed text-on-surface-variant shadow-inner">
-                                                                <div id="story-reader-text">
-                                    {!! $storyHtml !!}
+
+                            @if ($isOralReading)
+                                <div class="grid min-h-0 flex-1 grid-cols-1 gap-5 md:grid-cols-2">
+                                    <div class="flex min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-primary/15 bg-white/85 shadow-inner">
+                                        <div class="border-b border-primary/10 bg-primary/5 px-5 py-3">
+                                            <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Reading</p>
+                                        </div>
+                                        <div class="min-h-0 flex-1 overflow-y-auto p-5 text-base leading-relaxed text-on-surface-variant" data-sync-scroll="oral-story">
+                                            {!! $storyReadOnlyHtml !!}
+                                        </div>
+                                    </div>
+                                    <div class="flex min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-secondary/20 bg-white/85 shadow-inner">
+                                        <div class="border-b border-secondary/10 bg-secondary/5 px-5 py-3">
+                                            <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Teacher Check</p>
+                                        </div>
+                                        <div class="min-h-0 flex-1 overflow-y-auto p-5 text-base leading-relaxed text-on-surface-variant" id="story-reader-text" data-sync-scroll="oral-story">
+                                            {!! $storyMarkingHtml !!}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="mt-4 flex flex-wrap items-center justify-center gap-3 rounded-xl bg-surface-container-low/80 p-3 text-sm font-bold text-on-surface-variant shadow-sm" aria-label="Oral reading marking legend">
+                                    <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Legend</span>
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-red-400/70 ring-1 ring-red-500/30"></span>Mispronounced</span>
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-yellow-300/80 ring-1 ring-yellow-500/30"></span>Getting Closer</span>
+                                </div>
+                            @else
+                                <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-5 text-base leading-relaxed text-on-surface-variant shadow-inner">
+                                    <div id="story-reader-text">
+                                        {!! $storyHtml !!}
+                                    </div>
+                                </div>
+                            @endif
+
                             @if ($isSilentReading)
                                 <div class="mt-5 rounded-xl bg-surface-container-low p-4 shadow-sm">
                                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -367,6 +484,7 @@
                     const resultWrongPronunciation = document.getElementById('result-wrong-pronunciation');
                     const storyGate = document.getElementById('story-gate');
                     const storyReaderText = document.getElementById('story-reader-text');
+                    const syncedStoryScrollers = Array.from(document.querySelectorAll('[data-sync-scroll="oral-story"]'));
                     const startQuestionsButton = document.getElementById('start-questions-button');
                     const startTimerButton = document.getElementById('start-timer-button');
                     const endTimerButton = document.getElementById('end-timer-button');
@@ -377,9 +495,19 @@
                     const submitUrl = @json(route('student.assessments.submit', $assessment));
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const assessmentType = @json($assessmentType);
+                    const isFlashcards = @json($isFlashcards);
                     const isOralReading = assessmentType === 'oral_reading';
                     const isSilentReading = assessmentType === 'silent_reading';
                     const canTrackPronunciation = isOralReading;
+                    const frogGame = document.getElementById('frog-flashcards-game');
+                    const frogScore = document.getElementById('frog-score');
+                    const frogProgressBar = document.getElementById('frog-progress-bar');
+                    const frogLevelText = document.getElementById('frog-level-text');
+                    const frogQuestionText = document.getElementById('frog-question-text');
+                    const frogQuestionCard = document.getElementById('frog-question-card');
+                    const frogAnswerButtons = Array.from(document.querySelectorAll('[data-frog-answer]'));
+                    const frogTongue = document.getElementById('frog-tongue');
+                    const frogCharacter = document.getElementById('frog-character');
                     const letters = ['A', 'B', 'C', 'D'];
                     const questions = @json($gameQuestions->values());
                     const targetsNeeded = questions.length;
@@ -441,14 +569,14 @@
                     }
 
                     document.addEventListener('mousemove', (event) => {
-                        if (missionStarted && !isHooking && !isHatching) {
+                        if (!isFlashcards && missionStarted && !isHooking && !isHatching) {
                             currentHookX = event.clientX;
                             hookAssembly.style.left = `${currentHookX}px`;
                         }
                     });
 
                     canvas.addEventListener('click', (event) => {
-                        if (!missionStarted) return;
+                        if (!missionStarted || isFlashcards) return;
                         if (event.target.closest('.glass-hud')) return;
                         if (isHooking || isHatching || isProcessingCapture) return;
                         fireHook();
@@ -459,6 +587,24 @@
                     }
 
 
+
+                    let isSyncingStoryScroll = false;
+                    syncedStoryScrollers.forEach((scroller) => {
+                        scroller.addEventListener('scroll', () => {
+                            if (isSyncingStoryScroll) return;
+                            const maxScroll = Math.max(scroller.scrollHeight - scroller.clientHeight, 1);
+                            const scrollRatio = scroller.scrollTop / maxScroll;
+                            isSyncingStoryScroll = true;
+                            syncedStoryScrollers.forEach((target) => {
+                                if (target === scroller) return;
+                                const targetMaxScroll = Math.max(target.scrollHeight - target.clientHeight, 1);
+                                target.scrollTop = scrollRatio * targetMaxScroll;
+                            });
+                            requestAnimationFrame(() => {
+                                isSyncingStoryScroll = false;
+                            });
+                        });
+                    });
                     storyReaderText?.addEventListener('pointerdown', (event) => {
                         if (!canTrackPronunciation) return;
                         if (event.target.closest('.story-word')) event.preventDefault();
@@ -474,6 +620,89 @@
                         word.classList.remove('story-word-mark-1', 'story-word-mark-2');
                         if (nextMark > 0) word.classList.add(`story-word-mark-${nextMark}`);
                     });
+                    function renderFlashcardQuestion() {
+                        if (!isFlashcards || !questions[currentQuestionIndex]) return;
+
+                        const question = questions[currentQuestionIndex];
+                        frogQuestionText.innerText = question.text;
+                        frogLevelText.innerText = `Question ${currentQuestionIndex + 1}/${targetsNeeded}`;
+                        frogQuestionCard.classList.remove('bg-green-100', 'bg-red-100');
+                        frogAnswerButtons.forEach((button) => {
+                            const letter = button.dataset.frogAnswer;
+                            const option = (question.options || []).find((item) => item.l === letter);
+                            const label = button.querySelector('[data-frog-answer-label]');
+                            const circle = button.querySelector('[data-frog-answer-circle]');
+                            button.disabled = !option;
+                            button.classList.remove('is-caught');
+                            button.style.opacity = option ? '1' : '0.35';
+                            if (label) label.innerText = option ? option.t : `Answer ${letter}`;
+                            if (circle) {
+                                circle.innerText = letter;
+                                circle.classList.remove('bg-green-500', 'border-green-700', 'bg-red-500', 'border-red-700');
+                                circle.classList.add('bg-blue-500', 'border-blue-600');
+                            }
+                        });
+                    }
+
+                    function updateFrogProgress(correct) {
+                        const progress = targetsNeeded > 0 ? (caughtCount / targetsNeeded) * 100 : 0;
+                        if (frogScore) frogScore.innerText = String(totalScore);
+                        if (frogProgressBar) frogProgressBar.style.width = `${Math.min(progress, 100)}%`;
+                        if (frogQuestionCard) {
+                            frogQuestionCard.classList.toggle('bg-green-100', correct);
+                            frogQuestionCard.classList.toggle('bg-red-100', !correct);
+                        }
+                    }
+
+                    function animateFrogCatch(button) {
+                        if (!frogTongue || !frogCharacter || !button) return;
+                        const canvasBox = canvas.getBoundingClientRect();
+                        const frogBox = frogCharacter.getBoundingClientRect();
+                        const targetBox = button.getBoundingClientRect();
+                        const startX = frogBox.left + frogBox.width / 2 - canvasBox.left;
+                        const startY = frogBox.top + 44 - canvasBox.top;
+                        const targetX = targetBox.left + targetBox.width / 2 - canvasBox.left;
+                        const targetY = targetBox.top + targetBox.height / 2 - canvasBox.top;
+                        const dx = targetX - startX;
+                        const dy = targetY - startY;
+                        frogTongue.style.setProperty('--tongue-left', `${startX}px`);
+                        frogTongue.style.setProperty('--tongue-top', `${startY}px`);
+                        frogTongue.style.setProperty('--tongue-width', `${Math.sqrt(dx * dx + dy * dy)}px`);
+                        frogTongue.style.setProperty('--tongue-angle', `${Math.atan2(dy, dx) * 180 / Math.PI}deg`);
+                        frogTongue.classList.remove('is-catching');
+                        void frogTongue.offsetWidth;
+                        frogTongue.classList.add('is-catching');
+                        button.classList.add('is-caught');
+                    }
+
+                    function answerFlashcard(letter, button) {
+                        if (!isFlashcards || isProcessingCapture || !questions[currentQuestionIndex]) return;
+                        isProcessingCapture = true;
+                        frogAnswerButtons.forEach((item) => item.disabled = true);
+                        const question = questions[currentQuestionIndex];
+                        const correct = question.correct === letter;
+                        capturedAnswers[currentQuestionIndex] = letter;
+                        caughtCount++;
+                        if (correct) totalScore++;
+                        const circle = button?.querySelector('[data-frog-answer-circle]');
+                        if (circle) {
+                            circle.classList.remove('bg-blue-500', 'border-blue-600');
+                            circle.classList.add(correct ? 'bg-green-500' : 'bg-red-500', correct ? 'border-green-700' : 'border-red-700');
+                        }
+                        animateFrogCatch(button);
+                        updateFrogProgress(correct);
+
+                        setTimeout(() => {
+                            if (caughtCount >= targetsNeeded) {
+                                victory();
+                                return;
+                            }
+
+                            currentQuestionIndex++;
+                            isProcessingCapture = false;
+                            renderFlashcardQuestion();
+                        }, 900);
+                    }
 
                     function fireHook() {
                         isHooking = true;
@@ -752,16 +981,23 @@
 
                     function startMission() {
                         if (isOralReading) return;
-                        if (missionStarted && spawnTimer) return;
+                        if (missionStarted && (spawnTimer || isFlashcards)) return;
                         missionStarted = true;
                         storyGate?.classList.add('opacity-0', 'pointer-events-none');
                         setTimeout(() => storyGate?.classList.add('hidden'), 300);
+                        if (isFlashcards) {
+                            renderFlashcardQuestion();
+                            return;
+                        }
                         spawnTimer = setInterval(spawnBubble, 2000);
                         for (let index = 0; index < 3; index++) setTimeout(spawnBubble, index * 800);
                     }
 
                     startTimerButton?.addEventListener('click', startReadingTimer);
                     endTimerButton?.addEventListener('click', endReadingTimer);
+                    frogAnswerButtons.forEach((button) => {
+                        button.addEventListener('click', () => answerFlashcard(button.dataset.frogAnswer, button));
+                    });
                     startQuestionsButton?.addEventListener('click', () => {
                         if (isOralReading) {
                             victory();
@@ -770,6 +1006,7 @@
 
                         startMission();
                     });
+                    if (isFlashcards) renderFlashcardQuestion();
                     if (missionStarted && !isOralReading) startMission();
                 })();
             </script>

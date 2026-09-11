@@ -26,6 +26,7 @@ class User extends Authenticatable
         'email',
         'role',
         'section',
+        'gender',
         'teacher_token',
         'approval_status',
         'approved_at',

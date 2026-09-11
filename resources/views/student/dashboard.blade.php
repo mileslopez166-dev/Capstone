@@ -37,13 +37,8 @@
                         </div>
                     </div>
 
-                    <div class="relative h-48 w-48 flex-shrink-0">
-                        <div class="absolute inset-0 rounded-full bg-white/20 blur-3xl"></div>
-                        <img
-                            alt="Student Avatar"
-                            class="relative z-10 h-full w-full object-contain"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0Jq6GePF12X-juwqidKkpHeUsIezPA8AjQvdumN_cQHkXgJdwLV5nqxATQLJgze7NG3khpSjJs2IpbKvRkc1mJSI19CsS1tosXcEtlrqyN-UV9zY85OwKKKV4_Plcmfu0VNIJ0klDsVLkjIop9H_bilQyG-k7pd5LfBPtWrNk7nIv1CKfNuh-LOyRUUcElrsZnF_xPZerLZ6je2DTX7wfjrGvhCwJ2qSTp8LWwaYtHw160FVYznA5aCOvaWbFZVG7_Lg8OCRST6Je"
-                        />
+                    <div class="w-full max-w-[220px] flex-shrink-0 md:w-[220px]">
+                        <x-student-pixel-avatar :gender="$student->gender" :name="$student->name" size="lg" :show-card="true" class="bg-white/10" />
                     </div>
                 </div>
             </section>

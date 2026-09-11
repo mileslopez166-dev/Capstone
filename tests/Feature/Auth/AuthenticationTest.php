@@ -15,6 +15,8 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertStatus(200);
+        $response->assertDontSeeText('Automatic dashboard routing');
+        $response->assertDontSee('name="role"', false);
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-cache', (string) $response->headers->get('Cache-Control'));
     }
@@ -25,7 +27,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'teacher',
             'password' => 'password',
         ]);
 
@@ -39,7 +40,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'student',
             'password' => 'password',
         ]);
 
@@ -53,7 +53,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'admin',
             'password' => 'password',
         ]);
 
@@ -67,42 +66,37 @@ class AuthenticationTest extends TestCase
 
         $this->post('/login', [
             'email' => $user->email,
-            'role' => 'student',
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
     }
 
-    public function test_teachers_can_not_log_in_when_student_role_is_selected(): void
+    public function test_login_screen_does_not_require_role_selection(): void
     {
         $user = User::factory()->teacher()->create();
 
-        $response = $this->from('/login')->post('/login', [
+        $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'student',
             'password' => 'password',
         ]);
 
-        $response->assertRedirect('/login');
-        $response->assertSessionHasErrors('email');
-        $this->assertGuest();
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('teacher.dashboard'));
     }
 
-    public function test_legacy_accounts_with_missing_roles_are_repaired_on_login(): void
+    public function test_legacy_accounts_with_missing_roles_use_the_default_student_dashboard(): void
     {
         $user = User::factory()->create();
         $user->forceFill(['role' => ''])->save();
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'role' => 'teacher',
             'password' => 'password',
         ]);
 
         $this->assertAuthenticated();
-        $this->assertSame('teacher', $user->fresh()->role);
-        $response->assertRedirect(route('teacher.dashboard'));
+        $response->assertRedirect(route('student.dashboard'));
     }
 
     public function test_users_can_logout(): void
@@ -121,7 +115,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->from('/login')->post('/login', [
             'email' => $user->email,
-            'role' => 'teacher',
             'password' => 'password',
         ]);
 
@@ -136,7 +129,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->from('/login')->post('/login', [
             'email' => $user->email,
-            'role' => 'student',
             'password' => 'password',
         ]);
 
@@ -147,7 +139,7 @@ class AuthenticationTest extends TestCase
 
     public function test_admin_login_bootstraps_the_default_admin_when_missing(): void
     {
-        User::query()->where('email', 'admin@aipgaals.com')->delete();
+        User::withTrashed()->where('email', 'admin@aipgaals.com')->forceDelete();
 
         $this->assertDatabaseMissing('users', [
             'email' => 'admin@aipgaals.com',
@@ -155,7 +147,6 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => 'admin@aipgaals.com',
-            'role' => 'admin',
             'password' => 'admin123',
         ]);
 

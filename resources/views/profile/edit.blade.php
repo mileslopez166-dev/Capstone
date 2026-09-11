@@ -4,6 +4,7 @@
         $isStudent = $user->isStudent();
         $dashboardRoute = route($user->dashboardRouteName());
         $firstName = str($user->name)->before(' ')->title();
+        $studentAvatarStyle = ($user->gender === 'female') ? 'Lyra Vale' : 'Nova Finch';
         $initials = str($user->name)
             ->explode(' ')
             ->filter()
@@ -33,9 +34,13 @@
                     </p>
 
                     <div class="mt-8 flex items-center gap-4">
-                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl font-black text-white shadow-inner">
-                            {{ $initials }}
-                        </div>
+                        @if ($isStudent)
+                            <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="sm" />
+                        @else
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl font-black text-white shadow-inner">
+                                {{ $initials }}
+                            </div>
+                        @endif
                         <div>
                             <p class="font-headline text-xl font-bold">{{ $user->name }}</p>
                             <p class="text-sm font-medium text-white/75">{{ $user->email }}</p>
@@ -97,6 +102,18 @@
                                     </div>
                                 @endif
                             </div>
+                            @if ($isStudent)
+                                <div>
+                                    <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="profile-gender">Avatar Style</label>
+                                    <select id="profile-gender" name="gender" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface focus:ring-2 focus:ring-primary/20">
+                                        <option value="male" @selected(old('gender', $user->gender ?? 'male') === 'male')>Nova Finch - Boys</option>
+                                        <option value="female" @selected(old('gender', $user->gender) === 'female')>Lyra Vale - Girls</option>
+                                    </select>
+                                    <x-input-error class="mt-2 text-sm text-error" :messages="$errors->get('gender')" />
+                                </div>
+                            @else
+                                <input name="gender" type="hidden" value="{{ $user->gender }}">
+                            @endif
 
                             <div class="flex items-center gap-4">
                                 <button class="rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-bold text-on-primary shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]" type="submit">Save Changes</button>
@@ -160,6 +177,9 @@
                 </section>
 
                 <aside class="space-y-6">
+                    @if ($isStudent)
+                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" />
+                    @endif
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h2 class="font-headline text-2xl font-bold text-on-surface">Account Summary</h2>
                         <div class="mt-6 space-y-4">

@@ -9,47 +9,20 @@
                     <span class="material-symbols-outlined text-4xl text-primary">school</span>
                 </div>
                 <h1 class="mb-2 font-headline text-4xl font-extrabold tracking-tight text-on-background">AI-PGAALS</h1>
-                <p class="font-medium text-on-surface-variant">Welcome back to your learning journey.</p>
+                <p class="font-medium text-on-surface-variant">One sign in for students, teachers, and administrators.</p>
             </div>
 
-            <div class="glass-panel rounded-xl border border-white/40 p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" x-data="{ showPassword: false, role: '{{ old('role', 'student') }}' }">
+            <div class="glass-panel rounded-xl border border-white/40 p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" x-data="{ showPassword: false }">
                 <x-auth-session-status class="mb-5 rounded-lg bg-secondary-container/40 px-4 py-3 text-sm font-medium text-on-secondary-container" :status="session('status')" />
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-6">
                     @csrf
 
-                    <input type="hidden" name="role" x-model="role">
-
-                    <div class="mb-4 grid grid-cols-1 gap-3 rounded-lg bg-surface-container-low p-1 sm:grid-cols-3">
-                        <button
-                            class="flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-all active:scale-95"
-                            type="button"
-                            :class="role === 'admin' ? 'bg-surface-container-lowest font-bold text-primary shadow-sm' : 'font-medium text-on-surface-variant hover:bg-surface-container-high/50'"
-                            @click="role = 'admin'"
-                        >
-                            <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
-                            <span>Admin</span>
-                        </button>
-                        <button
-                            class="flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-all active:scale-95"
-                            type="button"
-                            :class="role === 'student' ? 'bg-surface-container-lowest font-bold text-primary shadow-sm' : 'font-medium text-on-surface-variant hover:bg-surface-container-high/50'"
-                            @click="role = 'student'"
-                        >
-                            <span class="material-symbols-outlined text-xl">face</span>
-                            <span>Student</span>
-                        </button>
-                        <button
-                            class="flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-all active:scale-95"
-                            type="button"
-                            :class="role === 'teacher' ? 'bg-surface-container-lowest font-bold text-primary shadow-sm' : 'font-medium text-on-surface-variant hover:bg-surface-container-high/50'"
-                            @click="role = 'teacher'"
-                        >
-                            <span class="material-symbols-outlined text-xl">workspace_premium</span>
-                            <span>Teacher</span>
-                        </button>
+                    <div class="flex justify-center py-2">
+                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl shadow-slate-300/50 ring-1 ring-outline-variant/10">
+                            <x-application-logo class="h-11 w-11 text-primary" />
+                        </div>
                     </div>
-                    <x-input-error :messages="$errors->get('role')" class="mt-2 text-sm text-error" />
 
                     <div class="space-y-2">
                         <label class="ml-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="email">Email Address</label>
@@ -86,7 +59,7 @@
                                 x-bind:type="showPassword ? 'text' : 'password'"
                                 required
                                 autocomplete="current-password"
-                                placeholder="••••••••"
+                                placeholder="Password"
                                 class="auth-input"
                             >
                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
@@ -114,7 +87,7 @@
                     </div>
 
                     <button class="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container py-5 text-lg font-bold text-on-primary shadow-lg transition-all hover:shadow-primary/20 active:scale-[0.98]" type="submit">
-                        <span>Sign In to Dashboard</span>
+                        <span>Sign In</span>
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </form>

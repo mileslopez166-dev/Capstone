@@ -84,6 +84,32 @@ class AdminDashboardTest extends TestCase
             'approved_by' => $admin->id,
         ]);
     }
+    public function test_admin_can_create_a_student_with_avatar_style(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'first_name' => 'Created',
+            'middle_name' => '',
+            'last_name' => 'Student',
+            'email' => 'created.student@example.com',
+            'role' => 'student',
+            'section' => 'Section A',
+            'gender' => 'male',
+            'approval_status' => 'approved',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard').'#user-management');
+        $this->assertDatabaseHas('users', [
+            'name' => 'Created Student',
+            'email' => 'created.student@example.com',
+            'role' => 'student',
+            'gender' => 'male',
+            'approval_status' => 'approved',
+        ]);
+    }
 
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void
     {

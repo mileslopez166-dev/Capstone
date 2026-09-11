@@ -108,7 +108,7 @@
                                         @foreach ([
                                             ['value' => 'multiple_choice', 'icon' => 'checklist', 'label' => 'Multiple Choice'],
                                             ['value' => 'data_egg', 'icon' => 'egg_alt', 'label' => 'Interactive Egg'],
-                                            ['value' => 'flashcards', 'icon' => 'style', 'label' => 'Flashcards'],
+                                            ['value' => 'flashcards', 'icon' => 'pest_control', 'label' => 'Frog Flashcards'],
                                         ] as $quizType)
                                             <label class="group relative cursor-pointer">
                                                 <input class="peer sr-only" name="quiz_type" type="radio" value="{{ $quizType['value'] }}" {{ old('quiz_type', 'multiple_choice') === $quizType['value'] ? 'checked' : '' }}>
@@ -228,6 +228,21 @@
                                                 @enderror
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="rounded-lg border border-dashed border-outline-variant/30 bg-surface p-5" id="question-upload-panel">
+                                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                            <div>
+                                                <h3 class="font-headline text-lg font-bold text-on-surface">Import Questions from TXT</h3>
+                                                <p class="text-sm text-on-surface-variant">Use Question:, A-D answers, and Correct Answer: A. Imported questions stay editable.</p>
+                                            </div>
+                                            <label class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-surface-container-high px-5 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary">
+                                                <span class="material-symbols-outlined text-lg">upload_file</span>
+                                                Upload TXT
+                                                <input class="sr-only" id="question-text-file" type="file" accept=".txt,text/plain">
+                                            </label>
+                                        </div>
+                                        <p class="mt-3 hidden text-sm font-medium" id="question-import-status"></p>
                                     </div>
 
                                     <div id="manual-questions" class="space-y-4">
@@ -460,6 +475,9 @@
         const focusChoices = document.querySelectorAll('[data-focus-choice]');
         const manualQuestions = document.getElementById('manual-questions');
         const addQuestionButton = document.getElementById('add-question-button');
+        const questionUploadPanel = document.getElementById('question-upload-panel');
+        const questionTextFile = document.getElementById('question-text-file');
+        const questionImportStatus = document.getElementById('question-import-status');
         const assessmentTypeInputs = document.querySelectorAll('input[name="assessment_type"]');
         const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
         const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
@@ -506,7 +524,16 @@
             });
         }
 
-        function questionTemplate(index) {
+        function escapeHtml(value) {
+            const element = document.createElement('textarea');
+            element.textContent = value ?? '';
+            return element.innerHTML;
+        }
+
+        function questionTemplate(index, question = {}) {
+            const answers = question.answers || {};
+            const correctAnswer = ['A', 'B', 'C', 'D'].includes(question.correct_answer) ? question.correct_answer : 'A';
+
             return `
                 <div class="manual-question-card rounded-lg border border-outline-variant/20 bg-surface p-6" data-question-card>
                     <div class="mb-4 flex items-center gap-4">
@@ -522,37 +549,104 @@
                     <div class="space-y-4">
                         <div>
                             <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Question</label>
-                            <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][question]" rows="3" placeholder="Type the question here..."></textarea>
+                            <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][question]" rows="3" placeholder="Type the question here...">${escapeHtml(question.question || '')}</textarea>
                         </div>
                         <div class="grid gap-3 sm:grid-cols-2">
                             ${['A', 'B', 'C', 'D'].map((answer) => `
                                 <div>
                                     <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Answer ${answer}</label>
-                                    <input class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][answers][${answer}]" type="text" placeholder="Option ${answer}">
+                                    <input class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][answers][${answer}]" type="text" value="${escapeHtml(answers[answer] || '')}" placeholder="Option ${answer}">
                                 </div>
                             `).join('')}
                         </div>
                         <div>
                             <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Correct Answer</label>
                             <select class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][correct_answer]">
-                                ${['A', 'B', 'C', 'D'].map((answer) => `<option value="${answer}">Answer ${answer}</option>`).join('')}
+                                ${['A', 'B', 'C', 'D'].map((answer) => `<option value="${answer}" ${correctAnswer === answer ? 'selected' : ''}>Answer ${answer}</option>`).join('')}
                             </select>
                         </div>
                     </div>
                 </div>
             `;
         }
-
         function toggleQuestionBuilder() {
             const selectedType = document.querySelector('input[name="assessment_type"]:checked')?.value || 'silent_reading';
             const isOralReading = selectedType === 'oral_reading';
             manualQuestions.classList.toggle('hidden', isOralReading);
             addQuestionButton.classList.toggle('hidden', isOralReading);
+            questionUploadPanel.classList.toggle('hidden', isOralReading);
+            questionTextFile.disabled = isOralReading;
             manualQuestions.querySelectorAll('input, textarea, select, button').forEach((field) => {
                 field.disabled = isOralReading;
             });
         }
 
+        function setQuestionImportStatus(message, isError = false) {
+            questionImportStatus.textContent = message;
+            questionImportStatus.classList.remove('hidden', 'text-error', 'text-secondary-dim');
+            questionImportStatus.classList.add(isError ? 'text-error' : 'text-secondary-dim');
+        }
+
+        function isCompleteImportedQuestion(question) {
+            return question.question
+                && ['A', 'B', 'C', 'D'].every((answer) => question.answers[answer])
+                && ['A', 'B', 'C', 'D'].includes(question.correct_answer);
+        }
+
+        function parseImportedQuestions(content) {
+            const questions = [];
+            let currentQuestion = null;
+
+            const pushCurrentQuestion = () => {
+                if (currentQuestion && isCompleteImportedQuestion(currentQuestion)) {
+                    questions.push(currentQuestion);
+                }
+            };
+
+            content
+                .replace(/\r\n/g, '\n')
+                .replace(/\r/g, '\n')
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .forEach((line) => {
+                    const questionMatch = line.match(/^question\s*(?:\d+)?\s*[:.-]\s*(.+)$/i);
+                    const answerMatch = line.match(/^([A-D])[\).:-]\s*(.+)$/i);
+                    const correctAnswerMatch = line.match(/^(?:correct\s+)?answer\s*[:.-]\s*([A-D])\b/i);
+
+                    if (questionMatch) {
+                        pushCurrentQuestion();
+                        currentQuestion = {
+                            question: questionMatch[1].trim(),
+                            answers: {},
+                            correct_answer: 'A',
+                        };
+                        return;
+                    }
+
+                    if (! currentQuestion) {
+                        currentQuestion = {
+                            question: line,
+                            answers: {},
+                            correct_answer: 'A',
+                        };
+                        return;
+                    }
+
+                    if (answerMatch) {
+                        currentQuestion.answers[answerMatch[1].toUpperCase()] = answerMatch[2].trim();
+                        return;
+                    }
+
+                    if (correctAnswerMatch) {
+                        currentQuestion.correct_answer = correctAnswerMatch[1].toUpperCase();
+                    }
+                });
+
+            pushCurrentQuestion();
+
+            return questions;
+        }
         function renumberQuestions() {
             manualQuestions.querySelectorAll('[data-question-card]').forEach((card, index) => {
                 card.querySelector('.question-number').textContent = `Q${index + 1}`;
@@ -584,6 +678,35 @@
             const index = manualQuestions.querySelectorAll('[data-question-card]').length;
             manualQuestions.insertAdjacentHTML('beforeend', questionTemplate(index));
             renumberQuestions();
+        });
+        questionTextFile.addEventListener('change', async () => {
+            const file = questionTextFile.files?.[0];
+
+            if (! file) {
+                return;
+            }
+
+            if (! file.name.toLowerCase().endsWith('.txt') && file.type !== 'text/plain') {
+                setQuestionImportStatus('Please upload a plain .txt file.', true);
+                questionTextFile.value = '';
+                return;
+            }
+
+            const importedQuestions = parseImportedQuestions(await file.text());
+
+            if (importedQuestions.length === 0) {
+                setQuestionImportStatus('No complete questions found. Use Question:, A-D options, and Correct Answer: A.', true);
+                questionTextFile.value = '';
+                return;
+            }
+
+            manualQuestions.innerHTML = importedQuestions
+                .map((question, index) => questionTemplate(index, question))
+                .join('');
+            renumberQuestions();
+            toggleQuestionBuilder();
+            setQuestionImportStatus(`${importedQuestions.length} question${importedQuestions.length === 1 ? '' : 's'} imported. You can still edit them before saving.`);
+            questionTextFile.value = '';
         });
         manualQuestions.addEventListener('click', (event) => {
             const button = event.target.closest('.remove-question');

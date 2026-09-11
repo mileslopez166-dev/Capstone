@@ -28,6 +28,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'role' => 'student',
             'section' => fake()->randomElement(['Grade 6-A', 'Grade 6-B', 'Grade 6-C']),
+            'gender' => fake()->randomElement(['male', 'female']),
             'approval_status' => 'approved',
             'approved_at' => now(),
             'email_verified_at' => now(),

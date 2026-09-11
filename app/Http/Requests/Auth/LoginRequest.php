@@ -31,7 +31,6 @@ class LoginRequest extends FormRequest
     {
         return [
             'email' => ['required', 'string', 'email'],
-            'role' => ['required', 'string', 'in:admin,student,teacher'],
             'password' => ['required', 'string'],
         ];
     }
@@ -49,20 +48,7 @@ class LoginRequest extends FormRequest
         $email = $this->string('email')->toString();
         $password = $this->string('password')->toString();
         $remember = $this->boolean('remember');
-
-        // First, check if the user is an admin trying to log in.
         $user = User::where('email', $email)->first();
-
-        // DEBUG: If you are still having issues, uncomment the following line to inspect the user data.
-        // if ($user && $email === 'admin@aipgaals.com') {
-        //     dd($user->toArray(), $user->isAdmin(), Hash::check($password, $user->password));
-        // }
-
-        if ($user && $user->isAdmin() && Hash::check($password, $user->password)) {
-            Auth::login($user, $remember);
-            RateLimiter::clear($this->throttleKey());
-            return;
-        }
 
         if ($user && ! $user->isAdmin() && ! $user->isApproved() && Hash::check($password, $user->password)) {
             $roleLabel = $user->isTeacher() ? 'teacher' : 'student';
@@ -75,28 +61,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        $selectedRole = $this->string('role')->toString();
-
-        // Repair legacy accounts that predate role enforcement by adopting the selected role on login.
-        if ($user && blank($user->role) && Hash::check($password, $user->password)) {
-            $user->forceFill(['role' => $selectedRole])->save();
-            Auth::login($user, $remember);
-            RateLimiter::clear($this->throttleKey());
-            return;
-        }
-
-        // If not an admin, proceed with role-based authentication.
-        $credentials = [
+        if (! Auth::attempt([
             'email' => $email,
             'password' => $password,
-            'role' => $selectedRole,
-        ];
-
-        if (! Auth::attempt($credentials, $remember)) {
+        ], $remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'These credentials do not match the selected account type.',
+                'email' => 'These credentials do not match our records.',
             ]);
         }
 

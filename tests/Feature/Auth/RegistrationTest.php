@@ -50,6 +50,7 @@ class RegistrationTest extends TestCase
             'email' => 'student@example.com',
             'role' => 'student',
             'section' => 'Section B',
+            'gender' => 'female',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -61,6 +62,7 @@ class RegistrationTest extends TestCase
             'name' => 'Student User',
             'email' => 'student@example.com',
             'role' => 'student',
+            'gender' => 'female',
             'approval_status' => 'pending',
         ]);
     }

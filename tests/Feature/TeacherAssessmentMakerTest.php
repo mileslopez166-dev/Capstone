@@ -20,6 +20,9 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Create New Assessment');
         $response->assertSeeText('No assessments yet');
+        $response->assertSeeText('Import Questions from TXT');
+        $response->assertSee('question-text-file');
+        $response->assertSeeText('Frog Flashcards');
     }
 
     public function test_teacher_can_create_a_literacy_assessment(): void

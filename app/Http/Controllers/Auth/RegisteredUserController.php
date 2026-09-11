@@ -35,12 +35,14 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:student,teacher'],
             'section' => ['required_if:role,teacher', 'nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'gender' => ['required_if:role,student', 'nullable', 'string', Rule::in(['male', 'female'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             'first_name.not_regex' => 'The first name must not contain numbers.',
             'middle_name.not_regex' => 'The middle name must not contain numbers.',
             'last_name.not_regex' => 'The last name must not contain numbers.',
             'section.required_if' => 'Please choose the section you are assigned to.',
+            'gender.required_if' => 'Please choose the student avatar style.',
         ]);
 
         $selectedRole = $request->role;
@@ -60,6 +62,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'role' => $selectedRole,
             'section' => $selectedRole === 'teacher' ? $request->section : null,
+            'gender' => $selectedRole === 'student' ? $request->gender : null,
             'teacher_token' => null,
             'approval_status' => $requiresApproval ? 'pending' : 'approved',
             'approved_at' => $requiresApproval ? null : now(),
