@@ -4,11 +4,15 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TokenRequestController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\AssessmentRetakeRequestController;
+use App\Http\Controllers\Teacher\StudentController;
 use App\Models\User;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
+use App\Models\AssessmentRetakeRequest;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -166,10 +170,18 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
 
+    $retakeAllowances = AssessmentRetakeRequest::query()
+        ->where('user_id', $student->id)
+        ->where('status', 'approved')
+        ->where('remaining_tries', '>', 0)
+        ->pluck('remaining_tries', 'assessment_id');
+
     $pendingAssessments = $visibleAssessmentsForStudent($student)
-        ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $student->id))
+        ->withCount(['submissions as student_attempts_count' => fn ($query) => $query->where('user_id', $student->id)])
         ->latest()
-        ->get();
+        ->get()
+        ->filter(fn (Assessment $assessment): bool => $assessment->student_attempts_count === 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
+        ->values();
 
     $submissions = AssessmentSubmission::query()
         ->with('assessment')
@@ -191,17 +203,52 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
     ]);
 })->middleware(['auth', 'verified'])->name('student.dashboard');
 
-Route::get('/student/activities', function () use ($visibleAssessmentsForStudent) {
+Route::get('/student/activities', function () use ($visibleAssessmentsForStudent, $submissionAccuracy) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
 
-    $pendingAssessments = $visibleAssessmentsForStudent($student)
-        ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $student->id))
+    $retakeAllowances = AssessmentRetakeRequest::query()
+        ->where('user_id', $student->id)
+        ->where('status', 'approved')
+        ->where('remaining_tries', '>', 0)
+        ->pluck('remaining_tries', 'assessment_id');
+
+    $latestRequests = AssessmentRetakeRequest::query()
+        ->where('user_id', $student->id)
+        ->latest()
+        ->get()
+        ->unique('assessment_id')
+        ->keyBy('assessment_id');
+
+    $visibleAssessments = $visibleAssessmentsForStudent($student)
+        ->withCount(['submissions as student_attempts_count' => fn ($query) => $query->where('user_id', $student->id)])
         ->latest()
         ->get();
 
+    $pendingAssessments = $visibleAssessments
+        ->filter(fn (Assessment $assessment): bool => $assessment->student_attempts_count === 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
+        ->values();
+
+    $completedSubmissions = AssessmentSubmission::query()
+        ->with('assessment')
+        ->where('user_id', $student->id)
+        ->latest('submitted_at')
+        ->get()
+        ->groupBy('assessment_id')
+        ->map(function ($attempts) use ($submissionAccuracy, $retakeAllowances, $latestRequests) {
+            $latestAttempt = $attempts->first();
+            $latestAttempt->attempts_count = $attempts->count();
+            $latestAttempt->accuracy = $submissionAccuracy($latestAttempt);
+            $latestAttempt->remaining_retake_tries = (int) ($retakeAllowances[$latestAttempt->assessment_id] ?? 0);
+            $latestAttempt->latest_retake_request = $latestRequests[$latestAttempt->assessment_id] ?? null;
+
+            return $latestAttempt;
+        })
+        ->values();
+
     return view('student.activities', [
         'pendingAssessments' => $pendingAssessments,
+        'completedSubmissions' => $completedSubmissions,
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');
 
@@ -213,6 +260,18 @@ Route::get('/student/assessments/{assessment}', function (Assessment $assessment
     $targetSection = $studentTargetSection($student);
     abort_unless(in_array($assessment->target_section, ['all', null], true) || ($targetSection && $assessment->target_section === $targetSection), 404);
 
+    $attemptCount = AssessmentSubmission::query()
+        ->where('assessment_id', $assessment->id)
+        ->where('user_id', $student->id)
+        ->count();
+    $remainingRetakeTries = (int) AssessmentRetakeRequest::query()
+        ->where('assessment_id', $assessment->id)
+        ->where('user_id', $student->id)
+        ->where('status', 'approved')
+        ->sum('remaining_tries');
+
+    abort_unless($attemptCount === 0 || $remainingRetakeTries > 0, 403, 'Ask your teacher for a retake token before answering again.');
+
     return view('student.assessment', [
         'assessment' => $assessment,
     ]);
@@ -220,6 +279,9 @@ Route::get('/student/assessments/{assessment}', function (Assessment $assessment
 Route::post('/student/assessments/{assessment}/submit', [AssessmentController::class, 'submitStudentAttempt'])
     ->middleware(['auth', 'verified'])
     ->name('student.assessments.submit');
+Route::post('/student/assessments/{assessment}/retake-request', [AssessmentRetakeRequestController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('student.assessments.retake-request');
 
 
 Route::get('/student/rewards', function () use ($submissionAccuracy) {
@@ -253,16 +315,24 @@ Route::get('/teacher/students', function () use ($submissionAccuracy) {
         ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
         ->get();
 
+    $activeStudentIds = DB::table('sessions')
+        ->whereNotNull('user_id')
+        ->where('last_activity', '>=', now()->subMinutes((int) config('session.lifetime', 120))->timestamp)
+        ->pluck('user_id')
+        ->map(fn ($id): int => (int) $id)
+        ->all();
+
     $students = User::query()
         ->where('role', 'student')
         ->orderBy('name')
         ->get()
-        ->map(function (User $student) use ($teacherSubmissions, $submissionAccuracy): User {
+        ->map(function (User $student) use ($teacherSubmissions, $submissionAccuracy, $activeStudentIds): User {
             $studentSubmissions = $teacherSubmissions->where('user_id', $student->id);
             $student->completed_assessments_count = $studentSubmissions->count();
             $student->average_accuracy = $studentSubmissions->isNotEmpty()
                 ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
                 : null;
+            $student->is_online = in_array($student->id, $activeStudentIds, true);
 
             return $student;
         });
@@ -271,6 +341,10 @@ Route::get('/teacher/students', function () use ($submissionAccuracy) {
         'students' => $students,
     ]);
 })->middleware(['auth', 'verified'])->name('students.index');
+
+Route::post('/teacher/students', [StudentController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.store');
 
 Route::get('/teacher/students/{student}', function (User $student) use ($submissionAccuracy) {
     $teacher = auth()->user();
@@ -290,6 +364,18 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
         'total_points' => (int) $submissions->sum('points'),
     ];
 
+    $studentIsOnline = DB::table('sessions')
+        ->where('user_id', $student->id)
+        ->where('last_activity', '>=', now()->subMinutes((int) config('session.lifetime', 120))->timestamp)
+        ->exists();
+
+    $assessmentRequests = AssessmentRetakeRequest::query()
+        ->with('assessment')
+        ->where('user_id', $student->id)
+        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->latest()
+        ->get();
+
     $subjectBreakdown = collect(['literacy' => 'Literacy', 'numeracy' => 'Numeracy'])
         ->map(function (string $label, string $subject) use ($submissions, $submissionAccuracy): array {
             $subjectSubmissions = $submissions->filter(fn ($submission): bool => ($submission->assessment?->subject ?? null) === $subject);
@@ -307,8 +393,17 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
         'submissions' => $submissions,
         'studentMetrics' => $studentMetrics,
         'subjectBreakdown' => $subjectBreakdown,
+        'studentIsOnline' => $studentIsOnline,
+        'assessmentRequests' => $assessmentRequests,
     ]);
 })->middleware(['auth', 'verified'])->name('students.show');
+Route::post('/teacher/students/{student}/assessment-requests/{retakeRequest}/approve', [AssessmentRetakeRequestController::class, 'approve'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.assessment-requests.approve');
+
+Route::post('/teacher/students/{student}/assessment-requests/{retakeRequest}/decline', [AssessmentRetakeRequestController::class, 'decline'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.assessment-requests.decline');
 
 Route::get('/teacher/reports', function () use ($submissionAccuracy) {
     $teacher = auth()->user();

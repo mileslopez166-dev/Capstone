@@ -3,13 +3,14 @@
     'name' => null,
     'size' => 'md',
     'showCard' => false,
+    'isOnline' => false,
 ])
 
 @php
     $genderValue = strtolower((string) $gender);
     $isGirl = in_array($genderValue, ['female', 'girl'], true);
     $characterName = $isGirl ? 'Lyra Vale' : 'Nova Finch';
-    $roleName = $isGirl ? 'Bright Ideas' : 'Neon Courier';
+    $onlineStatusLabel = $isOnline ? 'Online' : 'Offline';
     $sizeClasses = match ($size) {
         'sm' => 'h-16 w-16',
         'lg' => 'h-36 w-36 sm:h-44 sm:w-44',
@@ -27,7 +28,7 @@
                 <p class="font-label text-[9px] font-black uppercase tracking-[0.22em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Pixel Avatar</p>
                 <p class="mt-1 font-headline text-xl font-black tracking-tight text-white">{{ $characterName }}</p>
             </div>
-            <span class="rounded-sm border px-2 py-1 font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isGirl ? 'border-pink-400/40 text-pink-200' : 'border-cyan-400/40 text-cyan-200' }}">Ready</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isOnline ? 'border-emerald-300/40 text-emerald-200' : 'border-slate-300/30 text-slate-300' }}"><span class="h-1.5 w-1.5 rounded-full {{ $isOnline ? 'bg-emerald-300' : 'bg-slate-400' }}"></span>{{ $onlineStatusLabel }}</span>
         </div>
     @endif
 
@@ -62,15 +63,9 @@
     </div>
 
     @if ($showCard)
-        <div class="mt-4 grid grid-cols-2 gap-3 border-t pt-3 {{ $isGirl ? 'border-fuchsia-200/10' : 'border-cyan-200/10' }}">
-            <div>
-                <p class="font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Student</p>
-                <p class="truncate text-sm font-bold text-white">{{ $name ?: 'Student' }}</p>
-            </div>
-            <div class="text-right">
-                <p class="font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Style</p>
-                <p class="text-sm font-bold text-white">{{ $roleName }}</p>
-            </div>
+        <div class="mt-4 border-t pt-3 {{ $isGirl ? 'border-fuchsia-200/10' : 'border-cyan-200/10' }}">
+            <p class="font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Student</p>
+            <p class="truncate text-sm font-bold text-white">{{ $name ?: 'Student' }}</p>
         </div>
     @endif
 </div>

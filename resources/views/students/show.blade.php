@@ -14,7 +14,7 @@
         <div class="flex min-h-screen">
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="students" />
 
-            <main class="flex-1 p-4 md:p-8 lg:ml-64 lg:p-12">
+            <main class="flex-1 p-4 md:p-8 lg:ml-72 lg:p-12">
                 <section class="mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
                     <div class="lg:col-span-8">
                         <a class="mb-4 flex items-center gap-2 font-bold text-primary" href="{{ route('dashboard') }}">
@@ -31,7 +31,16 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end lg:col-span-4">
+                    <div class="flex flex-col gap-4 lg:col-span-4">
+                        <x-student-pixel-avatar
+                            :gender="$student->gender"
+                            :name="$student->name"
+                            size="lg"
+                            :show-card="true"
+                            :is-online="$studentIsOnline ?? false"
+                            class="w-full"
+                        />
+
                         <div class="w-full rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Student Progress</p>
                             <div class="flex items-baseline gap-2">
@@ -89,6 +98,59 @@
                     </div>
                 </section>
 
+
+                <section class="mt-8 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                    <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                        <div>
+                            <h2 class="font-headline text-2xl font-bold">Assessment Requests</h2>
+                            <p class="mt-1 text-sm text-on-surface-variant">Approve retake tokens and set how many tries this student can use.</p>
+                        </div>
+                    </div>
+
+                    @if (($assessmentRequests ?? collect())->isEmpty())
+                        <div class="rounded-xl bg-surface-container-low p-6 text-center">
+                            <span class="material-symbols-outlined text-5xl text-outline-variant">lock_reset</span>
+                            <p class="mt-3 font-headline text-xl font-bold text-on-surface">No retake requests</p>
+                            <p class="mt-2 text-sm text-on-surface-variant">When this student asks to take an assessment again, the request will appear here.</p>
+                        </div>
+                    @else
+                        <div class="space-y-3">
+                            @foreach ($assessmentRequests as $requestItem)
+                                <div class="rounded-xl border border-outline-variant/10 bg-surface-container-low p-4">
+                                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                        <div>
+                                            <p class="font-headline text-lg font-bold text-on-surface">{{ $requestItem->assessment?->title ?? 'Assessment' }}</p>
+                                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                                                {{ ucfirst($requestItem->status) }} | Requested {{ $requestItem->requested_tries }} {{ Str::plural('try', $requestItem->requested_tries) }}
+                                                @if ($requestItem->status === 'approved')
+                                                    | {{ $requestItem->remaining_tries }} remaining
+                                                @endif
+                                            </p>
+                                            @if ($requestItem->message)
+                                                <p class="mt-2 text-sm text-on-surface-variant">{{ $requestItem->message }}</p>
+                                            @endif
+                                        </div>
+
+                                        @if ($requestItem->status === 'pending')
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                                <form class="flex items-center gap-2" method="POST" action="{{ route('students.assessment-requests.approve', [$student, $requestItem]) }}">
+                                                    @csrf
+                                                    <label class="sr-only" for="approved-tries-{{ $requestItem->id }}">Allowed tries</label>
+                                                    <input class="w-20 rounded-sm border-none bg-white px-3 py-2 text-sm font-bold text-on-surface shadow-inner focus:ring-2 focus:ring-primary" id="approved-tries-{{ $requestItem->id }}" name="approved_tries" type="number" min="1" max="10" value="{{ $requestItem->requested_tries }}">
+                                                    <button class="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary" type="submit">Approve</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('students.assessment-requests.decline', [$student, $requestItem]) }}">
+                                                    @csrf
+                                                    <button class="rounded-lg bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface-variant" type="submit">Decline</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <div class="space-y-6 lg:col-span-2">
                         <div class="mb-2 flex items-center justify-between">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
+use App\Models\AssessmentRetakeRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -148,6 +149,9 @@ class AssessmentController extends Controller
         abort_unless($request->user()?->isStudent(), 403);
         abort_unless($assessment->status === 'published', 404);
 
+        $targetSection = $request->user()->section ? strtolower(str_replace(' ', '_', $request->user()->section)) : null;
+        abort_unless(in_array($assessment->target_section, ['all', null], true) || ($targetSection && $assessment->target_section === $targetSection), 404);
+
         $validated = $request->validate([
             'answers' => ['required', 'array'],
             'answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
@@ -167,23 +171,43 @@ class AssessmentController extends Controller
         $pointsPerQuestion = 250;
         $points = $correctCount * $pointsPerQuestion;
         $possiblePoints = $questionCount * $pointsPerQuestion;
+        $studentId = $request->user()->id;
+        $previousAttempts = AssessmentSubmission::query()
+            ->where('assessment_id', $assessment->id)
+            ->where('user_id', $studentId)
+            ->count();
+        $retakeToken = null;
 
-        AssessmentSubmission::query()->updateOrCreate(
-            [
-                'assessment_id' => $assessment->id,
-                'user_id' => $request->user()->id,
-            ],
-            [
-                'answers' => $answers->all(),
-                'correct_count' => $correctCount,
-                'question_count' => $questionCount,
-                'points' => $points,
-                'possible_points' => $possiblePoints,
-                'submitted_at' => now(),
-            ]
-        );
+        if ($previousAttempts > 0) {
+            $retakeToken = AssessmentRetakeRequest::query()
+                ->where('assessment_id', $assessment->id)
+                ->where('user_id', $studentId)
+                ->where('status', 'approved')
+                ->where('remaining_tries', '>', 0)
+                ->oldest('decided_at')
+                ->first();
+
+            abort_unless($retakeToken, 403, 'A teacher-approved retake token is required.');
+        }
+
+        $submission = AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $studentId,
+            'attempt_number' => $previousAttempts + 1,
+            'answers' => $answers->all(),
+            'correct_count' => $correctCount,
+            'question_count' => $questionCount,
+            'points' => $points,
+            'possible_points' => $possiblePoints,
+            'submitted_at' => now(),
+        ]);
+
+        if ($retakeToken) {
+            $retakeToken->decrement('remaining_tries');
+        }
 
         return response()->json([
+            'attempt_number' => $submission->attempt_number,
             'correct_count' => $correctCount,
             'question_count' => $questionCount,
             'points' => $points,

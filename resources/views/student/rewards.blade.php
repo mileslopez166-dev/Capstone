@@ -11,7 +11,8 @@
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface">
         <x-student-nav active="rewards" />
 
-        <main class="relative mx-auto max-w-6xl px-4 pb-32 pt-8 md:pt-16">
+        <main class="relative min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
+            <div class="mx-auto max-w-7xl">
             <div class="pointer-events-none absolute inset-0 opacity-15" style="background-image: radial-gradient(circle, #44a5ff 10%, transparent 10.5%), radial-gradient(circle, #ffeb3b 10%, transparent 10.5%), radial-gradient(circle, #91f78e 10%, transparent 10.5%); background-size: 40px 40px, 60px 60px, 50px 50px; background-position: 0 0, 20px 30px, 40px 10px;"></div>
 
             <section class="relative z-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
@@ -92,6 +93,7 @@
                     </div>
                 </div>
             </section>
+            </div>
         </main>
 
     </div>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
+use App\Models\AssessmentRetakeRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -69,6 +70,68 @@ class StudentAssessmentSubmissionTest extends TestCase
             'possible_points' => 500,
         ]);
     }
+
+    public function test_student_needs_teacher_token_before_taking_assessment_again(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Retake Reading Check',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'focus_areas' => ['Reading Fluency'],
+            'instructions' => 'Choose carefully.',
+            'status' => 'published',
+            'manual_questions' => [
+                [
+                    'question' => 'Choose the synonym for fast.',
+                    'answers' => ['A' => 'Quick', 'B' => 'Slow', 'C' => 'Late', 'D' => 'Still'],
+                    'correct_answer' => 'A',
+                ],
+            ],
+        ]);
+
+        $this->actingAs($student)
+            ->postJson(route('student.assessments.submit', $assessment), ['answers' => [0 => 'A']])
+            ->assertOk()
+            ->assertJson(['attempt_number' => 1]);
+
+        $this->actingAs($student)
+            ->postJson(route('student.assessments.submit', $assessment), ['answers' => [0 => 'A']])
+            ->assertForbidden();
+
+        $this->actingAs($student)
+            ->post(route('student.assessments.retake-request', $assessment), [
+                'requested_tries' => 2,
+                'message' => 'I want to improve my score.',
+            ])
+            ->assertRedirect();
+
+        $retakeRequest = AssessmentRetakeRequest::query()->firstOrFail();
+
+        $this->actingAs($teacher)
+            ->post(route('students.assessment-requests.approve', [$student, $retakeRequest]), [
+                'approved_tries' => 2,
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($student)
+            ->postJson(route('student.assessments.submit', $assessment), ['answers' => [0 => 'A']])
+            ->assertOk()
+            ->assertJson(['attempt_number' => 2]);
+
+        $this->assertDatabaseCount('assessment_submissions', 2);
+        $this->assertDatabaseHas('assessment_retake_requests', [
+            'id' => $retakeRequest->id,
+            'status' => 'approved',
+            'approved_tries' => 2,
+            'remaining_tries' => 1,
+        ]);
+    }
     public function test_oral_reading_assessment_shows_pronunciation_legend(): void
     {
         $teacher = User::factory()->teacher()->create();
@@ -105,6 +168,7 @@ class StudentAssessmentSubmissionTest extends TestCase
 
         $this->assertSame(2, substr_count($response->getContent(), 'data-sync-scroll="oral-story">'));
     }
+
     public function test_flashcards_assessment_uses_the_frog_mosquito_game(): void
     {
         $teacher = User::factory()->teacher()->create();

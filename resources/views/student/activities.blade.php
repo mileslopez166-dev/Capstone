@@ -6,8 +6,8 @@
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface selection:bg-primary-container/30">
         <x-student-nav active="activities" />
 
-        <main class="min-h-screen px-4 pb-32 pt-6 md:px-0">
-            <div class="mx-auto max-w-5xl space-y-8">
+        <main class="min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
+            <div class="mx-auto max-w-7xl space-y-8">
                 <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-dim">Assessment Queue</p>
@@ -136,6 +136,80 @@
                     @endif
                 </section>
 
+                <section class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                    <div class="mb-6">
+                        <h3 class="font-headline text-3xl font-bold text-on-surface">Recorded Outputs</h3>
+                        <p class="mt-2 text-on-surface-variant">Review your saved assessment scores, request a retake token, or take again when your teacher has allowed more tries.</p>
+                    </div>
+
+                    @if (($completedSubmissions ?? collect())->isEmpty())
+                        <div class="rounded-xl bg-surface-container-low p-6 text-center">
+                            <span class="material-symbols-outlined text-5xl text-outline-variant">history</span>
+                            <p class="mt-3 font-headline text-xl font-bold text-on-surface">No recorded outputs yet</p>
+                            <p class="mt-2 text-sm text-on-surface-variant">Your completed assessment output will appear here after you submit your first activity.</p>
+                        </div>
+                    @else
+                        <div class="space-y-4">
+                            @foreach ($completedSubmissions as $submission)
+                                @php
+                                    $assessment = $submission->assessment;
+                                    $requestStatus = $submission->latest_retake_request?->status;
+                                @endphp
+                                <div class="rounded-2xl border border-outline-variant/15 bg-white p-5 shadow-[0_20px_55px_rgba(0,94,159,0.06)]">
+                                    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                                        <div>
+                                            <div class="mb-3 flex flex-wrap gap-2">
+                                                <span class="rounded-full bg-primary-container/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Recorded</span>
+                                                <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Attempt {{ $submission->attempt_number }}</span>
+                                                @if ($submission->remaining_retake_tries > 0)
+                                                    <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">{{ $submission->remaining_retake_tries }} retake {{ Str::plural('try', $submission->remaining_retake_tries) }} left</span>
+                                                @elseif ($requestStatus)
+                                                    <span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Request {{ $requestStatus }}</span>
+                                                @endif
+                                            </div>
+                                            <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment?->title ?? 'Assessment' }}</h4>
+                                            <p class="mt-2 text-sm text-on-surface-variant">Submitted {{ $submission->submitted_at?->format('M d, Y h:i A') ?? 'recently' }} | {{ $submission->attempts_count }} total {{ Str::plural('attempt', $submission->attempts_count) }}</p>
+                                        </div>
+
+                                        <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
+                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy }}%</p>
+                                            </div>
+                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-secondary-dim">{{ number_format($submission->points) }}</p>
+                                            </div>
+                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->correct_count }}/{{ $submission->question_count }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                        @if ($assessment && $submission->remaining_retake_tries > 0)
+                                            <a class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-black text-on-primary shadow-lg shadow-primary/20" href="{{ route('student.assessments.show', $assessment) }}">
+                                                Take Again
+                                                <span class="material-symbols-outlined text-lg">replay</span>
+                                            </a>
+                                        @elseif ($assessment && $requestStatus === 'pending')
+                                            <button class="cursor-not-allowed rounded-lg bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant" type="button" disabled>Waiting for Teacher Approval</button>
+                                        @elseif ($assessment)
+                                            <form class="grid w-full gap-3 sm:grid-cols-[7rem_1fr_auto]" method="POST" action="{{ route('student.assessments.retake-request', $assessment) }}">
+                                                @csrf
+                                                <label class="sr-only" for="requested-tries-{{ $submission->id }}">Requested tries</label>
+                                                <input class="rounded-sm border-none bg-surface-container-low px-3 py-3 text-sm font-bold text-on-surface shadow-inner focus:ring-2 focus:ring-primary" id="requested-tries-{{ $submission->id }}" name="requested_tries" type="number" min="1" max="10" value="1">
+                                                <input class="rounded-sm border-none bg-surface-container-low px-3 py-3 text-sm text-on-surface shadow-inner focus:ring-2 focus:ring-primary" name="message" type="text" placeholder="Message to teacher (optional)">
+                                                <button class="rounded-lg bg-surface-container-highest px-5 py-3 text-sm font-bold text-on-surface" type="submit">Request Retake Token</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
                 <section class="grid gap-6 md:grid-cols-2">
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h4 class="flex items-center gap-2 font-headline text-xl font-bold">

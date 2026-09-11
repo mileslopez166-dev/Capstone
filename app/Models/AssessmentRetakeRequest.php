@@ -6,25 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AssessmentSubmission extends Model
+class AssessmentRetakeRequest extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'assessment_id',
         'user_id',
-        'attempt_number',
-        'answers',
-        'correct_count',
-        'question_count',
-        'points',
-        'possible_points',
-        'submitted_at',
+        'teacher_id',
+        'status',
+        'requested_tries',
+        'approved_tries',
+        'remaining_tries',
+        'message',
+        'decided_at',
     ];
 
     protected $casts = [
-        'answers' => 'array',
-        'submitted_at' => 'datetime',
+        'decided_at' => 'datetime',
     ];
 
     public function assessment(): BelongsTo
@@ -35,5 +34,10 @@ class AssessmentSubmission extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function teacher(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 }

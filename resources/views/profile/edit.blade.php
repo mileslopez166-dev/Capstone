@@ -18,7 +18,8 @@
             <x-student-nav active="profile" />
         @endif
 
-        <main class="mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6">
+        <main class="{{ $isStudent ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6' }}">
+            <div class="{{ $isStudent ? 'mx-auto max-w-7xl' : '' }}">
             <div class="mb-6">
                 <a class="inline-flex items-center gap-2 rounded-xl bg-surface-container-lowest px-4 py-2.5 text-sm font-bold text-primary shadow-[0_12px_30px_rgba(0,94,159,0.06)] transition-colors hover:bg-surface-container-low active:scale-[0.98]" href="{{ $dashboardRoute }}">
                     <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -178,7 +179,7 @@
 
                 <aside class="space-y-6">
                     @if ($isStudent)
-                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" />
+                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" :is-online="true" />
                     @endif
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h2 class="font-headline text-2xl font-bold text-on-surface">Account Summary</h2>
@@ -226,6 +227,7 @@
                         </form>
                     </div>
                 </aside>
+            </div>
             </div>
         </main>
 

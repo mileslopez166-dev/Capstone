@@ -15,7 +15,8 @@
     <div class="min-h-screen bg-background font-body text-on-surface">
         <x-student-nav active="home" />
 
-        <main class="mx-auto max-w-7xl px-6 py-8 pb-32">
+        <main class="min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
+            <div class="mx-auto max-w-7xl space-y-8">
             <section class="relative mb-12 overflow-visible">
                 <div class="flex flex-col items-center justify-between gap-8 rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl md:flex-row md:p-12">
                     <div class="flex-1">
@@ -38,7 +39,7 @@
                     </div>
 
                     <div class="w-full max-w-[220px] flex-shrink-0 md:w-[220px]">
-                        <x-student-pixel-avatar :gender="$student->gender" :name="$student->name" size="lg" :show-card="true" class="bg-white/10" />
+                        <x-student-pixel-avatar :gender="$student->gender" :name="$student->name" size="lg" :show-card="true" :is-online="true" class="bg-white/10" />
                     </div>
                 </div>
             </section>
@@ -97,6 +98,7 @@
                     <p class="mt-4 font-headline text-xl font-bold text-on-surface">{{ $completedCount > 0 ? 'Real analytics connected' : 'No analytics yet' }}</p>
                     <p class="mt-2 text-sm text-on-surface-variant">{{ $completedCount > 0 ? 'Average accuracy and points are calculated from your saved assessment submissions.' : 'Charts and summaries will appear here after the system stores completed assessment data.' }}</p>
                 </div>
+            </div>
             </div>
         </main>
 
