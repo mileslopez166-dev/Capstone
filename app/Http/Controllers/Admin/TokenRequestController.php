@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\NotificationSender;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -22,11 +23,24 @@ class TokenRequestController extends Controller
         $currentWeekStart = $now->subDays(7);
         $previousWeekStart = $currentWeekStart->subDays(7);
 
+        $filters = [
+            'search' => trim((string) $request->query('search', '')),
+        ];
+
         $pendingRequests = User::query()
             ->whereIn('role', ['student', 'teacher'])
             ->where('approval_status', 'pending')
+            ->when($filters['search'] !== '', function ($query) use ($filters): void {
+                $query->where(function ($query) use ($filters): void {
+                    $query->where('name', 'like', '%'.$filters['search'].'%')
+                        ->orWhere('email', 'like', '%'.$filters['search'].'%')
+                        ->orWhere('role', 'like', '%'.$filters['search'].'%')
+                        ->orWhere('section', 'like', '%'.$filters['search'].'%');
+                });
+            })
             ->latest()
-            ->paginate(8);
+            ->paginate(8)
+            ->withQueryString();
 
         $pendingCount = User::query()
             ->whereIn('role', ['student', 'teacher'])
@@ -56,6 +70,8 @@ class TokenRequestController extends Controller
             ->where('approval_status', 'approved')
             ->count();
 
+        $searchSuggestions = $this->buildSearchSuggestions();
+
         return view('admin.token-requests', [
             'adminUser' => $adminUser,
             'adminInitials' => $this->initials($adminUser->name),
@@ -64,7 +80,36 @@ class TokenRequestController extends Controller
             'pendingTrend' => $this->buildTrend($pendingCurrentWeek, $pendingPreviousWeek),
             'approvedToday' => $approvedToday,
             'approvedAccounts' => $approvedAccounts,
+            'filters' => $filters,
+            'searchSuggestions' => $searchSuggestions,
         ]);
+    }
+
+    private function buildSearchSuggestions(): \Illuminate\Support\Collection
+    {
+        $shortcuts = collect([
+            'Student',
+            'Teacher',
+            'Section A',
+            'Section B',
+            'Section C',
+            'Pending Approvals',
+        ]);
+
+        $pendingUsers = User::query()
+            ->select(['name', 'email', 'role', 'section'])
+            ->whereIn('role', ['student', 'teacher'])
+            ->where('approval_status', 'pending')
+            ->latest()
+            ->take(15)
+            ->get()
+            ->flatMap(fn (User $user): array => [$user->name, $user->email, ucfirst($user->role), $user->section]);
+
+        return $shortcuts
+            ->concat($pendingUsers)
+            ->filter()
+            ->unique()
+            ->values();
     }
 
     public function approve(Request $request, User $user): RedirectResponse
@@ -91,6 +136,10 @@ class TokenRequestController extends Controller
         }
 
         $user->forceFill($changes)->save();
+
+        if ($user->isStudent()) {
+            NotificationSender::notifyStudentEnrolled($user, $request->user());
+        }
 
         return redirect()
             ->route('admin.token-requests.index')

@@ -9,7 +9,9 @@
     @endphp
 
     <div class="min-h-screen bg-background">
-        <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search student by name..." />
+        <div class="lg:ml-72">
+            <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search student by name..." />
+        </div>
 
         <div class="flex min-h-screen">
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="students" />

@@ -104,4 +104,43 @@ class AdminTokenRequestTest extends TestCase
             ->get(route('admin.token-requests.index'))
             ->assertForbidden();
     }
+    public function test_admin_can_search_pending_token_requests(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->teacher()->pendingApproval()->create([
+            'name' => 'Mila Santos',
+            'email' => 'mila.teacher@example.com',
+            'section' => 'Section A',
+        ]);
+        User::factory()->teacher()->pendingApproval()->create([
+            'name' => 'Noel Reyes',
+            'email' => 'noel.teacher@example.com',
+            'section' => 'Section B',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.token-requests.index', ['search' => 'mila']));
+
+        $response
+            ->assertOk()
+            ->assertSee('Mila Santos')
+            ->assertDontSee('<p class="font-medium text-on-surface">Noel Reyes</p>', false)
+            ->assertSee('Showing matches for "mila"', false);
+    }
+    public function test_token_request_search_shows_possible_options(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->teacher()->pendingApproval()->create([
+            'name' => 'Lyra Vale',
+            'email' => 'lyra.teacher@example.com',
+            'section' => 'Section C',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.token-requests.index'))
+            ->assertOk()
+            ->assertSee('token-search-suggestions')
+            ->assertSee('Lyra Vale')
+            ->assertSee('lyra.teacher@example.com')
+            ->assertSee('Section C');
+    }
 }

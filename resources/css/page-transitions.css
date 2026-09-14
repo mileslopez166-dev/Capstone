@@ -1,0 +1,55 @@
+@view-transition {
+    navigation: auto;
+}
+
+:root {
+    --page-transition-duration: 260ms;
+    --page-transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keep the previous page visible until the new content has faded in. */
+::view-transition-group(*) {
+    animation-duration: var(--page-transition-duration);
+    animation-timing-function: var(--page-transition-ease);
+}
+
+::view-transition-old(root) {
+    animation: none;
+}
+
+::view-transition-new(root) {
+    animation: page-arrive var(--page-transition-duration) var(--page-transition-ease) both;
+    mix-blend-mode: normal;
+}
+
+.campus-student .campus-sidebar { view-transition-name: student-sidebar; }
+.campus-student .campus-topbar { view-transition-name: student-topbar; }
+.campus-student .campus-bottom-nav { view-transition-name: student-bottom-nav; }
+.teacher-theme .campus-sidebar { view-transition-name: teacher-sidebar; }
+.teacher-theme .campus-topbar { view-transition-name: teacher-topbar; }
+.admin-theme .admin-sidebar { view-transition-name: admin-sidebar; }
+.admin-theme .admin-topbar { view-transition-name: admin-topbar; }
+
+@keyframes page-arrive {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
+    }
+
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

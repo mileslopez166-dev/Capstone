@@ -202,6 +202,7 @@ class DashboardController extends Controller
             ->withQueryString();
 
         $sections = collect(['Section A', 'Section B', 'Section C']);
+        $searchSuggestions = $this->buildSearchSuggestions();
 
         return view('admin.dashboard', [
             'adminUser' => $adminUser,
@@ -219,7 +220,35 @@ class DashboardController extends Controller
             'sections' => $sections,
             'userFilters' => $userFilters,
             'trashedCount' => $trashedCount,
+            'searchSuggestions' => $searchSuggestions,
         ]);
+    }
+
+    private function buildSearchSuggestions(): Collection
+    {
+        $shortcuts = collect([
+            'Student',
+            'Teacher',
+            'Admin',
+            'Token Requests',
+            'Pending Approvals',
+            'Section A',
+            'Section B',
+            'Section C',
+        ]);
+
+        $users = User::query()
+            ->select(['name', 'email'])
+            ->latest()
+            ->take(15)
+            ->get()
+            ->flatMap(fn (User $user): array => [$user->name, $user->email]);
+
+        return $shortcuts
+            ->concat($users)
+            ->filter()
+            ->unique()
+            ->values();
     }
 
     private function buildGrowthSeries(CarbonImmutable $now): Collection

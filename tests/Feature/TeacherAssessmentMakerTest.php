@@ -20,9 +20,19 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Create New Assessment');
         $response->assertSeeText('No assessments yet');
-        $response->assertSeeText('Import Questions from TXT');
+        $response->assertSeeText('Import Story and Questions from TXT');
         $response->assertSee('question-text-file');
         $response->assertSeeText('Frog Flashcards');
+    }
+
+    public function test_multiple_choice_upload_sample_includes_story_format(): void
+    {
+        $sample = file_get_contents(public_path('samples/multiple-choice-upload-sample.txt'));
+
+        $this->assertStringContainsString('Story Title:', $sample);
+        $this->assertStringContainsString('Story Description:', $sample);
+        $this->assertStringContainsString('Question:', $sample);
+        $this->assertStringContainsString('Correct Answer:', $sample);
     }
 
     public function test_teacher_can_create_a_literacy_assessment(): void
@@ -44,6 +54,43 @@ class TeacherAssessmentMakerTest extends TestCase
             'status' => 'published',
             'created_by' => $teacher->id,
         ]);
+    }
+
+    public function test_teacher_can_create_oral_reading_assessment_without_questions(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $payload = $this->assessmentPayload([
+            'title' => 'Oral Story Check',
+            'assessment_type' => 'oral_reading',
+            'story_title' => 'The Garden Path',
+            'story_description' => 'Read this passage aloud for fluency checking.',
+        ]);
+        unset($payload['manual_questions']);
+
+        $this->actingAs($teacher)
+            ->post(route('assessments.store'), $payload)
+            ->assertRedirect(route('assessments.index'));
+
+        $assessment = Assessment::query()
+            ->where('title', 'Oral Story Check')
+            ->firstOrFail();
+
+        $this->assertSame([], $assessment->manual_questions);
+    }
+
+    public function test_silent_reading_assessment_requires_questions(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $payload = $this->assessmentPayload([
+            'assessment_type' => 'silent_reading',
+        ]);
+        unset($payload['manual_questions']);
+
+        $this->actingAs($teacher)
+            ->from(route('assessments.index'))
+            ->post(route('assessments.store'), $payload)
+            ->assertRedirect(route('assessments.index'))
+            ->assertSessionHasErrors('manual_questions');
     }
 
     public function test_teacher_can_create_a_numeracy_assessment(): void

@@ -226,14 +226,20 @@
                                     <div class="rounded-lg border border-dashed border-outline-variant/30 bg-surface p-5" id="question-upload-panel">
                                         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                                             <div>
-                                                <h3 class="font-headline text-lg font-bold text-on-surface">Import Questions from TXT</h3>
-                                                <p class="text-sm text-on-surface-variant">Use Question:, A-D answers, and Correct Answer: A. Imported questions stay editable.</p>
+                                                <h3 class="font-headline text-lg font-bold text-on-surface">Import Story and Questions from TXT</h3>
+                                                <p class="text-sm text-on-surface-variant">Use Story Title:, Story Description:, Question:, A-D answers, and Correct Answer: A. Imported content stays editable.</p>
                                             </div>
-                                            <label class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-surface-container-high px-5 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary">
-                                                <span class="material-symbols-outlined text-lg">upload_file</span>
-                                                Upload TXT
-                                                <input class="sr-only" id="question-text-file" type="file" accept=".txt,text/plain">
-                                            </label>
+                                            <div class="flex flex-wrap gap-2">
+                                                <a class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-primary ring-1 ring-primary/20 transition-colors hover:bg-primary/10" href="{{ asset('samples/multiple-choice-upload-sample.txt') }}" download>
+                                                    <span class="material-symbols-outlined text-lg">description</span>
+                                                    Sample Format
+                                                </a>
+                                                <label class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-surface-container-high px-5 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary">
+                                                    <span class="material-symbols-outlined text-lg">upload_file</span>
+                                                    Upload TXT
+                                                    <input class="sr-only" id="question-text-file" type="file" accept=".txt,text/plain">
+                                                </label>
+                                            </div>
                                         </div>
                                         <p class="mt-3 hidden text-sm font-medium" id="question-import-status"></p>
                                     </div>
@@ -488,6 +494,8 @@
         const questionUploadPanel = document.getElementById('question-upload-panel');
         const questionTextFile = document.getElementById('question-text-file');
         const questionImportStatus = document.getElementById('question-import-status');
+        const storyTitleInput = document.getElementById('story_title');
+        const storyDescriptionInput = document.getElementById('story_description');
         const assessmentTypeInputs = document.querySelectorAll('input[name="assessment_type"]');
         const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
         const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
@@ -579,15 +587,32 @@
                 </div>
             `;
         }
+        function selectedAssessmentType() {
+            return document.querySelector('input[name="assessment_type"]:checked')?.value || 'silent_reading';
+        }
+
+        function assessmentTypeRequiresQuestions(type = selectedAssessmentType()) {
+            return type !== 'oral_reading';
+        }
+
+        function ensureManualQuestionCard() {
+            if (! manualQuestions.querySelector('[data-question-card]')) {
+                manualQuestions.insertAdjacentHTML('beforeend', questionTemplate(0));
+                renumberQuestions();
+            }
+        }
+
         function toggleQuestionBuilder() {
-            const selectedType = document.querySelector('input[name="assessment_type"]:checked')?.value || 'silent_reading';
-            const isOralReading = selectedType === 'oral_reading';
-            manualQuestions.classList.toggle('hidden', isOralReading);
-            addQuestionButton.classList.toggle('hidden', isOralReading);
-            questionUploadPanel.classList.toggle('hidden', isOralReading);
-            questionTextFile.disabled = isOralReading;
+            const requiresQuestions = assessmentTypeRequiresQuestions();
+
+            if (requiresQuestions) {
+                ensureManualQuestionCard();
+            }
+
+            manualQuestions.classList.toggle('hidden', ! requiresQuestions);
+            addQuestionButton.classList.toggle('hidden', ! requiresQuestions);
             manualQuestions.querySelectorAll('input, textarea, select, button').forEach((field) => {
-                field.disabled = isOralReading;
+                field.disabled = ! requiresQuestions;
             });
         }
 
@@ -603,9 +628,13 @@
                 && ['A', 'B', 'C', 'D'].includes(question.correct_answer);
         }
 
-        function parseImportedQuestions(content) {
+        function parseImportedAssessment(content) {
             const questions = [];
             let currentQuestion = null;
+            let storyTitle = '';
+            const storyDescriptionLines = [];
+            let readingStoryDescription = false;
+            let reachedQuestions = false;
 
             const pushCurrentQuestion = () => {
                 if (currentQuestion && isCompleteImportedQuestion(currentQuestion)) {
@@ -617,20 +646,48 @@
                 .replace(/\r\n/g, '\n')
                 .replace(/\r/g, '\n')
                 .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .forEach((line) => {
+                .forEach((rawLine) => {
+                    const line = rawLine.trim();
+                    const storyTitleMatch = line.match(/^(?:story\s+)?title\s*[:.-]\s*(.+)$/i);
+                    const storyDescriptionMatch = line.match(/^(?:story\s+description|reading\s+passage|passage|story)\s*[:.-]\s*(.*)$/i);
                     const questionMatch = line.match(/^question\s*(?:\d+)?\s*[:.-]\s*(.+)$/i);
                     const answerMatch = line.match(/^([A-D])[\).:-]\s*(.+)$/i);
                     const correctAnswerMatch = line.match(/^(?:correct\s+)?answer\s*[:.-]\s*([A-D])\b/i);
 
                     if (questionMatch) {
+                        readingStoryDescription = false;
+                        reachedQuestions = true;
                         pushCurrentQuestion();
                         currentQuestion = {
                             question: questionMatch[1].trim(),
                             answers: {},
                             correct_answer: 'A',
                         };
+                        return;
+                    }
+
+                    if (! reachedQuestions && ! currentQuestion && storyTitleMatch) {
+                        storyTitle = storyTitleMatch[1].trim();
+                        readingStoryDescription = false;
+                        return;
+                    }
+
+                    if (! reachedQuestions && ! currentQuestion && storyDescriptionMatch) {
+                        readingStoryDescription = true;
+
+                        if (storyDescriptionMatch[1].trim()) {
+                            storyDescriptionLines.push(storyDescriptionMatch[1].trim());
+                        }
+
+                        return;
+                    }
+
+                    if (readingStoryDescription && ! reachedQuestions && ! currentQuestion) {
+                        storyDescriptionLines.push(rawLine.trimEnd());
+                        return;
+                    }
+
+                    if (! line) {
                         return;
                     }
 
@@ -655,7 +712,23 @@
 
             pushCurrentQuestion();
 
-            return questions;
+            return {
+                questions,
+                storyTitle,
+                storyDescription: storyDescriptionLines.join('\n').trim(),
+            };
+        }
+
+        function applyImportedStory(imported) {
+            if (imported.storyTitle) {
+                storyTitleInput.value = imported.storyTitle;
+                storyTitleInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            if (imported.storyDescription) {
+                storyDescriptionInput.value = imported.storyDescription;
+                storyDescriptionInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
         function renumberQuestions() {
             manualQuestions.querySelectorAll('[data-question-card]').forEach((card, index) => {
@@ -702,10 +775,41 @@
                 return;
             }
 
-            const importedQuestions = parseImportedQuestions(await file.text());
+            const importedAssessment = parseImportedAssessment(await file.text());
+            const importedQuestions = importedAssessment.questions;
+            const requiresQuestions = assessmentTypeRequiresQuestions();
+            const importedStoryParts = [
+                importedAssessment.storyTitle ? 'story title' : null,
+                importedAssessment.storyDescription ? 'story description' : null,
+            ].filter(Boolean);
+
+            if (importedQuestions.length === 0 && importedStoryParts.length === 0) {
+                setQuestionImportStatus('No story or complete questions found. Use Story Title:, Story Description:, Question:, A-D options, and Correct Answer: A.', true);
+                questionTextFile.value = '';
+                return;
+            }
+
+            applyImportedStory(importedAssessment);
+
+            if (! requiresQuestions) {
+                manualQuestions.innerHTML = '';
+                toggleQuestionBuilder();
+
+                const ignoredQuestions = importedQuestions.length > 0
+                    ? `${importedQuestions.length} question block${importedQuestions.length === 1 ? '' : 's'} ${importedQuestions.length === 1 ? 'was' : 'were'} ignored because this assessment type does not need questions.`
+                    : 'This assessment type does not need question cards.';
+
+                setQuestionImportStatus([
+                    importedStoryParts.length ? `${importedStoryParts.join(' and ')} imported.` : null,
+                    ignoredQuestions,
+                ].filter(Boolean).join(' '));
+                questionTextFile.value = '';
+                return;
+            }
 
             if (importedQuestions.length === 0) {
-                setQuestionImportStatus('No complete questions found. Use Question:, A-D options, and Correct Answer: A.', true);
+                toggleQuestionBuilder();
+                setQuestionImportStatus(`${importedStoryParts.join(' and ')} imported, but this assessment type still needs questions. Add them below or upload a TXT with Question:, A-D options, and Correct Answer: A.`, true);
                 questionTextFile.value = '';
                 return;
             }
@@ -715,7 +819,11 @@
                 .join('');
             renumberQuestions();
             toggleQuestionBuilder();
-            setQuestionImportStatus(`${importedQuestions.length} question${importedQuestions.length === 1 ? '' : 's'} imported. You can still edit them before saving.`);
+            setQuestionImportStatus([
+                importedStoryParts.length ? importedStoryParts.join(' and ') : null,
+                `${importedQuestions.length} question${importedQuestions.length === 1 ? '' : 's'}`,
+                'imported. You can still edit everything before saving.',
+            ].filter(Boolean).join(' '));
             questionTextFile.value = '';
         });
         manualQuestions.addEventListener('click', (event) => {

@@ -35,11 +35,23 @@
             ->implode('');
         $storyMarkingHtml = $storyParagraphs
             ->map(function (string $paragraph): string {
-                $words = collect(preg_split('/(\s+)/u', $paragraph, -1, PREG_SPLIT_DELIM_CAPTURE))
-                    ->map(fn (string $part): string => trim($part) === ''
-                        ? e($part)
-                        : '<button class="story-word" type="button" data-mark="0">'.e($part).'</button>')
-                    ->implode('');
+                preg_match_all('/[^.!?]+[.!?]+|[^.!?]+$/u', $paragraph, $matches);
+
+                $sentences = collect($matches[0] ?: [$paragraph])
+                    ->map(fn (string $sentence): string => trim($sentence))
+                    ->filter(fn (string $sentence): bool => $sentence !== '');
+
+                $words = $sentences
+                    ->map(function (string $sentence): string {
+                        $sentenceWords = collect(preg_split('/(\s+)/u', $sentence, -1, PREG_SPLIT_DELIM_CAPTURE))
+                            ->map(fn (string $part): string => trim($part) === ''
+                                ? e($part)
+                                : '<button class="story-word" type="button" data-mark="0">'.e($part).'</button>')
+                            ->implode('');
+
+                        return '<span class="story-sentence" data-sentence-mark="0">'.$sentenceWords.'</span>';
+                    })
+                    ->implode(' ');
 
                 return '<p class="story-paragraph">'.$words.'</p>';
             })
@@ -68,16 +80,51 @@
     @endphp
 
     <style>
-        .bubble-word { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; will-change: transform, bottom, left; }
+        .answer-fish { position: absolute; left: 0; top: 0; width: 132px; height: 80px; max-width: none; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: manipulation; will-change: transform; }
+        .fish-visual { display: block; width: 100%; height: 100%; overflow: visible; transform: scaleX(var(--fish-direction, 1)); filter: drop-shadow(0 5px 3px rgba(11,81,94,.15)); }
+        .fish-tail { transform-origin: 33px 40px; animation: fish-tail-beat .55s ease-in-out infinite alternate; }
+        .fish-fin { transform-origin: 72px 48px; animation: fish-fin-beat .8s ease-in-out infinite alternate; }
+        .fish-letter { position: absolute; inset: 0; display: grid; place-items: center; padding-left: 7px; font-size: 22px; font-weight: 900; color: #143847; text-shadow: 0 1px 0 rgba(255,255,255,.7); pointer-events: none; }
+        .answer-fish:focus-visible { outline: 3px solid #005e9f; outline-offset: 4px; border-radius: 50%; }
+        .answer-fish:hover .fish-visual { filter: drop-shadow(0 0 5px rgba(0,94,159,.5)); }
+        .answer-fish.is-caught { z-index: 45; pointer-events: none; }
+        .answer-fish.is-caught .fish-visual { transform: rotate(-90deg); }
+        .answer-fish.is-caught .fish-tail { animation-duration: .18s; }
+        @keyframes fish-tail-beat { from { transform: scaleX(.72) skewY(-8deg); } to { transform: scaleX(1) skewY(8deg); } }
+        @keyframes fish-fin-beat { from { transform: rotate(-14deg); } to { transform: rotate(12deg); } }
+        .hook-game { display: grid; grid-template-columns: 288px minmax(0,1fr); grid-template-rows: auto minmax(260px,1fr); gap: 20px 24px; padding: 20px 20px 180px; min-height: 700px; }
+        .hook-game #hook-hud { position: relative; inset: auto; grid-column: 1; grid-row: 1 / 3; width: auto; max-width: none; }
+        .hook-game #mission-info { position: relative; inset: auto; grid-column: 2; grid-row: 1; max-width: none; }
+        .hook-game #question-node { max-height: 400px; overflow-y: auto; border-radius: 8px; }
+        .hook-game #fish-container { position: relative; inset: auto; grid-column: 2; grid-row: 2; min-height: 320px; margin-top: 36px; overflow: hidden; border-top: 3px solid #8cdce3; background: linear-gradient(180deg, rgba(213,247,249,.6), rgba(166,224,233,.3)); }
+        .hook-game #fish-container::after { content: ''; position: absolute; inset: auto 0 0; height: 2px; background: #c1e8dd; pointer-events: none; }
+        .hook-head { position: relative; width: 40px; height: 48px; flex: none; filter: drop-shadow(1px 2px 1px rgba(27,65,79,.2)); }
+        @media (max-width: 760px) {
+            .hook-game { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto minmax(280px,1fr); gap: 12px; padding: 12px 12px 110px; height: auto; min-height: calc(100dvh - 64px); }
+            .hook-game #mission-info { grid-column: 1; grid-row: 1; text-align: left; }
+            .hook-game #mission-info h1 { font-size: 17px; }
+            .hook-game #hook-hud { grid-column: 1; grid-row: 2; gap: 8px; }
+            .hook-game #hook-hud > div:first-child { flex-direction: row; gap: 8px; }
+            .hook-game #hook-hud > div:first-child > div { flex: 1; padding: 8px; }
+            .hook-game #question-node { padding: 12px; max-height: 250px; }
+            .hook-game #question-node h2 { font-size: 16px; margin-bottom: 10px; }
+            .hook-game .hook-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+            .hook-game .hook-options > div { margin: 0; padding: 6px; gap: 7px; font-size: 13px; }
+            .hook-game .hook-options > div > span:first-child { flex-shrink: 0; }
+            .hook-game #fish-container { grid-column: 1; grid-row: 3; }
+            .hook-game #egg-wrapper { transform: translateX(-50%) scale(.55); transform-origin: center bottom; bottom: 4px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fish-tail, .fish-fin { animation: none; }
+        }
         .particle { position: absolute; pointer-events: none; z-index: 100; }
         .glass-hud { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
         .liquid-track { box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .liquid-fill { box-shadow: 0 0 15px rgba(145, 247, 142, 0.6), inset 0 2px 4px rgba(255,255,255,0.4); transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hook-cable { width: 2px; background: linear-gradient(to bottom, #74777a, #005e9f); height: 0; transition: height 0.3s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+        .hook-cable { width: 2px; background: #728c99; height: 0; flex: none; }
         .pulse-bag { animation: bag-pulse 2s infinite ease-in-out; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease; }
         @keyframes bag-pulse { 0%, 100% { transform: scale(var(--base-scale, 1)) translateY(0); } 50% { transform: scale(calc(var(--base-scale, 1) * 1.05)) translateY(-5px); } }
         .mission-canvas { cursor: crosshair; }
-        .caught-word { position: absolute; z-index: 45; transition: all 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); }
         .data-egg-container { width: 118px; height: 148px; position: relative; perspective: 1000px; }
         .data-egg { width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, #ffffff 0%, #eef1f4 50%, #d9dde1 100%); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; box-shadow: 0 20px 40px rgba(0, 94, 159, 0.15), inset -10px -10px 30px rgba(0, 0, 0, 0.05), inset 10px 10px 30px rgba(255, 255, 255, 0.8); position: relative; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.5); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; }
         .egg-glow { position: absolute; inset: -28px; background: radial-gradient(circle, rgba(68, 165, 255, 0.3) 0%, transparent 70%); pointer-events: none; opacity: 0.6; animation: glow-pulse 3s infinite ease-in-out; z-index: 5; }
@@ -95,10 +142,19 @@
         #story-reader-text { user-select: none; -webkit-user-select: none; }
         .story-paragraph { margin: 0 0 1rem; text-align: left; }
         .story-paragraph:last-child { margin-bottom: 0; }
+        .story-sentence { border-radius: 0.55rem; box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: pointer; padding: 0.08rem 0.12rem; transition: background-color 0.15s ease, box-shadow 0.15s ease; }
+        .story-sentence:hover { background: rgba(0, 94, 159, 0.06); }
+        .story-sentence-mark-1 { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 0 1px rgba(202, 138, 4, 0.18); }
+        .story-sentence-mark-2 { background: rgba(248, 113, 113, 0.2); box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.18); }
         .story-word { appearance: none; display: inline; cursor: pointer; border: 0; border-radius: 0.25rem; background: transparent; margin: 0; padding: 0.03rem 0.1rem; color: inherit; font: inherit; line-height: inherit; text-align: inherit; vertical-align: baseline; transition: background-color 0.15s ease, color 0.15s ease; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         .story-word:hover { background: rgba(0, 94, 159, 0.08); }
         .story-word-mark-1 { background: rgba(250, 204, 21, 0.32); color: #854d0e; }
         .story-word-mark-2 { background: rgba(248, 113, 113, 0.28); color: #991b1b; }
+        .mark-mode-button { transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+        .mark-mode-button:hover { transform: translateY(-1px); }
+        .mark-mode-button.is-active { background: #005e9f; color: #ffffff; box-shadow: 0 12px 24px rgba(0, 94, 159, 0.18); }
+        .mark-mode-button.mark-mode-yellow.is-active { background: #facc15; color: #713f12; box-shadow: 0 12px 24px rgba(202, 138, 4, 0.18); }
+        .mark-mode-button.mark-mode-red.is-active { background: #ef4444; color: #ffffff; box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18); }
         .result-pattern { background-image: radial-gradient(circle at 10px 10px, rgba(68, 165, 255, 0.45) 1px, transparent 1px), radial-gradient(circle at 30px 30px, rgba(145, 247, 142, 0.45) 1px, transparent 1px); background-size: 40px 40px; background-position: 0 0, 20px 20px; opacity: 0.2; }
         .joyful-bg { background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 34%, #bae6fd 66%, #f0f9ff 100%); }
         .sky-cloud { position: absolute; z-index: 1; width: 12rem; height: 3.5rem; border-radius: 9999px; background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.98) 58%, rgba(224,242,254,.94) 100%); box-shadow: 0 10px 18px rgba(14,116,144,.16), inset 0 -6px 0 rgba(186,230,253,.42); pointer-events: none; }
@@ -140,9 +196,10 @@
 
         @if ($questionCount > 0 || $isOralReading)
             <audio id="assessment-game-music" src="{{ asset('audio/assessment-game-music.mp3') }}" preload="auto" loop></audio>
+            <audio id="multiple-choice-hook-sound" src="{{ asset('audio/multiple-choice-hook-reel.mp3') }}" preload="auto"></audio>
             <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
             <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
-            <main class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }}" id="mission-canvas">
+            <main class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game' : '' }}" id="mission-canvas">
                 @if ($isFlashcards)
                     <div class="pointer-events-none absolute inset-0 overflow-hidden">
                         <div class="sky-cloud left-[-3rem] top-20"></div>
@@ -156,7 +213,7 @@
                         <div class="absolute bottom-20 right-[15%] h-96 w-96 rounded-full bg-tertiary-container/10 blur-3xl"></div>
                     </div>
                 @endif
-<div class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
+                <div id="hook-hud" class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
                         <div class="glass-hud pointer-events-auto flex items-center gap-4 rounded-lg border border-white/40 p-3 shadow-sm">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-container text-tertiary-dim shadow-sm"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span></div>
@@ -173,7 +230,7 @@
                         @if ($firstQuestion)
                             <div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node {{ $firstQuestion['node'] }}</h3></div>
                             <h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">{{ $firstQuestion['text'] }}</h2>
-                            <div class="space-y-2">
+                            <div class="hook-options space-y-2">
                                 @foreach ($firstQuestion['options'] as $option)
                                     <div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white">
                                         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">{{ $option['l'] }}</span>
@@ -181,19 +238,39 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <p class="mt-4 text-[10px] font-medium leading-relaxed text-slate-400 italic">* Capture a data packet (A, B, C, or D) to stabilize the core.</p>
                         @endif
                     </div>
                 </div>
 
                 <div class="pointer-events-none absolute right-3 top-3 z-30 max-w-[calc(100%-1.5rem)] text-right sm:right-5 sm:top-5 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
                     <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">MISSION: {{ $missionTitle }}</h1>
-                    <p class="font-body font-medium text-slate-500">Capture <span class="font-bold text-primary">{{ $questionCount }} Nodes</span> to power the drive.</p>
+                    <p class="font-body font-medium text-slate-500">{{ $questionCount }} questions</p>
                 </div>
 
-                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center transition-all duration-75 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="hook-assembly"><div class="hook-cable" id="hook-cable"></div><div class="relative -mt-1"><div class="flex h-10 w-10 rotate-45 transform items-center justify-center rounded-xl border-2 border-white bg-primary shadow-lg" id="hook-head"><span class="material-symbols-outlined -rotate-45 text-white" style="font-variation-settings: 'FILL' 1;">anchor</span></div></div></div>
+                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="hook-assembly" aria-hidden="true">
+                    <div class="hook-cable" id="hook-cable"></div>
+                    <div class="hook-head" id="hook-head">
+                        <svg width="40" height="48" viewBox="0 0 40 48" fill="none"><path d="M20 0v29c0 20 18 20 18 0v-8l-7 7" stroke="#4c6675" stroke-width="4" stroke-linejoin="round"/><path d="M20 0v29c0 17 16 17 16 0v-5" stroke="#deebef" stroke-width="1.5"/></svg>
+                    </div>
+                </div>
 
-                <div class="absolute inset-0 z-20 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="bubbles-container"></div>
+                <div class="absolute inset-0 z-20 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="fish-container" role="group" aria-label="Answer fish"></div>
+                <template id="answer-fish-template">
+                    <button type="button" class="answer-fish">
+                        <svg class="fish-visual" viewBox="0 0 132 80" aria-hidden="true">
+                            <g class="fish-tail"><path d="M38 40 6 15Q1 40 6 65Z" fill="var(--fish-dark)" stroke="var(--fish-outline)" stroke-width="2"/><path d="m9 25 22 15L9 55M7 40h24" fill="none" stroke="var(--fish-light)" stroke-width="2"/></g>
+                            <path d="M48 24Q57 1 79 12L88 27M48 56Q63 79 82 64L87 52" fill="var(--fish-dark)" stroke="var(--fish-outline)" stroke-width="2"/>
+                            <path d="M27 40C35 8 102 5 120 39 103 75 39 73 27 40Z" fill="var(--fish-color)" stroke="var(--fish-outline)" stroke-width="2"/>
+                            <path d="M35 44Q74 73 115 43C96 66 51 68 35 44Z" fill="var(--fish-light)"/>
+                            <path d="M42 29Q68 13 91 23" fill="none" stroke="var(--fish-light)" stroke-width="5" stroke-linecap="round"/>
+                            <path class="fish-fin" d="M76 45Q70 48 69 59 83 59 89 46" fill="var(--fish-dark)" stroke="var(--fish-outline)" stroke-width="1.5"/>
+                            <path d="M93 31q-6 10 0 20" fill="none" stroke="var(--fish-outline)" stroke-width="1.5" opacity=".5"/>
+                            <circle cx="103" cy="31" r="7" fill="white"/><circle cx="105" cy="32" r="3.6" fill="#153440"/><circle cx="106" cy="30" r="1.3" fill="white"/>
+                            <path d="m115 42 5-3" stroke="var(--fish-outline)" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span class="fish-letter"></span>
+                    </button>
+                </template>
 
                 <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="egg-wrapper">
                     <div class="egg-glow"></div><div class="hatch-light" id="hatch-flash"></div>
@@ -288,6 +365,21 @@
                                     <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Legend</span>
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-red-400/70 ring-1 ring-red-500/30"></span>Mispronounced</span>
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-yellow-300/80 ring-1 ring-yellow-500/30"></span>Getting Closer</span>
+                                </div>
+                                <div class="mt-3 flex flex-wrap items-center justify-center gap-2 rounded-xl bg-white/80 p-3 text-sm font-bold text-on-surface-variant shadow-sm" aria-label="Oral reading mark mode">
+                                    <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Mark Mode</span>
+                                    <button class="mark-mode-button is-active inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="word" aria-pressed="true">
+                                        <span class="material-symbols-outlined text-lg">touch_app</span>
+                                        Word
+                                    </button>
+                                    <button class="mark-mode-button mark-mode-yellow inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="sentence-1" aria-pressed="false">
+                                        <span class="material-symbols-outlined text-lg">format_color_fill</span>
+                                        Sentence: Getting Closer
+                                    </button>
+                                    <button class="mark-mode-button mark-mode-red inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="sentence-2" aria-pressed="false">
+                                        <span class="material-symbols-outlined text-lg">format_color_fill</span>
+                                        Sentence: Mispronounced
+                                    </button>
                                 </div>
                             @else
                                 <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant shadow-inner">
@@ -465,7 +557,9 @@
                     const hookAssembly = document.getElementById('hook-assembly');
                     const hookCable = document.getElementById('hook-cable');
                     const hookHead = document.getElementById('hook-head');
-                    const container = document.getElementById('bubbles-container');
+                    const container = document.getElementById('fish-container');
+                    const fishTemplate = document.getElementById('answer-fish-template');
+                    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const scoreEl = document.getElementById('score');
                     const progressEl = document.getElementById('progress-bar');
                     const bag = document.getElementById('power-core');
@@ -487,6 +581,7 @@
                     const resultWrongPronunciation = document.getElementById('result-wrong-pronunciation');
                     const storyGate = document.getElementById('story-gate');
                     const storyReaderText = document.getElementById('story-reader-text');
+                    const markModeButtons = Array.from(document.querySelectorAll('[data-mark-mode]'));
                     const syncedStoryScrollers = Array.from(document.querySelectorAll('[data-sync-scroll="oral-story"]'));
                     const startQuestionsButton = document.getElementById('start-questions-button');
                     const startTimerButton = document.getElementById('start-timer-button');
@@ -496,6 +591,7 @@
                     const resultReadingTimeRow = document.getElementById('result-reading-time-row');
                     const resultReadingTime = document.getElementById('result-reading-time');
                     const gameMusic = document.getElementById('assessment-game-music');
+                    const hookReelSound = document.getElementById('multiple-choice-hook-sound');
                     const frogWrongAnswerSound = document.getElementById('frog-wrong-answer-sound');
                     const frogCorrectAnswerSound = document.getElementById('frog-correct-answer-sound');
                     const submitUrl = @json(route('student.assessments.submit', $assessment));
@@ -514,7 +610,6 @@
                     const frogAnswerButtons = Array.from(document.querySelectorAll('[data-frog-answer]'));
                     const frogTongue = document.getElementById('frog-tongue');
                     const frogCharacter = document.getElementById('frog-character');
-                    const letters = ['A', 'B', 'C', 'D'];
                     const questions = @json($gameQuestions->values());
                     const targetsNeeded = questions.length;
                     const capturedAnswers = {};
@@ -524,12 +619,17 @@
                     let isHatching = false;
                     let isProcessingCapture = false;
                     let currentQuestionIndex = 0;
-                    let currentHookX = window.innerWidth / 2;
+                    let currentHookX = canvas.clientWidth / 2;
                     let missionStarted = !storyGate;
-                    let spawnTimer = null;
+                    let fishSchool = [];
+                    let fishFrame = null;
+                    let hookFrame = null;
+                    let lastFishFrame = null;
                     let readingTimer = null;
                     let readingStartedAt = null;
                     let readingElapsedSeconds = 0;
+                    let oralMarkMode = 'word';
+                    let hookReelFadeTimer = null;
 
                     function formatElapsedTime(totalSeconds) {
                         const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -547,6 +647,31 @@
                         if (!gameMusic) return;
                         gameMusic.pause();
                         gameMusic.currentTime = 0;
+                    }
+
+                    function playHookReelSound() {
+                        if (!hookReelSound || isOralReading || isFlashcards) return;
+                        clearInterval(hookReelFadeTimer);
+                        hookReelSound.pause();
+                        hookReelSound.currentTime = 0;
+                        hookReelSound.volume = 0.75;
+                        hookReelSound.play().catch(() => {});
+                    }
+
+                    function fadeHookReelSound() {
+                        if (!hookReelSound || hookReelSound.paused) return;
+                        clearInterval(hookReelFadeTimer);
+                        hookReelFadeTimer = setInterval(() => {
+                            const nextVolume = Math.max(0, hookReelSound.volume - 0.08);
+                            hookReelSound.volume = nextVolume;
+
+                            if (nextVolume <= 0) {
+                                clearInterval(hookReelFadeTimer);
+                                hookReelSound.pause();
+                                hookReelSound.currentTime = 0;
+                                hookReelSound.volume = 0.75;
+                            }
+                        }, 35);
                     }
 
                     function playFrogWrongAnswerSound() {
@@ -602,20 +727,36 @@
                         resultReadingTime.innerText = formatElapsedTime(readingElapsedSeconds);
                     }
 
-                    document.addEventListener('mousemove', (event) => {
-                        if (!isFlashcards && missionStarted && !isHooking && !isHatching) {
-                            currentHookX = event.clientX;
-                            hookAssembly.style.left = `${currentHookX}px`;
+                    function positionHook(clientX) {
+                        const arena = container.getBoundingClientRect();
+                        const canvasRect = canvas.getBoundingClientRect();
+                        const tipX = Math.max(arena.left + 12, Math.min(arena.right - 12, clientX));
+                        currentHookX = tipX - canvasRect.left - 18;
+                        hookAssembly.style.left = `${currentHookX}px`;
+                        hookAssembly.style.top = `${arena.top - canvasRect.top - 42}px`;
+                    }
+
+                    canvas.addEventListener('pointermove', (event) => {
+                        if (!isOralReading && !isFlashcards && missionStarted && !isHooking && !isHatching && !isProcessingCapture && container.contains(event.target)) {
+                            positionHook(event.clientX);
                         }
                     });
 
                     canvas.addEventListener('click', (event) => {
-                        if (!missionStarted || isFlashcards) return;
-                        if (event.target.closest('.glass-hud')) return;
+                        if (!missionStarted || isOralReading || isFlashcards || !container.contains(event.target)) return;
                         if (isHooking || isHatching || isProcessingCapture) return;
+                        const fish = event.target.closest('.answer-fish');
+                        const fishRect = fish?.getBoundingClientRect();
+                        positionHook(event.detail === 0 && fishRect ? fishRect.left + fishRect.width / 2 : event.clientX);
                         playGameMusic();
                         fireHook();
                     });
+
+                    if (!isOralReading && !isFlashcards) {
+                        new ResizeObserver(() => {
+                            positionHook(canvas.getBoundingClientRect().left + currentHookX + 18);
+                        }).observe(container);
+                    }
 
                     function escapeHtml(value) {
                         return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -640,20 +781,64 @@
                             });
                         });
                     });
+                    function setWordMark(word, mark) {
+                        word.dataset.mark = String(mark);
+                        word.classList.remove('story-word-mark-1', 'story-word-mark-2');
+                        if (mark > 0) word.classList.add(`story-word-mark-${mark}`);
+                    }
+
+                    function setSentenceMark(sentence, mark) {
+                        sentence.dataset.sentenceMark = String(mark);
+                        sentence.classList.remove('story-sentence-mark-1', 'story-sentence-mark-2');
+                        if (mark > 0) sentence.classList.add(`story-sentence-mark-${mark}`);
+                        sentence.querySelectorAll('.story-word').forEach((word) => setWordMark(word, mark));
+                    }
+
+                    function setOralMarkMode(mode) {
+                        oralMarkMode = mode;
+                        markModeButtons.forEach((button) => {
+                            const isActive = button.dataset.markMode === mode;
+                            button.classList.toggle('is-active', isActive);
+                            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                        });
+                    }
+
+                    markModeButtons.forEach((button) => {
+                        button.addEventListener('click', () => setOralMarkMode(button.dataset.markMode || 'word'));
+                    });
+
                     storyReaderText?.addEventListener('pointerdown', (event) => {
                         if (!canTrackPronunciation) return;
-                        if (event.target.closest('.story-word')) event.preventDefault();
+                        if (event.target.closest('.story-word, .story-sentence')) event.preventDefault();
                     });
 
                     storyReaderText?.addEventListener('click', (event) => {
                         if (!canTrackPronunciation) return;
                         const word = event.target.closest('.story-word');
-                        if (!word) return;
+                        const sentence = event.target.closest('.story-sentence');
+
+                        if (oralMarkMode.startsWith('sentence-')) {
+                            if (!sentence) return;
+                            event.preventDefault();
+                            const mark = Number(oralMarkMode.replace('sentence-', '')) || 2;
+                            const nextMark = Number(sentence.dataset.sentenceMark || '0') === mark ? 0 : mark;
+                            setSentenceMark(sentence, nextMark);
+                            return;
+                        }
+
+                        if (!word) {
+                            if (sentence) {
+                                event.preventDefault();
+                                const nextMark = (Number(sentence.dataset.sentenceMark || '0') + 1) % 3;
+                                setSentenceMark(sentence, nextMark);
+                            }
+
+                            return;
+                        }
+
                         event.preventDefault();
                         const nextMark = (Number(word.dataset.mark || '0') + 1) % 3;
-                        word.dataset.mark = String(nextMark);
-                        word.classList.remove('story-word-mark-1', 'story-word-mark-2');
-                        if (nextMark > 0) word.classList.add(`story-word-mark-${nextMark}`);
+                        setWordMark(word, nextMark);
                     });
                     function renderFlashcardQuestion() {
                         if (!isFlashcards || !questions[currentQuestionIndex]) return;
@@ -747,51 +932,93 @@
 
                     function fireHook() {
                         isHooking = true;
-                        hookCable.style.height = `${Math.max(180, canvas.offsetHeight - 220)}px`;
-                        let hasCaughtOne = false;
-                        const collisionCheck = setInterval(() => {
-                            if (hasCaughtOne) return;
+                        playHookReelSound();
+                        let depth = 0;
+                        let lastFrame = performance.now();
+                        let previousTipY = hookHead.getBoundingClientRect().top + 21;
+
+                        function lowerHook(now) {
+                            const elapsed = Math.min((now - lastFrame) / 1000, .04);
+                            lastFrame = now;
+                            depth = Math.min(depth + elapsed * 440, container.clientHeight + 20);
+                            hookCable.style.height = `${depth}px`;
                             const hookRect = hookHead.getBoundingClientRect();
-                            document.querySelectorAll('.bubble-word').forEach((node) => {
-                                if (hasCaughtOne || node.dataset.caught) return;
-                                const nodeRect = node.getBoundingClientRect();
-                                const collision = !(hookRect.right < nodeRect.left || hookRect.left > nodeRect.right || hookRect.bottom < nodeRect.top || hookRect.top > nodeRect.bottom);
-                                if (collision) {
-                                    hasCaughtOne = true;
-                                    catchNode(node, node.dataset.letter);
+                            const tipX = hookRect.left + 38;
+                            const tipY = hookRect.top + 21;
+
+                            // Check the swept hook tip so a slow frame cannot skip a fish.
+                            for (const { element } of fishSchool) {
+                                if (element.dataset.caught) continue;
+                                const fishRect = element.getBoundingClientRect();
+                                if (tipX >= fishRect.left + 22 && tipX <= fishRect.right - 14 && tipY >= fishRect.top + 24 && previousTipY <= fishRect.bottom - 20) {
+                                    catchFish(element);
+                                    return;
                                 }
-                            });
-                        }, 10);
-                        setTimeout(() => {
-                            clearInterval(collisionCheck);
-                            hookCable.style.height = '0px';
-                            setTimeout(() => { isHooking = false; }, 300);
-                        }, 300);
+                            }
+
+                            previousTipY = tipY;
+                            if (depth >= container.clientHeight + 20) {
+                                reelInFish();
+                                return;
+                            }
+                            hookFrame = requestAnimationFrame(lowerHook);
+                        }
+
+                        hookFrame = requestAnimationFrame(lowerHook);
                     }
 
-                    function catchNode(element, letter) {
+                    function catchFish(element) {
+                        fadeHookReelSound();
                         isProcessingCapture = true;
-                        capturedAnswers[currentQuestionIndex] = letter;
+                        capturedAnswers[currentQuestionIndex] = element.dataset.letter;
+                        const previousRect = element.getBoundingClientRect();
+                        const visual = element.querySelector('.fish-visual');
+                        const swimmingTransform = getComputedStyle(visual).transform;
                         element.dataset.caught = 'true';
-                        element.style.animation = 'none';
-                        element.classList.remove('bubble-word');
-                        element.classList.add('caught-word');
-                        const hookRect = hookHead.getBoundingClientRect();
-                        element.style.left = `${hookRect.left}px`;
-                        element.style.top = `${hookRect.top}px`;
-                        element.style.zIndex = '41';
-                        setTimeout(() => {
-                            const missionInfoRect = missionInfo.getBoundingClientRect();
-                            element.style.left = `${missionInfoRect.left + missionInfoRect.width / 2 - element.offsetWidth / 2}px`;
-                            element.style.top = `${missionInfoRect.top + missionInfoRect.height / 2 - element.offsetHeight / 2}px`;
-                            element.style.transform = 'scale(0.1) rotate(180deg)';
-                            element.style.opacity = '0';
-                            setTimeout(() => {
-                                element.remove();
-                                updateProgress();
-                                if (caughtCount < targetsNeeded) nextQuestion();
-                            }, 500);
-                        }, 100);
+                        element.disabled = true;
+                        element.classList.add('is-caught');
+
+                        // Parenting the catch to the hook keeps both on the same fishing line.
+                        hookHead.appendChild(element);
+                        element.style.left = '38px';
+                        element.style.top = '35px';
+                        element.style.transform = 'translateX(-50%)';
+                        const attachedRect = element.getBoundingClientRect();
+                        element.animate([
+                            { transform: `translate(calc(-50% + ${previousRect.left - attachedRect.left}px), ${previousRect.top - attachedRect.top}px)` },
+                            { transform: 'translate(-50%, 0)' },
+                        ], { duration: 180, easing: 'ease-out' });
+                        visual.animate([{ transform: swimmingTransform }, { transform: 'rotate(-90deg)' }], { duration: 180, easing: 'ease-out' });
+                        reelInFish(element);
+                    }
+
+                    async function reelInFish(element = null) {
+                        fadeHookReelSound();
+                        const depth = parseFloat(hookCable.style.height) || 0;
+                        const duration = element ? 900 : 500;
+                        const startedAt = performance.now();
+                        await new Promise((resolve) => {
+                            function lift(now) {
+                                const progress = Math.min((now - startedAt) / duration, 1);
+                                const eased = (1 - Math.cos(Math.PI * progress)) / 2;
+                                hookCable.style.height = `${depth * (1 - eased)}px`;
+                                if (progress < 1) {
+                                    hookFrame = requestAnimationFrame(lift);
+                                } else {
+                                    hookFrame = null;
+                                    resolve();
+                                }
+                            }
+                            hookFrame = requestAnimationFrame(lift);
+                        });
+
+                        if (element) {
+                            await element.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 160, fill: 'forwards' }).finished;
+                            element.remove();
+                            updateProgress();
+                            if (caughtCount < targetsNeeded) nextQuestion();
+                        }
+                        isHooking = false;
                     }
 
                     function nextQuestion() {
@@ -799,11 +1026,10 @@
                         const question = questions[currentQuestionIndex];
                         questionNode.style.opacity = '0';
                         setTimeout(() => {
-                            questionNode.innerHTML = `<div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node ${escapeHtml(question.node)}</h3></div><h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">${escapeHtml(question.text)}</h2><div class="space-y-2">${question.options.map((option) => `<div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">${escapeHtml(option.l)}</span><span class="font-medium text-on-surface-variant">${escapeHtml(option.t)}</span></div>`).join('')}</div><p class="mt-4 text-[10px] font-medium leading-relaxed text-slate-400 italic">* Capture a data packet (A, B, C, or D) to stabilize the core.</p>`;
+                            questionNode.innerHTML = `<div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node ${escapeHtml(question.node)}</h3></div><h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">${escapeHtml(question.text)}</h2><div class="hook-options space-y-2">${question.options.map((option) => `<div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">${escapeHtml(option.l)}</span><span class="font-medium text-on-surface-variant">${escapeHtml(option.t)}</span></div>`).join('')}</div>`;
                             questionNode.style.opacity = '1';
-                            container.innerHTML = '';
                             isProcessingCapture = false;
-                            for (let index = 0; index < 3; index++) setTimeout(spawnBubble, index * 800);
+                            spawnFishSchool();
                         }, 300);
                     }
 
@@ -821,6 +1047,11 @@
 
                     function hatchEgg() {
                         isHatching = true;
+                        cancelAnimationFrame(fishFrame);
+                        fishFrame = null;
+                        cancelAnimationFrame(hookFrame);
+                        container.replaceChildren();
+                        fishSchool = [];
                         hookAssembly.style.opacity = '0';
                         missionInfo.style.opacity = '0';
                         questionNode.style.opacity = '0.3';
@@ -991,6 +1222,7 @@
 
                     function victory() {
                         stopGameMusic();
+                        fadeHookReelSound();
                         updatePronunciationResults();
                         updateReadingTimeResult();
                         modal.classList.remove('hidden');
@@ -998,32 +1230,54 @@
                         submitAttempt();
                     }
 
-                    function spawnBubble() {
-                        if (!missionStarted || caughtCount >= targetsNeeded || isHatching || isProcessingCapture) return;
-                        const letter = letters[Math.floor(Math.random() * letters.length)];
-                        const bubble = document.createElement('div');
-                        bubble.dataset.letter = letter;
-                        bubble.className = 'bubble-word absolute z-20 flex min-w-[78px] flex-col items-center justify-center rounded-2xl border-2 border-primary/40 bg-white/90 p-5 shadow-primary/10';
-                        const playableLeft = Math.min(340, window.innerWidth * 0.32);
-                        const playableWidth = Math.max(220, window.innerWidth - playableLeft - 160);
-                        bubble.style.left = `${playableLeft + Math.random() * playableWidth}px`;
-                        bubble.style.bottom = '-150px';
-                        bubble.innerHTML = `<span class="font-headline text-3xl font-black text-on-surface sm:text-4xl">${escapeHtml(letter)}</span><span class="mt-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Node</span>`;
-                        container.appendChild(bubble);
-                        const duration = 8000 + Math.random() * 5000;
-                        const startTime = Date.now();
-                        const drift = (Math.random() - 0.5) * 200;
-                        function animate() {
-                            if (bubble.dataset.caught || isHatching) { if (isHatching) bubble.style.opacity = '0'; return; }
-                            const progress = (Date.now() - startTime) / duration;
-                            if (progress < 1) { bubble.style.bottom = `${progress * 130}%`; bubble.style.transform = `translateX(${Math.sin(progress * 6) * 40 + (progress * drift)}px)`; requestAnimationFrame(animate); } else { bubble.remove(); }
-                        }
-                        requestAnimationFrame(animate);
+                    function spawnFishSchool() {
+                        container.replaceChildren();
+                        const colors = [
+                            ['#54d8c7', '#169f99', '#b6f6d9', '#176273'],
+                            ['#ffa38d', '#ed706e', '#ffdbba', '#9e464a'],
+                            ['#f5d05e', '#dea035', '#fff0a3', '#8c681f'],
+                            ['#82c5f6', '#4b92d0', '#d5f2ff', '#34668e'],
+                        ];
+                        fishSchool = questions[currentQuestionIndex].options.map((option, index) => {
+                            const element = fishTemplate.content.firstElementChild.cloneNode(true);
+                            element.dataset.letter = option.l;
+                            element.setAttribute('aria-label', `${option.l}: ${option.t}`);
+                            element.querySelector('.fish-letter').textContent = option.l;
+                            ['color', 'dark', 'light', 'outline'].forEach((name, colorIndex) => {
+                                element.style.setProperty(`--fish-${name}`, colors[index % colors.length][colorIndex]);
+                            });
+                            container.appendChild(element);
+                            return { element, x: (container.clientWidth - 148) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: reducedMotion ? 18 : 32 + index * 4 };
+                        });
+                        positionFishSchool(0, performance.now());
+                    }
+
+                    function positionFishSchool(elapsed, now) {
+                        const maxX = Math.max(8, container.clientWidth - 140);
+                        const laneHeight = Math.max(0, container.clientHeight - 104) / Math.max(1, fishSchool.length - 1);
+                        fishSchool.forEach((fish, index) => {
+                            if (fish.element.dataset.caught) return;
+                            fish.x += fish.direction * fish.speed * elapsed;
+                            if (fish.x >= maxX) { fish.x = maxX; fish.direction = -1; }
+                            if (fish.x <= 8) { fish.x = 8; fish.direction = 1; }
+                            const bob = reducedMotion ? 0 : Math.sin(now / 650 + index * 2) * 3;
+                            const y = 12 + index * laneHeight + bob;
+                            fish.element.style.setProperty('--fish-direction', fish.direction);
+                            fish.element.style.transform = `translate(${fish.x}px, ${y}px)`;
+                        });
+                    }
+
+                    function swimFish(now) {
+                        if (!missionStarted || isHatching) { fishFrame = null; return; }
+                        const elapsed = lastFishFrame === null ? 0 : Math.min((now - lastFishFrame) / 1000, .04);
+                        lastFishFrame = now;
+                        positionFishSchool(elapsed, now);
+                        fishFrame = requestAnimationFrame(swimFish);
                     }
 
                     function startMission() {
                         if (isOralReading) return;
-                        if (missionStarted && (spawnTimer || isFlashcards)) return;
+                        if (missionStarted && (fishFrame || isFlashcards)) return;
                         missionStarted = true;
                         playGameMusic();
                         storyGate?.classList.add('opacity-0', 'pointer-events-none');
@@ -1032,8 +1286,10 @@
                             renderFlashcardQuestion();
                             return;
                         }
-                        spawnTimer = setInterval(spawnBubble, 2000);
-                        for (let index = 0; index < 3; index++) setTimeout(spawnBubble, index * 800);
+                        spawnFishSchool();
+                        const arena = container.getBoundingClientRect();
+                        positionHook(arena.left + arena.width / 2);
+                        fishFrame = requestAnimationFrame(swimFish);
                     }
 
                     startTimerButton?.addEventListener('click', startReadingTimer);

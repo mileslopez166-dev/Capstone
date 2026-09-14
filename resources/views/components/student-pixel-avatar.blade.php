@@ -4,68 +4,60 @@
     'size' => 'md',
     'showCard' => false,
     'isOnline' => false,
+    'rankTier' => 'Bronze',
+    'rank' => null,
 ])
 
 @php
-    $genderValue = strtolower((string) $gender);
-    $isGirl = in_array($genderValue, ['female', 'girl'], true);
+    $isGirl = in_array(strtolower((string) $gender), ['female', 'girl'], true);
     $characterName = $isGirl ? 'Lyra Vale' : 'Nova Finch';
-    $onlineStatusLabel = $isOnline ? 'Online' : 'Offline';
+    $tierLabel = is_array($rankTier) ? ($rankTier['label'] ?? 'Bronze') : ($rankTier ?? 'Bronze');
+    $profileTierLabel = $tierLabel === 'Flaming' ? 'Top Rank' : $tierLabel;
+    $tier = match ($tierLabel) {
+        'Flaming' => ['icon' => 'workspace_premium', 'ring' => 'ring-sky-300', 'badge' => 'bg-sky-100 text-sky-900 border-sky-300'],
+        'Diamond' => ['icon' => 'diamond', 'ring' => 'ring-cyan-300', 'badge' => 'bg-cyan-100 text-cyan-900 border-cyan-300'],
+        'Platinum' => ['icon' => 'workspace_premium', 'ring' => 'ring-slate-300', 'badge' => 'bg-slate-100 text-slate-800 border-slate-300'],
+        'Gold' => ['icon' => 'military_tech', 'ring' => 'ring-yellow-300', 'badge' => 'bg-yellow-100 text-yellow-900 border-yellow-300'],
+        'Silver' => ['icon' => 'shield', 'ring' => 'ring-zinc-300', 'badge' => 'bg-zinc-100 text-zinc-800 border-zinc-300'],
+        default => ['icon' => 'editor_choice', 'ring' => 'ring-orange-300', 'badge' => 'bg-orange-100 text-orange-900 border-orange-300'],
+    };
     $sizeClasses = match ($size) {
         'sm' => 'h-16 w-16',
         'lg' => 'h-36 w-36 sm:h-44 sm:w-44',
         default => 'h-24 w-24',
     };
-    $cardClasses = $isGirl
-        ? 'border-fuchsia-300/20 bg-[#211039] text-fuchsia-100 shadow-[0_24px_60px_rgba(78,27,124,0.28)]'
-        : 'border-cyan-300/20 bg-[#101533] text-cyan-100 shadow-[0_24px_60px_rgba(15,35,88,0.28)]';
 @endphp
 
-<div {{ $attributes->merge(['class' => $showCard ? "overflow-hidden rounded-lg border p-4 {$cardClasses}" : '']) }}>
+<div {{ $attributes->class(['campus-avatar-card' => $showCard]) }}>
     @if ($showCard)
-        <div class="mb-3 flex items-start justify-between gap-4">
+        <div class="campus-avatar-card-header">
             <div>
-                <p class="font-label text-[9px] font-black uppercase tracking-[0.22em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Pixel Avatar</p>
-                <p class="mt-1 font-headline text-xl font-black tracking-tight text-white">{{ $characterName }}</p>
+                <p>Pixel Avatar</p>
+                <h3 class="font-headline">{{ $characterName }}</h3>
             </div>
-            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isOnline ? 'border-emerald-300/40 text-emerald-200' : 'border-slate-300/30 text-slate-300' }}"><span class="h-1.5 w-1.5 rounded-full {{ $isOnline ? 'bg-emerald-300' : 'bg-slate-400' }}"></span>{{ $onlineStatusLabel }}</span>
+            <div class="campus-avatar-badges">
+                <span class="campus-avatar-status"><span class="{{ $isOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>{{ $isOnline ? 'Online' : 'Offline' }}</span>
+                <span class="campus-avatar-tier {{ $tier['badge'] }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ $tier['icon'] }}</span>{{ $profileTierLabel }}
+                </span>
+            </div>
         </div>
     @endif
 
-    <div class="relative mx-auto {{ $sizeClasses }} image-render-pixel select-none" aria-label="{{ $characterName }} avatar" role="img" style="image-rendering: pixelated;">
-        <div class="absolute inset-0 rounded-sm {{ $isGirl ? 'bg-purple-950' : 'bg-slate-950' }}"></div>
-        <div class="absolute inset-[10%] rounded-sm border {{ $isGirl ? 'border-fuchsia-300/10 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)]' : 'border-cyan-300/10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)]' }} bg-[length:12px_12px]"></div>
-
-        @if ($isGirl)
-            <div class="absolute left-[24%] top-[21%] h-[49%] w-[54%] bg-[#21113f]"></div>
-            <div class="absolute left-[19%] top-[27%] h-[42%] w-[12%] bg-[#120a2b]"></div>
-            <div class="absolute right-[16%] top-[29%] h-[38%] w-[12%] bg-[#120a2b]"></div>
-            <div class="absolute left-[31%] top-[31%] h-[26%] w-[39%] bg-[#ffad80]"></div>
-            <div class="absolute left-[38%] top-[27%] h-[9%] w-[27%] bg-[#c26aa2]"></div>
-            <div class="absolute left-[34%] top-[40%] h-[7%] w-[7%] bg-[#ffe777]"></div>
-            <div class="absolute right-[29%] top-[40%] h-[7%] w-[7%] bg-[#ff5f9d]"></div>
-            <div class="absolute left-[48%] top-[49%] h-[5%] w-[12%] bg-[#e85b63]"></div>
-            <div class="absolute left-[26%] top-[59%] h-[21%] w-[49%] bg-[#1689c3]"></div>
-            <div class="absolute left-[34%] top-[58%] h-[12%] w-[29%] bg-[#36c6d1]"></div>
-            <div class="absolute left-[39%] top-[68%] h-[12%] w-[28%] bg-[#f36a9f]"></div>
-            <div class="absolute right-[20%] top-[25%] h-[8%] w-[8%] bg-[#ffd86b]"></div>
-        @else
-            <div class="absolute left-[21%] top-[26%] h-[40%] w-[58%] bg-[#101533]"></div>
-            <div class="absolute left-[28%] top-[29%] h-[18%] w-[45%] bg-[#3a3d6b]"></div>
-            <div class="absolute left-[31%] top-[40%] h-[25%] w-[39%] bg-[#ffbd83]"></div>
-            <div class="absolute left-[38%] top-[48%] h-[6%] w-[7%] bg-[#14213e]"></div>
-            <div class="absolute right-[33%] top-[48%] h-[6%] w-[7%] bg-[#14213e]"></div>
-            <div class="absolute left-[44%] top-[58%] h-[5%] w-[13%] bg-[#d55c5c]"></div>
-            <div class="absolute left-[36%] top-[63%] h-[15%] w-[29%] bg-[#ff6961]"></div>
-            <div class="absolute left-[26%] top-[70%] h-[16%] w-[50%] bg-[#12a7b5]"></div>
-            <div class="absolute left-[36%] top-[77%] h-[7%] w-[16%] bg-[#ffe179]"></div>
-        @endif
+    <div class="campus-avatar-stage relative mx-auto ring-4 {{ $tier['ring'] }} {{ $showCard ? 'campus-avatar-stage-full' : $sizeClasses }}" aria-label="{{ $profileTierLabel }} avatar rank">
+        <x-student-character :gender="$gender" :variant="$showCard ? 'full' : 'portrait'" />
     </div>
 
     @if ($showCard)
-        <div class="mt-4 border-t pt-3 {{ $isGirl ? 'border-fuchsia-200/10' : 'border-cyan-200/10' }}">
-            <p class="font-label text-[8px] font-black uppercase tracking-[0.18em] {{ $isGirl ? 'text-fuchsia-300' : 'text-cyan-300' }}">Student</p>
-            <p class="truncate text-sm font-bold text-white">{{ $name ?: 'Student' }}</p>
+        <div class="campus-avatar-card-footer">
+            <div class="min-w-0">
+                <p>STUDENT</p>
+                <span>{{ $name ?: 'Student' }}</span>
+            </div>
+            <div class="shrink-0 text-right">
+                <p>RANK</p>
+                <span>{{ $rank ? '#'.$rank : 'New' }}</span>
+            </div>
         </div>
     @endif
 </div>

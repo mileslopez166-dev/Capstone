@@ -71,6 +71,37 @@ class StudentAssessmentSubmissionTest extends TestCase
         ]);
     }
 
+    public function test_multiple_choice_assessment_loads_hook_sound_effect(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Hook Sound Check',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'focus_areas' => ['Reading Fluency'],
+            'instructions' => 'Catch the correct answer.',
+            'status' => 'published',
+            'manual_questions' => [[
+                'question' => 'Choose the synonym for fast.',
+                'answers' => ['A' => 'Quick', 'B' => 'Slow', 'C' => 'Late', 'D' => 'Still'],
+                'correct_answer' => 'A',
+            ]],
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('student.assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('multiple-choice-hook-sound')
+            ->assertSee('audio/multiple-choice-hook-reel.mp3');
+
+        $this->assertFileExists(public_path('audio/multiple-choice-hook-reel.mp3'));
+    }
+
     public function test_student_needs_teacher_token_before_taking_assessment_again(): void
     {
         $teacher = User::factory()->teacher()->create();
@@ -109,7 +140,8 @@ class StudentAssessmentSubmissionTest extends TestCase
                 'requested_tries' => 2,
                 'message' => 'I want to improve my score.',
             ])
-            ->assertRedirect();
+            ->assertRedirect(route('student.dashboard'))
+            ->assertSessionHas('status', 'Token has been requested for retake. Please wait for your teacher approval.');
 
         $retakeRequest = AssessmentRetakeRequest::query()->firstOrFail();
 
@@ -130,6 +162,54 @@ class StudentAssessmentSubmissionTest extends TestCase
             'status' => 'approved',
             'approved_tries' => 2,
             'remaining_tries' => 1,
+        ]);
+    }
+    public function test_student_is_redirected_to_dashboard_when_retake_token_is_needed(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Retake Gate Check',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'focus_areas' => ['Reading Fluency'],
+            'instructions' => 'Choose carefully.',
+            'status' => 'published',
+            'manual_questions' => [[
+                'question' => 'Choose the synonym for fast.',
+                'answers' => ['A' => 'Quick', 'B' => 'Slow', 'C' => 'Late', 'D' => 'Still'],
+                'correct_answer' => 'A',
+            ]],
+        ]);
+
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'attempt_number' => 1,
+            'answers' => [0 => 'A'],
+            'correct_count' => 1,
+            'question_count' => 1,
+            'points' => 250,
+            'possible_points' => 250,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('student.assessments.show', $assessment))
+            ->assertRedirect(route('student.dashboard'))
+            ->assertSessionHas('status', 'Token has been requested for retake. Please wait for your teacher approval.');
+
+        $this->assertDatabaseHas('assessment_retake_requests', [
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'teacher_id' => $teacher->id,
+            'status' => 'pending',
+            'requested_tries' => 1,
+            'remaining_tries' => 0,
         ]);
     }
     public function test_oral_reading_assessment_shows_pronunciation_legend(): void
@@ -164,6 +244,10 @@ class StudentAssessmentSubmissionTest extends TestCase
             ->assertSeeText('Legend')
             ->assertSeeText('Mispronounced')
             ->assertSeeText('Getting Closer')
+            ->assertSeeText('Mark Mode')
+            ->assertSeeText('Sentence: Mispronounced')
+            ->assertSee('data-sentence-mark="0"', false)
+            ->assertSee('data-mark-mode="sentence-2"', false)
             ->assertSee('data-sync-scroll="oral-story"', false);
 
         $this->assertSame(2, substr_count($response->getContent(), 'data-sync-scroll="oral-story">'));

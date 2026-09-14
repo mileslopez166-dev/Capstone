@@ -47,7 +47,9 @@ class AssessmentRetakeRequestController extends Controller
             ]
         );
 
-        return back()->with('status', 'Retake token request sent to your teacher.');
+        return redirect()
+            ->route('student.dashboard')
+            ->with('status', 'Token has been requested for retake. Please wait for your teacher approval.');
     }
 
     public function approve(Request $request, User $student, AssessmentRetakeRequest $retakeRequest): RedirectResponse

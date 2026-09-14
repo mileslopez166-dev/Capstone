@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Assessment;
+use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,6 +47,64 @@ class ProfileTest extends TestCase
             ->assertSee(route('student.dashboard'), false);
     }
 
+    public function test_student_profile_shows_leaderboard_rank_effect(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create([
+            'name' => 'Miles Lopez',
+            'section' => 'Section A',
+            'approval_status' => 'approved',
+        ]);
+        $topStudent = User::factory()->create([
+            'name' => 'Lyra Vale',
+            'section' => 'Section B',
+            'approval_status' => 'approved',
+        ]);
+
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Profile Rank Check',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'assessment_type' => 'silent_reading',
+            'focus_areas' => ['Reading Fluency'],
+            'instructions' => 'Answer carefully.',
+            'status' => 'published',
+            'manual_questions' => [],
+        ]);
+
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $topStudent->id,
+            'attempt_number' => 1,
+            'answers' => [],
+            'correct_count' => 2,
+            'question_count' => 2,
+            'points' => 500,
+            'possible_points' => 500,
+            'submitted_at' => now(),
+        ]);
+
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'attempt_number' => 1,
+            'answers' => [],
+            'correct_count' => 1,
+            'question_count' => 2,
+            'points' => 250,
+            'possible_points' => 500,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($student)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSeeText('Diamond')
+            ->assertSeeText('#2');
+    }
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();

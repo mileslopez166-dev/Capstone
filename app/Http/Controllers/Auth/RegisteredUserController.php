@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\NotificationSender;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -70,6 +71,9 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        NotificationSender::notifyAdminsAboutRegistration($user);
+        NotificationSender::notifyStudentEnrolled($user);
 
         $statusMessage = $requiresApproval
             ? "{$roleLabel} account request submitted. Please wait for an administrator to approve your access."

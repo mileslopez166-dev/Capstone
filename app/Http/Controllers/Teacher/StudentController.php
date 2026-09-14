@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\NotificationSender;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -56,6 +57,8 @@ class StudentController extends Controller
             'approved_by' => $teacher->id,
             'password' => $validated['password'],
         ]);
+
+        NotificationSender::notifyStudentEnrolled($student, $teacher);
 
         return redirect()
             ->route('students.index')

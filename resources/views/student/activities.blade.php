@@ -6,19 +6,19 @@
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface selection:bg-primary-container/30">
         <x-student-nav active="activities" />
 
-        <main class="min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
+        <main class="campus-activities min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl space-y-8">
                 <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                        <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-dim">Assessment Queue</p>
-                        <h2 class="mt-3 font-headline text-3xl font-extrabold text-on-surface">Ready when your teacher is</h2>
+                    <div class="campus-panel rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                        <p class="campus-queue-label text-sm font-bold uppercase tracking-[0.2em] text-primary-dim"><span class="material-symbols-outlined" aria-hidden="true">bookmark_star</span>Assessment Queue</p>
+                        <h2 class="campus-queue-title mt-3 font-headline text-3xl font-extrabold text-on-surface">{{ $pendingAssessments->isEmpty() ? 'Ready when your teacher is' : 'Your next adventure awaits' }}</h2>
                         <p class="mt-3 text-on-surface-variant">This page shows assessments assigned by your teacher. Once an assessment is published, you can open it here and start answering questions.</p>
                     </div>
 
-                    <div class="rounded-lg bg-primary p-6 text-white shadow-xl">
+                    <div class="campus-stat rounded-lg bg-primary p-6 text-white shadow-xl">
                         <p class="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Pending Assessments</p>
                         <div class="mt-4 flex items-end justify-between">
-                            <span class="font-headline text-5xl font-black">{{ $pendingAssessments->count() }}</span>
+                            <span class="campus-stat-count font-headline text-5xl font-black">{{ $pendingAssessments->count() }}</span>
                             <span class="rounded-full bg-white/15 px-3 py-1 text-sm font-bold">{{ $pendingAssessments->isEmpty() ? 'Waiting for Teacher' : 'Ready to Open' }}</span>
                         </div>
                         <p class="mt-4 text-sm text-white/80">
@@ -31,9 +31,9 @@
                     </div>
                 </section>
 
-                <section class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                <section class="campus-panel rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                     @if ($pendingAssessments->isEmpty())
-                        <div class="flex flex-col items-center justify-center py-10 text-center">
+                        <div class="campus-empty flex flex-col items-center justify-center py-10 text-center">
                             <div class="flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-low text-primary">
                                 <span class="material-symbols-outlined text-5xl">assignment_late</span>
                             </div>
@@ -136,9 +136,9 @@
                     @endif
                 </section>
 
-                <section class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                    <div class="mb-6">
-                        <h3 class="font-headline text-3xl font-bold text-on-surface">Recorded Outputs</h3>
+                <section class="campus-results">
+                    <div class="campus-results-heading mb-6">
+                        <h3 class="font-headline text-3xl font-bold text-on-surface"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>Recorded Outputs</h3>
                         <p class="mt-2 text-on-surface-variant">Review your saved assessment scores, request a retake token, or take again when your teacher has allowed more tries.</p>
                     </div>
 
@@ -186,6 +186,56 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <details class="group mt-5 rounded-2xl border border-outline-variant/15 bg-surface-container-low p-5">
+                                        <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                            <div>
+                                                <h5 class="font-headline text-lg font-extrabold text-on-surface">Assessment Review</h5>
+                                                <p class="mt-1 text-sm text-on-surface-variant">Open this only if you want to check the questions from your latest attempt.</p>
+                                            </div>
+                                            <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'bg-secondary-container/40 text-secondary-dim' : 'bg-error/10 text-error' }}">
+                                                <span class="material-symbols-outlined text-sm">{{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'verified' : 'rate_review' }}</span>
+                                                {{ ($submission->wrong_review_items ?? collect())->count() }} Wrong
+                                                <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                                            </span>
+                                        </summary>
+
+                                        <div class="mt-4 border-t border-outline-variant/10 pt-4">
+                                            @if (($submission->review_items ?? collect())->isEmpty())
+                                                <div class="rounded-xl bg-white p-4 text-sm text-on-surface-variant">
+                                                    This assessment has no multiple-choice answers to review.
+                                                </div>
+                                            @elseif (($submission->wrong_review_items ?? collect())->isEmpty())
+                                                <div class="rounded-xl bg-white p-4 text-sm font-bold text-secondary-dim">
+                                                    Nice work. All checked answers were correct in this attempt.
+                                                </div>
+                                            @else
+                                                <div class="space-y-3">
+                                                    @foreach ($submission->wrong_review_items as $reviewItem)
+                                                        <div class="rounded-xl bg-white p-4 shadow-sm">
+                                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                                                <div class="min-w-0">
+                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Question {{ $reviewItem['number'] }}</p>
+                                                                    <p class="mt-1 font-bold text-on-surface">{{ $reviewItem['question'] }}</p>
+                                                                </div>
+                                                                <span class="inline-flex w-fit shrink-0 rounded-full bg-error/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-error">Needs Review</span>
+                                                            </div>
+                                                            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                                                <div class="rounded-lg border border-error/20 bg-error/5 p-3">
+                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-error">Your Answer</p>
+                                                                    <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['selected_letter'] ?: '-' }}. {{ $reviewItem['selected_text'] }}</p>
+                                                                </div>
+                                                                <div class="rounded-lg border border-secondary/20 bg-secondary-container/20 p-3">
+                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-secondary-dim">Correct Answer</p>
+                                                                    <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['correct_letter'] ?: '-' }}. {{ $reviewItem['correct_text'] }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </details>
 
                                     <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                         @if ($assessment && $submission->remaining_retake_tries > 0)

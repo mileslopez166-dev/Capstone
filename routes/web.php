@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\TokenRequestController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Teacher\StudentController;
+use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
+use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Models\User;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
@@ -36,6 +40,14 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return redirect()->route(auth()->user()->dashboardRouteName());
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::post('/notifications/mark-read', [NotificationController::class, 'markRead'])
+    ->middleware(['auth', 'verified'])
+    ->name('notifications.mark-read');
+
+Route::view('/support', 'support.developing')
+    ->middleware(['auth', 'verified'])
+    ->name('support.developing');
 
 $studentTargetSection = function (User $student): ?string {
     return $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
@@ -122,6 +134,10 @@ Route::get('/admin/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('admin.dashboard');
 
+Route::get('/admin/search', SearchController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('admin.search');
+
 Route::get('/admin/token-requests', [TokenRequestController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('admin.token-requests.index');
@@ -138,6 +154,14 @@ Route::post('/admin/users', [UserManagementController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.store');
 
+Route::get('/admin/users/trash', [UserManagementController::class, 'trash'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.trash');
+
+Route::delete('/admin/users/trash', [UserManagementController::class, 'emptyTrash'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.trash.empty');
+
 Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.edit');
@@ -150,13 +174,6 @@ Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'
     ->middleware(['auth', 'verified'])
     ->name('admin.users.destroy');
 
-Route::get('/admin/users/trash', [UserManagementController::class, 'trash'])
-    ->middleware(['auth', 'verified'])
-    ->name('admin.users.trash');
-
-Route::delete('/admin/users/trash', [UserManagementController::class, 'emptyTrash'])
-    ->middleware(['auth', 'verified'])
-    ->name('admin.users.trash.empty');
 
 Route::post('/admin/users/{id}/restore', [UserManagementController::class, 'restore'])
     ->middleware(['auth', 'verified'])
@@ -165,6 +182,10 @@ Route::post('/admin/users/{id}/restore', [UserManagementController::class, 'rest
 Route::delete('/admin/users/{id}/force-delete', [UserManagementController::class, 'forceDelete'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.force-delete');
+
+Route::get('/student/search', StudentSearchController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('student.search');
 
 Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent, $submissionAccuracy) {
     $student = auth()->user();
@@ -241,6 +262,27 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
             $latestAttempt->accuracy = $submissionAccuracy($latestAttempt);
             $latestAttempt->remaining_retake_tries = (int) ($retakeAllowances[$latestAttempt->assessment_id] ?? 0);
             $latestAttempt->latest_retake_request = $latestRequests[$latestAttempt->assessment_id] ?? null;
+            $answers = collect($latestAttempt->answers ?? []);
+            $latestAttempt->review_items = collect($latestAttempt->assessment?->manual_questions ?? [])
+                ->values()
+                ->map(function (array $question, int $index) use ($answers): array {
+                    $selectedLetter = (string) ($answers->get($index) ?? $answers->get((string) $index) ?? '');
+                    $correctLetter = (string) ($question['correct_answer'] ?? '');
+                    $options = $question['answers'] ?? [];
+
+                    return [
+                        'number' => $index + 1,
+                        'question' => $question['question'] ?? 'Question',
+                        'selected_letter' => $selectedLetter,
+                        'selected_text' => $selectedLetter !== '' ? ($options[$selectedLetter] ?? 'Answer '.$selectedLetter) : 'No answer',
+                        'correct_letter' => $correctLetter,
+                        'correct_text' => $correctLetter !== '' ? ($options[$correctLetter] ?? 'Answer '.$correctLetter) : 'No correct answer set',
+                        'is_correct' => $selectedLetter !== '' && $selectedLetter === $correctLetter,
+                    ];
+                });
+            $latestAttempt->wrong_review_items = $latestAttempt->review_items
+                ->filter(fn (array $item): bool => ! $item['is_correct'])
+                ->values();
 
             return $latestAttempt;
         })
@@ -270,7 +312,27 @@ Route::get('/student/assessments/{assessment}', function (Assessment $assessment
         ->where('status', 'approved')
         ->sum('remaining_tries');
 
-    abort_unless($attemptCount === 0 || $remainingRetakeTries > 0, 403, 'Ask your teacher for a retake token before answering again.');
+    if ($attemptCount > 0 && $remainingRetakeTries <= 0) {
+        AssessmentRetakeRequest::query()->updateOrCreate(
+            [
+                'assessment_id' => $assessment->id,
+                'user_id' => $student->id,
+                'status' => 'pending',
+            ],
+            [
+                'teacher_id' => $assessment->created_by,
+                'requested_tries' => 1,
+                'approved_tries' => 0,
+                'remaining_tries' => 0,
+                'message' => 'Student requested a retake token from the assessment page.',
+                'decided_at' => null,
+            ]
+        );
+
+        return redirect()
+            ->route('student.dashboard')
+            ->with('status', 'Token has been requested for retake. Please wait for your teacher approval.');
+    }
 
     return view('student.assessment', [
         'assessment' => $assessment,
@@ -283,6 +345,68 @@ Route::post('/student/assessments/{assessment}/retake-request', [AssessmentRetak
     ->middleware(['auth', 'verified'])
     ->name('student.assessments.retake-request');
 
+
+Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') use ($submissionAccuracy) {
+    $student = auth()->user();
+    abort_unless($student?->isStudent(), 403);
+
+    $scopes = [
+        'all' => 'All Sections',
+        'section_a' => 'Section A',
+        'section_b' => 'Section B',
+        'section_c' => 'Section C',
+    ];
+
+    abort_unless(array_key_exists($scope, $scopes), 404);
+
+    $students = User::query()
+        ->where('role', 'student')
+        ->where('approval_status', 'approved')
+        ->when($scope !== 'all', fn ($query) => $query->where('section', $scopes[$scope]))
+        ->orderBy('name')
+        ->get();
+
+    $submissions = AssessmentSubmission::query()
+        ->whereIn('user_id', $students->pluck('id'))
+        ->get()
+        ->groupBy('user_id');
+
+    $leaderboard = $students
+        ->map(function (User $rankedStudent) use ($submissions, $submissionAccuracy): array {
+            $studentSubmissions = $submissions->get($rankedStudent->id, collect());
+
+            return [
+                'student' => $rankedStudent,
+                'points' => (int) $studentSubmissions->sum('points'),
+                'completed' => $studentSubmissions->count(),
+                'accuracy' => $studentSubmissions->isNotEmpty()
+                    ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
+                    : null,
+            ];
+        })
+        ->filter(fn (array $entry): bool => $entry['completed'] > 0)
+        ->sortBy([
+            ['points', 'desc'],
+            ['accuracy', 'desc'],
+            ['completed', 'desc'],
+            fn (array $entry): string => $entry['student']->name,
+        ])
+        ->values()
+        ->map(function (array $entry, int $index): array {
+            $entry['rank'] = $index + 1;
+
+            return $entry;
+        });
+
+    $currentStudentRank = $leaderboard->firstWhere('student.id', $student->id)['rank'] ?? null;
+
+    return view('student.leaderboard', [
+        'scope' => $scope,
+        'scopeLabel' => $scopes[$scope],
+        'leaderboard' => $leaderboard,
+        'currentStudentRank' => $currentStudentRank,
+    ]);
+})->middleware(['auth', 'verified'])->name('student.leaderboard');
 
 Route::get('/student/rewards', function () use ($submissionAccuracy) {
     $student = auth()->user();
@@ -305,6 +429,10 @@ Route::get('/student/rewards', function () use ($submissionAccuracy) {
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('student.rewards');
+
+Route::get('/teacher/search', TeacherSearchController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.search');
 
 Route::get('/teacher/students', function () use ($submissionAccuracy) {
     $teacher = auth()->user();

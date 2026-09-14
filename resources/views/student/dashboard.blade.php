@@ -17,8 +17,16 @@
 
         <main class="min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl space-y-8">
+            @if (session('status'))
+                <div class="rounded-lg border border-secondary/20 bg-secondary-container/30 px-5 py-4 text-sm font-bold text-on-surface shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-secondary-dim">notifications_active</span>
+                        <p>{{ session('status') }}</p>
+                    </div>
+                </div>
+            @endif
             <section class="relative mb-12 overflow-visible">
-                <div class="flex flex-col items-center justify-between gap-8 rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl md:flex-row md:p-12">
+                <div class="campus-welcome flex flex-col items-center justify-between gap-8 rounded-lg p-8 text-on-primary shadow-xl md:flex-row md:p-12">
                     <div class="flex-1">
                         <h1 class="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
                             Welcome, {{ $firstName }}
@@ -38,8 +46,8 @@
                         </div>
                     </div>
 
-                    <div class="w-full max-w-[220px] flex-shrink-0 md:w-[220px]">
-                        <x-student-pixel-avatar :gender="$student->gender" :name="$student->name" size="lg" :show-card="true" :is-online="true" class="bg-white/10" />
+                    <div class="campus-welcome-character">
+                        <x-student-character :gender="$student->gender" />
                     </div>
                 </div>
             </section>

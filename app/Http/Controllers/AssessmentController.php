@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
 use App\Models\AssessmentRetakeRequest;
+use App\Support\NotificationSender;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,7 +78,7 @@ class AssessmentController extends Controller
             ])
             ->all();
 
-        $request->user()->createdAssessments()->create([
+        $assessment = $request->user()->createdAssessments()->create([
             'title' => $validated['title'],
             'subject' => $validated['subject'],
             'quiz_type' => $validated['quiz_type'],
@@ -92,6 +93,10 @@ class AssessmentController extends Controller
             'story_description' => $validated['story_description'] ?? null,
             'status' => $validated['status'],
         ]);
+
+        if ($assessment->status === 'published') {
+            NotificationSender::notifyAssessmentPublished($assessment);
+        }
 
         return redirect()
             ->route('assessments.index')
@@ -117,9 +122,15 @@ class AssessmentController extends Controller
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
 
+        $wasPublished = $assessment->status === 'published';
+
         $assessment->update([
             'status' => $validated['status'],
         ]);
+
+        if (! $wasPublished && $assessment->status === 'published') {
+            NotificationSender::notifyAssessmentPublished($assessment);
+        }
 
         $message = $validated['status'] === 'published'
             ? 'Assessment unlocked and visible to students.'
@@ -205,6 +216,8 @@ class AssessmentController extends Controller
         if ($retakeToken) {
             $retakeToken->decrement('remaining_tries');
         }
+
+        NotificationSender::notifyAssessmentCompleted($submission->load(['assessment.teacher', 'student']));
 
         return response()->json([
             'attempt_number' => $submission->attempt_number,

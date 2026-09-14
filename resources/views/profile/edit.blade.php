@@ -2,9 +2,12 @@
     @php
         $user = $user ?? Auth::user();
         $isStudent = $user->isStudent();
+        $isTeacher = $user->isTeacher();
         $dashboardRoute = route($user->dashboardRouteName());
         $firstName = str($user->name)->before(' ')->title();
         $studentAvatarStyle = ($user->gender === 'female') ? 'Lyra Vale' : 'Nova Finch';
+        $studentRank = $studentRank ?? null;
+        $studentRankTier = $studentRankTier ?? ['label' => 'Bronze', 'icon' => 'editor_choice'];
         $initials = str($user->name)
             ->explode(' ')
             ->filter()
@@ -16,10 +19,15 @@
     <div class="min-h-screen bg-background font-body text-on-surface">
         @if ($isStudent)
             <x-student-nav active="profile" />
+        @elseif ($isTeacher)
+            <x-teacher-sidebar :teacher-name="$user->name" :teacher-initials="$initials" active="profile" />
+            <div class="lg:ml-72">
+                <x-teacher-topbar :teacher-name="$user->name" :teacher-initials="$initials" search-placeholder="Search your workspace..." />
+            </div>
         @endif
 
-        <main class="{{ $isStudent ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6' }}">
-            <div class="{{ $isStudent ? 'mx-auto max-w-7xl' : '' }}">
+        <main class="{{ $isStudent || $isTeacher ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'mx-auto max-w-6xl px-4 py-8 pb-32 md:px-6' }}">
+            <div class="{{ $isStudent || $isTeacher ? 'mx-auto max-w-7xl' : '' }}">
             <div class="mb-6">
                 <a class="inline-flex items-center gap-2 rounded-xl bg-surface-container-lowest px-4 py-2.5 text-sm font-bold text-primary shadow-[0_12px_30px_rgba(0,94,159,0.06)] transition-colors hover:bg-surface-container-low active:scale-[0.98]" href="{{ $dashboardRoute }}">
                     <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -27,7 +35,7 @@
                 </a>
             </div>
             <section class="mb-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-                <div class="overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl">
+                <div class="campus-profile-intro overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl">
                     <p class="text-sm font-bold uppercase tracking-[0.25em] text-white/70">{{ $isStudent ? 'Student Profile' : 'Account Center' }}</p>
                     <h1 class="mt-4 font-headline text-4xl font-extrabold tracking-tight md:text-5xl">{{ $isStudent ? "Keep growing, {$firstName}" : $user->name }}</h1>
                     <p class="mt-4 max-w-md text-lg text-white/85">
@@ -36,7 +44,7 @@
 
                     <div class="mt-8 flex items-center gap-4">
                         @if ($isStudent)
-                            <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="sm" />
+                            <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="sm" :rank-tier="$studentRankTier" :rank="$studentRank" />
                         @else
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl font-black text-white shadow-inner">
                                 {{ $initials }}
@@ -104,14 +112,22 @@
                                 @endif
                             </div>
                             @if ($isStudent)
-                                <div>
-                                    <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="profile-gender">Avatar Style</label>
-                                    <select id="profile-gender" name="gender" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface focus:ring-2 focus:ring-primary/20">
-                                        <option value="male" @selected(old('gender', $user->gender ?? 'male') === 'male')>Nova Finch - Boys</option>
-                                        <option value="female" @selected(old('gender', $user->gender) === 'female')>Lyra Vale - Girls</option>
-                                    </select>
+                                <fieldset>
+                                    <legend class="text-sm font-bold text-on-surface-variant">Choose Your Avatar</legend>
+                                    <div class="campus-avatar-options">
+                                        @foreach (['male' => ['name' => 'Nova Finch', 'label' => 'Boy'], 'female' => ['name' => 'Lyra Vale', 'label' => 'Girl']] as $avatarGender => $avatarChoice)
+                                            <label class="campus-avatar-choice">
+                                                <input type="radio" name="gender" value="{{ $avatarGender }}" @checked(old('gender', $user->gender ?? 'male') === $avatarGender)>
+                                                <span>
+                                                    <x-student-character :gender="$avatarGender" />
+                                                    <strong>{{ $avatarChoice['name'] }}</strong>
+                                                    <small>{{ $avatarChoice['label'] }}</small>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
                                     <x-input-error class="mt-2 text-sm text-error" :messages="$errors->get('gender')" />
-                                </div>
+                                </fieldset>
                             @else
                                 <input name="gender" type="hidden" value="{{ $user->gender }}">
                             @endif
@@ -179,7 +195,7 @@
 
                 <aside class="space-y-6">
                     @if ($isStudent)
-                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" :is-online="true" />
+                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" :is-online="true" :rank-tier="$studentRankTier" :rank="$studentRank" />
                     @endif
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h2 class="font-headline text-2xl font-bold text-on-surface">Account Summary</h2>

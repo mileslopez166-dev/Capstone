@@ -84,6 +84,7 @@ class AdminDashboardTest extends TestCase
             'approved_by' => $admin->id,
         ]);
     }
+
     public function test_admin_can_create_a_student_with_avatar_style(): void
     {
         $admin = User::factory()->admin()->create();
@@ -109,6 +110,27 @@ class AdminDashboardTest extends TestCase
             'gender' => 'male',
             'approval_status' => 'approved',
         ]);
+    }
+
+    public function test_admin_can_empty_trash_without_hitting_user_delete_route(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $teacher = User::factory()->teacher()->create([
+            'email' => 'trashed.teacher@example.com',
+        ]);
+        $student = User::factory()->create([
+            'email' => 'trashed.student@example.com',
+        ]);
+
+        $teacher->delete();
+        $student->delete();
+
+        $response = $this->actingAs($admin)->delete(route('admin.users.trash.empty'));
+
+        $response->assertRedirect(route('admin.users.trash'));
+        $response->assertSessionHas('status', 'All trashed users have been permanently deleted.');
+        $this->assertDatabaseMissing('users', ['email' => 'trashed.teacher@example.com']);
+        $this->assertDatabaseMissing('users', ['email' => 'trashed.student@example.com']);
     }
 
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void
@@ -191,5 +213,39 @@ class AdminDashboardTest extends TestCase
         ])->save();
 
         return $systemAdmin;
+    }
+    public function test_admin_search_routes_role_queries_to_user_management(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.search', ['q' => 'student']))
+            ->assertRedirect(route('admin.dashboard', ['role' => 'student']).'#user-management');
+    }
+
+    public function test_admin_search_routes_token_queries_to_token_requests(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.search', ['q' => 'token request']))
+            ->assertRedirect(route('admin.token-requests.index', ['search' => 'token request']));
+    }
+    public function test_admin_dashboard_search_shows_possible_options(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->create([
+            'name' => 'Miles Lopez',
+            'email' => 'miles.student@example.com',
+            'role' => 'student',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('admin-search-suggestions')
+            ->assertSee('Token Requests')
+            ->assertSee('Miles Lopez')
+            ->assertSee('miles.student@example.com');
     }
 }
