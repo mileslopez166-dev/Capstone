@@ -1,0 +1,104 @@
+.hook-game.ocean-game {
+    isolation: isolate;
+    grid-template-columns: 296px minmax(0, 1fr);
+    grid-template-rows: 128px minmax(340px, 1fr);
+    gap: 16px 28px;
+    padding: 24px 28px 58px;
+    height: calc(100dvh - 76px);
+    min-height: 640px;
+    background: #197f9b;
+    letter-spacing: 0;
+}
+
+#fishing-sea-scene {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: linear-gradient(#b7e1ed 0%, #e4f3ed 22%, #42c5c6 25%, #14849e 58%, #105768 100%);
+}
+
+#fishing-sea-scene canvas { display: block; width: 100%; height: 100%; }
+.fishing-boat-fallback {
+    position: absolute;
+    left: -94px;
+    top: -44px;
+    width: 130px;
+    height: 93px;
+    max-width: none;
+    overflow: visible;
+    transform-origin: 70% 75%;
+    transform: translate(calc(var(--boat-pull, 0) * var(--boat-pull-direction, 1) * 24px), calc(var(--boat-pull, 0) * 130px)) rotate(calc(var(--boat-pull, 0) * var(--boat-pull-direction, 1) * 35deg));
+    opacity: calc(1 - var(--boat-pull, 0) * .75);
+}
+.sea-3d-ready .fishing-boat-fallback { display: none; }
+.ocean-game .answer-fish[data-result="incorrect"] .fish-visual { transform: rotate(90deg); }
+.ocean-game #question-node[data-catch-result="incorrect"] { outline: 3px solid #dc8170; outline-offset: -3px; }
+.ocean-game #question-node[data-catch-result="correct"] { outline: 3px solid #4ca77c; outline-offset: -3px; }
+.ocean-game #hook-hud { align-self: start; gap: 14px; }
+.ocean-game #hook-hud > div:first-child { flex-direction: row; gap: 8px; }
+.ocean-game #hook-hud > div:first-child > div { flex: 1; padding: 12px; }
+.ocean-game #hook-hud .glass-hud { background: rgba(249, 253, 252, .96); border-color: rgba(255, 255, 255, .8); box-shadow: 0 6px 22px #063f5620; border-radius: 8px; }
+.ocean-game #hook-hud > div:first-child > div:first-child { gap: 10px; }
+.ocean-game #hook-hud > div:first-child > div:first-child > div:first-child { width: 32px; height: 32px; background: #f5d681; color: #6b4c17; }
+.ocean-game #hook-hud p { letter-spacing: 0; }
+.ocean-game #question-node { max-height: min(570px, calc(100dvh - 235px)); padding: 20px; }
+.ocean-game #question-node h2 { font-size: 19px; line-height: 1.45; color: #163f49; }
+.ocean-game .hook-options { display: grid; gap: 9px; }
+.ocean-game .hook-options > div { margin: 0; align-items: start; border: 1px solid #dce9e8; border-radius: 6px; background: #fff; padding: 10px; font-size: 14px; line-height: 1.5; color: #284e55; }
+.ocean-game .hook-options > div > span:first-child { flex: 0 0 28px; border-radius: 50%; background: #d2eeeb; color: #225d55; }
+.ocean-game .hook-options > div:nth-child(2) > span:first-child { background: #fbe0d8; color: #944932; }
+.ocean-game .hook-options > div:nth-child(3) > span:first-child { background: #faecc1; color: #816118; }
+.ocean-game .hook-options > div:nth-child(4) > span:first-child { background: #d8e9f8; color: #2d6090; }
+.ocean-game #mission-info { align-self: start; padding: 4px 0 0; text-align: left; }
+.ocean-game #mission-info h1 { max-width: 680px; margin: 0 0 6px; font-size: 26px; line-height: 1.2; font-style: normal; letter-spacing: 0; color: #123f51; text-shadow: 0 1px 8px #e4f4faaa; }
+.ocean-game #mission-info p { max-width: 620px; font-size: 14px; line-height: 1.4; color: #255e70; }
+.ocean-game .ocean-eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #306c7a; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.ocean-game .ocean-eyebrow .material-symbols-outlined { font-size: 17px; }
+.hook-game.ocean-game #fish-container { min-height: 340px; margin: 0; border: 0; background: transparent; overflow: visible; }
+.hook-game.ocean-game #fish-container::after { display: none; }
+.ocean-game #egg-wrapper { display: none; }
+.ocean-game .answer-fish { width: 150px; height: 88px; }
+.ocean-game .fish-letter { inset: auto auto 1px 52px; width: 30px; height: 26px; padding: 0; border: 1px solid #ffffff90; border-radius: 6px; background: #ecfff5f2; color: #184b46; font-size: 15px; text-shadow: none; box-shadow: 0 3px 8px #053e5330; }
+.ocean-game .answer-fish[data-letter="B"] .fish-letter { background: #ffebddf2; color: #874834; }
+.ocean-game .answer-fish[data-letter="C"] .fish-letter { background: #fff2bef2; color: #785617; }
+.ocean-game .answer-fish[data-letter="D"] .fish-letter { background: #e2f2fff2; color: #315d7f; }
+.ocean-game .answer-fish:focus-visible { outline-color: #fff7bf; border-radius: 8px; }
+.ocean-game .answer-fish:hover .fish-letter { border-color: #fff; box-shadow: 0 0 0 3px #ffffff50; }
+.sea-3d-ready .fish-visual, .sea-3d-ready #hook-head > svg, .sea-3d-ready .hook-cable { opacity: 0; }
+.ocean-game .is-caught .fish-letter { opacity: 0; }
+.ocean-game .ocean-catch-status { position: absolute; z-index: 35; bottom: 19px; left: 352px; right: 28px; display: flex; justify-content: center; color: #f2fcf6; font-size: 14px; font-weight: 700; text-align: center; text-shadow: 0 2px 6px #033b48; pointer-events: none; }
+.ocean-game #story-gate { cursor: auto; }
+
+@media (min-width: 1500px) {
+    .hook-game.ocean-game { grid-template-columns: 320px minmax(0, 1fr); padding-left: 40px; padding-right: 40px; }
+    .ocean-game .ocean-catch-status { left: 388px; right: 40px; }
+}
+
+@media (max-width: 760px) {
+    .hook-game.ocean-game { height: auto; min-height: calc(100dvh - 76px); grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(340px, 1fr); gap: 14px; padding: 16px 16px 46px; }
+    .ocean-game #mission-info { grid-row: 1; padding: 0; }
+    .ocean-game #mission-info h1 { font-size: 22px; }
+    .ocean-game #mission-info p { font-size: 12px; }
+    .ocean-game .ocean-eyebrow { margin-bottom: 5px; }
+    .ocean-game #hook-hud { grid-row: 2; gap: 10px; }
+    .ocean-game #hook-hud > div:first-child > div { padding: 8px 12px; }
+    .ocean-game #question-node { max-height: 290px; padding: 14px; }
+    .ocean-game #question-node h2 { font-size: 16px; margin-bottom: 12px; }
+    .ocean-game #question-node > div:first-child { margin-bottom: 6px; }
+    .ocean-game .hook-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .ocean-game .hook-options > div { padding: 8px; gap: 7px; font-size: 13px; }
+    .hook-game.ocean-game #fish-container { grid-row: 3; margin-top: 34px; min-height: 340px; }
+    .ocean-game .ocean-catch-status { left: 16px; right: 16px; bottom: 12px; font-size: 12px; }
+}
+
+@media (max-width: 360px) {
+    .hook-game.ocean-game { padding-left: 10px; padding-right: 10px; }
+    .ocean-game #question-node { padding: 12px; }
+    .ocean-game .answer-fish { width: 132px; height: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fishing-boat-fallback { transform: translateY(calc(var(--boat-pull, 0) * 12px)); }
+}

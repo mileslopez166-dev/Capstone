@@ -21,6 +21,7 @@
         $isListeningComprehension = $assessmentType === 'listening_comprehension';
         $isFlashcards = ($assessment->quiz_type ?? 'multiple_choice') === 'flashcards';
         $storyDescription = $assessment->story_description;
+        $hasReadingStage = ($storyTitle || $storyDescription) && ! $isListeningComprehension;
         $storyText = $storyDescription ?: $assessment->instructions;
         $storyParagraphs = collect(preg_split('/\R{2,}/u', trim($storyText ?? '')))
             ->filter(fn (string $paragraph): bool => trim($paragraph) !== '');
@@ -156,62 +157,35 @@
         .mark-mode-button.mark-mode-yellow.is-active { background: #facc15; color: #713f12; box-shadow: 0 12px 24px rgba(202, 138, 4, 0.18); }
         .mark-mode-button.mark-mode-red.is-active { background: #ef4444; color: #ffffff; box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18); }
         .result-pattern { background-image: radial-gradient(circle at 10px 10px, rgba(68, 165, 255, 0.45) 1px, transparent 1px), radial-gradient(circle at 30px 30px, rgba(145, 247, 142, 0.45) 1px, transparent 1px); background-size: 40px 40px; background-position: 0 0, 20px 20px; opacity: 0.2; }
-        .joyful-bg { background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 34%, #bae6fd 66%, #f0f9ff 100%); }
-        .sky-cloud { position: absolute; z-index: 1; width: 12rem; height: 3.5rem; border-radius: 9999px; background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.98) 58%, rgba(224,242,254,.94) 100%); box-shadow: 0 10px 18px rgba(14,116,144,.16), inset 0 -6px 0 rgba(186,230,253,.42); pointer-events: none; }
-        .sky-cloud::before, .sky-cloud::after { content: ''; position: absolute; bottom: .35rem; border-radius: 9999px; background: linear-gradient(180deg, #fff, #e0f2fe); }
-        .sky-cloud::before { left: 1.5rem; width: 5.5rem; height: 5.5rem; }
-        .sky-cloud::after { right: 1.5rem; width: 4.5rem; height: 4.5rem; }
-        .sky-cloud.small { width: 9rem; height: 2.5rem; transform: scale(.9); }
-        .frog-answer { transition: transform .2s ease, filter .2s ease; }
-        .frog-answer:hover { transform: translateY(-4px) scale(1.03); }
-        .frog-answer.is-caught { animation: mosquitoCaught .72s ease-in forwards; pointer-events: none; }
-        .frog-answer-circle { box-shadow: 0 7px 0 rgba(30, 41, 59, .28); }
-        .dragonfly-wing { position: absolute; top: 50%; width: 4.1rem; height: 2.15rem; border: 3px solid rgba(255,255,255,.95); background: linear-gradient(135deg, var(--wing-light), var(--wing-mid) 48%, var(--wing-deep)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 0 10px var(--wing-glow), 0 3px 12px var(--wing-glow); pointer-events: none; z-index: 3; animation: wingFlutter .7s ease-in-out infinite alternate; }
-        .dragonfly-wing.red-wings { --wing-light: rgba(254,202,202,.95); --wing-mid: rgba(251,113,133,.72); --wing-deep: rgba(225,29,72,.5); --wing-glow: rgba(244,63,94,.65); }
-        .dragonfly-wing.gold-wings { --wing-light: rgba(254,249,195,.98); --wing-mid: rgba(251,191,36,.76); --wing-deep: rgba(234,138,0,.5); --wing-glow: rgba(250,204,21,.7); }
-        .dragonfly-wing.purple-wings { --wing-light: rgba(233,213,255,.98); --wing-mid: rgba(129,140,248,.72); --wing-deep: rgba(126,34,206,.5); --wing-glow: rgba(168,85,247,.7); }
-        .dragonfly-wing.green-wings { --wing-light: rgba(220,252,231,.98); --wing-mid: rgba(74,222,128,.72); --wing-deep: rgba(22,163,74,.5); --wing-glow: rgba(34,197,94,.7); }
-        .dragonfly-wing.left { right: 50%; border-radius: 100% 20% 20% 100%; transform: translateY(-50%) rotate(-16deg); }
-        .dragonfly-wing.right { left: 50%; border-radius: 20% 100% 100% 20%; transform: translateY(-50%) rotate(16deg); }
-        @keyframes wingFlutter { from { transform: translateY(-50%) rotate(-12deg) scaleY(.82); } to { transform: translateY(-50%) rotate(12deg) scaleY(1.12); } }
-        @keyframes mosquitoCaught { 0% { transform: scale(1) rotate(0); opacity: 1; } 45% { transform: scale(1.35) rotate(12deg); opacity: 1; } 100% { transform: scale(.05) rotate(-25deg); opacity: 0; } }
-        .frog-tongue { position: absolute; height: 12px; left: var(--tongue-left); top: var(--tongue-top); width: var(--tongue-width); z-index: 45; pointer-events: none; border-radius: 999px; background: linear-gradient(90deg, #fb7185, #ef4444 70%, #be123c); border: 3px solid #be123c; transform-origin: left center; transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; }
-        .frog-tongue.is-catching { animation: tongueShoot .72s cubic-bezier(.2,.8,.25,1) forwards; }
-        @keyframes tongueShoot { 0% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } 18%, 58% { opacity: 1; } 58% { transform: rotate(var(--tongue-angle)) scaleX(1); } 100% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } }
     </style>
 
-    <div class="app-safe-screen overflow-hidden bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
-        <nav class="sticky top-0 z-50 mx-auto flex w-full max-w-full items-center justify-between bg-white/80 px-5 py-3 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl">
-            <div class="flex items-center gap-4"><span class="font-headline text-xl font-extrabold italic text-blue-600">AI-PGAALS</span></div>
-            <div class="hidden items-center gap-8 md:flex">
-                <a class="font-medium text-slate-500 transition-colors hover:text-blue-500" href="{{ route('student.dashboard') }}">Home</a>
-                <a class="border-b-4 border-blue-500 font-bold text-blue-700 transition-colors hover:text-blue-500" href="{{ route('student.activities') }}">Missions</a>
-                <a class="font-medium text-slate-500 transition-colors hover:text-blue-500" href="{{ route('profile.edit') }}">Backpack</a>
-            </div>
-            <div class="flex items-center gap-4">
-                <a class="rounded-full p-2 transition-colors hover:bg-surface-container-low" href="{{ route('student.activities') }}"><span class="material-symbols-outlined text-on-surface-variant">arrow_back</span></a>
-                <a class="rounded-full p-2 transition-colors hover:bg-surface-container-low" href="{{ route('profile.edit') }}"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></a>
-            </div>
-        </nav>
+    <div class="student-assessment-page min-h-screen font-body text-on-surface">
+        <x-student-nav active="activities" />
+
+        <main class="assessment-workspace lg:ml-72" aria-labelledby="assessment-title">
+            <header class="assessment-heading">
+                <a class="assessment-back" href="{{ route('student.activities') }}" aria-label="Back to activities" title="Back to activities">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                </a>
+                <div class="assessment-heading-copy">
+                    <p>{{ $assessmentTypeLabel }}</p>
+                    <h1 id="assessment-title">{{ $assessment->title }}</h1>
+                </div>
+                <div class="assessment-attempt">
+                    <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
+                    <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
+                </div>
+            </header>
 
         @if ($questionCount > 0 || $isOralReading)
             <audio id="assessment-game-music" src="{{ asset('audio/assessment-game-music.mp3') }}" preload="auto" loop></audio>
             <audio id="multiple-choice-hook-sound" src="{{ asset('audio/multiple-choice-hook-reel.mp3') }}" preload="auto"></audio>
             <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
             <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
-            <main class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $isFlashcards ? 'joyful-bg' : 'bg-gradient-to-b from-surface via-surface-container-low to-surface' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game' : '' }}" id="mission-canvas">
-                @if ($isFlashcards)
-                    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div class="sky-cloud left-[-3rem] top-20"></div>
-                        <div class="sky-cloud small right-[-4rem] top-36"></div>
-                        <div class="sky-cloud left-[18%] top-72"></div>
-                        <div class="sky-cloud small bottom-44 right-[5%]"></div>
-                    </div>
-                @else
-                    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div class="absolute left-[10%] top-20 h-64 w-64 rounded-full bg-primary-container/10 blur-3xl"></div>
-                        <div class="absolute bottom-20 right-[15%] h-96 w-96 rounded-full bg-tertiary-container/10 blur-3xl"></div>
-                    </div>
+            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game ocean-game' : '' }}" id="mission-canvas" aria-label="Assessment activity">
+                @if (! $isOralReading && ! $isFlashcards)
+                    <div id="fishing-sea-scene" aria-hidden="true"></div>
+                    <div class="ocean-catch-status" id="ocean-catch-status" role="status" aria-live="polite"></div>
                 @endif
                 <div id="hook-hud" class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
@@ -220,7 +194,7 @@
                             <div><p class="font-label text-[10px] font-bold uppercase tracking-widest text-slate-500">Progress</p><p class="font-headline text-xl font-black leading-none text-on-surface" id="score">0/{{ $questionCount }}</p></div>
                         </div>
                         <div class="glass-hud pointer-events-auto rounded-lg border border-white/40 p-3 shadow-sm">
-                            <p class="font-label mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Energy Sync</p>
+                            <p class="font-label mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Catch Progress</p>
                             <div class="liquid-track h-3 w-full overflow-hidden rounded-full bg-surface-container-highest"><div class="liquid-fill h-full w-0 rounded-full bg-secondary" id="progress-bar"></div></div>
                         </div>
                     </div>
@@ -243,11 +217,19 @@
                 </div>
 
                 <div class="pointer-events-none absolute right-3 top-3 z-30 max-w-[calc(100%-1.5rem)] text-right sm:right-5 sm:top-5 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
-                    <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">MISSION: {{ $missionTitle }}</h1>
+                    <div class="ocean-eyebrow"><span class="material-symbols-outlined" aria-hidden="true">sailing</span> Ocean Expedition</div>
+                    <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">{{ $assessment->title }}</h1>
                     <p class="font-body font-medium text-slate-500">{{ $questionCount }} questions</p>
                 </div>
 
                 <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="hook-assembly" aria-hidden="true">
+                    <svg class="fishing-boat-fallback" viewBox="0 0 140 100" aria-hidden="true">
+                        <path d="M7 62h115c-10 21-22 26-39 26H37C22 88 14 77 7 62Z" fill="#f3ead9" stroke="#316c79" stroke-width="3"/>
+                        <path d="M35 35h33v27H35Z" fill="#fff9e5" stroke="#316c79" stroke-width="2"/>
+                        <path d="M40 41h21v13H40Z" fill="#397186"/><path d="M30 33h44" stroke="#ea9e64" stroke-width="4"/>
+                        <path d="M94 62c8-36 15-47 27-45l15 6" fill="none" stroke="#274750" stroke-width="2"/>
+                        <path d="m136 23-7 70" stroke="#e4f9ee" stroke-width="1.5"/>
+                    </svg>
                     <div class="hook-cable" id="hook-cable"></div>
                     <div class="hook-head" id="hook-head">
                         <svg width="40" height="48" viewBox="0 0 40 48" fill="none"><path d="M20 0v29c0 20 18 20 18 0v-8l-7 7" stroke="#4c6675" stroke-width="4" stroke-linejoin="round"/><path d="M20 0v29c0 17 16 17 16 0v-5" stroke="#deebef" stroke-width="1.5"/></svg>
@@ -283,68 +265,25 @@
                     </div>
                 </div>
 
-                                @if ($isFlashcards && ! $isOralReading)
-                    <div class="absolute inset-x-0 top-0 z-30 px-3 pt-4 sm:px-6 sm:pt-8" id="frog-flashcards-game">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 rounded-full border-2 border-blue-100 bg-white px-4 py-2 shadow-lg shadow-blue-200/50">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-yellow-500 bg-yellow-400 text-white"><span class="material-symbols-outlined text-lg">stars</span></div>
-                                <span class="font-headline text-2xl font-black text-blue-900" id="frog-score">0</span>
-                            </div>
-                            <div class="rounded-full border-2 border-blue-100 bg-white px-4 py-2 text-sm font-black uppercase tracking-wider text-blue-800 shadow-lg shadow-blue-200/50" id="frog-level-text">Question 1/{{ $questionCount }}</div>
-                        </div>
-                        <div class="mx-auto mt-5 max-w-4xl">
-                            <div class="h-4 w-full rounded-full border border-blue-100 bg-white p-1 shadow-inner">
-                                <div class="relative h-full w-0 rounded-full bg-gradient-to-r from-green-400 to-lime-500 transition-all duration-500" id="frog-progress-bar"><div class="absolute -right-2 -top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-lime-500 bg-white shadow-sm"><span class="material-symbols-outlined text-xs text-lime-600">pest_control</span></div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <section class="absolute inset-x-0 top-24 z-30 mx-auto flex w-full max-w-5xl flex-col items-center px-3 sm:top-28 sm:px-6" aria-label="Flashcards frog game">
-                        <div class="relative w-full rounded-2xl border-b-4 border-blue-100 bg-white px-4 py-4 sm:rounded-[2rem] sm:border-b-8 sm:px-8 sm:py-6 text-center shadow-xl shadow-blue-200/50 transition-colors duration-300" id="frog-question-card">
-                            <div class="absolute -left-4 -top-4 flex h-12 w-12 rotate-[-10deg] items-center justify-center rounded-full border-4 border-white bg-yellow-400 text-2xl font-black text-white shadow-md">?</div>
-                            <h2 class="font-headline text-xl font-black leading-tight text-blue-900 sm:text-3xl md:text-4xl" id="frog-question-text">{{ $firstQuestion ? $firstQuestion['text'] : 'Ready?' }}</h2>
-                        </div>
-                        <div class="relative mt-5 grid min-h-40 w-full grid-cols-2 gap-3 sm:mt-8 sm:min-h-48 sm:gap-5 md:grid-cols-4" id="frog-answer-zone">
-                            @foreach (['A', 'B', 'C', 'D'] as $index => $letter)
-                                @php $wingClass = ['red-wings', 'gold-wings', 'purple-wings', 'green-wings'][$index]; @endphp
-                                <button class="frog-answer relative mx-auto flex h-20 w-28 items-center justify-center sm:h-24 sm:w-32 focus:outline-none focus:ring-4 focus:ring-blue-200" type="button" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
-                                    <span class="dragonfly-wing left {{ $wingClass }}"></span>
-                                    <span class="dragonfly-wing right {{ $wingClass }}"></span>
-                                    <span class="frog-answer-circle relative z-10 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-600 bg-blue-500 text-xl font-black text-white" data-frog-answer-circle>{{ $letter }}</span>
-                                    <span class="absolute -bottom-4 left-1/2 z-10 w-32 -translate-x-1/2 truncate sm:w-40 rounded-full bg-white/90 px-3 py-1 text-xs font-black text-blue-900 shadow-sm" data-frog-answer-label>Answer {{ $letter }}</span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </section>
-
-                    <div class="frog-tongue" id="frog-tongue" aria-hidden="true"></div>
-                    <footer class="absolute inset-x-0 bottom-0 z-30 h-56 overflow-hidden">
-                        <div class="absolute bottom-0 h-32 w-full rounded-t-[3rem] bg-gradient-to-b from-blue-300 to-blue-500"></div>
-                        <div class="absolute bottom-8 left-1/2 h-20 w-64 -translate-x-1/2 rounded-[100%] border-b-8 border-green-700 bg-green-500 shadow-xl"></div>
-                        <div class="absolute bottom-4 left-1/2 h-32 w-36 -translate-x-1/2 rounded-t-full rounded-b-[2rem] border-4 border-lime-600 bg-lime-400 shadow-[inset_-10px_-10px_0_0_rgba(0,0,0,0.1)]" id="frog-character">
-                            <div class="absolute -top-10 left-2 flex h-16 w-14 items-center justify-center rounded-full border-4 border-lime-600 bg-lime-400"><span class="h-9 w-8 rounded-full bg-white"><span class="ml-2 mt-2 block h-5 w-4 rounded-full bg-slate-900"></span></span></div>
-                            <div class="absolute -top-10 right-2 flex h-16 w-14 items-center justify-center rounded-full border-4 border-lime-600 bg-lime-400"><span class="h-9 w-8 rounded-full bg-white"><span class="ml-2 mt-2 block h-5 w-4 rounded-full bg-slate-900"></span></span></div>
-                            <div class="absolute left-1/2 top-10 h-8 w-24 -translate-x-1/2 rounded-[50%] border-4 border-lime-700 bg-lime-950"><span class="absolute left-1/2 top-1/2 h-2 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-400"></span></div>
-                            <div class="absolute bottom-0 left-1/2 h-20 w-24 -translate-x-1/2 rounded-t-full rounded-b-xl bg-sky-100/80"></div>
-                        </div>
-                    </footer>
+                @if ($isFlashcards && ! $isOralReading)
+                    <x-frog-pond :question="$firstQuestion" :question-count="$questionCount" />
                 @endif
-                @if (($storyTitle || $storyDescription) && ! $isListeningComprehension)
-                    <div class="absolute inset-0 z-[90] flex items-center justify-center bg-surface/80 p-3 sm:p-5 backdrop-blur-xl" id="story-gate">
-                        <section class="glass-hud flex max-h-[calc(100dvh-6rem)] w-full {{ $isOralReading ? 'max-w-6xl' : 'max-w-3xl' }} flex-col rounded-2xl border border-white/70 p-4 shadow-2xl sm:p-6 md:p-8">
-                            <div class="mb-5 flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg shadow-primary/20">
+                @if ($hasReadingStage)
+                    <div id="story-gate" class="assessment-story-gate">
+                        <section class="assessment-reader {{ $isOralReading ? 'assessment-reader-oral' : '' }}" aria-labelledby="story-title">
+                            <div class="assessment-reader-heading">
+                                <div class="assessment-reader-icon">
                                     <span class="material-symbols-outlined">auto_stories</span>
                                 </div>
                                 <div>
-                                    <p class="font-label text-[10px] font-black uppercase tracking-[0.24em] text-primary-dim">Read First</p>
-                                    <h1 class="font-headline text-xl font-black leading-tight text-on-surface sm:text-2xl md:text-3xl">{{ $storyTitle ?: $assessment->title }}</h1>
+                                    <p class="assessment-eyebrow">{{ $isOralReading ? 'Reading Studio' : 'Read First' }}</p>
+                                    <h2 id="story-title">{{ $storyTitle ?: $assessment->title }}</h2>
                                 </div>
                             </div>
 
                             @if ($isOralReading)
-                                <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 sm:gap-5 md:grid-cols-2">
-                                    <div class="flex min-h-[220px] sm:min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-primary/15 bg-white/85 shadow-inner">
+                                <div class="assessment-reading-panes">
+                                    <div class="assessment-reading-pane">
                                         <div class="border-b border-primary/10 bg-primary/5 px-5 py-3">
                                             <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Reading</p>
                                         </div>
@@ -352,7 +291,7 @@
                                             {!! $storyReadOnlyHtml !!}
                                         </div>
                                     </div>
-                                    <div class="flex min-h-[220px] sm:min-h-[260px] flex-col overflow-hidden rounded-xl border-2 border-secondary/20 bg-white/85 shadow-inner">
+                                    <div class="assessment-reading-pane assessment-teacher-pane">
                                         <div class="border-b border-secondary/10 bg-secondary/5 px-5 py-3">
                                             <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Teacher Check</p>
                                         </div>
@@ -361,12 +300,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-4 flex flex-wrap items-center justify-center gap-3 rounded-xl bg-surface-container-low/80 p-3 text-sm font-bold text-on-surface-variant shadow-sm" aria-label="Oral reading marking legend">
+                                <div class="assessment-legend mt-4 flex flex-wrap items-center gap-3 p-3 text-sm font-bold text-on-surface-variant" aria-label="Oral reading marking legend">
                                     <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Legend</span>
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-red-400/70 ring-1 ring-red-500/30"></span>Mispronounced</span>
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-yellow-300/80 ring-1 ring-yellow-500/30"></span>Getting Closer</span>
                                 </div>
-                                <div class="mt-3 flex flex-wrap items-center justify-center gap-2 rounded-xl bg-white/80 p-3 text-sm font-bold text-on-surface-variant shadow-sm" aria-label="Oral reading mark mode">
+                                <div class="assessment-mark-tools mt-3 flex flex-wrap items-center gap-2 p-3 text-sm font-bold text-on-surface-variant" aria-label="Oral reading mark mode">
                                     <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Mark Mode</span>
                                     <button class="mark-mode-button is-active inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="word" aria-pressed="true">
                                         <span class="material-symbols-outlined text-lg">touch_app</span>
@@ -382,7 +321,7 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="min-h-0 flex-1 overflow-y-auto rounded-xl bg-white/70 p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant shadow-inner">
+                                <div class="assessment-passage overflow-y-auto p-4 text-sm sm:p-5 sm:text-base leading-relaxed text-on-surface-variant">
                                     <div id="story-reader-text">
                                         {!! $storyHtml !!}
                                     </div>
@@ -390,7 +329,7 @@
                             @endif
 
                             @if ($isSilentReading)
-                                <div class="mt-5 rounded-xl bg-surface-container-low p-4 shadow-sm">
+                                <div class="assessment-timer mt-5 p-4">
                                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Silent Reading Timer</p>
@@ -411,7 +350,7 @@
                                 </div>
                             @endif
 
-                            <div class="mt-6 flex justify-end">
+                            <div class="assessment-reader-actions mt-6 flex justify-end">
                                 <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 transition-colors hover:bg-primary-dim disabled:cursor-not-allowed disabled:opacity-50" id="start-questions-button" type="button" @if ($isSilentReading) disabled @endif>
                                     {{ $isOralReading ? 'Finish Assessment' : 'Start Questions' }}
                                     <span class="material-symbols-outlined text-lg">{{ $isOralReading ? 'check_circle' : 'arrow_forward' }}</span>
@@ -420,136 +359,70 @@
                         </section>
                     </div>
                 @endif
-                <div class="fixed inset-0 z-[100] hidden overflow-y-auto bg-surface opacity-0 transition-opacity duration-300" id="mission-modal">
-                    <div class="flex app-safe-screen flex-col md:flex-row">
-                        <aside class="hidden w-72 shrink-0 flex-col gap-8 bg-surface-container-low p-6 md:flex">
-                            <div class="mt-6 flex flex-col items-center gap-2 text-center">
-                                <div class="mb-2 flex h-24 w-24 items-center justify-center rounded-full border-4 border-surface bg-primary-container font-display text-3xl font-black text-on-primary-container shadow-sm">
-                                    {{ $studentInitials ?: 'S' }}
-                                </div>
-                                <h2 class="font-display text-xl font-black text-primary">{{ $studentName }}</h2>
-                                <p class="font-body text-on-surface-variant">Assessment Explorer</p>
-                            </div>
-                            <nav class="mt-4 flex flex-col gap-2">
-                                <a class="mx-2 flex items-center gap-4 rounded-xl px-4 py-3 text-on-surface-variant transition-all hover:bg-surface-container-high" href="{{ route('student.dashboard') }}"><span class="material-symbols-outlined">home</span> Home</a>
-                                <a class="mx-2 flex items-center gap-4 rounded-xl bg-surface-container-high px-4 py-3 font-bold text-primary" href="{{ route('student.activities') }}"><span class="material-symbols-outlined">auto_stories</span> Missions</a>
-                            </nav>
-                        </aside>
+            </section>
 
-                        <div class="relative flex app-safe-screen flex-1 flex-col">
-                            <header class="hidden items-center justify-between bg-surface px-8 py-4 shadow-sm md:flex">
-                                <div class="font-display text-2xl font-bold text-primary">AI-PGAALS</div>
-                                <nav class="flex gap-8">
-                                    <a class="rounded-lg px-3 py-2 font-headline font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{{ route('student.dashboard') }}">Dashboard</a>
-                                    <a class="rounded-lg border-b-4 border-primary px-3 py-2 font-headline font-bold text-primary transition-colors hover:bg-surface-container-high" href="{{ route('student.activities') }}">Activities</a>
-                                    <a class="rounded-lg px-3 py-2 font-headline font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{{ route('profile.edit') }}">Profile</a>
-                                </nav>
-                                <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary-container bg-surface-container-low font-bold text-primary">{{ $studentInitials ?: 'S' }}</div>
-                            </header>
-
-                            <main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden p-6 pb-28 md:p-12">
-                                <div class="result-pattern pointer-events-none absolute inset-0 z-0"></div>
-                                <div class="relative z-10 flex w-full max-w-4xl flex-col gap-8">
-                                    <div class="mb-4 text-center">
-                                        <h1 class="font-display text-4xl font-bold tracking-tight text-primary md:text-6xl">Great job!</h1>
-                                        <p class="mt-2 font-body text-xl font-medium text-on-surface-variant" id="result-summary">Checking your real score...</p>
-                                    </div>
-
-                                    <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-                                        <div class="flex flex-col gap-6">
-                                            <div class="relative flex flex-col gap-4 overflow-hidden rounded-[2rem] bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                                                <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary-container opacity-20 blur-xl"></div>
-                                                <h3 class="font-label text-xs font-bold uppercase tracking-wider text-on-surface-variant">Accuracy Score</h3>
-                                                <div class="flex items-end gap-2">
-                                                    <span class="font-display text-6xl font-bold leading-none text-primary" id="result-accuracy">0</span>
-                                                    <span class="pb-1 font-headline text-xl font-bold text-primary" id="result-accuracy-unit">%</span>
-                                                </div>
-                                                <div class="mt-2 h-4 w-full overflow-hidden rounded-full bg-surface-container-high">
-                                                    <div class="h-full rounded-full bg-secondary shadow-[inset_0_2px_4px_rgba(255,255,255,0.3)] transition-all duration-500" id="result-progress" style="width: 0%"></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="relative flex flex-col gap-4 overflow-hidden rounded-[2rem] bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                                                <div class="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-tertiary-container opacity-30 blur-lg"></div>
-                                                <h3 class="font-label text-xs font-bold uppercase tracking-wider text-on-surface-variant">Total Experience</h3>
-                                                <div class="flex items-center gap-4">
-                                                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-tertiary-container text-tertiary shadow-sm"><span class="material-symbols-outlined text-3xl">stars</span></div>
-                                                    <span class="font-display text-5xl font-bold text-on-surface" id="result-points">Saving...</span>
-                                                </div>
-                                                <p class="font-body text-sm font-medium text-on-surface-variant">Real assessment points saved to your account.</p>
-                                            </div>
-
-                                            <div class="relative flex items-center justify-between overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-primary-dim p-8 text-on-primary shadow-lg">
-                                                <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px);"></div>
-                                                <div class="relative z-10 flex max-w-[65%] flex-col gap-2">
-                                                    <h3 class="font-display text-2xl font-bold" id="result-badge-title">Badge Unlocked!</h3>
-                                                    <p class="font-body text-primary-container" id="result-badge">Calculating your achievement...</p>
-                                                </div>
-                                                <div class="relative z-10">
-                                                    <div class="relative flex h-20 w-20 items-center justify-center rounded-full border-4 border-tertiary-container bg-primary-dim shadow-inner">
-                                                        <div class="absolute inset-0 animate-pulse rounded-full bg-tertiary-container opacity-20 blur-md"></div>
-                                                        <span class="material-symbols-outlined text-4xl text-tertiary-container" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex flex-col gap-6">
-                                            <div class="flex h-full flex-col gap-6 rounded-[2rem] border border-outline-variant/10 bg-surface-container-low p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                                                <div class="mb-2 flex items-center gap-2">
-                                                    <span class="material-symbols-outlined text-secondary">bar_chart</span>
-                                                    <h3 class="font-headline text-xl font-bold text-on-surface">Performance Breakdown</h3>
-                                                </div>
-                                                <div class="flex flex-col gap-4">
-                                                    <div class="flex items-center justify-between rounded-xl bg-surface-container-lowest p-4 shadow-sm">
-                                                        <span class="font-body font-medium text-on-surface-variant">Correct Answers</span>
-                                                        <span class="font-display text-lg font-bold text-secondary" id="result-correct">0/{{ $questionCount }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between gap-4 rounded-xl bg-surface-container-lowest p-4 shadow-sm">
-                                                        <span class="font-body font-medium text-on-surface-variant">Passage</span>
-                                                        <span class="max-w-[55%] truncate text-right font-display text-sm font-bold text-primary">{{ $storyTitle ?: $assessment->title }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded-xl bg-surface-container-lowest p-4 shadow-sm">
-                                                        <span class="font-body font-medium text-on-surface-variant">Assessment Type</span>
-                                                        <span class="font-display text-lg font-bold text-tertiary">{{ $assessmentTypeLabel }}</span>
-                                                    </div>
-                                                    <div class="hidden items-center justify-between rounded-xl bg-surface-container-lowest p-4 shadow-sm" id="result-reading-time-row">
-                                                        <span class="font-body font-medium text-on-surface-variant">Reading Time</span>
-                                                        <span class="font-display text-lg font-bold text-primary" id="result-reading-time">00:00</span>
-                                                    </div>
-                                                    <div class="{{ $isOralReading ? '' : 'hidden' }} rounded-xl bg-surface-container-lowest p-4 shadow-sm">
-                                                        <div class="mb-3 flex items-center justify-between gap-4">
-                                                            <span class="font-body font-medium text-on-surface-variant">Pronunciation</span>
-                                                            <span class="font-label text-xs font-bold uppercase tracking-wider text-tertiary">Needs Improvement</span>
-                                                        </div>
-                                                        <div class="flex flex-wrap gap-2" id="result-needs-improvement">
-                                                            <span class="text-sm text-on-surface-variant">No yellow words marked.</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="{{ $isOralReading ? '' : 'hidden' }} rounded-xl bg-surface-container-lowest p-4 shadow-sm">
-                                                        <div class="mb-3 flex items-center justify-between gap-4">
-                                                            <span class="font-body font-medium text-on-surface-variant">Pronunciation</span>
-                                                            <span class="font-label text-xs font-bold uppercase tracking-wider text-error">Wrong Pronunciation</span>
-                                                        </div>
-                                                        <div class="flex flex-wrap gap-2" id="result-wrong-pronunciation">
-                                                            <span class="text-sm text-on-surface-variant">No red words marked.</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mx-auto mt-4 flex w-full max-w-md flex-col gap-4">
-                                        <a class="w-full rounded-[3rem] bg-gradient-to-br from-primary to-primary-container py-4 text-center font-headline text-xl font-bold text-on-primary shadow-md transition-all duration-200 hover:-translate-y-1 hover:from-primary-dim hover:to-primary active:translate-y-0 active:scale-95" href="{{ route('student.activities') }}">Next Level</a>
-                                        <button class="w-full rounded-[3rem] bg-surface-container-high py-4 font-headline text-lg font-bold text-on-surface transition-all duration-200 hover:bg-surface-dim active:scale-95" type="button" onclick="window.location.reload()">Try Again</button>
-                                    </div>
-                                </div>
-                            </main>
-                        </div>
+            <section class="assessment-results hidden opacity-0 transition-opacity duration-300" id="mission-modal" tabindex="-1" aria-labelledby="assessment-result-title">
+                <header class="assessment-result-heading">
+                    <div class="assessment-result-avatar"><x-student-character :gender="$student?->gender" variant="portrait" /></div>
+                    <div>
+                        <p class="assessment-eyebrow">Assessment Complete</p>
+                        <h2 id="assessment-result-title">Great job, {{ str($studentName)->before(' ') }}!</h2>
+                        <p id="result-summary" role="status">Checking your real score...</p>
                     </div>
+                </header>
+
+                <div class="assessment-result-metrics">
+                    <article class="assessment-result-metric">
+                        <p><span class="material-symbols-outlined" aria-hidden="true">target</span> Accuracy Score</p>
+                        <div class="assessment-result-value"><strong id="result-accuracy">0</strong><span id="result-accuracy-unit">%</span></div>
+                        <div class="assessment-result-track"><div id="result-progress" style="width: 0%"></div></div>
+                    </article>
+                    <article class="assessment-result-metric assessment-metric-xp">
+                        <p><span class="material-symbols-outlined" aria-hidden="true">stars</span> Experience Earned</p>
+                        <div class="assessment-result-value"><strong id="result-points">Saving...</strong></div>
+                        <p>Assessment points</p>
+                    </article>
+                    <article class="assessment-result-metric assessment-metric-correct">
+                        <p><span class="material-symbols-outlined" aria-hidden="true">task_alt</span> Correct Answers</p>
+                        <div class="assessment-result-value"><strong id="result-correct">0/{{ $questionCount }}</strong></div>
+                        <p>{{ $assessmentTypeLabel }}</p>
+                    </article>
                 </div>
-            </main>
+
+                <div class="assessment-result-detail">
+                    <section class="assessment-breakdown" aria-labelledby="breakdown-title">
+                        <h3 id="breakdown-title">Performance Breakdown</h3>
+                        <dl>
+                            <div><dt>Passage</dt><dd>{{ $storyTitle ?: $assessment->title }}</dd></div>
+                            <div><dt>Assessment Type</dt><dd>{{ $assessmentTypeLabel }}</dd></div>
+                            <div class="hidden" id="result-reading-time-row"><dt>Reading Time</dt><dd id="result-reading-time">00:00</dd></div>
+                        </dl>
+                        @if ($isOralReading)
+                            <div class="assessment-pronunciation">
+                                <h4><span class="assessment-color-yellow"></span> Getting Closer</h4>
+                                <div class="flex flex-wrap gap-2" id="result-needs-improvement"><span>No yellow words marked.</span></div>
+                            </div>
+                            <div class="assessment-pronunciation">
+                                <h4><span class="assessment-color-red"></span> Mispronounced</h4>
+                                <div class="flex flex-wrap gap-2" id="result-wrong-pronunciation"><span>No red words marked.</span></div>
+                            </div>
+                        @else
+                            <div id="result-needs-improvement" hidden></div>
+                            <div id="result-wrong-pronunciation" hidden></div>
+                        @endif
+                    </section>
+                    <aside class="assessment-achievement">
+                        <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+                        <h3 id="result-badge-title">Your Achievement</h3>
+                        <p id="result-badge">Calculating your achievement...</p>
+                    </aside>
+                </div>
+
+                <footer class="assessment-result-actions">
+                    <a class="assessment-primary-action" href="{{ route('student.activities') }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> Back to Activities</a>
+                    <button class="assessment-secondary-action" id="assessment-result-action" type="button">Retry Saving</button>
+                </footer>
+            </section>
 
             <script>
                 (() => {
@@ -559,6 +432,7 @@
                     const hookHead = document.getElementById('hook-head');
                     const container = document.getElementById('fish-container');
                     const fishTemplate = document.getElementById('answer-fish-template');
+                    const catchStatus = document.getElementById('ocean-catch-status');
                     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const scoreEl = document.getElementById('score');
                     const progressEl = document.getElementById('progress-bar');
@@ -583,6 +457,7 @@
                     const storyReaderText = document.getElementById('story-reader-text');
                     const markModeButtons = Array.from(document.querySelectorAll('[data-mark-mode]'));
                     const syncedStoryScrollers = Array.from(document.querySelectorAll('[data-sync-scroll="oral-story"]'));
+                    const progressScrollers = syncedStoryScrollers.length ? syncedStoryScrollers : (storyReaderText ? [storyReaderText.parentElement] : []);
                     const startQuestionsButton = document.getElementById('start-questions-button');
                     const startTimerButton = document.getElementById('start-timer-button');
                     const endTimerButton = document.getElementById('end-timer-button');
@@ -595,6 +470,12 @@
                     const frogWrongAnswerSound = document.getElementById('frog-wrong-answer-sound');
                     const frogCorrectAnswerSound = document.getElementById('frog-correct-answer-sound');
                     const submitUrl = @json(route('student.assessments.submit', $assessment));
+                    const progressUrl = @json(route('student.assessments.progress', $assessment));
+                    const attemptKey = @json($progress->attempt_key ?? null);
+                    const initialProgress = @json(['revision' => $progress->revision ?? 0, 'state' => $progress->state ?? []]);
+                    const storageKey = @json('assessment-progress:'.auth()->id().':'.$assessment->id.':'.($progress->attempt_key ?? 'preview'));
+                    const saveStatus = document.getElementById('assessment-save-status');
+                    const resultAction = document.getElementById('assessment-result-action');
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const assessmentType = @json($assessmentType);
                     const isFlashcards = @json($isFlashcards);
@@ -610,6 +491,7 @@
                     const frogAnswerButtons = Array.from(document.querySelectorAll('[data-frog-answer]'));
                     const frogTongue = document.getElementById('frog-tongue');
                     const frogCharacter = document.getElementById('frog-character');
+                    const frogOutcomeAnimations = [];
                     const questions = @json($gameQuestions->values());
                     const targetsNeeded = questions.length;
                     const capturedAnswers = {};
@@ -629,7 +511,124 @@
                     let readingStartedAt = null;
                     let readingElapsedSeconds = 0;
                     let oralMarkMode = 'word';
+                    let gameMusicFadeFrame = null;
                     let hookReelFadeTimer = null;
+                    let timerStatus = 'idle';
+                    let missionFinished = false;
+                    let submissionSaved = false;
+                    let submissionInFlight = false;
+                    let progressRevision = Number(initialProgress.revision || 0);
+                    let saveTimeout = null;
+
+                    function progressSnapshot() {
+                        if (readingTimer) updateReadingTimer();
+                        const scroller = progressScrollers[0];
+                        const allAnswered = targetsNeeded > 0 && Object.keys(capturedAnswers).length === targetsNeeded;
+                        return {
+                            answers: { ...capturedAnswers },
+                            phase: missionFinished || allAnswered ? 'finished' : (missionStarted && !isOralReading ? 'questions' : 'reading'),
+                            reading_seconds: readingElapsedSeconds,
+                            timer_status: timerStatus,
+                            word_marks: Array.from(storyReaderText?.querySelectorAll('.story-word') || [], word => Number(word.dataset.mark || 0)),
+                            sentence_marks: Array.from(storyReaderText?.querySelectorAll('.story-sentence') || [], sentence => Number(sentence.dataset.sentenceMark || 0)),
+                            mark_mode: oralMarkMode,
+                            scroll_ratio: scroller ? scroller.scrollTop / Math.max(1, scroller.scrollHeight - scroller.clientHeight) : 0,
+                        };
+                    }
+
+                    function persistProgress(leaving = false) {
+                        if (!attemptKey || submissionSaved) return;
+                        saveStatus.textContent = 'Saving progress...';
+                        progressRevision = Math.max(Date.now(), progressRevision + 1);
+                        const snapshot = { revision: progressRevision, state: progressSnapshot() };
+                        let backedUp = false;
+                        try {
+                            localStorage.setItem(storageKey, JSON.stringify(snapshot));
+                            backedUp = true;
+                        } catch (_) {}
+                        clearTimeout(saveTimeout);
+                        const send = async () => {
+                            if (submissionSaved) return;
+                            saveStatus.textContent = 'Saving progress...';
+                            try {
+                                const response = await fetch(progressUrl, {
+                                    method: 'POST',
+                                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                                    body: JSON.stringify({ attempt_key: attemptKey, ...snapshot }),
+                                    keepalive: leaving,
+                                });
+                                if (!response.ok) throw new Error('Progress not saved');
+                                if (!submissionSaved && snapshot.revision === progressRevision) saveStatus.textContent = 'Progress saved';
+                            } catch (_) {
+                                if (!submissionSaved && snapshot.revision === progressRevision) {
+                                    saveStatus.textContent = backedUp ? 'Saved on this device' : 'Progress not saved';
+                                }
+                            }
+                        };
+                        if (leaving) send(); else saveTimeout = setTimeout(send, 250);
+                    }
+
+                    function restoreProgress() {
+                        let snapshot = initialProgress;
+                        try {
+                            const backup = JSON.parse(localStorage.getItem(storageKey) || 'null');
+                            if (backup?.revision > Number(snapshot.revision || 0)) snapshot = backup;
+                        } catch (_) {}
+                        const state = snapshot.state || {};
+                        progressRevision = Number(snapshot.revision || 0);
+                        Object.entries(state.answers || {}).forEach(([index, answer]) => {
+                            if (questions[index]?.options.some(option => option.l === answer)) capturedAnswers[index] = answer;
+                        });
+                        caughtCount = Object.keys(capturedAnswers).length;
+                        currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                        if (currentQuestionIndex < 0) currentQuestionIndex = targetsNeeded;
+                        totalScore = questions.filter((question, index) => question.correct === capturedAnswers[index]).length;
+                        missionStarted = state.phase ? state.phase !== 'reading' : !storyGate;
+                        missionFinished = state.phase === 'finished' || (targetsNeeded > 0 && caughtCount === targetsNeeded);
+                        readingElapsedSeconds = Math.max(0, Number(state.reading_seconds || 0));
+                        timerStatus = state.timer_status === 'running' ? 'paused' : (state.timer_status || 'idle');
+                        storyReaderText?.querySelectorAll('.story-sentence').forEach((sentence, index) => setSentenceMark(sentence, Number(state.sentence_marks?.[index] || 0)));
+                        storyReaderText?.querySelectorAll('.story-word').forEach((word, index) => setWordMark(word, Number(state.word_marks?.[index] || 0)));
+                        setOralMarkMode(state.mark_mode || 'word');
+                        requestAnimationFrame(() => progressScrollers.forEach(scroller => {
+                            scroller.scrollTop = Number(state.scroll_ratio || 0) * Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+                        }));
+                        if (readingTimerDisplay) readingTimerDisplay.textContent = formatElapsedTime(readingElapsedSeconds);
+                        if (isSilentReading && startTimerButton) {
+                            startTimerButton.disabled = timerStatus === 'finished';
+                            startTimerButton.classList.toggle('opacity-60', timerStatus === 'finished');
+                            if (timerStatus === 'paused') startTimerButton.lastChild.textContent = ' Resume Timer';
+                            endTimerButton.disabled = timerStatus !== 'paused';
+                            endTimerButton.classList.toggle('opacity-60', timerStatus !== 'paused');
+                            startQuestionsButton.disabled = timerStatus !== 'finished';
+                            if (timerStatus === 'finished') readingTimerStatus.textContent = `Reading finished in ${formatElapsedTime(readingElapsedSeconds)}.`;
+                            if (timerStatus === 'paused') readingTimerStatus.textContent = `Timer paused at ${formatElapsedTime(readingElapsedSeconds)}.`;
+                        }
+                        if (progressRevision > 0) saveStatus.textContent = 'Progress restored';
+                        if (isFlashcards) updateFrogProgress();
+                        else if (!isOralReading && targetsNeeded > 0) {
+                            scoreEl.textContent = `${caughtCount}/${targetsNeeded}`;
+                            progressEl.style.width = `${caughtCount / targetsNeeded * 100}%`;
+                            for (let index = 1; index <= Math.ceil(caughtCount / targetsNeeded * 5); index++) document.getElementById(`crack-${index}`)?.classList.add('crack-visible');
+                            bag.style.setProperty('--base-scale', 1 + caughtCount / targetsNeeded * .4);
+                        }
+                    }
+
+                    function pauseAndSave() {
+                        if (readingTimer) {
+                            updateReadingTimer();
+                            clearInterval(readingTimer);
+                            readingTimer = null;
+                            timerStatus = 'paused';
+                            startTimerButton.disabled = false;
+                            startTimerButton.classList.remove('opacity-60');
+                            startTimerButton.lastChild.textContent = ' Resume Timer';
+                            readingTimerStatus.textContent = `Timer paused at ${formatElapsedTime(readingElapsedSeconds)}.`;
+                        }
+                        persistProgress(true);
+                        stopGameMusic();
+                        fadeHookReelSound();
+                    }
 
                     function formatElapsedTime(totalSeconds) {
                         const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -638,15 +637,41 @@
                     }
 
                     function playGameMusic() {
-                        if (!gameMusic || isOralReading) return;
+                        if (!gameMusic || isOralReading || missionFinished) return;
                         gameMusic.volume = 0.28;
                         gameMusic.play().catch(() => {});
                     }
 
                     function stopGameMusic() {
+                        cancelAnimationFrame(gameMusicFadeFrame);
+                        gameMusicFadeFrame = null;
                         if (!gameMusic) return;
                         gameMusic.pause();
                         gameMusic.currentTime = 0;
+                    }
+
+                    function fadeOutGameMusic() {
+                        if (!gameMusic || gameMusic.paused) {
+                            stopGameMusic();
+                            return;
+                        }
+                        cancelAnimationFrame(gameMusicFadeFrame);
+                        const startingVolume = gameMusic.volume;
+                        const startedAt = performance.now();
+                        const duration = 2000;
+
+                        function fade(now) {
+                            const progress = Math.min(1, (now - startedAt) / duration);
+                            const easedProgress = progress * progress * (3 - 2 * progress);
+                            gameMusic.volume = startingVolume * (1 - easedProgress);
+                            if (progress < 1) {
+                                gameMusicFadeFrame = requestAnimationFrame(fade);
+                            } else {
+                                stopGameMusic();
+                            }
+                        }
+
+                        gameMusicFadeFrame = requestAnimationFrame(fade);
                     }
 
                     function playHookReelSound() {
@@ -697,9 +722,9 @@
                     }
 
                     function startReadingTimer() {
-                        if (readingTimer) return;
-                        readingStartedAt = Date.now();
-                        readingElapsedSeconds = 0;
+                        if (readingTimer || timerStatus === 'finished') return;
+                        readingStartedAt = Date.now() - readingElapsedSeconds * 1000;
+                        timerStatus = 'running';
                         updateReadingTimer();
                         readingTimer = setInterval(updateReadingTimer, 1000);
                         startTimerButton.disabled = true;
@@ -707,17 +732,22 @@
                         endTimerButton.disabled = false;
                         endTimerButton.classList.remove('opacity-60');
                         readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
+                        persistProgress();
                     }
 
                     function endReadingTimer() {
-                        if (!readingTimer) return;
-                        updateReadingTimer();
+                        if (!readingTimer && timerStatus !== 'paused') return;
+                        if (readingTimer) updateReadingTimer();
                         clearInterval(readingTimer);
                         readingTimer = null;
+                        timerStatus = 'finished';
+                        startTimerButton.disabled = true;
+                        startTimerButton.classList.add('opacity-60');
                         endTimerButton.disabled = true;
                         endTimerButton.classList.add('opacity-60');
                         startQuestionsButton.disabled = false;
                         readingTimerStatus.innerText = `Reading finished in ${formatElapsedTime(readingElapsedSeconds)}. You can now start the questions.`;
+                        persistProgress();
                     }
 
                     function updateReadingTimeResult() {
@@ -841,46 +871,92 @@
                         setWordMark(word, nextMark);
                     });
                     function renderFlashcardQuestion() {
-                        if (!isFlashcards || !questions[currentQuestionIndex]) return;
+                        if (!isFlashcards || isOralReading || !frogQuestionText || !questions[currentQuestionIndex]) return;
 
                         const question = questions[currentQuestionIndex];
                         frogQuestionText.innerText = question.text;
                         frogLevelText.innerText = `Question ${currentQuestionIndex + 1}/${targetsNeeded}`;
-                        frogQuestionCard.classList.remove('bg-green-100', 'bg-red-100');
+                        frogOutcomeAnimations.splice(0).forEach((animation) => animation.cancel());
+                        frogTongue?.classList.remove('is-catching');
+                        delete canvas.dataset.frogOutcome;
+                        delete canvas.dataset.frogCatchStart;
+                        delete canvas.dataset.frogCatchDuration;
+                        delete frogQuestionCard.dataset.result;
+                        document.getElementById('frog-feedback').textContent = '';
                         frogAnswerButtons.forEach((button) => {
                             const letter = button.dataset.frogAnswer;
                             const option = (question.options || []).find((item) => item.l === letter);
                             const label = button.querySelector('[data-frog-answer-label]');
-                            const circle = button.querySelector('[data-frog-answer-circle]');
                             button.disabled = !option;
-                            button.classList.remove('is-caught');
-                            button.style.opacity = option ? '1' : '0.35';
-                            if (label) label.innerText = option ? option.t : `Answer ${letter}`;
-                            if (circle) {
-                                circle.innerText = letter;
-                                circle.classList.remove('bg-green-500', 'border-green-700', 'bg-red-500', 'border-red-700');
-                                circle.classList.add('bg-blue-500', 'border-blue-600');
-                            }
+                            button.hidden = !option;
+                            button.classList.remove('is-caught', 'is-attacking');
+                            delete button.dataset.result;
+                            button.setAttribute('aria-label', `${letter}: ${option?.t || ''}`);
+                            if (label) label.innerText = option?.t || '';
+                            button.querySelector('.frog-answer-verdict').textContent = '';
                         });
+                        canvas.dispatchEvent(new CustomEvent('frog:question'));
                     }
 
                     function updateFrogProgress(correct) {
                         const progress = targetsNeeded > 0 ? (caughtCount / targetsNeeded) * 100 : 0;
                         if (frogScore) frogScore.innerText = String(totalScore);
                         if (frogProgressBar) frogProgressBar.style.width = `${Math.min(progress, 100)}%`;
-                        if (frogQuestionCard) {
-                            frogQuestionCard.classList.toggle('bg-green-100', correct);
-                            frogQuestionCard.classList.toggle('bg-red-100', !correct);
-                        }
+                        if (frogQuestionCard) frogQuestionCard.dataset.result = correct ? 'correct' : 'incorrect';
+                        document.getElementById('frog-progress-track')?.setAttribute('aria-valuenow', caughtCount);
+                        const count = document.getElementById('frog-progress-count');
+                        if (count) count.textContent = `${caughtCount} / ${targetsNeeded}`;
                     }
 
-                    function animateFrogCatch(button) {
+                    function animateFrogCatch(button, correct, duration) {
                         if (!frogTongue || !frogCharacter || !button) return;
+                        canvas.dataset.frogOutcome = correct ? 'correct' : 'incorrect';
+                        const startedAt = performance.now();
+                        canvas.dataset.frogCatchStart = String(startedAt);
+                        canvas.dataset.frogCatchDuration = String(duration);
+                        canvas.dispatchEvent(new CustomEvent('frog:catch', { detail: { letter: button.dataset.frogAnswer, correct, duration, startedAt } }));
+                        button.classList.add(correct ? 'is-caught' : 'is-attacking');
+                        if (correct && canvas.dataset.pondState === 'ready') return;
+
                         const canvasBox = canvas.getBoundingClientRect();
                         const frogBox = frogCharacter.getBoundingClientRect();
-                        const targetBox = button.getBoundingClientRect();
+                        const targetBox = button.querySelector('.frog-target-visual').getBoundingClientRect();
+                        if (!correct) {
+                            const graphic = button.querySelector('.frog-target-fallback');
+                            const body = frogCharacter.querySelector('.frog-character-body');
+                            const gulpMouth = button.querySelector('.frog-target-mouth');
+                            const scale = reducedMotion ? 1.25 : 1.7;
+                            const attackX = frogBox.left + frogBox.width / 2 - (targetBox.left + targetBox.width / 2);
+                            const attackY = frogBox.top + frogBox.height * .24 - (targetBox.top + targetBox.height / 2);
+                            const destination = `translate(${attackX}px, ${attackY}px) scale(${scale})`;
+                            const bodyBox = body.getBoundingClientRect();
+                            const svgMatrix = frogCharacter.querySelector('svg').getScreenCTM();
+                            const swallowX = reducedMotion ? 0 : (frogBox.left + frogBox.width / 2 - bodyBox.left - bodyBox.width / 2) / svgMatrix.a;
+                            const swallowY = reducedMotion ? 0 : (frogBox.top + frogBox.height * .24 + targetBox.height * .143 * scale - bodyBox.top - bodyBox.height / 2) / svgMatrix.d;
+                            const swallowed = `translate(${swallowX}px, ${swallowY}px) scale(.001)`;
+                            frogOutcomeAnimations.push(
+                                graphic.animate([
+                                    { transform: reducedMotion ? destination : 'translate(0, 0) scale(1)', offset: 0 },
+                                    { transform: destination, offset: .32 },
+                                    { transform: destination, offset: .7 },
+                                    { transform: 'translate(0, 0) scale(1)', offset: 1 },
+                                ], { duration, easing: reducedMotion ? 'steps(1, end)' : 'ease-in-out', fill: 'forwards' }),
+                                body.animate([
+                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 0 },
+                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: .32 },
+                                    { transform: swallowed, opacity: 0, offset: .58 },
+                                    { transform: swallowed, opacity: 0, offset: .84 },
+                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 1 },
+                                ], { duration, easing: 'linear', fill: 'forwards' }),
+                                gulpMouth.animate([
+                                    { opacity: 1, offset: 0 }, { opacity: 1, offset: .58 },
+                                    { opacity: 0, offset: .64 }, { opacity: 0, offset: 1 },
+                                ], { duration, fill: 'forwards' }),
+                            );
+                            return;
+                        }
                         const startX = frogBox.left + frogBox.width / 2 - canvasBox.left;
-                        const startY = frogBox.top + 44 - canvasBox.top;
+                        const startY = frogBox.top + frogBox.height * .48 - canvasBox.top;
                         const targetX = targetBox.left + targetBox.width / 2 - canvasBox.left;
                         const targetY = targetBox.top + targetBox.height / 2 - canvasBox.top;
                         const dx = targetX - startX;
@@ -892,17 +968,18 @@
                         frogTongue.classList.remove('is-catching');
                         void frogTongue.offsetWidth;
                         frogTongue.classList.add('is-catching');
-                        button.classList.add('is-caught');
                     }
 
                     function answerFlashcard(letter, button) {
-                        if (!isFlashcards || isProcessingCapture || !questions[currentQuestionIndex]) return;
+                        if (!isFlashcards || isOralReading || !missionStarted || isProcessingCapture || !questions[currentQuestionIndex]) return;
+                        const question = questions[currentQuestionIndex];
+                        if (!question.options.some((option) => option.l === letter)) return;
                         playGameMusic();
                         isProcessingCapture = true;
                         frogAnswerButtons.forEach((item) => item.disabled = true);
-                        const question = questions[currentQuestionIndex];
                         const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
+                        persistProgress(true);
                         caughtCount++;
                         if (correct) {
                             totalScore++;
@@ -910,12 +987,13 @@
                         } else {
                             playFrogWrongAnswerSound();
                         }
-                        const circle = button?.querySelector('[data-frog-answer-circle]');
-                        if (circle) {
-                            circle.classList.remove('bg-blue-500', 'border-blue-600');
-                            circle.classList.add(correct ? 'bg-green-500' : 'bg-red-500', correct ? 'border-green-700' : 'border-red-700');
-                        }
-                        animateFrogCatch(button);
+                        button.dataset.result = correct ? 'correct' : 'incorrect';
+                        button.querySelector('.frog-answer-verdict').textContent = correct ? 'check_circle' : 'cancel';
+                        document.getElementById('frog-feedback').textContent = correct
+                            ? 'Correct! The frog eats the mosquito.'
+                            : 'Not quite! The mosquito eats the frog. The frog will return for the next question.';
+                        const catchDuration = correct ? 850 : (reducedMotion ? 650 : 2400);
+                        animateFrogCatch(button, correct, catchDuration);
                         updateFrogProgress(correct);
 
                         setTimeout(() => {
@@ -927,11 +1005,12 @@
                             currentQuestionIndex++;
                             isProcessingCapture = false;
                             renderFlashcardQuestion();
-                        }, 900);
+                        }, catchDuration + 80);
                     }
 
                     function fireHook() {
                         isHooking = true;
+                        if (catchStatus) catchStatus.textContent = '';
                         playHookReelSound();
                         let depth = 0;
                         let lastFrame = performance.now();
@@ -969,13 +1048,21 @@
 
                     function catchFish(element) {
                         fadeHookReelSound();
+                        const correct = questions[currentQuestionIndex].correct === element.dataset.letter;
+                        canvas.dataset.catchResult = correct ? 'correct' : 'incorrect';
+                        questionNode.dataset.catchResult = canvas.dataset.catchResult;
+                        element.dataset.result = canvas.dataset.catchResult;
+                        if (catchStatus) catchStatus.textContent = correct
+                            ? `Correct! Caught ${element.dataset.letter}. Reeling in...`
+                            : 'Not quite! The fish is pulling the boat under!';
                         isProcessingCapture = true;
                         capturedAnswers[currentQuestionIndex] = element.dataset.letter;
+                        persistProgress(true);
                         const previousRect = element.getBoundingClientRect();
                         const visual = element.querySelector('.fish-visual');
                         const swimmingTransform = getComputedStyle(visual).transform;
                         element.dataset.caught = 'true';
-                        element.disabled = true;
+                        fishSchool.forEach((fish) => { fish.element.disabled = true; });
                         element.classList.add('is-caught');
 
                         // Parenting the catch to the hook keeps both on the same fishing line.
@@ -988,8 +1075,47 @@
                             { transform: `translate(calc(-50% + ${previousRect.left - attachedRect.left}px), ${previousRect.top - attachedRect.top}px)` },
                             { transform: 'translate(-50%, 0)' },
                         ], { duration: 180, easing: 'ease-out' });
-                        visual.animate([{ transform: swimmingTransform }, { transform: 'rotate(-90deg)' }], { duration: 180, easing: 'ease-out' });
-                        reelInFish(element);
+                        visual.animate([{ transform: swimmingTransform }, { transform: correct ? 'rotate(-90deg)' : 'rotate(90deg)' }], { duration: 180, easing: 'ease-out' });
+                        if (correct) reelInFish(element);
+                        else sinkBoat(element);
+                    }
+
+                    async function sinkBoat(element) {
+                        const depth = parseFloat(hookCable.style.height) || 0;
+                        const maxDepth = Math.max(depth, canvas.getBoundingClientRect().bottom - hookAssembly.getBoundingClientRect().top - 30);
+                        const diveDepth = Math.min(depth + 120, maxDepth);
+                        const duration = reducedMotion ? 700 : 2600;
+                        const startedAt = performance.now();
+                        canvas.style.setProperty('--boat-pull-direction', currentHookX > canvas.clientWidth * .7 ? '-1' : '1');
+
+                        // One timeline drives the line, 3D boat and fallback before the next answer unlocks.
+                        await new Promise((resolve) => {
+                            function pullUnder(now) {
+                                const progress = Math.min((now - startedAt) / duration, 1);
+                                const dive = Math.min(progress / .62, 1);
+                                const recovery = Math.max(0, (progress - .8) / .2);
+                                const pull = (dive * dive * (3 - 2 * dive)) * (1 - recovery * recovery * (3 - 2 * recovery));
+                                canvas.style.setProperty('--boat-pull', pull.toFixed(4));
+                                canvas.dataset.catchPhase = progress < .62 ? 'pulling' : (progress < .8 ? 'submerged' : 'recovering');
+                                hookCable.style.height = `${(depth + (diveDepth - depth) * dive) * (1 - recovery)}px`;
+                                if (progress >= .8) element.remove();
+                                if (progress < 1) hookFrame = requestAnimationFrame(pullUnder);
+                                else {
+                                    hookFrame = null;
+                                    resolve();
+                                }
+                            }
+                            hookFrame = requestAnimationFrame(pullUnder);
+                        });
+
+                        element.remove();
+                        canvas.style.removeProperty('--boat-pull');
+                        canvas.style.removeProperty('--boat-pull-direction');
+                        delete canvas.dataset.catchPhase;
+                        hookCable.style.height = '0px';
+                        updateProgress();
+                        if (caughtCount < targetsNeeded) nextQuestion();
+                        isHooking = false;
                     }
 
                     async function reelInFish(element = null) {
@@ -1019,18 +1145,27 @@
                             if (caughtCount < targetsNeeded) nextQuestion();
                         }
                         isHooking = false;
+                        if (!element && catchStatus) catchStatus.textContent = 'No catch this time. Cast again!';
                     }
 
                     function nextQuestion() {
                         currentQuestionIndex++;
-                        const question = questions[currentQuestionIndex];
                         questionNode.style.opacity = '0';
                         setTimeout(() => {
-                            questionNode.innerHTML = `<div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node ${escapeHtml(question.node)}</h3></div><h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">${escapeHtml(question.text)}</h2><div class="hook-options space-y-2">${question.options.map((option) => `<div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">${escapeHtml(option.l)}</span><span class="font-medium text-on-surface-variant">${escapeHtml(option.t)}</span></div>`).join('')}</div>`;
+                            renderHookQuestion();
                             questionNode.style.opacity = '1';
                             isProcessingCapture = false;
                             spawnFishSchool();
                         }, 300);
+                    }
+
+                    function renderHookQuestion() {
+                        const question = questions[currentQuestionIndex];
+                        if (!question || !questionNode) return;
+                        delete canvas.dataset.catchResult;
+                        delete questionNode.dataset.catchResult;
+                        if (catchStatus) catchStatus.textContent = '';
+                        questionNode.innerHTML = `<div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node ${escapeHtml(question.node)}</h3></div><h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">${escapeHtml(question.text)}</h2><div class="hook-options space-y-2">${question.options.map((option) => `<div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">${escapeHtml(option.l)}</span><span class="font-medium text-on-surface-variant">${escapeHtml(option.t)}</span></div>`).join('')}</div>`;
                     }
 
                     function updateProgress() {
@@ -1053,6 +1188,11 @@
                         container.replaceChildren();
                         fishSchool = [];
                         hookAssembly.style.opacity = '0';
+                        if (canvas.classList.contains('ocean-game')) {
+                            if (catchStatus) catchStatus.textContent = 'All answers caught!';
+                            setTimeout(victory, 450);
+                            return;
+                        }
                         missionInfo.style.opacity = '0';
                         questionNode.style.opacity = '0.3';
                         bag.style.animation = 'none';
@@ -1183,6 +1323,9 @@
                     }
 
                     async function submitAttempt() {
+                        if (submissionInFlight || submissionSaved) return;
+                        submissionInFlight = true;
+                        resultAction.disabled = true;
                         resultPoints.innerText = 'Saving...';
                         resultSummary.innerText = 'Checking your real score...';
 
@@ -1194,7 +1337,8 @@
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': csrfToken,
                                 },
-                                body: JSON.stringify({ answers: capturedAnswers }),
+                                body: JSON.stringify({ answers: capturedAnswers, attempt_key: attemptKey, state: progressSnapshot(), revision: Math.max(1, progressRevision) }),
+                                keepalive: true,
                             });
 
                             if (!response.ok) {
@@ -1202,6 +1346,11 @@
                             }
 
                             const result = await response.json();
+                            submissionSaved = true;
+                            clearTimeout(saveTimeout);
+                            try { localStorage.removeItem(storageKey); } catch (_) {}
+                            saveStatus.textContent = 'Assessment saved';
+                            resultAction.textContent = 'Take Again';
                             const accuracy = Number(result.accuracy || 0);
                             scoreEl.innerText = result.points.toLocaleString();
                             resultAccuracy.innerText = accuracy.toLocaleString();
@@ -1217,15 +1366,31 @@
                             resultSummary.innerText = 'Your answers were captured, but the score could not be saved. Please try again.';
                             resultBadgeTitle.innerText = 'Score Sync Needed';
                             resultBadge.innerText = 'Try again when the connection is stable.';
+                            resultAction.textContent = 'Retry Saving';
+                        } finally {
+                            submissionInFlight = false;
+                            resultAction.disabled = false;
                         }
                     }
 
                     function victory() {
-                        stopGameMusic();
+                        canvas.dataset.assessmentFinished = 'true';
+                        missionFinished = true;
+                        missionStarted = false;
+                        isProcessingCapture = true;
+                        persistProgress();
+                        storyGate?.classList.add('hidden');
+                        frogAnswerButtons.forEach(button => button.disabled = true);
+                        canvas.dispatchEvent(new CustomEvent('frog:finished'));
+                        canvas.dispatchEvent(new CustomEvent('fishing:finished'));
+                        fadeOutGameMusic();
                         fadeHookReelSound();
                         updatePronunciationResults();
                         updateReadingTimeResult();
                         modal.classList.remove('hidden');
+                        canvas.hidden = true;
+                        modal.focus({ preventScroll: true });
+                        document.querySelector('.assessment-heading').scrollIntoView({ block: 'start' });
                         setTimeout(() => modal.classList.add('opacity-100'), 50);
                         submitAttempt();
                     }
@@ -1247,14 +1412,16 @@
                                 element.style.setProperty(`--fish-${name}`, colors[index % colors.length][colorIndex]);
                             });
                             container.appendChild(element);
-                            return { element, x: (container.clientWidth - 148) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: reducedMotion ? 18 : 32 + index * 4 };
+                            return { element, x: Math.max(0, container.clientWidth - element.offsetWidth - 16) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: reducedMotion ? 0 : 32 + index * 4 };
                         });
                         positionFishSchool(0, performance.now());
                     }
 
                     function positionFishSchool(elapsed, now) {
-                        const maxX = Math.max(8, container.clientWidth - 140);
-                        const laneHeight = Math.max(0, container.clientHeight - 104) / Math.max(1, fishSchool.length - 1);
+                        const fishWidth = fishSchool[0]?.element.offsetWidth || 150;
+                        const fishHeight = fishSchool[0]?.element.offsetHeight || 88;
+                        const maxX = Math.max(8, container.clientWidth - fishWidth - 8);
+                        const laneHeight = Math.max(0, container.clientHeight - fishHeight - 24) / Math.max(1, fishSchool.length - 1);
                         fishSchool.forEach((fish, index) => {
                             if (fish.element.dataset.caught) return;
                             fish.x += fish.direction * fish.speed * elapsed;
@@ -1276,16 +1443,19 @@
                     }
 
                     function startMission() {
-                        if (isOralReading) return;
-                        if (missionStarted && (fishFrame || isFlashcards)) return;
+                        if (isOralReading || missionFinished || !questions[currentQuestionIndex]) return;
+                        if (missionStarted && (fishFrame || frogGame?.dataset.started === 'true')) return;
                         missionStarted = true;
+                        persistProgress();
                         playGameMusic();
-                        storyGate?.classList.add('opacity-0', 'pointer-events-none');
-                        setTimeout(() => storyGate?.classList.add('hidden'), 300);
+                        canvas.classList.remove('assessment-reading');
+                        storyGate?.classList.add('hidden');
                         if (isFlashcards) {
+                            if (frogGame) frogGame.dataset.started = 'true';
                             renderFlashcardQuestion();
                             return;
                         }
+                        renderHookQuestion();
                         spawnFishSchool();
                         const arena = container.getBoundingClientRect();
                         positionHook(arena.left + arena.width / 2);
@@ -1305,14 +1475,35 @@
 
                         startMission();
                     });
-                    if (isFlashcards) renderFlashcardQuestion();
-                    if (missionStarted && !isOralReading) startMission();
+                    storyReaderText?.addEventListener('click', () => persistProgress());
+                    markModeButtons.forEach(button => button.addEventListener('click', () => persistProgress()));
+                    progressScrollers.forEach(scroller => scroller.addEventListener('scroll', () => persistProgress(), { passive: true }));
+                    window.addEventListener('pagehide', pauseAndSave);
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.hidden) pauseAndSave();
+                    });
+                    window.addEventListener('online', () => {
+                        if (missionFinished) submitAttempt(); else persistProgress();
+                    });
+                    resultAction.addEventListener('click', () => {
+                        if (submissionSaved) window.location.reload(); else submitAttempt();
+                    });
+                    setInterval(() => {
+                        if (!document.hidden && !submissionSaved) persistProgress();
+                    }, 5000);
+                    restoreProgress();
+                    if (missionFinished) victory();
+                    else {
+                        if (isFlashcards) renderFlashcardQuestion();
+                        if (missionStarted && !isOralReading) startMission();
+                    }
                 })();
             </script>
         @elseif ($assetPath)
-            <main class="relative flex app-game-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-on-primary"><span class="material-symbols-outlined text-6xl">file_open</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">Uploaded Mission</h1><p class="mt-3 font-medium text-slate-500">{{ $assessment->instructions ?: 'Open the uploaded assessment material from your teacher.' }}</p><a class="mt-8 inline-flex rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-primary-dim" href="{{ $assetUrl }}" target="_blank" rel="noopener">Open File</a></div></main>
+            <section class="assessment-empty flex w-full items-center justify-center p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-on-primary"><span class="material-symbols-outlined text-6xl">file_open</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">Uploaded Mission</h1><p class="mt-3 font-medium text-slate-500">{{ $assessment->instructions ?: 'Open the uploaded assessment material from your teacher.' }}</p><a class="mt-8 inline-flex rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-primary-dim" href="{{ $assetUrl }}" target="_blank" rel="noopener">Open File</a></div></section>
         @else
-            <main class="relative flex app-game-screen w-full items-center justify-center overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-6xl">pending_actions</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">No Mission Data</h1><p class="mt-3 font-medium text-slate-500">Your teacher has published this assessment, but no manual questions or uploaded file were attached.</p></div></main>
+            <section class="assessment-empty flex w-full items-center justify-center p-4 sm:p-8"><div class="glass-hud w-full max-w-xl rounded-2xl border border-white/60 p-6 text-center shadow-xl sm:p-10"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-6xl">pending_actions</span></div><h1 class="font-headline text-3xl font-black text-on-surface sm:text-4xl">No Mission Data</h1><p class="mt-3 font-medium text-slate-500">Your teacher has published this assessment, but no manual questions or uploaded file were attached.</p></div></section>
         @endif
+        </main>
     </div>
 </x-app-layout>

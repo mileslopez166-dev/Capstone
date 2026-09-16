@@ -23,6 +23,12 @@
                         </div>
                     </div>
 
+                    @if (session('status'))
+                        <div class="mb-6 rounded-sm border border-primary/20 bg-primary-container/20 px-5 py-4 text-sm font-semibold text-primary">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <section class="rounded-sm border border-outline-variant/10 bg-surface-container-lowest p-6 lg:col-span-4">
                             <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-on-surface-variant">Student Distribution</h3>
@@ -61,10 +67,17 @@
                                     <p class="text-sm leading-relaxed text-on-primary">{{ $submissions->isEmpty() ? 'No AI-generated insights yet. Recommendations only appear after student progress exists in the system.' : 'Report data is now live from saved student assessment results.' }}</p>
                                 </div>
                             </div>
-                            <a class="mt-8 flex items-center justify-center gap-2 rounded-full bg-surface-container-lowest px-6 py-3 text-sm font-bold text-primary transition-colors hover:bg-on-primary" href="{{ route('reports.student') }}">
-                                Open Individual Student Report
-                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                            </a>
+                            @if ($students->isNotEmpty())
+                                <a class="mt-8 flex items-center justify-center gap-2 rounded-full bg-surface-container-lowest px-6 py-3 text-sm font-bold text-primary transition-colors hover:bg-on-primary" href="{{ route('reports.student', ['student' => $students->first()]) }}">
+                                    Open Individual Student Report
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            @else
+                                <div class="mt-8 flex items-center justify-center gap-2 rounded-full bg-surface-container-lowest/70 px-6 py-3 text-sm font-bold text-on-surface-variant">
+                                    No answered student reports yet
+                                    <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+                                </div>
+                            @endif
                         </section>
                     </div>
                 </section>

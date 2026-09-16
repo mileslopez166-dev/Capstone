@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\AssessmentSubmission;
 use App\Models\User;
+use App\Support\StudentLeaderboard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
@@ -72,38 +71,7 @@ class ProfileController extends Controller
 
     private function studentLeaderboardRank(User $student): ?int
     {
-        $students = User::query()
-            ->where('role', 'student')
-            ->where('approval_status', 'approved')
-            ->orderBy('name')
-            ->get();
-
-        $submissions = AssessmentSubmission::query()
-            ->whereIn('user_id', $students->pluck('id'))
-            ->get()
-            ->groupBy('user_id');
-
-        $rankedStudents = $students
-            ->map(function (User $rankedStudent) use ($submissions): array {
-                $studentSubmissions = $submissions->get($rankedStudent->id, collect());
-
-                return [
-                    'student' => $rankedStudent,
-                    'points' => (int) $studentSubmissions->sum('points'),
-                    'completed' => $studentSubmissions->count(),
-                ];
-            })
-            ->filter(fn (array $entry): bool => $entry['completed'] > 0)
-            ->sortBy([
-                ['points', 'desc'],
-                ['completed', 'desc'],
-                fn (array $entry): string => $entry['student']->name,
-            ])
-            ->values();
-
-        $rank = $rankedStudents->search(fn (array $entry): bool => $entry['student']->is($student));
-
-        return $rank === false ? null : $rank + 1;
+        return StudentLeaderboard::entries()->firstWhere('student.id', $student->id)['rank'] ?? null;
     }
 
     private function rankTier(?int $rank): array

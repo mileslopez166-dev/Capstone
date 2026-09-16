@@ -15,8 +15,7 @@
     </head>
     @php
         $campusRole = auth()->user()?->role;
-        $hasCampusTheme = $campusRole === 'student'
-            && ! request()->routeIs('student.assessments.*');
+        $hasCampusTheme = $campusRole === 'student';
         $workspaceTheme = in_array($campusRole, ['teacher', 'admin'], true) ? 'staff-theme '.$campusRole.'-theme' : '';
     @endphp
     <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }}">

@@ -182,6 +182,90 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertSeeText('Unlocked');
     }
 
+    public function test_teacher_can_only_see_and_manage_assessments_they_created(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $otherTeacher = User::factory()->teacher()->create();
+
+        $ownedAssessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'My Reading Check',
+            'subject' => 'literacy',
+            'status' => 'published',
+        ]);
+        $foreignAssessment = Assessment::query()->create([
+            'created_by' => $otherTeacher->id,
+            'title' => 'Other Instructor Check',
+            'subject' => 'literacy',
+            'status' => 'published',
+            'retry_limit' => 0,
+        ]);
+
+        $this->actingAs($teacher)
+            ->get(route('assessments.index'))
+            ->assertOk()
+            ->assertSeeText('My Reading Check')
+            ->assertDontSeeText('Other Instructor Check');
+
+        $this->get(route('assessments.show', $ownedAssessment))->assertOk();
+        $this->get(route('assessments.show', $foreignAssessment))->assertNotFound();
+        $this->patch(route('assessments.availability', $foreignAssessment), ['status' => 'draft'])->assertNotFound();
+        $this->patch(route('assessments.retries', $foreignAssessment), ['retry_limit' => 3])->assertNotFound();
+        $this->delete(route('assessments.destroy', $foreignAssessment))->assertNotFound();
+
+        $this->assertDatabaseHas('assessments', [
+            'id' => $foreignAssessment->id,
+            'status' => 'published',
+            'retry_limit' => 0,
+        ]);
+    }
+
+    public function test_teacher_cannot_spoof_assessment_creator_when_creating_assessment(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $otherTeacher = User::factory()->teacher()->create();
+
+        $this->actingAs($teacher)
+            ->post(route('assessments.store'), $this->assessmentPayload([
+                'title' => 'Ownership Spoof Check',
+                'created_by' => $otherTeacher->id,
+            ]))
+            ->assertRedirect(route('assessments.index'));
+
+        $this->assertDatabaseHas('assessments', [
+            'title' => 'Ownership Spoof Check',
+            'created_by' => $teacher->id,
+        ]);
+        $this->assertDatabaseMissing('assessments', [
+            'title' => 'Ownership Spoof Check',
+            'created_by' => $otherTeacher->id,
+        ]);
+    }
+
+    public function test_teacher_can_set_and_update_retry_limit(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $this->actingAs($teacher)->post(route('assessments.store'), $this->assessmentPayload(['retry_limit' => 2]))
+            ->assertSessionHasNoErrors()->assertRedirect(route('assessments.index'));
+        $assessment = Assessment::query()->firstOrFail();
+        $this->assertSame(2, $assessment->retry_limit);
+        $this->get(route('assessments.show', $assessment))->assertOk()->assertSeeText('3 total attempts per student');
+        $this->patch(route('assessments.retries', $assessment), ['retry_limit' => 4])->assertSessionHasNoErrors();
+        $this->assertSame(4, $assessment->fresh()->retry_limit);
+        $this->patch(route('assessments.retries', $assessment), ['retry_limit' => 'unlimited'])->assertSessionHasNoErrors();
+        $this->assertSame(Assessment::UNLIMITED_RETRY_LIMIT, $assessment->fresh()->retry_limit);
+        $this->get(route('assessments.show', $assessment))->assertOk()->assertSeeText('Unlimited attempts per student');
+
+        foreach ([-1, 11, 1.5, 'forever'] as $invalid) {
+            $this->patch(route('assessments.retries', $assessment), ['retry_limit' => $invalid])->assertSessionHasErrors('retry_limit');
+        }
+        $this->actingAs(User::factory()->teacher()->create())
+            ->patch(route('assessments.retries', $assessment), ['retry_limit' => 0])->assertNotFound();
+        $this->actingAs(User::factory()->create())
+            ->patch(route('assessments.retries', $assessment), ['retry_limit' => 0])->assertForbidden();
+        $this->assertSame(Assessment::UNLIMITED_RETRY_LIMIT, $assessment->fresh()->retry_limit);
+    }
+
     private function assessmentPayload(array $overrides = []): array
     {
         return array_replace_recursive([

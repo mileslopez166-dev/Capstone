@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="relative overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-dim p-10 text-on-primary shadow-2xl md:col-span-2">
-                        <img class="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay" alt="Achievement burst" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7BTUqvGq-IdXSn8OHJ6ckGPNIUxTnrUcsJbdoQzC_P2nA-k6_nt6Jabi5OQyc6TyMQYucqLlzSxpoBFS-AeF2w2BgVzSYyuQj1AWwitBk3jkOv9e90KcHg8ctlo6LAIOTDhmJYJkfhKHf0hUA4e7jnsA8ETXgRlipVoyXNctZH2ZwKG-WP-s3BFbFmuZ2A69cLRppnfi3HbtE3s3Y6bSO8IWKw0Q2RbO-Gh5YA8DDt5DNUsTitrNryKxfeS3Udt1nAuY_f85DNmNi">
+                        <img class="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay" alt="" src="{{ asset('images/campus/pixel-world.png') }}">
                         <div class="relative flex flex-col items-center justify-between gap-8 md:flex-row">
                             <div class="text-center md:text-left">
                                 <h3 class="mb-2 font-headline text-3xl font-bold">{{ $studentMetrics['rewards_available'] > 0 ? 'Rewards Available' : 'No Rewards Yet' }}</h3>

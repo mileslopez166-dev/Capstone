@@ -223,7 +223,7 @@
     .campus-student-topbar > div:first-child > a { display: none; }
     .campus-theme .campus-bottom-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; border-top: 2px solid #8fcdf3; border-radius: 0; padding: 7px 8px max(7px, env(safe-area-inset-bottom)); background: #f8fcfff5; }
     .campus-bottom-nav > :is(a, div) { min-height: 54px; padding: 5px 2px; border-radius: 5px; transform: none; }
-    .campus-bottom-nav > div { background: #dcefff; box-shadow: inset 0 -3px 0 #1672d2; }
+    .campus-bottom-nav > [aria-current="page"] { background: #dcefff; box-shadow: inset 0 -3px 0 #1672d2; }
     .campus-theme::before { background-position: 35% bottom; }
 }
 @media (max-width: 767px) {

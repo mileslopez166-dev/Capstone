@@ -1,5 +1,10 @@
 <x-app-layout>
-    <div class="min-h-screen bg-surface px-6 py-8 text-on-surface sm:px-8 lg:px-12">
+    @php($isStudent = Auth::user()->isStudent())
+    <div class="min-h-screen bg-surface text-on-surface">
+        @if ($isStudent)
+            <x-student-nav active="support" />
+        @endif
+        <main class="{{ $isStudent ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'px-6 py-8 sm:px-8 lg:px-12' }}">
         <div class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl items-center justify-center">
             <section class="w-full rounded-DEFAULT bg-surface-container-lowest p-8 text-center shadow-[0_24px_70px_rgba(0,94,159,0.08)] sm:p-12">
                 <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-container/30 text-primary">
@@ -22,5 +27,6 @@
                 </div>
             </section>
         </div>
+        </main>
     </div>
 </x-app-layout>

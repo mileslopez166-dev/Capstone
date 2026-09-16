@@ -161,7 +161,9 @@
                                             <div class="mb-3 flex flex-wrap gap-2">
                                                 <span class="rounded-full bg-primary-container/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Recorded</span>
                                                 <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Attempt {{ $submission->attempt_number }}</span>
-                                                @if ($submission->remaining_retake_tries > 0)
+                                                @if ($assessment?->hasUnlimitedRetries())
+                                                    <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">Unlimited retakes left</span>
+                                                @elseif ($submission->remaining_retake_tries > 0)
                                                     <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">{{ $submission->remaining_retake_tries }} retake {{ Str::plural('try', $submission->remaining_retake_tries) }} left</span>
                                                 @elseif ($requestStatus)
                                                     <span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Request {{ $requestStatus }}</span>
@@ -238,7 +240,7 @@
                                     </details>
 
                                     <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                                        @if ($assessment && $submission->remaining_retake_tries > 0)
+                                        @if ($assessment && ($assessment->hasUnlimitedRetries() || $submission->remaining_retake_tries > 0))
                                             <a class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-black text-on-primary shadow-lg shadow-primary/20" href="{{ route('student.assessments.show', $assessment) }}">
                                                 Take Again
                                                 <span class="material-symbols-outlined text-lg">replay</span>

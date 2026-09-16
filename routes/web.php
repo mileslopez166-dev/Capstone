@@ -7,16 +7,17 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Teacher\StudentController;
-use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
-use App\Http\Controllers\Student\SearchController as StudentSearchController;
-use App\Models\User;
-use App\Models\Assessment;
-use App\Models\AssessmentSubmission;
-use App\Models\AssessmentRetakeRequest;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Student\SearchController as StudentSearchController;
+use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
+use App\Http\Controllers\Teacher\StudentController;
+use App\Models\Assessment;
+use App\Models\AssessmentRetakeRequest;
+use App\Models\AssessmentSubmission;
+use App\Models\User;
+use App\Support\StudentLeaderboard;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -174,7 +175,6 @@ Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'
     ->middleware(['auth', 'verified'])
     ->name('admin.users.destroy');
 
-
 Route::post('/admin/users/{id}/restore', [UserManagementController::class, 'restore'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.restore');
@@ -195,13 +195,14 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
         ->where('user_id', $student->id)
         ->where('status', 'approved')
         ->where('remaining_tries', '>', 0)
+        ->selectRaw('assessment_id, SUM(remaining_tries) as remaining_tries')->groupBy('assessment_id')
         ->pluck('remaining_tries', 'assessment_id');
 
     $pendingAssessments = $visibleAssessmentsForStudent($student)
         ->withCount(['submissions as student_attempts_count' => fn ($query) => $query->where('user_id', $student->id)])
         ->latest()
         ->get()
-        ->filter(fn (Assessment $assessment): bool => $assessment->student_attempts_count === 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
+        ->filter(fn (Assessment $assessment): bool => $assessment->remainingIncludedAttempts($assessment->student_attempts_count) > 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
         ->values();
 
     $submissions = AssessmentSubmission::query()
@@ -232,6 +233,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->where('user_id', $student->id)
         ->where('status', 'approved')
         ->where('remaining_tries', '>', 0)
+        ->selectRaw('assessment_id, SUM(remaining_tries) as remaining_tries')->groupBy('assessment_id')
         ->pluck('remaining_tries', 'assessment_id');
 
     $latestRequests = AssessmentRetakeRequest::query()
@@ -247,7 +249,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->get();
 
     $pendingAssessments = $visibleAssessments
-        ->filter(fn (Assessment $assessment): bool => $assessment->student_attempts_count === 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
+        ->filter(fn (Assessment $assessment): bool => $assessment->remainingIncludedAttempts($assessment->student_attempts_count) > 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0)
         ->values();
 
     $completedSubmissions = AssessmentSubmission::query()
@@ -260,7 +262,10 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
             $latestAttempt = $attempts->first();
             $latestAttempt->attempts_count = $attempts->count();
             $latestAttempt->accuracy = $submissionAccuracy($latestAttempt);
-            $latestAttempt->remaining_retake_tries = (int) ($retakeAllowances[$latestAttempt->assessment_id] ?? 0);
+            $includedRemaining = $latestAttempt->assessment?->remainingIncludedAttempts($attempts->count()) ?? 0;
+            $latestAttempt->remaining_retake_tries = $includedRemaining === PHP_INT_MAX
+                ? PHP_INT_MAX
+                : $includedRemaining + (int) ($retakeAllowances[$latestAttempt->assessment_id] ?? 0);
             $latestAttempt->latest_retake_request = $latestRequests[$latestAttempt->assessment_id] ?? null;
             $answers = collect($latestAttempt->answers ?? []);
             $latestAttempt->review_items = collect($latestAttempt->assessment?->manual_questions ?? [])
@@ -294,50 +299,10 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');
 
-Route::get('/student/assessments/{assessment}', function (Assessment $assessment) use ($studentTargetSection) {
-    $student = auth()->user();
-    abort_unless($student?->isStudent(), 403);
-    abort_unless($assessment->status === 'published', 404);
-
-    $targetSection = $studentTargetSection($student);
-    abort_unless(in_array($assessment->target_section, ['all', null], true) || ($targetSection && $assessment->target_section === $targetSection), 404);
-
-    $attemptCount = AssessmentSubmission::query()
-        ->where('assessment_id', $assessment->id)
-        ->where('user_id', $student->id)
-        ->count();
-    $remainingRetakeTries = (int) AssessmentRetakeRequest::query()
-        ->where('assessment_id', $assessment->id)
-        ->where('user_id', $student->id)
-        ->where('status', 'approved')
-        ->sum('remaining_tries');
-
-    if ($attemptCount > 0 && $remainingRetakeTries <= 0) {
-        AssessmentRetakeRequest::query()->updateOrCreate(
-            [
-                'assessment_id' => $assessment->id,
-                'user_id' => $student->id,
-                'status' => 'pending',
-            ],
-            [
-                'teacher_id' => $assessment->created_by,
-                'requested_tries' => 1,
-                'approved_tries' => 0,
-                'remaining_tries' => 0,
-                'message' => 'Student requested a retake token from the assessment page.',
-                'decided_at' => null,
-            ]
-        );
-
-        return redirect()
-            ->route('student.dashboard')
-            ->with('status', 'Token has been requested for retake. Please wait for your teacher approval.');
-    }
-
-    return view('student.assessment', [
-        'assessment' => $assessment,
-    ]);
-})->middleware(['auth', 'verified'])->name('student.assessments.show');
+Route::get('/student/assessments/{assessment}', [AssessmentController::class, 'showStudent'])
+    ->middleware(['auth', 'verified'])->name('student.assessments.show');
+Route::post('/student/assessments/{assessment}/progress', [AssessmentController::class, 'saveStudentProgress'])
+    ->middleware(['auth', 'verified'])->name('student.assessments.progress');
 Route::post('/student/assessments/{assessment}/submit', [AssessmentController::class, 'submitStudentAttempt'])
     ->middleware(['auth', 'verified'])
     ->name('student.assessments.submit');
@@ -345,8 +310,7 @@ Route::post('/student/assessments/{assessment}/retake-request', [AssessmentRetak
     ->middleware(['auth', 'verified'])
     ->name('student.assessments.retake-request');
 
-
-Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') use ($submissionAccuracy) {
+Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
 
@@ -359,44 +323,7 @@ Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') us
 
     abort_unless(array_key_exists($scope, $scopes), 404);
 
-    $students = User::query()
-        ->where('role', 'student')
-        ->where('approval_status', 'approved')
-        ->when($scope !== 'all', fn ($query) => $query->where('section', $scopes[$scope]))
-        ->orderBy('name')
-        ->get();
-
-    $submissions = AssessmentSubmission::query()
-        ->whereIn('user_id', $students->pluck('id'))
-        ->get()
-        ->groupBy('user_id');
-
-    $leaderboard = $students
-        ->map(function (User $rankedStudent) use ($submissions, $submissionAccuracy): array {
-            $studentSubmissions = $submissions->get($rankedStudent->id, collect());
-
-            return [
-                'student' => $rankedStudent,
-                'points' => (int) $studentSubmissions->sum('points'),
-                'completed' => $studentSubmissions->count(),
-                'accuracy' => $studentSubmissions->isNotEmpty()
-                    ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
-                    : null,
-            ];
-        })
-        ->filter(fn (array $entry): bool => $entry['completed'] > 0)
-        ->sortBy([
-            ['points', 'desc'],
-            ['accuracy', 'desc'],
-            ['completed', 'desc'],
-            fn (array $entry): string => $entry['student']->name,
-        ])
-        ->values()
-        ->map(function (array $entry, int $index): array {
-            $entry['rank'] = $index + 1;
-
-            return $entry;
-        });
+    $leaderboard = StudentLeaderboard::entries($scope === 'all' ? null : $scopes[$scope]);
 
     $currentStudentRank = $leaderboard->firstWhere('student.id', $student->id)['rank'] ?? null;
 
@@ -543,8 +470,11 @@ Route::get('/teacher/reports', function () use ($submissionAccuracy) {
         ->latest('submitted_at')
         ->get();
 
+    $studentIdsWithTeacherResults = $submissions->pluck('user_id')->unique()->values();
+
     $students = User::query()
         ->where('role', 'student')
+        ->whereIn('id', $studentIdsWithTeacherResults)
         ->orderBy('name')
         ->get()
         ->map(function (User $student) use ($submissions, $submissionAccuracy): User {
@@ -588,8 +518,22 @@ Route::get('/teacher/reports/students/{student?}', function (?User $student = nu
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
-    $student ??= User::query()->where('role', 'student')->orderBy('name')->first();
-    abort_unless($student && $student->isStudent(), 404);
+    $reportableStudents = User::query()
+        ->where('role', 'student')
+        ->whereHas('assessmentSubmissions.assessment', fn ($query) => $query->where('created_by', $teacher->id));
+
+    if ($student === null) {
+        $student = (clone $reportableStudents)->orderBy('name')->first();
+
+        if (! $student) {
+            return redirect()
+                ->route('reports.index')
+                ->with('status', 'No answered assessment reports are available yet.');
+        }
+    } else {
+        abort_unless($student->isStudent(), 404);
+        abort_unless((clone $reportableStudents)->whereKey($student->id)->exists(), 404);
+    }
 
     $submissions = AssessmentSubmission::query()
         ->with('assessment')
@@ -635,6 +579,8 @@ Route::post('/teacher/assessments', [AssessmentController::class, 'store'])
 Route::patch('/teacher/assessments/{assessment}/availability', [AssessmentController::class, 'updateAvailability'])
     ->middleware(['auth', 'verified'])
     ->name('assessments.availability');
+Route::patch('/teacher/assessments/{assessment}/retries', [AssessmentController::class, 'updateRetries'])
+    ->middleware(['auth', 'verified'])->name('assessments.retries');
 
 Route::get('/teacher/assessments/{assessment}', [AssessmentController::class, 'show'])
     ->middleware(['auth', 'verified'])

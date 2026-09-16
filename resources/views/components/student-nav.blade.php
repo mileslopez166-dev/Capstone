@@ -10,21 +10,9 @@
         ->take(2)
         ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
         ->implode('');
-    $rankedStudentIds = $student
-        ? \App\Models\AssessmentSubmission::query()
-            ->selectRaw('user_id, SUM(points) as total_points, COUNT(*) as completed_count')
-            ->whereIn('user_id', \App\Models\User::query()
-                ->select('id')
-                ->where('role', 'student')
-                ->where('approval_status', 'approved'))
-            ->groupBy('user_id')
-            ->orderByDesc('total_points')
-            ->orderByDesc('completed_count')
-            ->pluck('user_id')
-            ->values()
-        : collect();
-    $studentRankIndex = $student ? $rankedStudentIds->search($student->id) : false;
-    $studentRank = $studentRankIndex === false ? null : $studentRankIndex + 1;
+    $studentRank = $student
+        ? (\App\Support\StudentLeaderboard::entries()->firstWhere('student.id', $student->id)['rank'] ?? null)
+        : null;
     $studentTier = match ($studentRank) {
         1 => ['label' => 'Flaming', 'class' => 'student-mini-tier-flaming bg-gradient-to-br from-red-600 via-orange-500 to-yellow-300 text-white ring-orange-200 shadow-[0_0_24px_rgba(249,115,22,0.7)]'],
         2 => ['label' => 'Diamond', 'class' => 'student-mini-tier-diamond text-white ring-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.55)]'],
@@ -177,10 +165,10 @@
 <nav class="campus-bottom-nav fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[2rem] bg-white/85 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl lg:hidden" aria-label="Student navigation">
     @foreach ([...$links, ['key' => 'profile', 'label' => 'Profile', 'short' => 'Profile', 'href' => route('profile.edit'), 'icon' => 'account_circle']] as $link)
         @if ($active === $link['key'])
-            <div class="flex scale-110 flex-col items-center justify-center rounded-[1.7rem] bg-blue-100 px-5 py-2 text-blue-700 shadow-inner">
+            <a class="flex scale-110 flex-col items-center justify-center rounded-[1.7rem] bg-blue-100 px-5 py-2 text-blue-700 shadow-inner" href="{{ $link['href'] }}" aria-current="page">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">{{ $link['icon'] }}</span>
                 <span class="text-[10px] font-bold">{{ $link['short'] }}</span>
-            </div>
+            </a>
         @else
             <a class="flex flex-col items-center justify-center px-3 py-2 text-slate-400 transition-transform hover:scale-105 hover:text-blue-600" href="{{ $link['href'] }}">
                 <span class="material-symbols-outlined">{{ $link['icon'] }}</span>

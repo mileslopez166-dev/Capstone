@@ -1,0 +1,114 @@
+.frog-pond-game {
+    height: auto;
+    min-height: calc(100dvh - 70px);
+    background: #d5edf2;
+    isolation: isolate;
+    cursor: default;
+}
+
+.frog-pond-scene, .frog-pond-fallback { position: absolute; inset: 0; pointer-events: none; }
+.frog-pond-scene { z-index: 1; visibility: hidden; }
+.pond-3d-ready .frog-pond-scene { visibility: visible; }
+.frog-pond-scene canvas { display: block; width: 100%; height: 100%; }
+.frog-pond-fallback { background: linear-gradient(#d6eef5 0%, #eaf7ed 65%, #80d5d2 66%, #46b3bc 100%); }
+.pond-3d-ready .frog-pond-fallback, .pond-3d-ready .frog-target-fallback, .pond-3d-ready .frog-character-fallback { visibility: hidden; }
+
+.frog-interface {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-rows: auto auto auto minmax(210px, 1fr) auto;
+    gap: 16px;
+    min-height: calc(100dvh - 70px);
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 20px 32px;
+    pointer-events: none;
+    color: #234b47;
+    letter-spacing: 0;
+}
+
+.frog-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 42px; }
+.frog-mission-name { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 800; color: #226151; }
+.frog-mission-name > span { font-size: 26px; }
+.frog-hud-stats { display: flex; align-items: center; gap: 20px; font-size: 13px; font-weight: 700; }
+.frog-score-chip { display: flex; align-items: center; gap: 7px; min-width: 112px; padding: 8px 12px; background: #ffffffd9; border: 1px solid #fff; border-radius: 8px; }
+.frog-score-chip > .material-symbols-outlined { color: #bb830d; font-variation-settings: 'FILL' 1; }
+.frog-score-chip strong { font-size: 19px; }
+.frog-score-chip > span:last-child { font-size: 11px; font-weight: 500; }
+
+.frog-question-card { align-self: start; width: 100%; max-width: 850px; margin: 0 auto; padding: 19px 28px; border: 1px solid #ffffff; border-bottom: 4px solid #b6d4cd; border-radius: 8px; background: #fffffff0; box-shadow: 0 8px 24px #39666a12; pointer-events: auto; transition: border-color .2s; }
+.frog-question-card h1 { max-height: 140px; overflow-y: auto; margin: 0; color: #23423f; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; line-height: 1.4; text-align: center; }
+.frog-question-card[data-result='correct'] { border-bottom-color: #399c69; }
+.frog-question-card[data-result='incorrect'] { border-bottom-color: #d57163; }
+
+.frog-answer-zone { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; width: 100%; max-width: 930px; margin: 0 auto; }
+.frog-pond-game .frog-answer { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0; background: none; border: 0; border-radius: 8px; cursor: pointer; touch-action: manipulation; pointer-events: auto; transition: filter .15s; }
+.frog-pond-game .frog-answer:hover { transform: none; }
+.frog-pond-game .frog-answer.is-caught { animation: none; }
+.frog-answer[data-frog-answer='A'] { --target-color: #ed8b7d; --target-deep: #b4524b; --target-pale: #fce8e2; }
+.frog-answer[data-frog-answer='B'] { --target-color: #efc056; --target-deep: #997125; --target-pale: #fff3d2; }
+.frog-answer[data-frog-answer='C'] { --target-color: #78b6e5; --target-deep: #42769d; --target-pale: #e3f2fc; }
+.frog-answer[data-frog-answer='D'] { --target-color: #b7a0df; --target-deep: #766092; --target-pale: #f0eafa; }
+.frog-target-visual { display: block; flex: none; width: 150px; height: 112px; max-width: 100%; }
+.frog-target-fallback { width: 100%; height: 100%; filter: drop-shadow(0 5px 3px #263e491a); animation: frog-target-hover 2.8s ease-in-out infinite; }
+.frog-answer:nth-child(even) .frog-target-fallback { animation-delay: -.9s; }
+.frog-answer-copy { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 64px; flex: 1; padding: 12px; border: 1px solid #ffffff; border-bottom: 4px solid var(--target-color); border-radius: 8px; background: #ffffffed; box-shadow: 0 6px 12px #24494c12; text-align: left; transition: border-color .2s, box-shadow .2s, background .2s; }
+.frog-answer-letter { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; background: var(--target-pale); color: var(--target-deep); font-size: 14px; font-weight: 800; }
+.frog-answer-copy [data-frog-answer-label] { flex: 1; color: #304a48; font-size: 14px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.frog-answer:focus-visible { outline: 3px solid #226d63; outline-offset: 5px; }
+.frog-answer:hover:not(:disabled) .frog-answer-copy { border-color: var(--target-color); background: #fff; box-shadow: 0 8px 18px #24494c20; }
+.frog-answer-verdict { display: none; flex: 0 0 20px; font-size: 20px; }
+.frog-answer[data-result] .frog-answer-verdict { display: block; }
+.frog-answer[data-result='correct'] .frog-answer-copy { border-color: #439b69; background: #edf9f0; }
+.frog-answer[data-result='correct'] .frog-answer-verdict { color: #29794c; }
+.frog-answer[data-result='incorrect'] .frog-answer-copy { border-color: #d57969; background: #fff1ec; }
+.frog-answer[data-result='incorrect'] .frog-answer-verdict { color: #ac5143; }
+.frog-answer:disabled { cursor: default; }
+.frog-answer[hidden] { display: none; }
+
+.frog-stage { display: flex; align-items: flex-end; justify-content: center; min-height: 210px; }
+.frog-character-anchor { width: 270px; height: 230px; max-width: 100%; }
+.frog-character-fallback { display: block; width: 100%; height: 100%; }
+.frog-mission-progress { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 460px; margin: 0 auto; color: #174f52; font-size: 11px; font-weight: 700; }
+.frog-progress-track { height: 10px; flex: 1; overflow: hidden; border: 2px solid #ffffffc7; border-radius: 8px; background: #256c7933; }
+.frog-progress-track > div { width: 0; height: 100%; background: #fff0a6; border-radius: 8px; transition: width .45s ease; }
+.frog-pond-game .frog-tongue { position: absolute; height: 10px; left: var(--tongue-left); top: var(--tongue-top); width: var(--tongue-width); z-index: 3; pointer-events: none; border-radius: 9px; background: #ef7791; border: 2px solid #bd4867; transform-origin: left center; transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; }
+.frog-pond-game .frog-tongue.is-catching { animation: pond-tongue .85s ease-in-out forwards; }
+.pond-3d-ready .frog-tongue { display: none; }
+.frog-answer.is-caught .frog-target-fallback { animation: pond-target-caught .85s ease-in forwards; }
+.frog-target-mouth { display: none; }
+.frog-answer.is-attacking { position: relative; z-index: 4; }
+.frog-answer.is-attacking .frog-target-fallback { animation: none; }
+.frog-answer.is-attacking .frog-target-mouth { display: inline; }
+.frog-answer.is-attacking .frog-target-proboscis { opacity: 0; }
+.frog-character-body { transform-box: fill-box; transform-origin: center; }
+.frog-pond-game #frog-question-card[data-result='incorrect'] { outline: 2px solid #d57969; outline-offset: -2px; }
+.frog-pond-game #frog-question-card[data-result='correct'] { outline: 2px solid #439b69; outline-offset: -2px; }
+@keyframes frog-target-hover { 0%, 100% { transform: translateY(2px) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+@keyframes pond-tongue { 0%, 100% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 0; } 32%, 46% { transform: rotate(var(--tongue-angle)) scaleX(1); opacity: 1; } 85% { transform: rotate(var(--tongue-angle)) scaleX(0); opacity: 1; } }
+@keyframes pond-target-caught { 0%, 42% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(80px) scale(.05); } }
+
+@media (max-width: 700px) {
+    .frog-interface { padding: 14px 16px; gap: 12px; grid-template-rows: auto auto auto minmax(170px, 1fr) auto; }
+    .frog-hud { gap: 8px; }
+    .frog-mission-name { font-size: 15px; gap: 5px; }
+    .frog-mission-name > span { font-size: 21px; }
+    .frog-hud-stats { gap: 8px; font-size: 11px; }
+    .frog-score-chip { min-width: 0; padding: 6px 8px; gap: 4px; }
+    .frog-score-chip > span:last-child { display: none; }
+    .frog-question-card { padding: 14px; }
+    .frog-question-card h1 { font-size: 18px; max-height: 110px; }
+    .frog-answer-zone { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; max-width: 460px; }
+    .frog-target-visual { width: 116px; height: 78px; }
+    .frog-answer-copy { min-height: 56px; padding: 8px; gap: 7px; }
+    .frog-answer-copy [data-frog-answer-label] { font-size: 12px; }
+    .frog-answer-letter { flex-basis: 24px; width: 24px; height: 24px; font-size: 12px; }
+    .frog-stage { min-height: 170px; }
+    .frog-character-anchor { width: 218px; height: 186px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .frog-target-fallback { animation: none; }
+    .frog-answer-copy, .frog-progress-track > div { transition: none; }
+}

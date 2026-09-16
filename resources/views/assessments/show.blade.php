@@ -28,6 +28,8 @@
         $availabilityConfirm = $isPublished
             ? 'Lock this assessment? Students will no longer be able to answer it.'
             : 'Unlock this assessment? Students will be able to answer it.';
+        $retryLimitFormValue = old('retry_limit', $assessment->retryLimitFormValue());
+        $totalIncludedAttempts = 1 + (int) $assessment->retry_limit;
     @endphp
 
     <div class="min-h-screen bg-surface lg:flex" x-data="{ mobileMenuOpen: false }">
@@ -77,6 +79,36 @@
                         </form>
                     </div>
                 </div>
+
+                @if (session('status'))
+                    <p class="mb-6 rounded-lg bg-secondary-container/30 p-4 text-secondary-dim" role="status">{{ session('status') }}</p>
+                @endif
+
+                <form class="mb-8 flex flex-wrap items-end gap-4 border-b border-outline-variant/20 pb-6" method="POST" action="{{ route('assessments.retries', $assessment) }}">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="mb-2 block text-sm font-bold" for="retry_limit">Retries after first attempt</label>
+                        <select class="w-48 rounded-lg border-outline-variant/30 bg-white p-3" id="retry_limit" name="retry_limit" required>
+                            @foreach (\App\Models\Assessment::retryLimitOptions() as $value => $label)
+                                <option value="{{ $value }}" @selected((string) $retryLimitFormValue === (string) $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-on-primary" type="submit">
+                        <span class="material-symbols-outlined text-lg">save</span>Save Retry Limit
+                    </button>
+                    <p class="py-3 text-sm text-on-surface-variant">
+                        @if ($assessment->hasUnlimitedRetries())
+                            Unlimited attempts per student
+                        @else
+                            {{ $totalIncludedAttempts }} total {{ Str::plural('attempt', $totalIncludedAttempts) }} per student
+                        @endif
+                    </p>
+                    @error('retry_limit')
+                        <p class="w-full text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </form>
 
                 <section class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-lowest shadow-[0_24px_70px_rgba(0,94,159,0.08)]">
                     <div class="grid lg:grid-cols-[22rem_1fr]">

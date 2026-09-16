@@ -28,6 +28,7 @@ class SearchController extends Controller
                 ->where('user_id', $student->id)
                 ->where('status', 'approved')
                 ->where('remaining_tries', '>', 0)
+                ->selectRaw('assessment_id, SUM(remaining_tries) as remaining_tries')->groupBy('assessment_id')
                 ->pluck('remaining_tries', 'assessment_id');
 
             $assessments = Assessment::query()
@@ -53,7 +54,7 @@ class SearchController extends Controller
                 ->limit(8)
                 ->get()
                 ->map(function (Assessment $assessment) use ($retakeAllowances): Assessment {
-                    $assessment->can_open = $assessment->student_attempts_count === 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0;
+                    $assessment->can_open = $assessment->remainingIncludedAttempts($assessment->student_attempts_count) > 0 || ($retakeAllowances[$assessment->id] ?? 0) > 0;
 
                     return $assessment;
                 });

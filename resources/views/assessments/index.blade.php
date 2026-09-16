@@ -328,6 +328,18 @@
                                         @enderror
                                     </div>
 
+                                    <div>
+                                        <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="retry_limit">Retries after first attempt</label>
+                                        <select class="w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" id="retry_limit" name="retry_limit" required>
+                                            @foreach (\App\Models\Assessment::retryLimitOptions() as $value => $label)
+                                                <option value="{{ $value }}" @selected((string) old('retry_limit', '0') === (string) $value)>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('retry_limit')
+                                            <p class="mt-2 text-sm text-error">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
                                     <hr class="border-outline-variant/20">
 
                                     <div class="space-y-3" id="literacy-options">
