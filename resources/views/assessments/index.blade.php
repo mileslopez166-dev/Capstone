@@ -35,7 +35,7 @@
                     <input id="assessment-status" name="status" type="hidden" value="{{ old('status', 'published') }}">
                     <input id="delivery-method" name="delivery_method" type="hidden" value="manual">
 
-                    <header class="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                    <header class="teacher-workspace-heading mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                         <div>
                             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-primary">Curriculum Builder</span>
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
@@ -185,7 +185,7 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="overflow-hidden rounded-lg bg-surface-container-low text-xs shadow-sm ring-1 ring-outline-variant/15">
+                                            <div class="assessment-type-reference overflow-hidden rounded-lg bg-surface-container-low text-xs shadow-sm ring-1 ring-outline-variant/15">
                                                 <div class="grid grid-cols-4 gap-0 bg-surface-container-high px-3 py-2 font-black uppercase tracking-wider text-on-surface-variant">
                                                     <span>Assessment Type</span>
                                                     <span>Reading Mode</span>
@@ -414,7 +414,6 @@
                             @foreach ($assessments as $assessment)
                                 @php
                                     $isPublished = $assessment->status === 'published';
-                                    $availabilityLabel = $isPublished ? 'Unlocked' : 'Locked';
                                     $nextAvailability = $isPublished ? 'draft' : 'published';
                                     $availabilityButtonLabel = $isPublished ? 'Lock' : 'Unlock';
                                     $availabilityIcon = $isPublished ? 'lock' : 'lock_open';
@@ -433,9 +432,7 @@
                                         <span class="rounded-full bg-primary-container/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
                                             Story Assessment
                                         </span>
-                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $isPublished ? 'bg-secondary-container/30 text-secondary-dim' : 'bg-error-container/30 text-error' }}">
-                                            {{ $availabilityLabel }}
-                                        </span>
+                                        <x-status-badge :status="$isPublished ? 'unlocked' : 'draft'" />
                                     </div>
                                     <h3 class="font-headline text-xl font-bold text-on-surface">{{ $assessment->title }}</h3>
                                     <p class="mt-2 text-sm text-on-surface-variant">{{ $assessment->instructions ?: 'No instructions added yet.' }}</p>

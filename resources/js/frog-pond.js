@@ -204,7 +204,7 @@ export function initFrogPond(host) {
     const tongue = mesh(scene, cylinder, '#ed7293', [0, 0, 0], [1, 1, 1], { roughness: .3 });
     const tongueTip = ellipsoid(scene, '#f398ac', [0, 0, 0], [1, 1, 1]);
     tongue.visible = tongueTip.visible = false;
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const motionQuery = { get matches() { return window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches; } };
     const gaze = new THREE.Vector2();
     const mouthWorld = new THREE.Vector3();
     const tip = new THREE.Vector3();

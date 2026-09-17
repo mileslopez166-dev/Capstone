@@ -16,7 +16,7 @@
                 <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search reports..." />
 
                 <section class="px-8 pb-8 pt-8">
-                    <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                    <div class="teacher-workspace-heading mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                         <div class="space-y-1">
                             <h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Reports</h1>
                             <p class="text-lg text-on-surface-variant">{{ $submissions->isEmpty() ? 'Reports will populate when student progress is available in the system.' : 'Reports are connected to saved student assessment submissions.' }}</p>
@@ -29,7 +29,7 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                    <div class="teacher-report-overview grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <section class="rounded-sm border border-outline-variant/10 bg-surface-container-lowest p-6 lg:col-span-4">
                             <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-on-surface-variant">Student Distribution</h3>
                             <div class="flex min-h-[18rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-6 text-center">
@@ -57,7 +57,7 @@
                             </div>
                         </section>
 
-                        <section class="rounded-lg bg-primary p-8 shadow-2xl lg:col-span-5">
+                        <section class="teacher-callout rounded-lg bg-primary p-8 shadow-2xl lg:col-span-5">
                             <div>
                                 <div class="mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-2xl text-tertiary-fixed">auto_awesome</span>

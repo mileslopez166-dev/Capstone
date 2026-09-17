@@ -144,7 +144,7 @@
                                         #{{ $entry['rank'] }}
                                     </div>
                                     <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full {{ $tier['avatar'] }}" aria-hidden="true">
-                                        <x-student-character :gender="$entry['student']->gender" variant="portrait" />
+                                        <x-student-character :user="$entry['student']" variant="portrait" />
                                     </div>
                                     <div class="min-w-0">
                                         <p class="truncate font-headline text-base font-black text-on-surface">

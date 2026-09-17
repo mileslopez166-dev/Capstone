@@ -14,20 +14,24 @@ export default function studentCompanion(messages) {
         isVisible: false,
         reducedMotion: false,
         documentHidden: document.hidden,
+        isMobile: false,
+        compact: true,
 
         get message() {
             return this.messages[this.messageIndex];
         },
 
         get canAnimate() {
-            return this.isVisible && !this.documentHidden && !this.isPaused && !this.reducedMotion;
+            return this.isVisible && !this.documentHidden && !this.isPaused && !this.reducedMotion && (!this.isMobile || !this.compact);
         },
 
         init() {
+            this.isMobile = this.$el.classList.contains('campus-companion-mobile');
+            try { this.compact = localStorage.getItem('pgaals-compact-companion') !== 'false'; } catch {}
             motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-            this.reducedMotion = motionPreference.matches;
-            motionChanged = (event) => {
-                this.reducedMotion = event.matches;
+            this.reducedMotion = window.PgaalsPreferences?.reducedMotion ?? motionPreference.matches;
+            motionChanged = () => {
+                this.reducedMotion = window.PgaalsPreferences?.reducedMotion ?? motionPreference.matches;
                 this.syncPlayback();
             };
             visibilityChanged = () => {
@@ -35,6 +39,7 @@ export default function studentCompanion(messages) {
                 this.syncPlayback();
             };
             motionPreference.addEventListener('change', motionChanged);
+            window.addEventListener('pgaals:preferences', motionChanged);
             document.addEventListener('visibilitychange', visibilityChanged);
 
             // Only the visible companion runs: desktop sidebar or mobile strip.
@@ -85,10 +90,17 @@ export default function studentCompanion(messages) {
             this.syncPlayback();
         },
 
+        toggleCompact() {
+            this.compact = !this.compact;
+            try { localStorage.setItem('pgaals-compact-companion', String(this.compact)); } catch {}
+            this.syncPlayback();
+        },
+
         destroy() {
             this.stop();
             observer?.disconnect();
             motionPreference?.removeEventListener('change', motionChanged);
+            window.removeEventListener('pgaals:preferences', motionChanged);
             document.removeEventListener('visibilitychange', visibilityChanged);
         },
     };

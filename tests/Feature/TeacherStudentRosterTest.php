@@ -91,7 +91,7 @@ class TeacherStudentRosterTest extends TestCase
         $response = $this->actingAs($teacher)->get(route('students.show', $student));
 
         $response->assertOk();
-        $response->assertSeeText('Pixel Avatar');
+        $response->assertSeeText('Your Avatar');
         $response->assertSeeText('Lyra Vale');
         $response->assertSeeText('Offline');
         $response->assertSeeText($student->name);

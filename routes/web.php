@@ -8,6 +8,9 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Student\AvatarController;
+use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
+use App\Http\Controllers\Teacher\PracticeController as TeacherPracticeController;
 use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
 use App\Http\Controllers\Teacher\StudentController;
@@ -49,6 +52,21 @@ Route::post('/notifications/mark-read', [NotificationController::class, 'markRea
 Route::view('/support', 'support.developing')
     ->middleware(['auth', 'verified'])
     ->name('support.developing');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/student/wardrobe', [AvatarController::class, 'edit'])->name('student.wardrobe.edit');
+    Route::patch('/student/wardrobe', [AvatarController::class, 'update'])->name('student.wardrobe.update');
+    Route::post('/student/wardrobe/purchase', [AvatarController::class, 'purchase'])->name('student.wardrobe.purchase');
+    Route::get('/student/practice', [StudentPracticeController::class, 'index'])->name('student.practice.index');
+    Route::get('/student/practice/{mission}', [StudentPracticeController::class, 'show'])->name('student.practice.show');
+    Route::post('/student/practice/{mission}', [StudentPracticeController::class, 'submit'])->name('student.practice.submit');
+    Route::get('/teacher/practice', [TeacherPracticeController::class, 'index'])->name('teacher.practice.index');
+    Route::get('/teacher/practice/from/{submission}', [TeacherPracticeController::class, 'create'])->name('teacher.practice.create');
+    Route::post('/teacher/practice/from/{submission}', [TeacherPracticeController::class, 'store'])->name('teacher.practice.store');
+    Route::get('/teacher/practice/{mission}', [TeacherPracticeController::class, 'show'])->name('teacher.practice.show');
+    Route::patch('/teacher/practice/{mission}/review', [TeacherPracticeController::class, 'review'])->name('teacher.practice.review');
+    Route::post('/teacher/practice/{mission}/cancel', [TeacherPracticeController::class, 'cancel'])->name('teacher.practice.cancel');
+});
 
 $studentTargetSection = function (User $student): ?string {
     return $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
@@ -211,17 +229,22 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
         ->latest('submitted_at')
         ->get();
 
+    $pendingAssessments = \App\Support\StudentTaskQueue::assessments($pendingAssessments, $student);
+    $bestSubmissions = $submissions->groupBy('assessment_id')->map(fn ($attempts) => $attempts->sortByDesc('points')->first());
     $studentMetrics = [
         'pending_count' => $pendingAssessments->count(),
-        'completed_count' => $submissions->count(),
-        'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
-        'total_points' => (int) $submissions->sum('points'),
+        'completed_count' => $bestSubmissions->count(),
+        'average_accuracy' => $bestSubmissions->isNotEmpty() ? (int) round($bestSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'total_points' => (int) $bestSubmissions->sum('points'),
     ];
 
     return view('student.dashboard', [
         'pendingAssessments' => $pendingAssessments,
-        'recentSubmissions' => $submissions->take(3),
+        'recentSubmissions' => $submissions->unique('assessment_id')->take(3),
         'studentMetrics' => $studentMetrics,
+        'nextTask' => \App\Support\StudentTaskQueue::next($pendingAssessments, $student),
+        'practiceCount' => \App\Models\PracticeMission::where('student_id', $student->id)->where('status', 'assigned')->count(),
+        'coinBalance' => $student->practiceCoinBalance(),
     ]);
 })->middleware(['auth', 'verified'])->name('student.dashboard');
 
@@ -294,7 +317,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->values();
 
     return view('student.activities', [
-        'pendingAssessments' => $pendingAssessments,
+        'pendingAssessments' => \App\Support\StudentTaskQueue::assessments($pendingAssessments, $student),
         'completedSubmissions' => $completedSubmissions,
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');

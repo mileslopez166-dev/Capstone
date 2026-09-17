@@ -5,7 +5,6 @@
         $isTeacher = $user->isTeacher();
         $dashboardRoute = route($user->dashboardRouteName());
         $firstName = str($user->name)->before(' ')->title();
-        $studentAvatarStyle = ($user->gender === 'female') ? 'Lyra Vale' : 'Nova Finch';
         $studentRank = $studentRank ?? null;
         $studentRankTier = $studentRankTier ?? ['label' => 'Bronze', 'icon' => 'editor_choice'];
         $initials = str($user->name)
@@ -44,7 +43,7 @@
 
                     <div class="mt-8 flex items-center gap-4">
                         @if ($isStudent)
-                            <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="sm" :rank-tier="$studentRankTier" :rank="$studentRank" />
+                            <x-student-pixel-avatar :user="$user" :name="$user->name" size="sm" :rank-tier="$studentRankTier" :rank="$studentRank" />
                         @else
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl font-black text-white shadow-inner">
                                 {{ $initials }}
@@ -57,7 +56,7 @@
                     </div>
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-3">
+                <div class="teacher-summary-metrics grid gap-4 sm:grid-cols-3">
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Account Type</p>
                         <p class="mt-3 font-headline text-2xl font-bold text-primary">{{ ucfirst($user->role ?? 'student') }}</p>
@@ -73,7 +72,7 @@
                 </div>
             </section>
 
-            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <div class="teacher-profile-forms grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <section class="space-y-6">
                     <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <div class="mb-6">
@@ -112,25 +111,13 @@
                                 @endif
                             </div>
                             @if ($isStudent)
-                                <fieldset>
-                                    <legend class="text-sm font-bold text-on-surface-variant">Choose Your Avatar</legend>
-                                    <div class="campus-avatar-options">
-                                        @foreach (['male' => ['name' => 'Nova Finch', 'label' => 'Boy'], 'female' => ['name' => 'Lyra Vale', 'label' => 'Girl']] as $avatarGender => $avatarChoice)
-                                            <label class="campus-avatar-choice">
-                                                <input type="radio" name="gender" value="{{ $avatarGender }}" @checked(old('gender', $user->gender ?? 'male') === $avatarGender)>
-                                                <span>
-                                                    <x-student-character :gender="$avatarGender" />
-                                                    <strong>{{ $avatarChoice['name'] }}</strong>
-                                                    <small>{{ $avatarChoice['label'] }}</small>
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <x-input-error class="mt-2 text-sm text-error" :messages="$errors->get('gender')" />
-                                </fieldset>
-                            @else
-                                <input name="gender" type="hidden" value="{{ $user->gender }}">
+                                <a class="wardrobe-profile-link" href="{{ route('student.wardrobe.edit') }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">checkroom</span>
+                                    <span>Customize Avatar</span>
+                                    <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                                </a>
                             @endif
+                            <input name="gender" type="hidden" value="{{ $user->gender }}">
 
                             <div class="flex items-center gap-4">
                                 <button class="rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-bold text-on-primary shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]" type="submit">Save Changes</button>
@@ -195,7 +182,12 @@
 
                 <aside class="space-y-6">
                     @if ($isStudent)
-                        <x-student-pixel-avatar :gender="$user->gender" :name="$user->name" size="lg" :show-card="true" :is-online="true" :rank-tier="$studentRankTier" :rank="$studentRank" />
+                        <x-student-pixel-avatar :user="$user" :name="$user->name" size="lg" :show-card="true" :is-online="true" :rank-tier="$studentRankTier" :rank="$studentRank" />
+                        <a class="wardrobe-profile-link" href="{{ route('student.wardrobe.edit') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">checkroom</span>
+                            <span>Open Wardrobe</span>
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                        </a>
                     @endif
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h2 class="font-headline text-2xl font-bold text-on-surface">Account Summary</h2>

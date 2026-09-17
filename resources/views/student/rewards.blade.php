@@ -1,10 +1,13 @@
 <x-app-layout>
     @php
         $student = Auth::user();
+        $practiceCoins = $student->practiceCoinBalance();
+        $unlockedRewards = count($student->unlockedAvatarItems());
         $breakdown = [
             ['label' => 'Completed Assessments', 'value' => number_format($studentMetrics['completed_count']), 'tone' => 'text-secondary'],
             ['label' => 'Saved Results', 'value' => number_format($studentMetrics['saved_results']), 'tone' => 'text-primary'],
-            ['label' => 'Rewards Available', 'value' => $studentMetrics['rewards_available'] > 0 ? number_format($studentMetrics['rewards_available']) : 'None', 'tone' => 'text-tertiary'],
+            ['label' => 'Practice Coins', 'value' => number_format($practiceCoins), 'tone' => 'text-tertiary'],
+            ['label' => 'Wardrobe Rewards', 'value' => number_format($unlockedRewards), 'tone' => 'text-secondary'],
         ];
     @endphp
 
@@ -13,12 +16,13 @@
 
         <main class="relative min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl">
+                <x-practice-entry />
             <div class="pointer-events-none absolute inset-0 opacity-15" style="background-image: radial-gradient(circle, #44a5ff 10%, transparent 10.5%), radial-gradient(circle, #ffeb3b 10%, transparent 10.5%), radial-gradient(circle, #91f78e 10%, transparent 10.5%); background-size: 40px 40px, 60px 60px, 50px 50px; background-position: 0 0, 20px 30px, 40px 10px;"></div>
 
             <section class="relative z-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
                 <div class="mb-4 text-center lg:col-span-12">
                     <h1 class="mb-2 font-headline text-5xl font-extrabold tracking-tight text-primary md:text-7xl">Rewards</h1>
-                    <p class="text-xl font-medium text-on-surface-variant md:text-2xl">This page will show rewards and summaries when real activity results are available.</p>
+                    <p class="text-xl font-medium text-on-surface-variant md:text-2xl">Your practice coins and wardrobe collection</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 lg:col-span-7 md:grid-cols-2">
@@ -46,7 +50,7 @@
                                 <span class="material-symbols-outlined text-4xl text-tertiary">folder</span>
                                 <span class="font-headline text-6xl font-black text-on-surface">{{ number_format($studentMetrics['saved_results']) }}</span>
                             </div>
-                            <p class="mt-4 text-sm font-medium text-on-surface-variant">{{ $studentMetrics['saved_results'] > 0 ? number_format($studentMetrics['total_points']).' total points saved.' : 'No reward totals have been generated yet.' }}</p>
+                            <p class="mt-4 text-sm font-medium text-on-surface-variant">{{ $studentMetrics['saved_results'] > 0 ? number_format($studentMetrics['total_points']).' total points saved.' : 'No assessment results saved yet.' }}</p>
                         </div>
                     </div>
 
@@ -54,8 +58,9 @@
                         <img class="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay" alt="" src="{{ asset('images/campus/pixel-world.png') }}">
                         <div class="relative flex flex-col items-center justify-between gap-8 md:flex-row">
                             <div class="text-center md:text-left">
-                                <h3 class="mb-2 font-headline text-3xl font-bold">{{ $studentMetrics['rewards_available'] > 0 ? 'Rewards Available' : 'No Rewards Yet' }}</h3>
-                                <p class="max-w-sm text-lg text-on-primary/80">{{ $studentMetrics['rewards_available'] > 0 ? 'You earned recognition from completed assessments.' : 'Once the system records completed activities, this section will display available rewards and recognition.' }}</p>
+                                <h3 class="mb-2 font-headline text-3xl font-bold">Practice Wardrobe</h3>
+                                <p class="max-w-sm text-lg text-on-primary/80">{{ number_format($practiceCoins) }} coins &middot; {{ $unlockedRewards }} rewards unlocked</p>
+                                <a class="practice-button practice-secondary mt-4" href="{{ route('student.wardrobe.edit') }}"><span class="material-symbols-outlined" aria-hidden="true">checkroom</span> Open wardrobe</a>
                             </div>
                             <div class="relative flex h-40 w-40 items-center justify-center">
                                 <div class="absolute inset-0 rounded-full bg-tertiary-container opacity-40 blur-2xl"></div>
@@ -87,9 +92,7 @@
                         <a class="w-full rounded-lg bg-gradient-to-r from-primary to-primary-container py-5 text-center font-headline text-xl font-extrabold text-on-primary shadow-lg transition-transform duration-200 hover:scale-[1.02] active:scale-95" href="{{ route('student.activities') }}">
                             View Activities
                         </a>
-                        <button class="w-full rounded-lg bg-surface-container-highest py-5 font-headline text-lg font-bold text-on-surface-variant transition-colors duration-200 hover:bg-surface-variant active:scale-95" type="button">
-                            No Reward Data
-                        </button>
+                        <a class="practice-button" href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Practice Missions</a>
                     </div>
                 </div>
             </section>

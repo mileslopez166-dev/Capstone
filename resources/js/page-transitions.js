@@ -4,7 +4,7 @@ import '../css/page-transitions.css';
 if (!('CSSViewTransitionRule' in window)) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const showPage = () => {
-        if (reducedMotion.matches) return;
+        if (window.PgaalsPreferences?.reducedMotion ?? reducedMotion.matches) return;
 
         document.querySelector('main')?.animate?.(
             [

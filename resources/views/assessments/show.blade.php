@@ -54,7 +54,7 @@
             </x-teacher-topbar>
 
             <div class="mx-auto max-w-6xl p-5 sm:p-8">
-                <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div class="teacher-workspace-heading mb-8 flex flex-wrap items-center justify-between gap-4">
                     <a class="inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary-dim" href="{{ route('assessments.index') }}">
                         <span class="material-symbols-outlined text-lg">arrow_back</span>
                         Back to Assessment Builder

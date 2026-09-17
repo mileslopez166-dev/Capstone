@@ -6,14 +6,21 @@ import '../css/login.css';
 import '../css/frog-pond.css';
 import '../css/fishing-sea.css';
 import '../css/student-assessment.css';
+import '../css/avatar-wardrobe.css';
+import '../css/practice.css';
+import '../css/ui-polish.css';
+import comfortControls, { preferences } from './ui-preferences';
 import './page-transitions';
 
 import Alpine from 'alpinejs';
 import studentCompanion from './student-companion';
+import avatarWardrobe from './avatar-wardrobe';
 
 window.Alpine = Alpine;
 
 Alpine.data('studentCompanion', studentCompanion);
+Alpine.data('avatarWardrobe', avatarWardrobe);
+Alpine.data('comfortControls', comfortControls);
 
 Alpine.start();
 
@@ -40,6 +47,7 @@ if (fishingSea) {
 const buttonClickSound = new Audio('/audio/button-click.mp3');
 buttonClickSound.preload = 'auto';
 buttonClickSound.volume = 0.45;
+preferences.register(buttonClickSound);
 
 const shouldPlayButtonClick = (target) => {
     const buttonLike = target.closest('button, a, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]');
@@ -60,7 +68,7 @@ const shouldPlayButtonClick = (target) => {
 };
 
 document.addEventListener('click', (event) => {
-    if (!shouldPlayButtonClick(event.target)) {
+    if (!preferences.sound || !shouldPlayButtonClick(event.target)) {
         return;
     }
 

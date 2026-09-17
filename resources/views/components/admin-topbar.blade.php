@@ -12,6 +12,7 @@
         </datalist>
     </form>
     <div class="admin-topbar-actions">
+        <x-comfort-controls />
         <x-notification-menu :user="$adminUser" />
         <a class="admin-account" href="{{ route('profile.edit') }}" aria-label="Administrator profile" title="Administrator profile">{{ $adminInitials }}</a>
     </div>

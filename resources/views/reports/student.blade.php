@@ -20,14 +20,14 @@
                 <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search reports..." />
 
                 <div class="mx-auto max-w-7xl space-y-12 p-8 lg:p-12">
-                    <section class="flex flex-col justify-between gap-8 md:flex-row md:items-end">
+                    <section class="teacher-workspace-heading flex flex-col justify-between gap-8 md:flex-row md:items-end">
                         <div class="space-y-4">
                             <nav class="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
                                 <a class="hover:text-primary" href="{{ route('reports.index') }}">Reports</a>
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                                 <span class="text-primary">{{ $student->name }}</span>
                             </nav>
-                            <div class="flex items-center gap-6">
+                            <div class="teacher-report-identity flex items-center gap-6">
                                 <div class="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-surface-container-lowest bg-primary-container/20 shadow-xl">
                                     <span class="font-headline text-2xl font-black text-on-primary-container">{{ $studentInitials ?: 'S' }}</span>
                                 </div>
@@ -38,7 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="flex gap-4">
+                        <div class="teacher-report-actions flex gap-4">
                             <button class="flex items-center gap-2 rounded-sm border-2 border-outline-variant/20 bg-surface-container-lowest px-6 py-3 font-bold text-on-surface transition-all hover:bg-surface-container" type="button">
                                 <span class="material-symbols-outlined">print</span>
                                 Print
@@ -50,7 +50,7 @@
                         </div>
                     </section>
 
-                    <section class="grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-6">
+                    <section class="teacher-summary-metrics grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-6">
                         @foreach ([
                             ['title' => 'Literacy', 'value' => 'No Data', 'note' => 'No completed literacy assessments', 'icon' => 'auto_stories', 'tone' => 'primary'],
                             ['title' => 'Numeracy', 'value' => 'No Data', 'note' => 'No completed numeracy assessments', 'icon' => 'calculate', 'tone' => 'error'],
@@ -73,7 +73,7 @@
                     </section>
 
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                        <div class="relative overflow-hidden rounded-sm bg-on-primary-container p-10 text-on-primary lg:col-span-2">
+                        <div class="teacher-callout relative overflow-hidden rounded-sm bg-on-primary-container p-10 text-on-primary lg:col-span-2">
                             <div class="relative z-10">
                                 <div class="mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-primary-fixed">psychology</span>
@@ -128,6 +128,7 @@
                                                 <div>
                                                     <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
                                                     <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
+                                                    <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
                                                 </div>
                                                 <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
                                             </div>

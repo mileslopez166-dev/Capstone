@@ -1,114 +1,50 @@
 <x-app-layout>
-    @php
-        $student = Auth::user();
-        $firstName = str($student->name)->before(' ')->title();
-        $pendingAssessments = $pendingAssessments ?? collect();
-        $recentSubmissions = $recentSubmissions ?? collect();
-        $studentMetrics = $studentMetrics ?? ['pending_count' => 0, 'completed_count' => 0, 'average_accuracy' => null, 'total_points' => 0];
-        $pendingCount = $studentMetrics['pending_count'] ?? $pendingAssessments->count();
-        $completedCount = $studentMetrics['completed_count'] ?? $recentSubmissions->count();
-        $averageAccuracy = $studentMetrics['average_accuracy'] ?? null;
-        $totalPoints = $studentMetrics['total_points'] ?? 0;
-        $activityProgress = $pendingCount + $completedCount > 0 ? (int) round(($completedCount / ($pendingCount + $completedCount)) * 100) : 0;
-    @endphp
-
-    <div class="min-h-screen bg-background font-body text-on-surface">
-        <x-student-nav active="home" />
-
-        <main class="min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
-            <div class="mx-auto max-w-7xl space-y-8">
-            @if (session('status'))
-                <div class="rounded-lg border border-secondary/20 bg-secondary-container/30 px-5 py-4 text-sm font-bold text-on-surface shadow-sm">
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-secondary-dim">notifications_active</span>
-                        <p>{{ session('status') }}</p>
-                    </div>
-                </div>
-            @endif
-            <section class="relative mb-12 overflow-visible">
-                <div class="campus-welcome flex flex-col items-center justify-between gap-8 rounded-lg p-8 text-on-primary shadow-xl md:flex-row md:p-12">
-                    <div class="flex-1">
-                        <h1 class="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
-                            Welcome, {{ $firstName }}
-                        </h1>
-                        <p class="mb-8 mt-4 max-w-md text-lg text-on-primary/90">Your student dashboard is ready. Open assigned activities, check your account, and review your current status here.</p>
-
-                        <div class="space-y-3">
-                            <div class="flex items-end justify-between">
-                                <span class="font-headline text-xl font-bold">Assigned Activities</span>
-                                <span class="font-bold">{{ $pendingCount }} Available</span>
-                            </div>
-                            <div class="h-6 w-full overflow-hidden rounded-full border-2 border-white/20 bg-surface-container-highest/30">
-                                <div class="relative h-full rounded-full bg-secondary shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]" style="width: {{ $activityProgress }}%">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="campus-welcome-character">
-                        <x-student-character :gender="$student->gender" />
-                    </div>
-                </div>
-            </section>
-
-            <div class="mb-12 grid grid-cols-1 gap-6 md:grid-cols-12">                @forelse ($pendingAssessments->take(2) as $assessment)
-                    <div class="group rounded-lg border-b-4 {{ $assessment->subject === 'literacy' ? 'border-primary-container' : 'border-secondary-container' }} bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)] transition-transform hover:-translate-y-1 md:col-span-6">
-                        <div class="mb-6 flex items-start justify-between">
-                            <div class="rounded-lg {{ $assessment->subject === 'literacy' ? 'bg-primary-container/10' : 'bg-secondary-container/10' }} p-4">
-                                <span class="material-symbols-outlined text-4xl {{ $assessment->subject === 'literacy' ? 'text-primary' : 'text-secondary' }}">{{ $assessment->subject === 'literacy' ? 'menu_book' : 'calculate' }}</span>
-                            </div>
-                            <span class="rounded-full bg-tertiary-container px-4 py-1 text-sm font-bold tracking-wide text-on-tertiary-container">AVAILABLE</span>
-                        </div>
-                        <h3 class="font-headline text-2xl font-bold">{{ $assessment->title }}</h3>
-                        <p class="mb-8 mt-2 text-on-surface-variant">{{ $assessment->instructions ?: 'Open the assigned assessment prepared by your teacher.' }}</p>
-                        <a class="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r {{ $assessment->subject === 'literacy' ? 'from-primary to-primary-container' : 'from-secondary to-secondary-dim' }} py-4 font-bold text-white shadow-lg transition-all" href="{{ route('student.assessments.show', $assessment) }}">
-                            Open Activity
-                            <span class="material-symbols-outlined">rocket_launch</span>
-                        </a>
-                    </div>
+    @php $student = Auth::user(); @endphp
+    <x-student-nav active="home" />
+    <main class="student-home lg:ml-72">
+        <header class="home-heading">
+            <div><p>YOUR LEARNING SPACE</p><h1>Hi, {{ str($student->name)->before(' ')->title() }}!</h1></div>
+            <a class="ui-button ui-button-secondary" href="{{ route('student.wardrobe.edit') }}"><span class="material-symbols-outlined" aria-hidden="true">checkroom</span>Wardrobe</a>
+        </header>
+        @if (session('status'))<p class="wardrobe-notice" role="status">{{ session('status') }}</p>@endif
+        <section class="home-next" aria-labelledby="next-task-heading">
+            <div class="home-next-content">
+                <p class="home-eyebrow">UP NEXT{{ $nextTask ? ' / '.$nextTask['kind'] : '' }}</p>
+                @if ($nextTask)
+                    <x-status-badge :status="$nextTask['status']" />
+                    <h2 id="next-task-heading">{{ $nextTask['title'] }}</h2>
+                    <a class="ui-button" href="{{ $nextTask['url'] }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $nextTask['status'] === 'in_progress' ? 'play_arrow' : 'arrow_forward' }}</span>{{ $nextTask['action'] }}</a>
+                @else
+                    <h2 id="next-task-heading">You're all caught up!</h2><p>Your next assignment will appear here.</p>
+                    <a class="ui-button" href="{{ route('student.activities') }}"><span class="material-symbols-outlined" aria-hidden="true">history</span>View Results</a>
+                @endif
+            </div>
+            <a class="home-avatar" href="{{ route('student.wardrobe.edit') }}" aria-label="Customize your avatar"><x-student-character :user="$student" /></a>
+        </section>
+        <section class="home-stats" aria-label="Your progress">
+            <a href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span><div><strong>{{ number_format($coinBalance) }}</strong><span>Practice coins</span></div></a>
+            <a href="{{ route('student.activities') }}#recorded-outputs"><span class="material-symbols-outlined" aria-hidden="true">task_alt</span><div><strong>{{ $studentMetrics['completed_count'] }}</strong><span>Assessments done</span></div></a>
+            <div><span class="material-symbols-outlined" aria-hidden="true">target</span><div><strong>{{ $studentMetrics['average_accuracy'] === null ? '--' : $studentMetrics['average_accuracy'].'%' }}</strong><span>Best-score accuracy</span></div></div>
+            <a href="{{ route('student.leaderboard') }}"><span class="material-symbols-outlined" aria-hidden="true">stars</span><div><strong>{{ number_format($studentMetrics['total_points']) }}</strong><span>Best-score points</span></div></a>
+        </section>
+        <div class="home-columns">
+            <section class="home-section" aria-labelledby="recent-results">
+                <header><h2 id="recent-results">Recent Results</h2><a href="{{ route('student.activities') }}#recorded-outputs">View all<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></header>
+                @forelse ($recentSubmissions as $submission)
+                    <a class="home-result" href="{{ route('student.activities') }}#result-{{ $submission->id }}"><span class="home-result-icon material-symbols-outlined" aria-hidden="true">assignment_turned_in</span><div><strong>{{ $submission->assessment?->title ?? 'Assessment' }}</strong><span>{{ $submission->submitted_at?->format('M j, Y') }} &middot; {{ $submission->correct_count }} / {{ $submission->question_count }} correct</span></div><strong>{{ number_format($submission->points) }}<small>points</small></strong><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
                 @empty
-                    <div class="rounded-lg border-b-4 border-outline-variant bg-surface-container-lowest p-8 text-center shadow-[0_20px_40px_rgba(0,94,159,0.06)] md:col-span-12">
-                        <span class="material-symbols-outlined text-5xl text-outline-variant">assignment_late</span>
-                        <h3 class="mt-4 font-headline text-2xl font-bold">No assigned activities</h3>
-                        <p class="mt-2 text-on-surface-variant">Unlocked assessments for your section will appear here automatically.</p>
-                    </div>
+                    <div class="home-empty"><span class="material-symbols-outlined" aria-hidden="true">assignment</span><p>No results yet. Your completed assessments will appear here.</p></div>
                 @endforelse
-
-                <div class="flex flex-col items-center justify-center rounded-lg bg-surface-container-low p-6 text-center md:col-span-4">
-                    <span class="mb-2 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Current Status</span>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-4xl text-primary">assignment</span>
-                        <span class="font-headline text-3xl font-black text-on-surface">{{ $averageAccuracy === null ? 'No Summary Yet' : $averageAccuracy.'%' }}</span>
-                    </div>
-                    <p class="mt-4 text-sm text-on-surface-variant">Completed: {{ $completedCount }} | Points: {{ number_format($totalPoints) }}</p>
-                </div>
-
-                <div class="rounded-lg bg-surface-container-lowest p-6 shadow-sm md:col-span-8">
-                    <div class="mb-6 flex items-center justify-between">
-                        <h4 class="font-headline text-xl font-bold">Achievements</h4>
-                    </div>
-                    <div class="rounded-xl bg-surface-container-low p-6 text-center">
-                        <span class="material-symbols-outlined text-5xl text-outline-variant">workspace_premium</span>
-                        <p class="mt-4 font-headline text-xl font-bold text-on-surface">{{ $completedCount > 0 ? 'Progress saved' : 'No rewards available yet' }}</p>
-                        <p class="mt-2 text-sm text-on-surface-variant">{{ $completedCount > 0 ? 'Your completed assessment results are now connected to this dashboard.' : 'This area will stay empty until real activity results are recorded by the system.' }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-lg bg-surface-container-low p-8">
-                <h3 class="flex items-center gap-2 font-headline text-xl font-bold">
-                    <span class="material-symbols-outlined text-primary">analytics</span>
-                    Activity Overview
-                </h3>
-                <div class="mt-6 rounded-xl bg-surface-container-lowest p-8 text-center">
-                    <span class="material-symbols-outlined text-5xl text-outline-variant">bar_chart</span>
-                    <p class="mt-4 font-headline text-xl font-bold text-on-surface">{{ $completedCount > 0 ? 'Real analytics connected' : 'No analytics yet' }}</p>
-                    <p class="mt-2 text-sm text-on-surface-variant">{{ $completedCount > 0 ? 'Average accuracy and points are calculated from your saved assessment submissions.' : 'Charts and summaries will appear here after the system stores completed assessment data.' }}</p>
-                </div>
-            </div>
-            </div>
-        </main>
-
-    </div>
+            </section>
+            <section class="home-section" aria-labelledby="your-queue">
+                <header><h2 id="your-queue">Your Queue</h2><a href="{{ route('student.activities') }}">Activities<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></header>
+                @forelse ($pendingAssessments->take(3) as $assessment)
+                    <a class="home-queue-item" href="{{ route('student.assessments.show', $assessment) }}"><div><strong>{{ $assessment->title }}</strong><x-status-badge :status="$assessment->student_state" /></div><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
+                @empty
+                    <p class="home-empty">No assessments waiting.</p>
+                @endforelse
+                <a class="home-practice-link" href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span><strong>Practice Missions</strong><span>{{ $practiceCount }} to do</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+            </section>
+        </div>
+    </main>
 </x-app-layout>

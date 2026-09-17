@@ -41,6 +41,9 @@
             <span class="material-symbols-outlined">note_add</span>
             <span>Assessments</span>
         </a>
+        <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase transition-all {{ $active === 'practice' ? 'border-r-4 border-blue-600 font-bold text-blue-700' : 'text-slate-500 hover:bg-slate-200' }}" href="{{ route('teacher.practice.index') }}" @if ($active === 'practice') aria-current="page" @endif>
+            <span class="material-symbols-outlined" aria-hidden="true">flag</span><span>Practice</span>
+        </a>
     </nav>
 
     <div class="teacher-section-label"><span class="material-symbols-outlined" aria-hidden="true">school</span>Grade 6{{ Auth::user()->section ? ' / '.Auth::user()->section : '' }}</div>

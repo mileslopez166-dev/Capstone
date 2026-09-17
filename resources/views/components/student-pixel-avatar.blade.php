@@ -6,10 +6,14 @@
     'isOnline' => false,
     'rankTier' => 'Bronze',
     'rank' => null,
+    'user' => null,
 ])
 
 @php
-    $isGirl = in_array(strtolower((string) $gender), ['female', 'girl'], true);
+    $gender = $user?->gender ?? $gender;
+    $isGirl = $user?->avatar_config
+        ? \App\Support\AvatarWardrobe::resolve($user->avatar_config, $gender)['character'] === 'lyra'
+        : in_array(strtolower((string) $gender), ['female', 'girl'], true);
     $characterName = $isGirl ? 'Lyra Vale' : 'Nova Finch';
     $tierLabel = is_array($rankTier) ? ($rankTier['label'] ?? 'Bronze') : ($rankTier ?? 'Bronze');
     $profileTierLabel = $tierLabel === 'Flaming' ? 'Top Rank' : $tierLabel;
@@ -32,7 +36,7 @@
     @if ($showCard)
         <div class="campus-avatar-card-header">
             <div>
-                <p>Pixel Avatar</p>
+                <p>Your Avatar</p>
                 <h3 class="font-headline">{{ $characterName }}</h3>
             </div>
             <div class="campus-avatar-badges">
@@ -45,7 +49,7 @@
     @endif
 
     <div class="campus-avatar-stage relative mx-auto ring-4 {{ $tier['ring'] }} {{ $showCard ? 'campus-avatar-stage-full' : $sizeClasses }}" aria-label="{{ $profileTierLabel }} avatar rank">
-        <x-student-character :gender="$gender" :variant="$showCard ? 'full' : 'portrait'" />
+        <x-student-character :user="$user" :gender="$gender" :variant="$showCard ? 'full' : 'portrait'" />
     </div>
 
     @if ($showCard)

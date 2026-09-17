@@ -95,7 +95,7 @@
         <div class="flex items-center gap-3">
             <div class="relative">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full font-headline text-sm font-bold ring-4 {{ $studentTier['class'] }}" title="{{ $studentTier['label'] }} tier{{ $studentRank ? ' - rank #'.$studentRank : '' }}">
-                    <x-student-character :gender="$student?->gender" variant="portrait" />
+                    <x-student-character :user="$student" variant="portrait" />
                 </div>
                 <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-50 bg-emerald-500"></div>
             </div>
@@ -115,9 +115,14 @@
         @endforeach
     </nav>
 
-    <x-student-companion :gender="$student?->gender" :page="$active" />
+    <a class="flex items-center gap-3 px-6 py-3 text-sm font-bold text-primary {{ $active === 'practice' ? 'border-r-4 border-blue-600 bg-blue-100' : '' }}" href="{{ route('student.practice.index') }}" @if ($active === 'practice') aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">flag</span>Practice Missions</a>
+    <x-student-companion :user="$student" :page="$active" />
 
     <div class="campus-sidebar-footer mt-auto space-y-1 px-2">
+        <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase tracking-widest text-slate-500 transition-all hover:bg-slate-200" href="{{ route('student.wardrobe.edit') }}" @if (request()->routeIs('student.wardrobe.*')) aria-current="page" @endif>
+            <span class="material-symbols-outlined">checkroom</span>
+            <span>Wardrobe</span>
+        </a>
         <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase tracking-widest transition-all {{ $active === 'profile' ? 'border-r-4 border-blue-600 font-bold text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:bg-slate-200' }}" href="{{ route('profile.edit') }}">
             <span class="material-symbols-outlined">settings</span>
             <span>Profile</span>
@@ -144,10 +149,11 @@
     </div>
 
     <div class="campus-topbar-actions flex items-center gap-4 sm:gap-6">
+        <x-comfort-controls />
         <x-notification-menu :user="$student" />
         <a class="campus-account-link flex items-center gap-3 rounded-full border border-outline-variant/10 bg-surface-container-low py-1.5 pl-2 pr-4" href="{{ route('profile.edit') }}" aria-label="Student profile">
             <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white font-headline text-xs font-bold ring-2 {{ $studentTier['class'] }}" title="{{ $studentTier['label'] }} tier{{ $studentRank ? ' - rank #'.$studentRank : '' }}">
-                <x-student-character :gender="$student?->gender" variant="portrait" />
+                <x-student-character :user="$student" variant="portrait" />
             </div>
             <span class="hidden max-w-[10rem] truncate text-sm font-bold text-on-surface sm:inline">{{ $studentName }}</span>
         </a>
@@ -160,11 +166,11 @@
     </a>
 </header>
 
-<x-student-companion :gender="$student?->gender" :page="$active" placement="mobile" />
+<x-student-companion :user="$student" :page="$active" placement="mobile" />
 
 <nav class="campus-bottom-nav fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[2rem] bg-white/85 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl lg:hidden" aria-label="Student navigation">
     @foreach ([...$links, ['key' => 'profile', 'label' => 'Profile', 'short' => 'Profile', 'href' => route('profile.edit'), 'icon' => 'account_circle']] as $link)
-        @if ($active === $link['key'])
+        @if ($active === $link['key'] || ($active === 'practice' && $link['key'] === 'activities'))
             <a class="flex scale-110 flex-col items-center justify-center rounded-[1.7rem] bg-blue-100 px-5 py-2 text-blue-700 shadow-inner" href="{{ $link['href'] }}" aria-current="page">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">{{ $link['icon'] }}</span>
                 <span class="text-[10px] font-bold">{{ $link['short'] }}</span>

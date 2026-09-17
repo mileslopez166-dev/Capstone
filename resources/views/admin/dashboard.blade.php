@@ -125,12 +125,6 @@
                                             default => 'bg-surface-container-high text-on-surface-variant',
                                         };
                                         $status = $managedUser->approval_status ?? 'approved';
-                                        $statusClasses = match ($status) {
-                                            'pending' => 'bg-tertiary-container text-on-tertiary-container',
-                                            'rejected' => 'bg-error-container/20 text-error',
-                                            default => 'bg-secondary-container text-secondary-dim',
-                                        };
-                                        $statusLabel = $status === 'rejected' ? 'Declined' : ucfirst($status);
                                         $isSystemAdministrator = $managedUser->isSystemAdministrator();
                                     @endphp
                                     <tr class="transition-colors hover:bg-surface-bright">
@@ -153,7 +147,7 @@
                                         </td>
                                         <td class="px-6 py-4 font-medium text-on-surface">{{ $managedUser->section ?: 'Unassigned' }}</td>
                                         <td class="px-6 py-4">
-                                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $statusClasses }}">{{ $statusLabel }}</span>
+                                            <x-status-badge :status="$status" />
                                         </td>
                                         <td class="px-6 py-4 text-on-surface-variant">{{ $managedUser->created_at?->format('M d, Y') ?? 'Unknown' }}</td>
                                         <td class="px-6 py-4 text-right">

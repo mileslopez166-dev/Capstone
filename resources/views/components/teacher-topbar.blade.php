@@ -14,6 +14,7 @@
                     ['route' => 'students.index', 'label' => 'Students', 'icon' => 'group'],
                     ['route' => 'reports.index', 'label' => 'Reports', 'icon' => 'assessment'],
                     ['route' => 'assessments.index', 'label' => 'Assessments', 'icon' => 'note_add'],
+                    ['route' => 'teacher.practice.index', 'label' => 'Practice', 'icon' => 'flag'],
                     ['route' => 'profile.edit', 'label' => 'Settings', 'icon' => 'settings'],
                 ] as $link)
                     <a href="{{ route($link['route']) }}" @if (request()->routeIs($link['route'])) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">{{ $link['icon'] }}</span>{{ $link['label'] }}</a>
@@ -33,6 +34,7 @@
     </div>
 
     <div class="campus-topbar-actions flex items-center gap-4 sm:gap-6">
+        <x-comfort-controls />
         <x-notification-menu :user="Auth::user()" />
         <a class="campus-account-link flex items-center gap-3 rounded-full border border-outline-variant/10 bg-surface-container-low py-1.5 pl-2 pr-4" href="{{ route('profile.edit') }}" aria-label="Teacher profile">
             <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary font-headline text-xs font-bold text-white">

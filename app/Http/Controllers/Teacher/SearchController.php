@@ -68,6 +68,7 @@ class SearchController extends Controller
         }
 
         $quickLinks = collect([
+            ['label' => 'Practice Missions', 'description' => 'Assign practice and review progress', 'href' => route('teacher.practice.index'), 'keywords' => ['practice', 'mission', 'review']],
             ['label' => 'Dashboard', 'description' => 'Teacher overview and recent activity', 'href' => route('teacher.dashboard'), 'keywords' => ['dashboard', 'home', 'overview']],
             ['label' => 'Students', 'description' => 'Roster and add student form', 'href' => route('students.index'), 'keywords' => ['student', 'students', 'roster', 'add student', 'enroll']],
             ['label' => 'Assessments', 'description' => 'Create, publish, lock, and delete assessments', 'href' => route('assessments.index'), 'keywords' => ['assessment', 'assessments', 'quiz', 'question', 'create', 'publish', 'lock']],

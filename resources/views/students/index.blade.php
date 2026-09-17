@@ -18,7 +18,7 @@
                 <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search student accounts..." />
 
                 <div class="mx-auto max-w-7xl space-y-8 p-5 sm:p-8">
-                    <section class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                    <section class="teacher-workspace-heading flex flex-col justify-between gap-4 md:flex-row md:items-end">
                         <div>
                             <h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Students</h1>
                             <p class="mt-2 text-on-surface-variant">This list is connected to the database and shows real student accounts in the system.</p>

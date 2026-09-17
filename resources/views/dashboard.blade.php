@@ -4,7 +4,7 @@
         $teacherName = $teacher->name;
         $teacherInitials = str($teacherName)->explode(' ')->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
     @endphp
-    <div class="min-h-screen">
+    <div class="teacher-dashboard min-h-screen">
         <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="dashboard" />
         <main class="min-h-screen lg:ml-72">
             <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search students and assessments..." />

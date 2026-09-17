@@ -1,10 +1,17 @@
 <x-app-layout>
-    @php($isStudent = Auth::user()->isStudent())
+    @php
+        $isStudent = Auth::user()->isStudent();
+        $isTeacher = Auth::user()->isTeacher();
+        $teacherInitials = collect(explode(' ', Auth::user()->name))->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
+    @endphp
     <div class="min-h-screen bg-surface text-on-surface">
         @if ($isStudent)
             <x-student-nav active="support" />
+        @elseif ($isTeacher)
+            <x-teacher-sidebar :teacher-name="Auth::user()->name" :teacher-initials="$teacherInitials" active="support" />
+            <div class="lg:ml-72"><x-teacher-topbar :teacher-name="Auth::user()->name" :teacher-initials="$teacherInitials" /></div>
         @endif
-        <main class="{{ $isStudent ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'px-6 py-8 sm:px-8 lg:px-12' }}">
+        <main class="{{ $isStudent || $isTeacher ? 'px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12' : 'px-6 py-8 sm:px-8 lg:px-12' }}">
         <div class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl items-center justify-center">
             <section class="w-full rounded-DEFAULT bg-surface-container-lowest p-8 text-center shadow-[0_24px_70px_rgba(0,94,159,0.08)] sm:p-12">
                 <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-container/30 text-primary">

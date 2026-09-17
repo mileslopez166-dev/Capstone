@@ -27,7 +27,20 @@ class StudentRewardsTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Rewards');
-        $response->assertSeeText('No Rewards Yet');
+        $response->assertSeeText('Practice Wardrobe');
+        $response->assertSeeText('0 rewards unlocked');
+        $response->assertDontSeeText('No Reward Data');
         $response->assertSeeText('Performance Breakdown');
+    }
+
+    public function test_rewards_show_real_coins_and_owned_items(): void
+    {
+        $student = User::factory()->create();
+        $student->practiceCoinTransactions()->create(['amount' => 50, 'description' => 'Practice rewards']);
+        $student->practiceCoinTransactions()->create(['amount' => -25, 'item_key' => 'headwear:star_cap', 'description' => 'Star cap']);
+
+        $this->actingAs($student)->get(route('student.rewards'))->assertOk()
+            ->assertSeeText('25 coins')->assertSeeText('1 rewards unlocked')
+            ->assertSee(route('student.wardrobe.edit'));
     }
 }

@@ -50,6 +50,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
+        'avatar_config' => 'array',
         'email_verified_at' => 'datetime',
         'approved_at' => 'datetime',
         'password' => 'hashed',
@@ -109,5 +110,20 @@ class User extends Authenticatable
     public function appNotifications(): HasMany
     {
         return $this->hasMany(AppNotification::class);
+    }
+
+    public function practiceCoinTransactions(): HasMany
+    {
+        return $this->hasMany(PracticeCoinTransaction::class);
+    }
+
+    public function practiceCoinBalance(): int
+    {
+        return (int) $this->practiceCoinTransactions()->sum('amount');
+    }
+
+    public function unlockedAvatarItems(): array
+    {
+        return $this->practiceCoinTransactions()->whereNotNull('item_key')->pluck('item_key')->all();
     }
 }

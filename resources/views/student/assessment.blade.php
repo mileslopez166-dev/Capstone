@@ -363,7 +363,7 @@
 
             <section class="assessment-results hidden opacity-0 transition-opacity duration-300" id="mission-modal" tabindex="-1" aria-labelledby="assessment-result-title">
                 <header class="assessment-result-heading">
-                    <div class="assessment-result-avatar"><x-student-character :gender="$student?->gender" variant="portrait" /></div>
+                    <div class="assessment-result-avatar"><x-student-character :user="$student" variant="portrait" /></div>
                     <div>
                         <p class="assessment-eyebrow">Assessment Complete</p>
                         <h2 id="assessment-result-title">Great job, {{ str($studentName)->before(' ') }}!</h2>
@@ -433,7 +433,7 @@
                     const container = document.getElementById('fish-container');
                     const fishTemplate = document.getElementById('answer-fish-template');
                     const catchStatus = document.getElementById('ocean-catch-status');
-                    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const reducedMotion = () => window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const scoreEl = document.getElementById('score');
                     const progressEl = document.getElementById('progress-bar');
                     const bag = document.getElementById('power-core');
@@ -925,22 +925,22 @@
                             const graphic = button.querySelector('.frog-target-fallback');
                             const body = frogCharacter.querySelector('.frog-character-body');
                             const gulpMouth = button.querySelector('.frog-target-mouth');
-                            const scale = reducedMotion ? 1.25 : 1.7;
+                            const scale = reducedMotion() ? 1.25 : 1.7;
                             const attackX = frogBox.left + frogBox.width / 2 - (targetBox.left + targetBox.width / 2);
                             const attackY = frogBox.top + frogBox.height * .24 - (targetBox.top + targetBox.height / 2);
                             const destination = `translate(${attackX}px, ${attackY}px) scale(${scale})`;
                             const bodyBox = body.getBoundingClientRect();
                             const svgMatrix = frogCharacter.querySelector('svg').getScreenCTM();
-                            const swallowX = reducedMotion ? 0 : (frogBox.left + frogBox.width / 2 - bodyBox.left - bodyBox.width / 2) / svgMatrix.a;
-                            const swallowY = reducedMotion ? 0 : (frogBox.top + frogBox.height * .24 + targetBox.height * .143 * scale - bodyBox.top - bodyBox.height / 2) / svgMatrix.d;
+                            const swallowX = reducedMotion() ? 0 : (frogBox.left + frogBox.width / 2 - bodyBox.left - bodyBox.width / 2) / svgMatrix.a;
+                            const swallowY = reducedMotion() ? 0 : (frogBox.top + frogBox.height * .24 + targetBox.height * .143 * scale - bodyBox.top - bodyBox.height / 2) / svgMatrix.d;
                             const swallowed = `translate(${swallowX}px, ${swallowY}px) scale(.001)`;
                             frogOutcomeAnimations.push(
                                 graphic.animate([
-                                    { transform: reducedMotion ? destination : 'translate(0, 0) scale(1)', offset: 0 },
+                                    { transform: reducedMotion() ? destination : 'translate(0, 0) scale(1)', offset: 0 },
                                     { transform: destination, offset: .32 },
                                     { transform: destination, offset: .7 },
                                     { transform: 'translate(0, 0) scale(1)', offset: 1 },
-                                ], { duration, easing: reducedMotion ? 'steps(1, end)' : 'ease-in-out', fill: 'forwards' }),
+                                ], { duration, easing: reducedMotion() ? 'steps(1, end)' : 'ease-in-out', fill: 'forwards' }),
                                 body.animate([
                                     { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 0 },
                                     { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: .32 },
@@ -992,7 +992,7 @@
                         document.getElementById('frog-feedback').textContent = correct
                             ? 'Correct! The frog eats the mosquito.'
                             : 'Not quite! The mosquito eats the frog. The frog will return for the next question.';
-                        const catchDuration = correct ? 850 : (reducedMotion ? 650 : 2400);
+                        const catchDuration = correct ? 850 : (reducedMotion() ? 650 : 2400);
                         animateFrogCatch(button, correct, catchDuration);
                         updateFrogProgress(correct);
 
@@ -1084,7 +1084,7 @@
                         const depth = parseFloat(hookCable.style.height) || 0;
                         const maxDepth = Math.max(depth, canvas.getBoundingClientRect().bottom - hookAssembly.getBoundingClientRect().top - 30);
                         const diveDepth = Math.min(depth + 120, maxDepth);
-                        const duration = reducedMotion ? 700 : 2600;
+                        const duration = reducedMotion() ? 700 : 2600;
                         const startedAt = performance.now();
                         canvas.style.setProperty('--boat-pull-direction', currentHookX > canvas.clientWidth * .7 ? '-1' : '1');
 
@@ -1412,7 +1412,7 @@
                                 element.style.setProperty(`--fish-${name}`, colors[index % colors.length][colorIndex]);
                             });
                             container.appendChild(element);
-                            return { element, x: Math.max(0, container.clientWidth - element.offsetWidth - 16) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: reducedMotion ? 0 : 32 + index * 4 };
+                            return { element, x: Math.max(0, container.clientWidth - element.offsetWidth - 16) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: 32 + index * 4 };
                         });
                         positionFishSchool(0, performance.now());
                     }
@@ -1424,10 +1424,10 @@
                         const laneHeight = Math.max(0, container.clientHeight - fishHeight - 24) / Math.max(1, fishSchool.length - 1);
                         fishSchool.forEach((fish, index) => {
                             if (fish.element.dataset.caught) return;
-                            fish.x += fish.direction * fish.speed * elapsed;
+                            if (!reducedMotion()) fish.x += fish.direction * fish.speed * elapsed;
                             if (fish.x >= maxX) { fish.x = maxX; fish.direction = -1; }
                             if (fish.x <= 8) { fish.x = 8; fish.direction = 1; }
-                            const bob = reducedMotion ? 0 : Math.sin(now / 650 + index * 2) * 3;
+                            const bob = reducedMotion() ? 0 : Math.sin(now / 650 + index * 2) * 3;
                             const y = 12 + index * laneHeight + bob;
                             fish.element.style.setProperty('--fish-direction', fish.direction);
                             fish.element.style.transform = `translate(${fish.x}px, ${y}px)`;

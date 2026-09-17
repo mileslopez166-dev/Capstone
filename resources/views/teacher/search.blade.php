@@ -17,7 +17,7 @@
             <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search students, assessments, reports..." />
 
             <div class="mx-auto max-w-7xl space-y-8 p-5 sm:p-8">
-                <section class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)] sm:p-8">
+                <section class="teacher-workspace-heading rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)] sm:p-8">
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-primary">Teacher Search</p>
                     <h1 class="mt-2 font-headline text-3xl font-extrabold text-on-surface sm:text-4xl">{{ $hasQuery ? 'Results for "'.$query.'"' : 'Search your teacher workspace' }}</h1>
                     <form class="mt-6 flex flex-col gap-3 sm:flex-row" method="GET" action="{{ route('teacher.search') }}">

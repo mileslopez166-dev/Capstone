@@ -326,7 +326,7 @@ export function initFishingSea(host) {
     const splashMaterial = standard('#d5fff6', { transparent: true, opacity: .8, roughness: .18 });
     const droplets = Array.from({ length: 14 }, () => { const item = mesh(scene, sphere, splashMaterial); item.visible = false; return item; });
 
-    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const motion = { get matches() { return window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches; } };
     let width = 1;
     let height = 1;
     let waterY = 0;

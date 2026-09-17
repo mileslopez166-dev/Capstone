@@ -8,6 +8,7 @@
 
         <main class="campus-activities min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl space-y-8">
+                <x-practice-entry />
                 <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                     <div class="campus-panel rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="campus-queue-label text-sm font-bold uppercase tracking-[0.2em] text-primary-dim"><span class="material-symbols-outlined" aria-hidden="true">bookmark_star</span>Assessment Queue</p>
@@ -92,9 +93,7 @@
                                                         <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
                                                             {{ $quizLabel }}
                                                         </span>
-                                                        <span class="rounded-full bg-secondary-container/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">
-                                                            Published
-                                                        </span>
+                                                        <x-status-badge :status="$assessment->student_state" />
                                                     </div>
 
                                                     <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment->title }}</h4>
@@ -123,7 +122,7 @@
                                                         Prepared {{ $assessment->created_at?->format('M d, Y') }}
                                                     </span>
                                                     <span class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition-colors group-hover:bg-primary-dim">
-                                                        Open Assessment
+                                                        {{ $assessment->student_action }}
                                                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
                                                     </span>
                                                 </div>
@@ -136,7 +135,7 @@
                     @endif
                 </section>
 
-                <section class="campus-results">
+                <section class="campus-results" id="recorded-outputs">
                     <div class="campus-results-heading mb-6">
                         <h3 class="font-headline text-3xl font-bold text-on-surface"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>Recorded Outputs</h3>
                         <p class="mt-2 text-on-surface-variant">Review your saved assessment scores, request a retake token, or take again when your teacher has allowed more tries.</p>
@@ -155,11 +154,11 @@
                                     $assessment = $submission->assessment;
                                     $requestStatus = $submission->latest_retake_request?->status;
                                 @endphp
-                                <div class="rounded-2xl border border-outline-variant/15 bg-white p-5 shadow-[0_20px_55px_rgba(0,94,159,0.06)]">
+                                <div id="result-{{ $submission->id }}" class="rounded-2xl border border-outline-variant/15 bg-white p-5 shadow-[0_20px_55px_rgba(0,94,159,0.06)]">
                                     <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                                         <div>
                                             <div class="mb-3 flex flex-wrap gap-2">
-                                                <span class="rounded-full bg-primary-container/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Recorded</span>
+                                                <x-status-badge status="completed" />
                                                 <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Attempt {{ $submission->attempt_number }}</span>
                                                 @if ($assessment?->hasUnlimitedRetries())
                                                     <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-dim">Unlimited retakes left</span>

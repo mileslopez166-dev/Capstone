@@ -17,7 +17,7 @@
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="students" />
 
             <main class="flex-1 p-4 md:p-8 lg:ml-72 lg:p-12">
-                <section class="mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
+                <section class="teacher-workspace-heading mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
                     <div class="lg:col-span-8">
                         <a class="mb-4 flex items-center gap-2 font-bold text-primary" href="{{ route('dashboard') }}">
                             <span class="material-symbols-outlined">arrow_back</span>
@@ -35,6 +35,7 @@
 
                     <div class="flex flex-col gap-4 lg:col-span-4">
                         <x-student-pixel-avatar
+                            :user="$student"
                             :gender="$student->gender"
                             :name="$student->name"
                             size="lg"
@@ -87,7 +88,7 @@
                         </div>
                     </div>
 
-                    <div class="relative flex flex-col justify-between overflow-hidden rounded-lg bg-primary p-8 text-on-primary shadow-xl">
+                    <div class="teacher-callout relative flex flex-col justify-between overflow-hidden rounded-lg bg-primary p-8 text-on-primary shadow-xl">
                         <div>
                             <div class="mb-2 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-sm">bolt</span>
@@ -176,6 +177,7 @@
                                             <div>
                                                 <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
                                                 <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
+                                                <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
                                             </div>
                                             <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
                                         </div>
