@@ -1,0 +1,714 @@
+{
+  "title": "ARAL Mathematics - Grade 6",
+  "source": "[FINAL - RTP] ARAL Math G6 Learner's Worksheets.pdf",
+  "publisher": "Department of Education; includes materials adapted from iSipnayan (OSSFF).",
+  "worksheets": [
+    {
+      "number": 1,
+      "title": "ARAL Math Grade 6 - Worksheet 1",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 4,
+          "image": "worksheet-01-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 5,
+          "image": "worksheet-01-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "ARAL Math Grade 6 - Worksheet 2",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 6,
+          "image": "worksheet-02-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 7,
+          "image": "worksheet-02-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "ARAL Math Grade 6 - Worksheet 3",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 8,
+          "image": "worksheet-03-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 9,
+          "image": "worksheet-03-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "ARAL Math Grade 6 - Worksheet 4",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 10,
+          "image": "worksheet-04-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 11,
+          "image": "worksheet-04-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "ARAL Math Grade 6 - Worksheet 5",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 12,
+          "image": "worksheet-05-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 13,
+          "image": "worksheet-05-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "ARAL Math Grade 6 - Worksheet 6",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 14,
+          "image": "worksheet-06-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 15,
+          "image": "worksheet-06-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "ARAL Math Grade 6 - Worksheet 7",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 16,
+          "image": "worksheet-07-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 17,
+          "image": "worksheet-07-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "ARAL Math Grade 6 - Worksheet 8",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 18,
+          "image": "worksheet-08-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 19,
+          "image": "worksheet-08-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "ARAL Math Grade 6 - Worksheet 9",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 20,
+          "image": "worksheet-09-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 21,
+          "image": "worksheet-09-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "ARAL Math Grade 6 - Worksheet 10",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 22,
+          "image": "worksheet-10-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 23,
+          "image": "worksheet-10-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "ARAL Math Grade 6 - Worksheet 11",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 24,
+          "image": "worksheet-11-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 25,
+          "image": "worksheet-11-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "ARAL Math Grade 6 - Worksheet 12",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 26,
+          "image": "worksheet-12-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 27,
+          "image": "worksheet-12-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "ARAL Math Grade 6 - Worksheet 13",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 28,
+          "image": "worksheet-13-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 29,
+          "image": "worksheet-13-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "ARAL Math Grade 6 - Worksheet 14",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 30,
+          "image": "worksheet-14-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 31,
+          "image": "worksheet-14-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "ARAL Math Grade 6 - Worksheet 15",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 32,
+          "image": "worksheet-15-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 33,
+          "image": "worksheet-15-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "ARAL Math Grade 6 - Worksheet 16",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 34,
+          "image": "worksheet-16-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 35,
+          "image": "worksheet-16-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "ARAL Math Grade 6 - Worksheet 17",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 36,
+          "image": "worksheet-17-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 37,
+          "image": "worksheet-17-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "ARAL Math Grade 6 - Worksheet 18",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 38,
+          "image": "worksheet-18-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 39,
+          "image": "worksheet-18-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "ARAL Math Grade 6 - Worksheet 19",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 40,
+          "image": "worksheet-19-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 41,
+          "image": "worksheet-19-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "ARAL Math Grade 6 - Worksheet 20",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 42,
+          "image": "worksheet-20-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 43,
+          "image": "worksheet-20-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "ARAL Math Grade 6 - Worksheet 21",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 44,
+          "image": "worksheet-21-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 45,
+          "image": "worksheet-21-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "ARAL Math Grade 6 - Worksheet 22",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 46,
+          "image": "worksheet-22-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 47,
+          "image": "worksheet-22-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "title": "ARAL Math Grade 6 - Worksheet 23",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 48,
+          "image": "worksheet-23-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 49,
+          "image": "worksheet-23-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "ARAL Math Grade 6 - Worksheet 24",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 50,
+          "image": "worksheet-24-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 51,
+          "image": "worksheet-24-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "title": "ARAL Math Grade 6 - Worksheet 25",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 52,
+          "image": "worksheet-25-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 53,
+          "image": "worksheet-25-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 3,
+          "source_page": 54,
+          "image": "worksheet-25-part-3.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "title": "ARAL Math Grade 6 - Worksheet 26",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 55,
+          "image": "worksheet-26-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 56,
+          "image": "worksheet-26-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 3,
+          "source_page": 57,
+          "image": "worksheet-26-part-3.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "title": "ARAL Math Grade 6 - Worksheet 27",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 58,
+          "image": "worksheet-27-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "title": "ARAL Math Grade 6 - Worksheet 28",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 59,
+          "image": "worksheet-28-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 60,
+          "image": "worksheet-28-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "title": "ARAL Math Grade 6 - Worksheet 29",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 61,
+          "image": "worksheet-29-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 62,
+          "image": "worksheet-29-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "title": "ARAL Math Grade 6 - Worksheet 30",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 63,
+          "image": "worksheet-30-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 64,
+          "image": "worksheet-30-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "title": "ARAL Math Grade 6 - Worksheet 31",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 65,
+          "image": "worksheet-31-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 66,
+          "image": "worksheet-31-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "title": "ARAL Math Grade 6 - Worksheet 32",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 67,
+          "image": "worksheet-32-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 68,
+          "image": "worksheet-32-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "title": "ARAL Math Grade 6 - Worksheet 33",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 69,
+          "image": "worksheet-33-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 70,
+          "image": "worksheet-33-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "title": "ARAL Math Grade 6 - Worksheet 34",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 71,
+          "image": "worksheet-34-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 72,
+          "image": "worksheet-34-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "title": "ARAL Math Grade 6 - Worksheet 35",
+      "pages": [
+        {
+          "part": 1,
+          "source_page": 73,
+          "image": "worksheet-35-part-1.jpg",
+          "width": 1432,
+          "height": 1013
+        },
+        {
+          "part": 2,
+          "source_page": 74,
+          "image": "worksheet-35-part-2.jpg",
+          "width": 1432,
+          "height": 1013
+        }
+      ]
+    }
+  ]
+}

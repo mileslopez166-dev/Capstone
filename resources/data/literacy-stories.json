@@ -1,0 +1,77 @@
+[
+    {
+        "id": "school-garden-project",
+        "story_title": "The School Garden Project",
+        "story_description": "Lara noticed that the empty space behind their classroom was full of weeds and dried leaves. She suggested creating a small garden where students could plant vegetables and flowers. Her classmates helped clean the area and prepared the soil. They planted tomatoes, carrots, and sunflowers. After several weeks, the garden became colorful and useful. Students used it during science activities to learn about plants. The project taught everyone that teamwork and patience can turn a simple idea into something valuable.",
+        "manual_questions": [
+            { "question": "What did Lara notice behind their classroom?", "answers": { "A": "A playground", "B": "An empty space with weeds", "C": "A new building", "D": "A reading corner" }, "correct_answer": "B" },
+            { "question": "What did Lara suggest creating?", "answers": { "A": "A library", "B": "A garden", "C": "A classroom", "D": "A playground" }, "correct_answer": "B" },
+            { "question": "Who helped Lara prepare the garden?", "answers": { "A": "Her classmates", "B": "Her parents", "C": "The principal", "D": "The visitors" }, "correct_answer": "A" },
+            { "question": "What did the students plant?", "answers": { "A": "Trees only", "B": "Flowers only", "C": "Vegetables and flowers", "D": "Fruits only" }, "correct_answer": "C" },
+            { "question": "Why did students use the garden during science activities?", "answers": { "A": "To play games", "B": "To learn about plants", "C": "To sell vegetables", "D": "To hold events" }, "correct_answer": "B" },
+            { "question": "What lesson did the project teach?", "answers": { "A": "Teamwork is important", "B": "Gardens are expensive", "C": "Plants grow quickly", "D": "Work should be avoided" }, "correct_answer": "A" },
+            { "question": "What does the word \"valuable\" mean?", "answers": { "A": "Important", "B": "Broken", "C": "Small", "D": "Hidden" }, "correct_answer": "A" },
+            { "question": "What is the main idea of the story?", "answers": { "A": "Gardens are difficult to build", "B": "Teamwork can create positive results", "C": "Students dislike gardening", "D": "Plants do not need care" }, "correct_answer": "B" }
+        ]
+    },
+    {
+        "id": "lost-notebook",
+        "story_title": "The Lost Notebook",
+        "story_description": "During a busy school day, Carlo discovered that his science notebook was missing. He searched his classroom, but he could not find it anywhere. His friend Ana helped him look around the school. They checked the library, hallway, and playground. Finally, they found the notebook on a table near the science laboratory. Carlo thanked Ana for helping him. He learned that staying calm and asking for help can solve problems faster.",
+        "manual_questions": [
+            { "question": "What did Carlo lose?", "answers": { "A": "His book", "B": "His notebook", "C": "His bag", "D": "His pencil" }, "correct_answer": "B" },
+            { "question": "What subject was Carlo's notebook for?", "answers": { "A": "Mathematics", "B": "English", "C": "Science", "D": "History" }, "correct_answer": "C" },
+            { "question": "Who helped Carlo search?", "answers": { "A": "Ana", "B": "His teacher", "C": "His brother", "D": "His parents" }, "correct_answer": "A" },
+            { "question": "Where did they find the notebook?", "answers": { "A": "Library", "B": "Classroom", "C": "Playground", "D": "Science laboratory table" }, "correct_answer": "D" },
+            { "question": "What did Carlo learn?", "answers": { "A": "Ignore problems", "B": "Stay calm and ask for help", "C": "Buy a new notebook", "D": "Avoid friends" }, "correct_answer": "B" },
+            { "question": "Why did Carlo thank Ana?", "answers": { "A": "She gave him a notebook", "B": "She helped him find it", "C": "She wrote his notes", "D": "She cleaned his room" }, "correct_answer": "B" },
+            { "question": "What does \"missing\" mean?", "answers": { "A": "Lost", "B": "New", "C": "Clean", "D": "Finished" }, "correct_answer": "A" },
+            { "question": "What is the lesson of the story?", "answers": { "A": "Problems can be solved with cooperation", "B": "School supplies are unnecessary", "C": "Friends create problems", "D": "Searching is useless" }, "correct_answer": "A" }
+        ]
+    },
+    {
+        "id": "helpful-neighbor",
+        "story_title": "The Helpful Neighbor",
+        "story_description": "Ben lived near an elderly neighbor named Mr. Santos. One afternoon, Ben saw him carrying heavy bags from the market. Ben offered to help carry the bags to his house. Mr. Santos thanked him and shared stories about his childhood. From that day, Ben visited him regularly. They became good friends and learned many things from each other. Ben discovered that a small act of kindness could make someone feel appreciated.",
+        "manual_questions": [
+            { "question": "Who was Ben's neighbor?", "answers": { "A": "Mr. Santos", "B": "Mr. Cruz", "C": "Teacher Ana", "D": "Carlo" }, "correct_answer": "A" },
+            { "question": "What was Mr. Santos carrying?", "answers": { "A": "Books", "B": "Heavy bags", "C": "Plants", "D": "Toys" }, "correct_answer": "B" },
+            { "question": "How did Ben help?", "answers": { "A": "He cooked food", "B": "He cleaned the house", "C": "He carried the bags", "D": "He bought groceries" }, "correct_answer": "C" },
+            { "question": "What happened after Ben helped?", "answers": { "A": "They became friends", "B": "They moved away", "C": "They stopped talking", "D": "They argued" }, "correct_answer": "A" },
+            { "question": "What did Ben learn?", "answers": { "A": "Kindness is valuable", "B": "Helping is difficult", "C": "Friends are unnecessary", "D": "Older people cannot teach" }, "correct_answer": "A" },
+            { "question": "What does \"appreciated\" mean?", "answers": { "A": "Forgotten", "B": "Valued", "C": "Ignored", "D": "Lost" }, "correct_answer": "B" },
+            { "question": "Why did Mr. Santos share stories?", "answers": { "A": "To teach Ben", "B": "To sell something", "C": "To complain", "D": "To leave" }, "correct_answer": "A" },
+            { "question": "What is the main idea?", "answers": { "A": "Small kindness can help others", "B": "Neighbors should avoid each other", "C": "Helping people wastes time", "D": "Stories are not useful" }, "correct_answer": "A" }
+        ]
+    },
+    {
+        "id": "clean-river-campaign",
+        "story_title": "The Clean River Campaign",
+        "story_description": "A group of Grade 6 students noticed that the river near their community had become polluted. They organized a clean-up activity with the help of their teacher and parents. The students collected plastic waste and reminded people to properly throw their garbage. After several weeks, the river became cleaner. The community thanked the students for their effort. The experience showed them that protecting nature requires cooperation from everyone.",
+        "manual_questions": [
+            { "question": "What problem did the students notice?", "answers": { "A": "A broken bridge", "B": "A polluted river", "C": "A missing road", "D": "A damaged school" }, "correct_answer": "B" },
+            { "question": "Who helped the students?", "answers": { "A": "Teachers and parents", "B": "Tourists", "C": "Drivers", "D": "Business owners" }, "correct_answer": "A" },
+            { "question": "What did students collect?", "answers": { "A": "Books", "B": "Plastic waste", "C": "Plants", "D": "Rocks" }, "correct_answer": "B" },
+            { "question": "What did they remind people to do?", "answers": { "A": "Plant flowers", "B": "Throw garbage properly", "C": "Build houses", "D": "Catch fish" }, "correct_answer": "B" },
+            { "question": "What happened after several weeks?", "answers": { "A": "The river became cleaner", "B": "The river disappeared", "C": "The students stopped", "D": "The community moved" }, "correct_answer": "A" },
+            { "question": "What lesson did students learn?", "answers": { "A": "Nature protection needs cooperation", "B": "Cleaning is unnecessary", "C": "Rivers cannot change", "D": "Students cannot help" }, "correct_answer": "A" },
+            { "question": "What does \"polluted\" mean?", "answers": { "A": "Dirty", "B": "Beautiful", "C": "Empty", "D": "Safe" }, "correct_answer": "A" },
+            { "question": "What is the main idea?", "answers": { "A": "Students can help protect the environment", "B": "Rivers are dangerous", "C": "Communities should ignore problems", "D": "Cleaning is difficult" }, "correct_answer": "A" }
+        ]
+    },
+    {
+        "id": "reading-challenge",
+        "story_title": "The Reading Challenge",
+        "story_description": "The school library announced a reading challenge for students. Each participant needed to read several books and write short reflections about them. Mia joined the activity because she wanted to improve her reading skills. At first, she found some books difficult, but she continued practicing every day. After a month, Mia finished many books and became more confident. She realized that regular practice helped her become a better reader.",
+        "manual_questions": [
+            { "question": "What did the library announce?", "answers": { "A": "A sports event", "B": "A reading challenge", "C": "A music contest", "D": "A science fair" }, "correct_answer": "B" },
+            { "question": "Why did Mia join?", "answers": { "A": "To improve reading skills", "B": "To win money", "C": "To avoid classes", "D": "To meet teachers" }, "correct_answer": "A" },
+            { "question": "What did participants write?", "answers": { "A": "Letters", "B": "Stories", "C": "Reflections", "D": "Poems" }, "correct_answer": "C" },
+            { "question": "What problem did Mia experience?", "answers": { "A": "Books were missing", "B": "Some books were difficult", "C": "The library closed", "D": "She disliked reading" }, "correct_answer": "B" },
+            { "question": "How did Mia improve?", "answers": { "A": "By practicing daily", "B": "By stopping reading", "C": "By avoiding books", "D": "By asking others to read" }, "correct_answer": "A" },
+            { "question": "What happened after a month?", "answers": { "A": "Mia became more confident", "B": "Mia quit reading", "C": "Mia forgot books", "D": "Mia left school" }, "correct_answer": "A" },
+            { "question": "What does \"regular\" mean?", "answers": { "A": "Daily or repeated", "B": "Rare", "C": "Short", "D": "Difficult" }, "correct_answer": "A" },
+            { "question": "What is the main idea?", "answers": { "A": "Practice improves skills", "B": "Reading is unnecessary", "C": "Challenges should be avoided", "D": "Libraries are boring" }, "correct_answer": "A" }
+        ]
+    }
+]

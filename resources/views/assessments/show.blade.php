@@ -84,6 +84,8 @@
                     <p class="mb-6 rounded-lg bg-secondary-container/30 p-4 text-secondary-dim" role="status">{{ session('status') }}</p>
                 @endif
 
+                <x-assessment-student-picker :assessment="$assessment" :students="$eligibleStudents" />
+
                 <form class="mb-8 flex flex-wrap items-end gap-4 border-b border-outline-variant/20 pb-6" method="POST" action="{{ route('assessments.retries', $assessment) }}">
                     @csrf
                     @method('PATCH')

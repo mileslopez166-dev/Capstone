@@ -54,6 +54,19 @@
                     </div>
                 </section>
 
+                @if (session('status'))<p class="mb-6 rounded-lg bg-secondary-container/30 p-4" role="status">{{ session('status') }}</p>@endif
+                <section class="assisted-picker" aria-labelledby="student-assessments-title">
+                    <h2 id="student-assessments-title">Take an Assessment Together</h2>
+                    @forelse ($assistedAssessments as $assignedAssessment)
+                        <div class="assisted-assignment">
+                            <div><strong>{{ $assignedAssessment->title }}</strong><p>{{ ucfirst($assignedAssessment->subject) }} &middot; {{ str($assignedAssessment->assessment_type)->replace('_', ' ')->title() }}</p></div>
+                            <a class="ui-button" href="{{ route('teacher.assessments.take', [$assignedAssessment, $student]) }}"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>Start / Resume</a>
+                        </div>
+                    @empty
+                        <p>No unlocked assessments assigned to this student.</p>
+                    @endforelse
+                </section>
+
                 <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)] md:col-span-2">
                         <div class="mb-8 flex items-start justify-between">
@@ -178,9 +191,13 @@
                                                 <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
                                                 <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
                                                 <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
+                                                @if ($submission->assessment?->subject === 'literacy')
+                                                    <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
+                                                @endif
                                             </div>
-                                            <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
+                                            <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $submission->question_count > 0 ? $accuracy.'%' : 'Reading activity' }}</span>
                                         </div>
+                                        <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
                                     </div>
                                 @endforeach
                             </div>

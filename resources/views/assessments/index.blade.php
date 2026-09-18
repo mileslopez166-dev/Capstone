@@ -39,6 +39,7 @@
                         <div>
                             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-primary">Curriculum Builder</span>
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
+                            <a class="ui-button ui-button-secondary mt-4" href="{{ route('worksheets.index') }}"><span class="material-symbols-outlined">menu_book</span>Numeracy Worksheets</a>
                             <p class="mt-2 max-w-xl text-on-surface-variant">Configure a student-ready assessment. Choose the focus area, add instructions, then save it locked or publish it to the student activity queue.</p>
                         </div>
 
@@ -60,7 +61,7 @@
 
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <label class="group relative cursor-pointer">
-                                        <input class="peer sr-only" name="subject" type="radio" value="literacy" {{ old('subject', 'literacy') === 'literacy' ? 'checked' : '' }} data-subject-choice="literacy">
+                                        <input class="peer sr-only" name="subject" type="radio" value="literacy" checked data-subject-choice="literacy">
                                                 <div class="rounded-lg border-2 border-transparent bg-surface-container-low p-6 transition-all group-hover:bg-surface-container-high peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-lg peer-checked:shadow-primary/10">
                                             <div class="mb-4 flex items-start justify-between">
                                                 <div class="rounded-lg bg-white p-3 shadow-sm">
@@ -75,21 +76,11 @@
                                         </div>
                                     </label>
 
-                                    <label class="group relative cursor-pointer">
-                                        <input class="peer sr-only" name="subject" type="radio" value="numeracy" {{ old('subject') === 'numeracy' ? 'checked' : '' }} data-subject-choice="numeracy">
-                                                <div class="rounded-lg border-2 border-transparent bg-surface-container-low p-6 transition-all group-hover:bg-surface-container-high peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-lg peer-checked:shadow-primary/10">
-                                            <div class="mb-4 flex items-start justify-between">
-                                                <div class="rounded-lg bg-white p-3 shadow-sm">
-                                                    <span class="material-symbols-outlined text-3xl text-primary">calculate</span>
-                                                </div>
-                                                <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary">
-                                                    <span class="h-2 w-2 rounded-full bg-white"></span>
-                                                </span>
-                                            </div>
-                                            <h3 class="mb-1 text-lg font-bold">Numeracy</h3>
-                                            <p class="text-sm leading-relaxed text-on-surface-variant">Arithmetic, number sense, spatial reasoning, and problem solving.</p>
-                                        </div>
-                                    </label>
+                                    <a class="group relative block rounded-lg border-2 border-transparent bg-surface-container-low p-6 transition-colors hover:border-primary hover:bg-primary/10" href="{{ route('worksheets.index') }}" data-numeracy-mission>
+                                        <div class="mb-4 flex items-start justify-between"><span class="material-symbols-outlined rounded-lg bg-white p-3 text-3xl text-primary" aria-hidden="true">menu_book</span><span class="material-symbols-outlined text-primary" aria-hidden="true">arrow_forward</span></div>
+                                        <h3 class="mb-1 text-lg font-bold">Numeracy</h3>
+                                        <p class="text-sm leading-relaxed text-on-surface-variant">Worksheet Mission / 35 ARAL worksheets</p>
+                                    </a>
                                 </div>
                                 @error('subject')
                                     <p class="mt-3 text-sm text-error">{{ $message }}</p>
@@ -205,6 +196,8 @@
                                                     </div>
                                                 @endforeach
                                             </div>
+
+                                            <x-literacy-story-library :stories="$storyTemplates" />
 
                                             <div>
                                                 <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="story_title">Story Title</label>
@@ -343,6 +336,7 @@
                                     <hr class="border-outline-variant/20">
 
                                     <div class="space-y-3" id="literacy-options">
+                                        <x-phil-iri-rubric />
                                         <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Literacy Focus</label>
                                         @foreach (['Reading Fluency', 'Comprehension Depth', 'Spelling & Vocabulary'] as $focus)
                                             <label class="flex cursor-pointer items-center gap-3 rounded-sm border border-transparent bg-white p-3 transition-all hover:border-primary/20 hover:bg-primary/5" data-focus-choice>
@@ -505,6 +499,13 @@
         const questionImportStatus = document.getElementById('question-import-status');
         const storyTitleInput = document.getElementById('story_title');
         const storyDescriptionInput = document.getElementById('story_description');
+        const storyTemplates = {{ \Illuminate\Support\Js::from($storyTemplates) }};
+        const storyLibrary = document.getElementById('story-library');
+        const storyLibrarySelect = document.getElementById('story-library-select');
+        const loadStoryTemplateButton = document.getElementById('load-story-template');
+        const storyLibraryStatus = document.getElementById('story-library-status');
+        const assessmentTitleInput = document.getElementById('title');
+        let templateAssessmentTitle = null;
         const assessmentTypeInputs = document.querySelectorAll('input[name="assessment_type"]');
         const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
         const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
@@ -515,6 +516,9 @@
             const isLiteracy = type === 'literacy';
             literacyOptions.classList.toggle('hidden', !isLiteracy);
             numeracyOptions.classList.toggle('hidden', isLiteracy);
+            storyLibrary.classList.toggle('hidden', !isLiteracy);
+            storyLibrarySelect.disabled = !isLiteracy;
+            loadStoryTemplateButton.disabled = !isLiteracy || !storyLibrarySelect.value;
             bgIcon.textContent = isLiteracy ? 'menu_book' : 'grid_view';
             bgIcon.classList.toggle('text-primary', isLiteracy);
             bgIcon.classList.toggle('text-secondary', !isLiteracy);
@@ -765,6 +769,39 @@
         });
         assessmentTypeInputs.forEach((input) => {
             input.addEventListener('change', toggleQuestionBuilder);
+        });
+        storyLibrarySelect.addEventListener('change', () => {
+            const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
+            loadStoryTemplateButton.disabled = !template || storyLibrarySelect.disabled;
+            document.getElementById('story-library-count').textContent = template ? `${template.manual_questions.length} questions` : '';
+        });
+        loadStoryTemplateButton.addEventListener('click', () => {
+            if (storyLibrarySelect.disabled) return;
+            const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
+            if (!template) return;
+
+            const hasContent = storyTitleInput.value.trim() || storyDescriptionInput.value.trim()
+                || Array.from(manualQuestions.querySelectorAll('textarea, input')).some(field => field.value.trim());
+            if (hasContent && !confirm(`Replace the current story and questions with "${template.story_title}"?`)) return;
+
+            applyImportedStory({ storyTitle: template.story_title, storyDescription: template.story_description });
+            if (!assessmentTitleInput.value.trim() || assessmentTitleInput.value === templateAssessmentTitle) {
+                assessmentTitleInput.value = template.story_title;
+                assessmentTitleInput.dispatchEvent(new Event('input', { bubbles: true }));
+                templateAssessmentTitle = template.story_title;
+            }
+            manualQuestions.innerHTML = template.manual_questions.map((question, index) => questionTemplate(index, question)).join('');
+            renumberQuestions();
+            // Oral reading keeps these cards disabled; switching back restores the comprehension questions.
+            toggleQuestionBuilder();
+            questionTextFile.value = '';
+            questionImportStatus.classList.add('hidden');
+            const summary = assessmentTypeRequiresQuestions()
+                ? `${template.manual_questions.length} questions loaded.`
+                : 'Passage loaded for oral reading.';
+            const screeningNote = selectedAssessmentType() === 'group_screening' ? ' Grade 6 GST scoring requires 20 questions.' : '';
+            storyLibraryStatus.textContent = `${template.story_title}: ${summary}${screeningNote}`;
+            storyLibraryStatus.classList.remove('hidden');
         });
         addQuestionButton.addEventListener('click', () => {
             const index = manualQuestions.querySelectorAll('[data-question-card]').length;

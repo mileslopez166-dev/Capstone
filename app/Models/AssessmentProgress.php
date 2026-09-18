@@ -15,7 +15,7 @@ class AssessmentProgress extends Model
         'state', 'revision', 'submission_id',
     ];
 
-    protected $casts = ['state' => 'array', 'revision' => 'integer'];
+    protected $casts = ['state' => 'array', 'revision' => 'integer', 'multiplication_table_unlocked_at' => 'datetime'];
 
     public static function forAttempt(Assessment $assessment, User $student, int $attemptNumber): self
     {
@@ -32,5 +32,17 @@ class AssessmentProgress extends Model
     public function submission(): BelongsTo
     {
         return $this->belongsTo(AssessmentSubmission::class, 'submission_id');
+    }
+
+    public function recordAssistance(User $actor): void
+    {
+        if ($actor->isTeacher()) {
+            $this->forceFill(['administered_by' => $actor->id])->save();
+        }
+    }
+
+    public function administrator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'administered_by')->withTrashed();
     }
 }

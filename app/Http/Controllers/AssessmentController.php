@@ -7,7 +7,9 @@ use App\Models\AssessmentProgress;
 use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
+use App\Support\AssessmentParticipant;
 use App\Support\NotificationSender;
+use App\Support\PhilIri;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,9 +20,10 @@ use Illuminate\View\View;
 
 class AssessmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         abort_unless($request->user()?->isTeacher(), 403);
+        if ($request->query('subject') === 'numeracy') return redirect()->route('worksheets.index');
 
         $assessments = Assessment::query()
             ->where('created_by', $request->user()->id)
@@ -29,12 +32,14 @@ class AssessmentController extends Controller
 
         return view('assessments.index', [
             'assessments' => $assessments,
+            'storyTemplates' => json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true, 512, JSON_THROW_ON_ERROR),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         abort_unless($request->user()?->isTeacher(), 403);
+        if ($request->input('subject') === 'numeracy') return redirect()->route('worksheets.index');
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -113,9 +118,28 @@ class AssessmentController extends Controller
         abort_unless($request->user()?->isTeacher(), 403);
         abort_unless($assessment->created_by === $request->user()->id, 404);
 
+        $eligibleStudents = User::where('role', 'student')->where('approval_status', 'approved')->orderBy('name')->get()
+            ->filter(fn (User $student) => AssessmentParticipant::matchesSection($assessment, $student));
+
+        if ($assessment->worksheet_number) {
+            return view('worksheets.assignment', ['assessment' => $assessment, 'eligibleStudents' => $eligibleStudents,
+                'worksheet' => \App\Support\NumeracyWorksheets::find($assessment->worksheet_number)]);
+        }
+
         return view('assessments.show', [
             'assessment' => $assessment,
+            'eligibleStudents' => $eligibleStudents,
         ]);
+    }
+
+    public function startForStudent(Request $request, Assessment $assessment): RedirectResponse
+    {
+        abort_unless($request->user()?->isTeacher() && $request->user()->isApproved(), 403);
+        abort_unless($assessment->created_by === $request->user()->id, 404);
+        $data = $request->validate(['student_id' => ['required', 'integer']]);
+        $student = AssessmentParticipant::resolve($request, $assessment, User::findOrFail($data['student_id']));
+
+        return redirect()->route('teacher.assessments.take', [$assessment, $student]);
     }
 
     public function updateAvailability(Request $request, Assessment $assessment): RedirectResponse
@@ -198,21 +222,16 @@ class AssessmentController extends Controller
             ->with('status', 'Assessment deleted successfully.');
     }
 
-    private function authorizeStudentAssessment(Request $request, Assessment $assessment): void
+    public function showStudent(Request $request, Assessment $assessment, ?User $student = null): View|RedirectResponse
     {
-        abort_unless($request->user()?->isStudent(), 403);
-        abort_unless($assessment->status === 'published', 404);
+        $student = AssessmentParticipant::resolve($request, $assessment, $student);
+        $assisted = $request->user()->isTeacher();
 
-        $targetSection = $request->user()->section ? strtolower(str_replace(' ', '_', $request->user()->section)) : null;
-        abort_unless(in_array($assessment->target_section, ['all', null], true) || ($targetSection && $assessment->target_section === $targetSection), 404);
-    }
+        $pendingWorksheet = $assessment->worksheetAttempts()->where('user_id', $student->id)->whereNull('reviewed_at')->first();
+        if ($pendingWorksheet) return redirect()->route('worksheets.review', $pendingWorksheet);
 
-    public function showStudent(Request $request, Assessment $assessment): View|RedirectResponse
-    {
-        $this->authorizeStudentAssessment($request, $assessment);
-
-        return DB::transaction(function () use ($request, $assessment) {
-            $student = User::query()->lockForUpdate()->findOrFail($request->user()->id);
+        return DB::transaction(function () use ($student, $assisted, $assessment) {
+            $student = User::query()->lockForUpdate()->findOrFail($student->id);
             $attemptCount = $assessment->submissions()->where('user_id', $student->id)->count();
             $remainingTokens = AssessmentRetakeRequest::query()
                 ->where('assessment_id', $assessment->id)->where('user_id', $student->id)
@@ -224,8 +243,13 @@ class AssessmentController extends Controller
                 ], [
                     'teacher_id' => $assessment->created_by, 'requested_tries' => 1,
                     'approved_tries' => 0, 'remaining_tries' => 0,
-                    'message' => 'Student requested a retake token from the assessment page.',
+                    'message' => $assisted ? 'Retake requested during a teacher-assisted assessment.' : 'Student requested a retake token from the assessment page.',
                 ]);
+
+                if ($assisted) {
+                    return redirect()->route('students.show', $student)
+                        ->with('status', 'No tries remain for '.$student->name.'. Approve the retake request below before continuing.');
+                }
 
                 return redirect()->route('student.dashboard')
                     ->with('status', 'Token has been requested for retake. Please wait for your teacher approval.');
@@ -233,7 +257,13 @@ class AssessmentController extends Controller
 
             $progress = AssessmentProgress::forAttempt($assessment, $student, $attemptCount + 1);
 
-            return view('student.assessment', compact('assessment', 'progress'));
+            if ($assessment->worksheet_number) {
+                return view('worksheets.answer', compact('assessment', 'progress', 'student', 'assisted') + [
+                    'worksheet' => \App\Support\NumeracyWorksheets::find($assessment->worksheet_number),
+                ]);
+            }
+
+            return view('student.assessment', compact('assessment', 'progress', 'student', 'assisted'));
         });
     }
 
@@ -264,37 +294,40 @@ class AssessmentController extends Controller
         }
     }
 
-    public function saveStudentProgress(Request $request, Assessment $assessment): JsonResponse
+    public function saveStudentProgress(Request $request, Assessment $assessment, ?User $student = null): JsonResponse
     {
-        $this->authorizeStudentAssessment($request, $assessment);
+        $student = AssessmentParticipant::resolve($request, $assessment, $student);
+        abort_if($assessment->worksheet_number, 422, 'Use the worksheet progress endpoint.');
         $validated = $request->validate(array_merge($this->progressRules(), [
             'attempt_key' => ['required', 'uuid'],
             'state' => ['required', $this->progressRules()['state'][1]],
         ]));
         $this->validateAnswerIndexes($validated['state']['answers'], $assessment);
 
-        return DB::transaction(function () use ($request, $assessment, $validated) {
-            User::query()->lockForUpdate()->findOrFail($request->user()->id);
+        return DB::transaction(function () use ($request, $student, $assessment, $validated) {
+            User::query()->lockForUpdate()->findOrFail($student->id);
             $progress = AssessmentProgress::query()
-                ->where('assessment_id', $assessment->id)->where('user_id', $request->user()->id)
+                ->where('assessment_id', $assessment->id)->where('user_id', $student->id)
                 ->where('attempt_key', $validated['attempt_key'])->firstOrFail();
             abort_if($progress->submission_id !== null, 409, 'This attempt has already been submitted.');
 
             // Delayed autosaves must not overwrite a newer snapshot.
             if ($validated['revision'] > $progress->revision) {
                 $progress->update(['state' => $validated['state'], 'revision' => $validated['revision']]);
+                $progress->recordAssistance($request->user());
             }
 
             return response()->json(['revision' => $progress->revision]);
         });
     }
 
-    public function submitStudentAttempt(Request $request, Assessment $assessment): JsonResponse
+    public function submitStudentAttempt(Request $request, Assessment $assessment, ?User $student = null): JsonResponse
     {
-        $this->authorizeStudentAssessment($request, $assessment);
+        $student = AssessmentParticipant::resolve($request, $assessment, $student);
+        abort_if($assessment->worksheet_number, 422, 'This worksheet requires teacher review.');
 
         $validated = $request->validate(array_merge($this->progressRules(), [
-            'attempt_key' => ['sometimes', 'required', 'uuid'],
+            'attempt_key' => [$request->user()->isTeacher() ? 'required' : 'sometimes', 'required', 'uuid'],
             'answers' => ['present', 'array', 'size:'.count($assessment->manual_questions ?? [])],
             'answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
         ]));
@@ -314,8 +347,8 @@ class AssessmentController extends Controller
         $pointsPerQuestion = 250;
         $points = $correctCount * $pointsPerQuestion;
         $possiblePoints = $questionCount * $pointsPerQuestion;
-        $studentId = $request->user()->id;
-        $submission = DB::transaction(function () use ($assessment, $validated, $studentId, $answers, $correctCount, $questionCount, $points, $possiblePoints) {
+        $studentId = $student->id;
+        $submission = DB::transaction(function () use ($request, $assessment, $validated, $studentId, $answers, $correctCount, $questionCount, $points, $possiblePoints) {
             // Serialize attempts and token consumption for this student, including multiple tabs.
             $student = User::query()->lockForUpdate()->findOrFail($studentId);
             $progress = isset($validated['attempt_key']) ? AssessmentProgress::query()
@@ -346,6 +379,7 @@ class AssessmentController extends Controller
             $progress ??= AssessmentProgress::forAttempt($assessment, $student, $previousAttempts + 1);
             abort_unless($progress->attempt_number === $previousAttempts + 1, 409, 'This attempt is no longer current.');
 
+            $state = $validated['state'] ?? $progress->state ?? [];
             $submission = AssessmentSubmission::query()->create([
                 'assessment_id' => $assessment->id,
                 'user_id' => $studentId,
@@ -355,6 +389,7 @@ class AssessmentController extends Controller
                 'question_count' => $questionCount,
                 'points' => $points,
                 'possible_points' => $possiblePoints,
+                'phil_iri' => PhilIri::initial($assessment, $correctCount, $questionCount, $state),
                 'submitted_at' => now(),
             ]);
 
@@ -362,10 +397,10 @@ class AssessmentController extends Controller
                 $retakeToken->decrement('remaining_tries');
             }
 
-            $state = $validated['state'] ?? $progress->state ?? [];
             $state['answers'] = $answers->all();
             $state['phase'] = 'finished';
             $progress->update(['submission_id' => $submission->id, 'state' => $state]);
+            $progress->recordAssistance($request->user());
 
             return $submission;
         });
@@ -380,6 +415,7 @@ class AssessmentController extends Controller
             'question_count' => $submission->question_count,
             'points' => $submission->points,
             'possible_points' => $submission->possible_points,
+            'phil_iri' => PhilIri::forSubmission($submission),
             'accuracy' => $submission->question_count > 0 ? round(($submission->correct_count / $submission->question_count) * 100) : 0,
         ]);
     }

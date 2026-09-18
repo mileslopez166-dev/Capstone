@@ -1,0 +1,307 @@
+{
+  "1": [
+    {"title":"Divisibility Rules Review","sections":[
+      {"heading":"Rules and examples","paragraphs":["By 2: All even numbers are divisible by 2. For example, 128 is divisible by 2; 129 is not.","By 3: Add the digits. If the sum is divisible by 3, so is the number. For 381, 3 + 8 + 1 = 12, so 381 is divisible by 3. For 217, 2 + 1 + 7 = 10, so 217 is not divisible by 3.","By 5: Numbers ending in 5 or 0 are divisible by 5. Examples: 175 and 200.","By 10: Numbers ending in 0 are divisible by 10. Examples: 200, 50 and 450.","By 9: Add the digits. If the sum is divisible by 9, so is the number. For 756, 7 + 5 + 6 = 18, so 756 is divisible by 9. For 217, the sum is 10, so it is not divisible by 9."]},
+      {"instruction":"For each number, give all its divisors from this list: 2, 3, 5, 9, 10.","start":1,"items":["245","240","256","432","454","455","480","543","610","612"]}
+    ]},
+    {"title":"Apply the Divisibility Rules","sections":[
+      {"instruction":"For each number, give all its divisors from this list: 2, 3, 5, 9, 10.","start":11,"items":["630","662","729","750","768","780","850","998","1,065","2,150"]},
+      {"instruction":"Fill each blank with the SMALLEST digit that makes the number divisible by the given number.","start":21,"items":["2_4 (divisible by 9)","41_ (divisible by 2)","6_7 (divisible by 3)","74_ (divisible by 10)","_77 (divisible by 9)","16_ (divisible by 5)","_85 (divisible by 3)","72_ (divisible by 9)","5,23_ (divisible by 10)","7,67_ (divisible by 5)","4,6_7 (divisible by 9)","95_ (divisible by 5)","_,615 (divisible by 3)","35_ (divisible by 9)","3,34_ (divisible by 10)"]}
+    ]}
+  ],
+  "2": [
+    {"title":"Divisibility by 4, 6 and 8","sections":[
+      {"paragraphs":["By 4: If the last two digits form a number divisible by 4, so is the whole number. For example, 1,312 is divisible by 4 because 12 is divisible by 4.","By 6: A number divisible by both 2 and 3 is divisible by 6. For example, 114 is even, and 1 + 1 + 4 = 6. Therefore, 114 is divisible by 6.","By 8: If the last three digits form a number divisible by 8, so is the whole number. For example, 9,816 is divisible by 8 because 816 is divisible by 8. The number 6,302 is not divisible by 8 because 302 is not."]},
+      {"instruction":"For each number, give all its divisors from this list: 4, 6, 8.","start":1,"items":["648","924","216","460","618","248","6,816","6,424","9,428","6,864"]}
+    ]},
+    {"title":"Check the Divisors","sections":[
+      {"instruction":"Give all divisors from this list: 4, 6, 8.","start":11,"items":["9,232","4,656","7,344","9,462","1,284"]},
+      {"instruction":"Give all divisors from this list: 2, 3, 4, 5, 6, 8, 9, 10.","start":16,"items":["5,312","1,492","4,272","2,725","9,963","1,586","4,686","8,714","7,089","5,930","2,967","5,680","6,657","7,260","9,688"]}
+    ]}
+  ],
+  "3": [
+    {"title":"Divisibility Rules","reading_only":true,"sections":[
+      {"paragraphs":["A number is divisible by another number if their quotient is a whole number with no remainder. The other number is a divisor of the given number.","By 2: The last digit is even: 0, 2, 4, 6 or 8. Example: 37,598.","By 3: The sum of the digits is a multiple of 3. Example: 36, because 3 + 6 = 9.","By 4: The last two digits are 00 or form a multiple of 4. Examples: 600 and 748.","By 5: The last digit is 0 or 5. Example: 105.","By 6: The number is divisible by both 2 and 3. Example: 636.","By 8: The last three digits are 000 or form a multiple of 8. Examples: 1,000 and 12,048.","By 9: The sum of the digits is a multiple of 9.","By 10: The last digit is 0. Example: 1,450.","By 11: Add the digits in alternating positions separately. If the difference between the two sums is 0 or a multiple of 11, the number is divisible by 11. For 7,097,442: 7 + 9 + 4 + 2 = 22, and 0 + 7 + 4 = 11. The difference is 11, so the number is divisible by 11.","By 12: The number is divisible by both 3 and 4. For 564, the digit sum is 15 and the last two digits form 64. Both tests pass, so 564 is divisible by 12."]}
+    ]},
+    {"title":"Explain Your Answer","sections":[
+      {"instruction":"Is the first number divisible by the second? Write Yes or No and justify your answer using the divisibility rules. The two item numbers identify the answer and its justification.","paragraphs":["Example: 129 and 3. Yes, because 1 + 2 + 9 = 12, which is divisible by 3."],"items":[
+        {"label":"1 / 8","text":"160 and 2"},{"label":"2 / 9","text":"297 and 3"},{"label":"3 / 10","text":"590 and 5"},{"label":"4 / 11","text":"876 and 6"},{"label":"5 / 12","text":"595 and 12"},{"label":"6 / 13","text":"215 and 4"},{"label":"7 / 14","text":"5,634 and 10"},
+        {"label":"15 / 24","text":"900 and 3"},{"label":"16 / 25","text":"4,016 and 8"},{"label":"17 / 26","text":"2,079 and 11"},{"label":"18 / 27","text":"5,935 and 6"},{"label":"19 / 28","text":"4,850 and 10"},{"label":"20 / 29","text":"5,634 and 6"},{"label":"21 / 30","text":"2,105 and 5"},{"label":"22 / 31","text":"5,136 and 12"},{"label":"23 / 32","text":"2,104 and 2"}
+      ]}
+    ]}
+  ],
+  "4": [
+    {"title":"Divisibility Practice","sections":[
+      {"instruction":"Is the first number divisible by the second? Write Yes or No.","start":1,"items":["265; 9","420; 2","505; 11","111; 3","696; 5","1,600; 4","2,228; 8","4,132; 12","5,640; 6","7,517; 10"]},
+      {"instruction":"Give all possible divisors from this list: 2, 3, 4, 5, 6, 8, 9, 10, 11, 12.","start":11,"items":["800","878","160","663","445","9,999","1,144","7,326","7,400","4,215"]}
+    ]},
+    {"title":"Find All the Divisors","sections":[{"instruction":"Give all divisors from this list: 2, 3, 4, 5, 6, 8, 9, 10, 11, 12.","start":21,"items":["216","970","752","459","760","9,645","7,653","5,580","5,900","9,040"]}]}
+  ],
+  "5": [
+    {"title":"Evaluate Expressions","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":1,"items":["3 x (13 x 10)","6 + (10 x 14)","17 x (2 x 10)","(3 x 44) x 1","3 x (1 x 14)","(17 x 2) x 2","(3 x 11) + 2","(10 x 12) + 4","7 x (10 x 16)","40 x (4 x 10)","9 x (10 x 12)","8 x (13 x 10)","19 x (10 x 3)","(3 x 8) + 2","1 + (10 x 6)","2 x (6 / 6)","(7 x 5) - 2","(10 - 4) + 8","(7 + 5) + 9","(10 - 10) + 4"]}]},
+    {"title":"Evaluate Expressions","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":21,"items":["(10 + 1) + 10","(7 x 6) - 10","(8 / 4) x 6","(10 + 5) + 5","5 + (7 x 8)","(9 / 9) x 2","(4 x 10) - 9","1 + (1 x 8)","(10 + 9) + 3","7 - (9 - 5)","10 + (2 x 6)","(6 / 2) x 7","5 + (9 / 1)","(6 x 12) - 2","8 + (9 x 7)","(9 x 2) - 3","4 x (5 x 9)","3 + (5 x 4)","(5 x 6) + 2","(12 x 6) - 6"]}]}
+  ],
+  "7": [
+    {"title":"Evaluate Expressions","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":1,"items":["(8 x 5) - 10","(9 x 9) - 8","(3 x 5) + 8","(7 x 6) + 23","(18 / 2) - 3","(45 / 5) - 3","(8 x 5) + 5","45 - (2 x 5)","(2 x 10) - 5","(8 x 3) + 2","(10 x 6) + 5","(24 / 3) - 3","(72 / 9) - 6","(5 x 9) + 0","34 - (6 x 2)","(5 x 3) - 2","(9 x 3) - 1","(9 x 3) - 9","(7 x 5) + 7","(6 x 4) + 4"]}]},
+    {"title":"Evaluate Expressions","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":21,"items":["(6 x 6) x 10","(6 x 8) / 4","(3 x 4) / 6","(8 / 4) x 5","6 x (10 - 4)","9 + (5 x 5)","10 + (2 x 8)","(5 / 5) x 6","(8 + 9) - 7","4 x (6 / 2)","(5 x 5) + 7","(3 x 4) - 1","(5 x 4) + 5","1 - (10 - 9)","(5 x 5) - 10","10 + (6 + 9)","(6 x 9) - 9","10 + (10 / 5)","(2 / 1) x 3","6 x (3 x 5)"]}]}
+  ],
+  "8": [
+    {"title":"Order of Operations","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":1,"items":["4 - (9 / 9)","(8 / 4) + 9","(10 x 3) / 5","3 x (5 x 1)","(7 + 5) - 2","(7 x 2) + 10","(4 x 3) + 5","(10 + 10) + 1","2 + (3 x 7)","(10 x 5) - 4","(7 x 3) - 10","(4 - 3) x 5","1 x (10 x 8)","(9 - 7) + 1","(10 + 9) - 6","(9 x 8) / 4","(9 + 7) - 1","(3 x 3) + 1","(8 x 3) / 1","(3 x 8) - 6"]}]},
+    {"title":"Order of Operations","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":21,"items":["(8 + 7) + 7","(8 x 3) x 9","(8 - 2) + 7","(5 x 3) + 6","(2 + 1) x 9","(4 / 1) / 2","(8 x 3) + 7","(8 x 4) - 10","(6 + 8) + 7","(9 x 8) - 1","(2 x 3) + 8","1 + (9 x 5)","1 + (8 x 9)","(6 x 7) - 6","1 + (6 x 2)","(5 + 9) + 6","(6 x 5) - 3","2 / (4 / 2)","(7 x 5) - 1","(3 x 4) + 10"]}]}
+  ],
+  "9": [
+    {"title":"Greatest Common Factor","sections":[
+      {"heading":"Finding the GCF by continuous division","paragraphs":["Divide both numbers by a common prime factor. Continue until the quotients have no common factor greater than 1. Multiply the common prime factors to get the GCF.","Example: 16 and 40 become 8 and 20 after dividing by 2, then 4 and 10 after dividing by 2 again, then 2 and 5 after dividing by 2 again. The GCF is 2 x 2 x 2 = 8."]},
+      {"instruction":"Find the GCF using continuous division. Show your solutions.","start":1,"items":["10 and 50","16 and 40","28 and 40","36 and 52","20 and 50","35 and 50","18 and 27","26 and 40"]}
+    ]},
+    {"title":"Greatest Common Factor","sections":[{"instruction":"Find the GCF using continuous division. Show your solutions.","start":9,"items":["50 and 80","56 and 60","24 and 60","48 and 72","32 and 44","110 and 150","36 and 51","28 and 40","49 and 77","120 and 150","90 and 135","150 and 200"]}]}
+  ],
+  "10": [
+    {"title":"Least Common Multiple","sections":[
+      {"heading":"LCM of three numbers using continuous division","paragraphs":["Divide numbers by a common factor of at least two of them, bringing down any number not divisible by that factor. Continue until no pair has a common factor greater than 1. Multiply the divisors and the remaining numbers.","Example: 20, 40 and 60 become 10, 20 and 30 after dividing by 2; then 5, 10 and 15 after dividing by 2; then 1, 2 and 3 after dividing by 5. LCM = 2 x 2 x 5 x 1 x 2 x 3 = 120.","Example: For 16, 18 and 20, division by 2 gives 8, 9 and 10. Divide 8 and 10 by 2 and bring down 9 to obtain 4, 9 and 5. LCM = 2 x 2 x 4 x 9 x 5 = 720.","Example: For 12, 20 and 25, divide 12 and 20 by 4 to get 3, 5 and 25. Divide 5 and 25 by 5 to get 3, 1 and 5. LCM = 4 x 5 x 3 x 1 x 5 = 300."]},
+      {"instruction":"Find the LCM. Show your solutions.","start":1,"items":["10, 15 and 30","24, 32 and 40","40, 24 and 48","27, 36 and 54","16, 20 and 24","9, 12 and 18"]}
+    ]},
+    {"title":"Least Common Multiple","sections":[{"instruction":"Find the LCM. Show your solutions.","start":7,"items":["12, 16 and 14","14, 18 and 30","9, 18 and 27","12, 16 and 20","8, 20 and 28","10, 25 and 30","12, 20 and 24","15, 18 and 21","12, 15 and 18","28, 30 and 32","25, 30 and 50","22, 34 and 44"]}]}
+  ],
+  "11": [
+    {"title":"More on GCF and LCM","sections":[
+      {"paragraphs":["To find the LCM of two numbers when their GCF is known, multiply the numbers and divide their product by the GCF.","LCM = (first number x second number) / GCF.","Example: For 35 and 50, the GCF is 5. LCM = (35 x 50) / 5 = 1,750 / 5 = 350."]},
+      {"instruction":"Find the LCM given the GCF. Show your solutions.","start":1,"items":["12 and 30; GCF: 6","10 and 50; GCF: 10","9 and 12; GCF: 3","14 and 24; GCF: 2","12 and 40; GCF: 4","15 and 35; GCF: 5","25 and 40; GCF: 5","28 and 42; GCF: 14","40 and 60; GCF: 20","15 and 85; GCF: 5"]}
+    ]},
+    {"title":"Find the Missing Data","sections":[{"instruction":"For each pair, find the product, GCF and LCM.","start":11,"items":["21 and 24","15 and 25","24 and 56","30 and 36","27 and 63","18 and 24","28 and 40","21 and 27","20 and 55","14 and 35"]}]}
+  ],
+  "12": [
+    {"title":"Factors, GCF and LCM","sections":[
+      {"paragraphs":["If the smaller number is a factor of the bigger number, the smaller number is their GCF and the bigger number is their LCM.","Example: For 9 and 27, 27 / 9 = 3. Therefore, their GCF is 9 and their LCM is 27."]},
+      {"instruction":"Check by division whether the smaller number is a factor of the bigger number. Find their GCF and LCM. Show the division.","start":1,"items":["10 and 30","27 and 54","25 and 50","22 and 44","15 and 30","50 and 100","26 and 52","13 and 39","24 and 72","4 and 28"]}
+    ]},
+    {"title":"Factors, GCF and LCM","sections":[{"instruction":"Check by division whether the smaller number is a factor of the bigger number. Find their GCF and LCM. Show the division.","start":11,"items":["15 and 30","48 and 144","49 and 196","13 and 169","80 and 320","55 and 165","15 and 120","66 and 198","35 and 105","25 and 175","19 and 114","32 and 224"]}]}
+  ],
+  "13": [
+    {"title":"GCF and LCM Together","sections":[{"instruction":"Find the GCF and LCM of each set. Use any method. The first item number is for GCF; the second is for LCM.","items":[{"label":"1 / 2","text":"44 and 48"},{"label":"3 / 4","text":"25 and 30"},{"label":"5 / 6","text":"21 and 24"},{"label":"7 / 8","text":"39 and 42"},{"label":"9 / 10","text":"3 and 24"},{"label":"11 / 12","text":"10 and 18"},{"label":"13 / 14","text":"15, 24 and 27"},{"label":"15 / 16","text":"15, 18 and 20"},{"label":"17 / 18","text":"25, 45 and 60"},{"label":"19 / 20","text":"13 and 27"}]}]},
+    {"title":"GCF and LCM Word Problems","sections":[
+      {"instruction":"Find the GCF and LCM. The first item number is for GCF; the second is for LCM.","items":[{"label":"21 / 22","text":"9, 14 and 25"},{"label":"23 / 24","text":"21 and 50"},{"label":"25 / 26","text":"6, 17 and 35"},{"label":"27 / 28","text":"18 and 90"},{"label":"29 / 30","text":"10 and 50"},{"label":"31 / 32","text":"23 and 92"}]},
+      {"instruction":"Analyze and solve the problems.","items":[
+        {"label":"33 / 34","text":"Melissa wants to make paper bouquets. Each flower uses one sheet of colored paper. She has 12 red, 14 yellow and 16 orange colored papers. If she wants each bouquet to have an equal number of flowers per color, how many bouquets can she make at the most? How many flowers per color are in each bouquet?"},
+        {"label":"35","text":"Three blinking neon signs are turned on at the same time. Each blinks every 6 seconds, 11 seconds and 25 seconds respectively. After how many seconds will they blink together?"},
+        {"label":"36","text":"Jona can arrange her toy collections in a box. She can arrange either 15 toys, 20 toys or 18 toys in a box. How many toys can she have at the least?"},
+        {"label":"37 / 38","text":"Cathy is giving donations to calamity victims. She has 12 clothes, 28 packs of goods and 36 kilos of rice. What is the greatest number of bags she can make if each type is equally distributed among the bags? How many of each will go into the bags?"},
+        {"label":"39 / 40","text":"The teachers will make loot bags for awardees in a contest. Stickers come in sheets of 9, glitter pens come in packs of 12, and water bottles are sold individually, so they plan to buy 36 pieces. Each loot bag should have an equal number of each item. How many stickers and how many glitter pens should they buy at the least?"},
+        {"label":"41 / 42","text":"Elena has 18 apples, 27 pears and 21 bananas. She wants to make fruit baskets with the same number of each fruit in each basket. How many fruit baskets can she make at the most? Identify the number of each fruit in a basket."},
+        {"label":"43","text":"It takes approximately 12 hours to reach Albay, Bicol by bus from Araneta Cubao Bus Station. Each bus rests at different intervals: Cagsawa Liner every 3 hours, Isarog Lines every 4 hours and Penafrancia Tours every 2 hours. If all leave at 12 noon, what time will they be at a bus stop at the same time?"}
+      ]}
+    ]}
+  ],
+  "14": [
+    {"title":"Multiply Fractions with Models","sections":[{"instruction":"Shade a model and solve each equation.","start":1,"items":[{"text":"1/3 x 1/3 = ____","grid":[3,3]},{"text":"2/4 x 6/8 = ____","grid":[4,8]},{"text":"3/5 x 3/4 = ____","grid":[4,5]},{"text":"6/7 x 2/3 = ____","grid":[3,7]}]}]},
+    {"title":"Multiply Fractions with Models","sections":[{"instruction":"Shade a model and solve each equation.","start":5,"items":[{"text":"2/3 x 1/2 = ____","grid":[2,3]},{"text":"3/6 x 3/5 = ____","grid":[5,6]},{"text":"6/7 x 4/5 = ____","grid":[5,7]},{"text":"8/9 x 2/3 = ____","grid":[3,9]}]}]}
+  ],
+  "15": [
+    {"title":"Multiplication of Fractions","sections":[
+      {"paragraphs":["Multiply the numerators, then multiply the denominators. Reduce the answer to lowest terms if necessary.","Example: 4/5 x 2/7 = 8/35."]},
+      {"instruction":"Find the product. Show your solutions and express your answers in lowest terms.","start":1,"items":["5/7 x 1/4","3/4 x 1/4","6/7 x 4/5","1/2 x 3/6","1/2 x 3/6","2/10 x 1/9","1/3 x 2/3","6/7 x 1/7","1/6 x 1/13","1/8 x 3/7","2/9 x 1/11","3/10 x 7/8","5/7 x 2/11","2/3 x 4/9","1/4 x 2/7"]}
+    ]},
+    {"title":"Cross Cancellation","sections":[
+      {"paragraphs":["When a numerator and the other fraction's denominator have a common factor, divide both by their GCF before multiplying.","Example: 4/9 x 1/10 = 2/45. Cancel the common factor 2 from 4 and 10.","Example: 4/15 x 5/12 = 1/9. Cancel the common factors 4 from 4 and 12, and 5 from 5 and 15."]},
+      {"instruction":"Find the product using cross cancellation. Show your solutions and express your answers in lowest terms.","start":16,"items":["2/9 x 3/4","2/10 x 2/3","1/4 x 2/3","1/3 x 3/5","1/2 x 2/5","2/3 x 1/2","5/10 x 4/5","1/3 x 3/4","2/3 x 1/2","4/5 x 3/4","3/4 x 2/5","4/5 x 1/2","2/15 x 3/16","5/18 x 3/10","3/5 x 10/18"]}
+    ]}
+  ],
+  "16": [
+    {"title":"Whole Numbers and Fractions","sections":[
+      {"paragraphs":["Multiply the whole number by the numerator and keep the denominator. You may cancel common factors first. Reduce your answer to lowest terms.","Examples: 5 x 3/7 = 15/7 = 2 1/7. Also, 8 x 5/6 = 20/3 = 6 2/3."]},
+      {"instruction":"Multiply. Show your solutions and express your answers in lowest terms.","start":1,"items":["9 x 2/5","5 x 1/4","2 x 1/2","8 x 1/2","3 x 2/3","10 x 1/2","2 x 4/9","3/9 x 16","11/14 x 21","8/14 x 24","2/5 x 18","4/7 x 6","5 x 2/5","10 x 3/20","4/6 x 9"]}
+    ]},
+    {"title":"Multiplication of Mixed Numbers","sections":[
+      {"paragraphs":["Change mixed numbers to improper fractions, then multiply. Cancel common factors when possible and reduce to lowest terms.","Examples: 2 1/9 x 1 2/3 = 19/9 x 5/3 = 95/27 = 3 14/27. Also, 2 3/7 x 3 1/2 = 17/7 x 7/2 = 17/2 = 8 1/2."]},
+      {"instruction":"Multiply. Show your solutions and express your answers in lowest terms.","start":16,"items":["2 1/2 x 4 2/5","2 1/2 x 3 4/5","2 1/5 x 3 1/4","3 4/5 x 4 1/2","3 1/3 x 2 9/10","4 4/5 x 2 7/10","4 4/5 x 2 1/3","2 2/5 x 2 1/2","4 1/3 x 3 1/2","3 1/4 x 2 5/9","3 5/8 x 4 1/2","5 4/5 x 2 2/3","5 1/2 x 4 1/2","2 4/7 x 3 8/9","6 1/2 x 3 2/5"]}
+    ]}
+  ],
+  "17": [
+    {"title":"Fraction Multiplication Practice","sections":[{"instruction":"Find the product. Express your answers in lowest terms.","start":1,"items":["1/2 x 1/9","3/11 x 5/13","5/13 x 3/7","5/7 x 9/11","3/10 x 4/9","2/3 x 9/14","5/8 x 10/25","6/18 x 3/4","3/4 x 4/9","3/5 x 1/18","3/7 x 4","18 x 2/9","20 x 4/5","5/12 x 30","6/8 x 14","2 4/9 x 4 1/8","3 1/5 x 3 1/4","5 2/9 x 4 7/8","3 1/4 x 3 6/7","3 5/6 x 6 1/2"]}]},
+    {"title":"Fraction Word Problems","sections":[{"instruction":"Analyze and answer the word problems. Show your solutions.","start":21,"items":[
+      "1/4 of 2 1/2 is what number?","What is the product of 2 2/3 and 3/4?","If you triple 2 4/5, what number will you get?",
+      "Harald has three buckets of fries. Each bucket contains 10 2/3 fries. How many fries does Harald have?",
+      "On Monday, a team of street sweepers cleaned 3/5 of a city block. On Tuesday, the team cleaned 2 2/3 times as many blocks as on Monday. How many city blocks did they clean on Tuesday?",
+      "Dawn has 3 1/2 cookies. Each costs 5. What is the cost of all the cookies?",
+      "Anna's height is 1 1/3 of Jenny's height. Jenny is 5 1/2 feet tall. What is Anna's height?",
+      "Gino's score is 2 1/8 of Jona's score. Jona scored 56 1/4. What is Gino's score?",
+      "Allan's weight is 3 1/2 times Nico's weight. Nico weighs 50 1/4 kg. What is Allan's weight?",
+      "Bambi's foot size is 1 1/2 of Dona's foot size. Dona's foot size is 5 1/2 inches. What is Bambi's foot size?"
+    ]}]}
+  ],
+  "18": [
+    {"title":"Multiplying Three Numbers","sections":[
+      {"paragraphs":["To multiply three or more fractions and mixed numbers, convert mixed numbers to improper fractions, cancel common factors when possible, then multiply.","Examples: 3/8 x 4/7 x 7/11 = 3/22. Also, 6 x 4 2/3 x 2 1/7 = 60."]},
+      {"instruction":"Multiply. Use cancellation if possible.","start":1,"items":["3/4 x 2/7 x 2/9","4/5 x 1/4 x 5/6","3/4 x 4/7 x 2/6","4/10 x 5/9 x 3/8","3/10 x 4/9 x 2/7","2/5 x 1/4 x 5/9","3/4 x 1/2 x 6/9","2/5 x 3/7 x 2/10","2/9 x 3/10 x 4/8","2/7 x 3/5 x 7/9","4/10 x 10/20 x 7/8"]}
+    ]},
+    {"title":"Multiplying Three Numbers","sections":[{"instruction":"Multiply. Use cancellation if possible.","start":12,"items":["5 x 3/5 x 3/10","6 x 4/6 x 5/8","7 x 6/7 x 3/8","8 x 3/4 x 2/15","9 x 1/6 x 8/10","3 1/4 x 1/6 x 3/5","2 1/7 x 5 3/5 x 4 2/10","3 3/4 x 1/3 x 2 2/3","1 1/2 x 2 1/3 x 3 1/4","5 1/2 x 3/8 x 1 2/9","8 x 1 1/8 x 2 2/3","9 x 2 3/5 x 1 5/9","4/5 x 2 2/5 x 10","3/8 x 3 3/4 x 8/9"]}]}
+  ],
+  "19": [
+    {"title":"Divide Fractions with Models","sections":[{"instruction":"Shade a model and solve each equation.","start":1,"items":[{"text":"1/2 / 1/4 = ____","grid":[4,2]},{"text":"5/6 / 1/2 = ____","grid":[2,6]},{"text":"3/4 / 4/5 = ____","grid":[5,4]},{"text":"5/8 / 2/3 = ____","grid":[3,8]}]}]},
+    {"title":"Divide Fractions with Models","sections":[{"instruction":"Shade a model and solve each equation.","start":5,"items":[{"text":"1/2 / 2/3 = ____","grid":[3,2]},{"text":"3/5 / 1/4 = ____","grid":[4,5]},{"text":"2/3 / 1/6 = ____","grid":[6,3]},{"text":"3/4 / 2/3 = ____","grid":[3,4]}]}]}
+  ],
+  "20": [
+    {"title":"Reciprocals","sections":[
+      {"paragraphs":["To get the reciprocal of a nonzero fraction, swap its numerator and denominator. For mixed numbers, first convert to an improper fraction.","Examples: 2/3 becomes 3/2; 1/3 becomes 3; 18/17 becomes 17/18; 6 becomes 1/6; 1 1/2 becomes 3/2, whose reciprocal is 2/3."]},
+      {"instruction":"Identify the reciprocal of each number.","start":1,"items":["4/5","7/6","4/3","10/12","2","3/5","2 2/8","1 2/3","6 7/11","3 1/3","1 2/9","3 3/6","1 3/4","6 2/5","1 9/10"]}
+    ]},
+    {"title":"Division of Fractions","sections":[
+      {"paragraphs":["Multiply the dividend by the reciprocal of the divisor. Reduce the answer to lowest terms.","Example: 3/4 / 2/5 = 3/4 x 5/2 = 15/8 = 1 7/8."]},
+      {"instruction":"Find the quotient. Show your solutions and reduce your answers to lowest terms.","start":16,"items":["4/5 / 1/2","2/7 / 1/3","3/8 / 1/4","6/7 / 1/5","4/5 / 5/6","2/9 / 2/7","1/2 / 5/8","1/5 / 1/9","2/5 / 3/10","7/9 / 2/11","9/10 / 5/12","1/4 / 2/13","2/3 / 3/4","2/9 / 4/15","5/14 / 5/9"]}
+    ]}
+  ],
+  "21": [
+    {"title":"Division of Fractions and Whole Numbers","sections":[
+      {"paragraphs":["To divide a fraction by a whole number, or a whole number by a fraction, multiply by the reciprocal of the divisor. Reduce to lowest terms.","Examples: 7/9 / 5 = 7/9 x 1/5 = 7/45. Also, 12 / 4/7 = 12 x 7/4 = 21."]},
+      {"instruction":"Find the quotient. Show your solutions and reduce your answers to lowest terms.","start":1,"items":["4/5 / 2","2/7 / 3","3/8 / 4","6/7 / 5","4/5 / 6","2/9 / 7","1/2 / 8","1/5 / 9","2/5 / 10","7/9 / 11","9/10 / 12","1/4 / 13"]}
+    ]},
+    {"title":"Division Practice","sections":[{"instruction":"Find the quotient. Show your solutions and reduce your answers to lowest terms.","start":13,"items":["2/3 / 14","2/9 / 15","5 / 5/9","4 / 2/7","7 / 4/7","1 / 2/9","4 / 1/2","9 / 5/6","5 / 1/2","2 / 1/3","3 / 1/4","6 / 1/5","5 / 5/6","9 / 2/7","1 / 5/8","5 / 1/9","2 / 3/10","7 / 2/11"]}]}
+  ],
+  "22": [
+    {"title":"Division of Mixed Numbers","sections":[
+      {"paragraphs":["Convert mixed numbers to improper fractions. Multiply the dividend by the reciprocal of the divisor and reduce to lowest terms.","Example: 5 4/5 / 2 1/3 = 29/5 / 7/3 = 29/5 x 3/7 = 87/35 = 2 17/35."]},
+      {"instruction":"Find the quotient. Show your solutions and reduce to lowest terms.","start":1,"items":["2 / 1/8","3 / 3/5","2 / 2/3","3 / 1/2","4 / 3/7","4 / 5/8","1/10 / 4","1/8 / 3","4/5 / 3","1/7 / 4","7/9 / 3","7/8 / 5"]}
+    ]},
+    {"title":"Division Practice","sections":[{"instruction":"Find the quotient. Show your solutions and reduce to lowest terms.","start":13,"items":["4 / 1/2","3 / 2/7","5 / 3/10","6 / 4/9","5 / 4/5","3 / 1/3","7 / 7/10","8 / 5/9","6 / 7/8","1/2 / 8","1/8 / 3","5/7 / 8","2/3 / 7","5/9 / 6","3/8 / 6","3/10 / 4","3/8 / 5","5/8 / 9"]}]}
+  ],
+  "23": [
+    {"title":"Find the Quotient","sections":[{"instruction":"Find the quotient.","start":1,"items":["2/7 / 1/2","5/9 / 1/3","3/8 / 2/5","2/5 / 8","3/7 / 10","3/11 / 12","4 / 1/7","2 / 5/9","7 / 2/3","2/3 / 5","3/5 / 5","3 / 2/7","4 / 5/6","2/3 / 4","9 / 5/8","1/10 / 4","3 / 1/8","2/5 / 8","10 / 1/7","7/9 / 8"]}]},
+    {"title":"Division Word Problems","sections":[{"instruction":"Analyze and answer the word problems. Show your solutions and reduce your answers to lowest terms.","start":21,"items":[
+      "Jessa has 2/3 of a cake left and wants to divide it equally among her 6 friends. What part will each friend receive?",
+      "Carla is baking cookies for her friends. A batch needs 3 pounds of chocolate chips. The average weight of a chocolate chip is 1/10 pound. How many chocolate chips are needed?",
+      "Marie's laundry weighs 1/5 kilo, and she pays the laundry shop PHP 25. How much is the laundry per kilo?",
+      "Each block is 1/4 foot high. If the total height of blocks stacked on top of each other is 9/10 foot, how many blocks are there?",
+      "You have 3/4 hour left for your exam and 8 unanswered questions. How many minutes should you allot for each question?",
+      "Lenny has already written 12 novels. If she writes 1/2 of a novel every month, how many months did she take to finish all 12?",
+      "Icko can memorize a poem in 8/9 minute. Steph can memorize it in 1/3 minute. How many times as fast is Steph at memorizing the poem?",
+      "A student spends PHP 40 to play computer games for 4/5 hour at an internet cafe. What is the probable hourly rate?",
+      "The total weight of the books is 10 kg. If each book weighs 5/8 kg, how many books are there?",
+      "How many small bottles will you need if each bottle holds 1/4 tablespoon of salt and you have 1/2 tablespoon of salt?"
+    ]}]}
+  ],
+  "24": [
+    {"title":"Dividing Three Numbers","sections":[
+      {"paragraphs":["For successive division, work from left to right. Convert mixed numbers to improper fractions, then multiply the first number by the reciprocal of each following divisor. Cancel common factors when possible.","Examples: 5/8 / 3/4 / 5/9 = 5/8 x 4/3 x 9/5 = 3/2 = 1 1/2. Also, 2 2/7 / 2 2/3 / 1 3/7 = 16/7 x 3/8 x 7/10 = 3/5."]},
+      {"instruction":"Divide. Use cancellation if possible.","start":1,"items":["4/5 / 8/15 / 2/3","1/3 / 4/5 / 10/21","1/5 / 3/4 / 8/15","1/2 / 5/6 / 10/11","5/6 / 1/10 / 2/3","1/6 / 3/8 / 4/7","11/12 / 1/9 / 11/14","1/15 / 3/5 / 3/7","2/3 / 3/14 / 9/10","3/4 / 2/3 / 1/9","1/2 / 2/5 / 3"]}
+    ]},
+    {"title":"Dividing Three Numbers","sections":[{"instruction":"Divide. Use cancellation if possible.","start":12,"items":["2 / 5/8 / 3","5/9 / 3 / 1/3","2/3 / 6 / 5","3/4 / 4 / 2/5","2/3 / 4/5 / 2/5","3 / 5/6 / 4","4 / 6/7 / 2/7","8 / 4/5 / 2","9 / 3/7 / 3/4","10 / 4/5 / 1/3","5/7 / 3/7 / 5","3/8 / 1/5 / 6","2/9 / 8 / 2/5","5/6 / 10 / 3/4"]}]}
+  ],
+  "25": [
+    {"title":"Polygon Names and Sides","sections":[{"instruction":"Complete the missing polygon name, number of sides or drawing.","start":1,"items":[
+      {"text":"Quadrilateral. Number of sides: ____","shape":[[15,80],[40,25],[95,25],[70,80]]},
+      {"text":"Hexagon. Number of sides: ____","shape":6},{"text":"Octagon. Number of sides: ____","shape":8},
+      {"text":"10 sides. Polygon name: ____","shape":10},{"text":"Heptagon. Number of sides: ____","shape":7},
+      "Nonagon, 9 sides. Draw the figure."
+    ]}]},
+    {"title":"Polygon Names and Sides","sections":[{"instruction":"Complete the missing polygon name, number of sides or drawing.","start":7,"items":[
+      {"text":"Pentagon. Number of sides: ____","shape":5},"Decagon, 10 sides. Draw the figure.",
+      {"text":"Hendecagon. Number of sides: ____","shape":11},{"text":"9 sides. Polygon name: ____","shape":9},
+      "Octagon, 8 sides. Draw the figure.",{"text":"Dodecagon. Number of sides: ____","shape":12}
+    ]}]},
+    {"title":"Polygon Names and Sides","sections":[{"instruction":"Complete the missing polygon name, number of sides or drawing.","start":13,"items":[
+      {"text":"6 sides. Polygon name: ____","shape":6},"Heptagon, 7 sides. Draw the figure.",
+      {"text":"Decagon. Number of sides: ____","shape":10},{"text":"Pentagon. Number of sides: ____","shape":5},
+      {"text":"8 sides. Polygon name: ____","shape":8},"Quadrilateral, 4 sides. Draw the figure."
+    ]}]}
+  ],
+  "26": [
+    {"title":"Regular and Irregular Polygons","sections":[
+      {"paragraphs":["A regular polygon has sides of equal length and equal angles. A square is one example.","An irregular polygon does not have all sides and all angles equal."]},
+      {"instruction":"Tell whether each figure is regular or irregular.","start":1,"items":[
+        {"text":"Figure 1","shape":3},{"text":"Figure 2","shape":[[5,40],[28,20],[70,20],[95,45],[75,60],[95,80],[5,80],[22,58]]},
+        {"text":"Figure 3","shape":5},{"text":"Figure 4","shape":[[10,30],[55,20],[65,45],[95,45],[95,80],[15,80]]},
+        {"text":"Figure 5","shape":[[5,80],[78,25],[95,80]]},{"text":"Figure 6","shape":[[5,50],[65,20],[95,50],[75,75],[30,75]]},
+        {"text":"Figure 7","shape":8},{"text":"Figure 8","shape":6},
+        {"text":"Figure 9","shape":[[30,20],[70,20],[95,85],[5,85]]},{"text":"Figure 10","shape":[[20,20],[75,20],[95,40],[80,65],[82,90],[20,90],[48,63],[5,55]]},
+        {"text":"Figure 11","shape":[[15,15],[15,90],[90,90]]},{"text":"Figure 12","shape":[[50,5],[60,35],[95,35],[68,55],[78,90],[50,70],[22,90],[32,55],[5,35],[40,35]]},
+        {"text":"Figure 13","shape":[[40,10],[95,40],[75,90],[15,90],[8,42]]},{"text":"Figure 14","shape":[[10,18],[50,10],[90,18],[90,82],[50,90],[10,82]]},
+        {"text":"Figure 15","shape":[[10,15],[50,50],[52,10],[95,10],[98,90],[8,88]]},{"text":"Figure 16","shape":[[15,10],[85,10],[85,30],[62,30],[62,95],[38,95],[38,30],[15,30]]},
+        {"text":"Figure 17","shape":[[10,10],[90,10],[90,60],[50,95],[10,60]]},{"text":"Figure 18","shape":[[5,15],[72,15],[95,85],[28,85]]},
+        {"text":"Figure 19","shape":7},{"text":"Figure 20","shape":[[25,25],[75,25],[98,50],[75,75],[25,75],[2,50]]}
+      ]}
+    ]},
+    {"title":"Regular or Irregular?","sections":[{"instruction":"Tell whether each figure is regular or irregular.","start":21,"items":[
+      {"text":"Figure 21","shape":[[30,10],[90,25],[5,90],[95,90]]},{"text":"Figure 22","shape":[[55,10],[90,10],[92,30],[40,95],[10,65]]},
+      {"text":"Figure 23","shape":5},{"text":"Figure 24","shape":3},
+      {"text":"Figure 25","shape":[[38,10],[90,35],[95,75],[50,95],[58,56],[5,42]]},{"text":"Figure 26","shape":[[5,25],[60,42],[82,5],[96,75],[63,62],[18,92]]},
+      {"text":"Figure 27","shape":6},{"text":"Figure 28","shape":[[5,20],[80,20],[98,50],[80,80],[5,80],[23,50]]},
+      {"text":"Figure 29","shape":4},{"text":"Figure 30","shape":8}
+    ]}]},
+    {"title":"Regular or Irregular?","sections":[{"instruction":"Tell whether each figure is regular or irregular.","start":31,"items":[
+      {"text":"Figure 31","shape":[[5,35],[55,10],[98,55],[30,95]]},{"text":"Figure 32","shape":[[30,10],[95,25],[78,90],[30,90],[5,55]]},
+      {"text":"Figure 33","shape":9},{"text":"Figure 34","shape":[[5,5],[48,32],[95,5],[72,55],[95,95],[52,70],[28,78],[34,50]]},
+      {"text":"Figure 35","shape":[[50,5],[95,42],[62,65],[92,95],[28,90],[40,65],[5,42]]},{"text":"Figure 36","shape":[[25,5],[98,90],[8,90]]},
+      {"text":"Figure 37","shape":8},{"text":"Figure 38","shape":[[5,5],[32,32],[52,5],[72,30],[98,5],[98,95],[72,70],[50,95],[28,70],[5,95]]},
+      {"text":"Figure 39","shape":[[25,5],[95,28],[95,90],[62,92],[58,72],[32,73],[15,47],[27,28],[5,20]]},{"text":"Figure 40","shape":3}
+    ]}]}
+  ],
+  "27": [
+    {"title":"12-Hour and 24-Hour Time","sections":[{"instruction":"Write each time in 24-hour format.","start":1,"items":["12:00 AM","1:00 AM","2:00 AM","3:00 AM","4:00 AM","5:00 AM","6:00 AM","7:00 AM","8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM","11:00 PM"]}]}
+  ],
+  "28": [
+    {"title":"Reading Clocks","sections":[{"instruction":"Read each clock and write the time in 24-hour format.","start":1,"items":[
+      {"text":"AM","clock":[12,15]},{"text":"AM","clock":[1,30]},{"text":"PM","clock":[2,0]},{"text":"PM","clock":[5,45]},
+      {"text":"AM","clock":[12,30]},{"text":"PM","clock":[6,0]},{"text":"PM","clock":[9,45]},{"text":"PM","clock":[8,15]}
+    ]}]},
+    {"title":"Reading Clocks","sections":[{"instruction":"Read each clock and write the time in 24-hour format.","start":9,"items":[
+      {"text":"PM","clock":[8,45]},{"text":"AM","clock":[6,15]},{"text":"AM","clock":[2,30]},{"text":"PM","clock":[4,45]},
+      {"text":"AM","clock":[12,15]},{"text":"PM","clock":[1,45]},{"text":"AM","clock":[8,0]},{"text":"PM","clock":[10,15]}
+    ]}]}
+  ],
+  "29": [
+    {"title":"Convert Between Time Formats","sections":[
+      {"instruction":"Convert to 24-hour format.","start":1,"items":["12:10 AM","7:45 PM","5:05 AM","4:45 PM","9:30 AM","2:15 AM","8:25 PM","1:55 PM","8:00 AM","10:15 PM","12:00 PM","3:40 AM"]},
+      {"instruction":"Convert to 12-hour format, including AM or PM.","start":13,"items":["1650","2235","1800","1545","1330","0000","2015","1755","2140","0615","0410","2355"]}
+    ]},
+    {"title":"Convert Between Time Formats","sections":[
+      {"instruction":"Convert to 24-hour format.","start":25,"items":["2:50 AM","7:35 PM","11:48 PM","7:00 AM","9:00 PM","10:15 PM","12:15 AM","8:45 AM","1:30 PM","4:15 PM","3:35 PM","5:00 AM"]},
+      {"instruction":"Convert to 12-hour format, including AM or PM.","start":37,"items":["0545","1950","1200","1715","0910","0010","1445","2230","1115","2325","1650","0335"]}
+    ]}
+  ],
+  "30": [
+    {"title":"Area of a Triangle","sections":[
+      {"paragraphs":["Area of a triangle = 1/2 x base x height. The height is perpendicular to the base.","Example: A triangle with base 4 cm and height 3 cm has area 1/2 x 4 x 3 = 6 square cm."]},
+      {"instruction":"Calculate the area of each triangle. Include the square units in your answers.","start":1,"items":["Base 6 feet; height 4 feet","Base 54 cm; height 45 cm","Base 72 feet; height 64 feet","Base 6 cm; height 2 cm","Base 12 in; height 6 in","Base 8 in; height 8 in","Base 19 in; height 4 in","Base 22 in; height 10 in","Base 31 in; height 24 in","Base 35 in; height 12 in","Base 22 in; height 6 in","Base 42 in; height 14 in"]}
+    ]},
+    {"title":"Area of a Triangle","sections":[{"instruction":"Calculate the area of each triangle. Include the square units in your answers.","start":13,"items":["Base 36 m; height 36 m","Base 60 m; height 24 m","Base 12 m; height 16 m","Base 80 m; height 10 m","Base 27 m; height 63 m","Base 32 feet; height 48 feet","Base 18 in; height 10 in","Base 40 in; height 36 in","Base 32 in; height 16 in","Base 17 in; height 5 in","Base 14 in; height 9 in","Base 35 in; height 21 in","Base 42 in; height 23 in","Base 53 in; height 33 in"]}]}
+  ],
+  "31": [
+    {"title":"Area of a Trapezoid","sections":[
+      {"paragraphs":["Area = (upper base + lower base) x height / 2. Add the two parallel bases, multiply by the perpendicular height, then divide by 2.","Example: Bases 5 cm and 8 cm, height 3 cm. Area = (5 + 8) x 3 / 2 = 19.5 square cm."]},
+      {"instruction":"Find the area of each trapezoid.","start":1,"items":["Upper base 14; lower base 16; height 8","Upper base 7; lower base 9; height 5","Upper base 24; lower base 63; height 35","Upper base 150; lower base 180; height 17","Upper base 120; lower base 135; height 55","Bases 8 cm and 16 cm; height 8 cm","Bases 25 cm and 43 cm; height 19 cm","Bases 49 m and 27 m; height 16 m","Bases 57 m and 38 m; height 58 m","Bases 44 feet and 57 feet; height 44 feet","Bases 150 cm and 330 cm; height 90 cm","Bases 80 cm and 160 cm; height 60 cm","Bases 84 m and 76 m; height 55 m","Bases 140 feet and 210 feet; height 90 feet","Bases 570 m and 283 m; height 38 m"]}
+    ]},
+    {"title":"Area of a Parallelogram","sections":[
+      {"paragraphs":["Area of a parallelogram = base x perpendicular height.","Example: Base 60 inches, height 40 inches. Area = 60 x 40 = 2,400 square inches."]},
+      {"instruction":"Find the area of each parallelogram.","start":16,"items":["Base 200 cm; height 120 cm","Base 20 cm; height 12 cm","Base 160 m; height 120 m","Base 150 m; height 10 m","Base 15 cm; height 9 cm","Base 115 cm; height 94 cm","Base 10 cm; height 15 cm","Base 16 m; height 20 m","Base 164 m; height 88 m","Base 16 m; height 8 m","Base 40; height 60","Base 65; height 34","Base 220; height 46","Base 289; height 92","Base 125; height 59"]}
+    ]}
+  ],
+  "32": [
+    {"title":"Volume of a Rectangular Prism","sections":[
+      {"paragraphs":["Volume = length x width x height. Make sure all measurements use the same unit before computing.","Example: Length 5 cm, width 3 cm, height 1 cm. Volume = 5 x 3 x 1 = 15 cubic cm."]},
+      {"instruction":"Identify the length, width and height, then find the volume.","items":[{"label":"1-4","text":"Length: ____; width: ____; height: ____; volume: ____","prism":["20 mm","5 mm","15 mm"]},{"label":"5-8","text":"Length: ____; width: ____; height: ____; volume: ____","prism":["40 cm","10 cm","30 cm"]},{"label":"9-12","text":"Length: ____; width: ____; height: ____; volume: ____","prism":["50 m","30 m","20 m"]}]},
+      {"instruction":"Find the volume. Dimensions are length, width and height, in that order.","start":13,"items":["4 cm, 3 cm, 1 cm","12 cm, 9 cm, 3 cm","8 m, 6 m, 2 m","40 mm, 30 mm, 10 mm","5 in, 3 in, 2 in","6 in, 3 in, 3 in","9 m, 6 m, 5 m","36 ft, 28 ft, 5 ft","80 cm, 15 cm, 1 cm","6 mm, 48 mm, 12 mm"]},
+      {"items":[{"label":"23 / 24","text":"Draw and label a rectangular prism with length 3 m, width 10 m and height 10 m. Find its volume in cubic meters."}]}
+    ]},
+    {"title":"Volume of a Cube","sections":[
+      {"paragraphs":["Volume of a cube = side x side x side = side cubed.","Example: A cube with side 2 cm has volume 2 x 2 x 2 = 8 cubic cm."]},
+      {"instruction":"Find the volume of the cube with the given side length.","start":25,"items":["10 mm","16 mm","9 mm","11 m","90 mm","15 mm","2 cm","18 mm","5 cm","100 mm","35 mm","3 m","6 ft","4 cm"]},
+      {"items":[{"label":"39 / 40","text":"Draw and label a cube with side length 7 cm. Find its volume in cubic centimeters."}]}
+    ]}
+  ],
+  "33": [
+    {"title":"Reading a Thermometer","sections":[{"instruction":"Read each thermometer. Write the temperature in degrees Celsius.","start":1,"items":[{"text":"Thermometer 1","figure":"thermometer-1.jpeg"},{"text":"Thermometer 2","figure":"thermometer-2.jpeg"},{"text":"Thermometer 3","figure":"thermometer-3.jpeg"},{"text":"Thermometer 4","figure":"thermometer-4.jpeg"},{"text":"Thermometer 5","figure":"thermometer-5.jpeg"},{"text":"Thermometer 6","figure":"thermometer-6.jpeg"},{"text":"Thermometer 7","figure":"thermometer-7.jpeg"},{"text":"Thermometer 8","figure":"thermometer-8.jpeg"}]}]},
+    {"title":"Reading a Thermometer","sections":[{"instruction":"Read each thermometer. Write the temperature in degrees Celsius.","start":9,"items":[{"text":"Thermometer 9","figure":"thermometer-9.jpeg"},{"text":"Thermometer 10","figure":"thermometer-10.jpeg"},{"text":"Thermometer 11","figure":"thermometer-11.jpeg"},{"text":"Thermometer 12","figure":"thermometer-12.jpeg"},{"text":"Thermometer 13","figure":"thermometer-13.jpeg"},{"text":"Thermometer 14","figure":"thermometer-14.jpeg"},{"text":"Thermometer 15","figure":"thermometer-15.jpeg"},{"text":"Thermometer 16","figure":"thermometer-16.jpeg"}]}]}
+  ],
+  "34": [
+    {"title":"Mark the Temperature","sections":[{"instruction":"Color each thermometer to show the given temperature.","start":1,"items":[{"text":"0 degrees Celsius","thermometer":true},{"text":"-10 degrees Celsius","thermometer":true},{"text":"10 degrees Celsius","thermometer":true},{"text":"35 degrees Celsius","thermometer":true},{"text":"20 degrees Celsius","thermometer":true},{"text":"15 degrees Celsius","thermometer":true},{"text":"5 degrees Celsius","thermometer":true},{"text":"-25 degrees Celsius","thermometer":true}]}]},
+    {"title":"Mark the Temperature","sections":[{"instruction":"Color each thermometer to show the given temperature.","start":9,"items":[{"text":"20 degrees Celsius","thermometer":true},{"text":"45 degrees Celsius","thermometer":true},{"text":"-30 degrees Celsius","thermometer":true},{"text":"-10 degrees Celsius","thermometer":true},{"text":"-25 degrees Celsius","thermometer":true},{"text":"50 degrees Celsius","thermometer":true},{"text":"25 degrees Celsius","thermometer":true},{"text":"5 degrees Celsius","thermometer":true}]}]}
+  ],
+  "35": [
+    {"title":"Digital Thermometers","sections":[{"instruction":"Write the temperature shown on each digital thermometer.","start":1,"items":[{"text":"Digital thermometer 1","digital":"37.2"},{"text":"Digital thermometer 2","digital":"12"},{"text":"Digital thermometer 3","digital":"52"},{"text":"Digital thermometer 4","digital":"-7"},{"text":"Digital thermometer 5","digital":"42.1"}]}]},
+    {"title":"Write the Temperature","sections":[{"instruction":"Write the indicated temperature on each thermometer display.","start":6,"items":["38 degrees Celsius","72.3 degrees Celsius","-20.1 degrees Celsius","-15.7 degrees Celsius","57.5 degrees Celsius"]}]}
+  ],
+  "6": [
+    {"title":"Order of Operations","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":1,"items":["(10 x 7) + 1","(8 x 2) + 9","3 x (9 x 2)","4 + (3 x 6)","(31 x 1) + 1","(36 / 6) / 1","(27 / 9) / 3","(110 / 10) / 1","(36 / 9) / 2","(12 / 4) / 1","(49 / 7) / 1","(48 / 8) / 1","(9 / 9) / 1","50 / (200 / 4)","(60 / 10) / 6","(16 / 4) / 2","(15 / 5) / 3","(10 / 5) x 10","1 x (1 / 1)","(7 x 5) / 1"]}]},
+    {"title":"Order of Operations","sections":[{"instruction":"Evaluate each expression. Show your solution and clearly identify your final answer.","start":21,"items":["10 + (8 x 1)","1 x (9 - 7)","7 + (6 + 1)","3 x (9 / 3)","(6 x 6) x 1","7 x (5 x 2)","(8 x 2) x 2","6 x (5 / 1)","(10 x 9) - 7","7 + (6 + 9)","7 + (7 + 9)","(1 - 1) + 1","6 + (8 x 3)","(3 x 3) + 9","1 x (4 - 2)","(2 x 3) + 10","(6 / 3) + 7","(5 x 5) + 7","(9 x 9) - 8","4 + (3 x 8)"]}]}
+  ]
+}

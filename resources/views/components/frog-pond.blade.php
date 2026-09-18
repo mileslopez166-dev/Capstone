@@ -3,9 +3,9 @@
 <div id="frog-pond-scene" class="frog-pond-scene" aria-hidden="true"></div>
 <div class="frog-pond-fallback" aria-hidden="true"></div>
 
-<section class="frog-interface" id="frog-flashcards-game" aria-label="Flashcards frog game">
+<section class="frog-interface" id="frog-flashcards-game" aria-label="Lily pad finish line game">
     <header class="frog-hud">
-        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">spa</span>Frog Pond</div>
+        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">sports_score</span>Lily Pad Race</div>
         <div class="frog-hud-stats">
             <span id="frog-level-text">Question 1/{{ $questionCount }}</span>
             <span class="frog-score-chip"><span class="material-symbols-outlined" aria-hidden="true">stars</span><strong id="frog-score">0</strong><span>correct</span></span>
@@ -21,27 +21,21 @@
         @foreach (['A', 'B', 'C', 'D'] as $index => $letter)
             <button type="button" class="frog-answer" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
                 <span class="frog-target-visual" aria-hidden="true">
-                    <svg class="frog-target-fallback" viewBox="0 0 160 112" fill="none">
-                        <g stroke="#48586c" stroke-width="3" stroke-linecap="round">
-                            <path d="m69 57-24 2-10 17m34-10-20 10-3 16m43-35 24 2 10 17m-34-10 20 10 3 16"/>
-                            <path d="m70 38-7-17m26 17 8-17"/>
+                    <svg class="frog-target-fallback" viewBox="0 0 160 144" fill="none">
+                        <ellipse cx="80" cy="119" rx="68" ry="25" fill="#226b71" opacity=".18"/>
+                        <path d="M80 112 131 95A65 27 0 1 0 141 121Z" transform="translate(0 5)" fill="#2f7945"/>
+                        <path d="M80 112 131 95A65 27 0 1 0 141 121Z" fill="#73bd59" stroke="#3a8d48" stroke-width="2"/>
+                        <path d="m80 112-55-8m55 8-33-23m33 23 9-25m-9 25-49 13m49-13-8 25m8-25 42 19" stroke="#b3d77b" stroke-width="1.5" stroke-linecap="round"/>
+                        <g fill="var(--target-color)" stroke="var(--target-deep)" stroke-width="1">
+                            <ellipse cx="44" cy="96" rx="7" ry="5"/>
+                            <ellipse cx="36" cy="102" rx="7" ry="5"/>
+                            <ellipse cx="52" cy="102" rx="7" ry="5"/>
+                            <ellipse cx="40" cy="109" rx="7" ry="5"/>
+                            <ellipse cx="48" cy="109" rx="7" ry="5"/>
                         </g>
-                        <g fill="#e9fbff" stroke="#9acbd8" stroke-width="2" class="frog-fallback-wings">
-                            <ellipse cx="46" cy="42" rx="32" ry="13" transform="rotate(24 46 42)"/>
-                            <ellipse cx="112" cy="42" rx="32" ry="13" transform="rotate(-24 112 42)"/>
-                        </g>
-                        <ellipse cx="79" cy="72" rx="18" ry="25" fill="var(--target-color)" stroke="var(--target-deep)" stroke-width="3"/>
-                        <path d="M63 70h32M64 81h29" stroke="var(--target-deep)" stroke-width="4"/>
-                        <ellipse cx="79" cy="44" rx="23" ry="21" fill="var(--target-color)" stroke="var(--target-deep)" stroke-width="3"/>
-                        <ellipse cx="70" cy="42" rx="8" ry="10" fill="white"/><ellipse cx="89" cy="42" rx="8" ry="10" fill="white"/>
-                        <circle cx="72" cy="44" r="4" fill="#26394a"/><circle cx="87" cy="44" r="4" fill="#26394a"/>
-                        <path class="frog-target-proboscis" d="m79 53 3 16" stroke="#48586c" stroke-width="3" stroke-linecap="round"/>
-                        <g class="frog-target-mouth">
-                            <ellipse cx="79" cy="72" rx="22" ry="25" fill="var(--target-color)"/>
-                            <ellipse cx="79" cy="72" rx="18" ry="21" fill="#442d43"/>
-                            <ellipse cx="79" cy="84" rx="10" ry="4" fill="#e991a5"/>
-                        </g>
+                        <circle cx="44" cy="103" r="5" fill="#fff3ba"/>
                     </svg>
+                    <span class="frog-pad-ripple"></span>
                 </span>
                 <span class="frog-answer-copy">
                     <span class="frog-answer-letter" data-frog-answer-circle>{{ $letter }}</span>
@@ -53,6 +47,18 @@
     </div>
 
     <div class="frog-stage" aria-hidden="true">
+        <div class="frog-course-trail"></div>
+        <div class="frog-finish-line" id="frog-finish-line">
+            <span class="frog-finish-banner">FINISH</span>
+            <span class="frog-finish-checks"></span>
+            <div class="frog-finish-pad" id="frog-finish-pad">
+                <svg class="frog-finish-fallback" viewBox="0 0 160 50" fill="none">
+                    <ellipse cx="80" cy="28" rx="76" ry="20" fill="#387e4f"/>
+                    <path d="m80 24 65-13C117-4 8 4 4 23c-5 25 130 33 150 9Z" fill="#81bf58" stroke="#508d49" stroke-width="2"/>
+                    <path d="m80 24-61-7m61 7-37 13m37-13 5-18m-5 18 55 10" stroke="#d0e493" stroke-width="2"/>
+                </svg>
+            </div>
+        </div>
         <div id="frog-character" class="frog-character-anchor">
             <svg class="frog-character-fallback" viewBox="0 0 260 230" fill="none">
                 <ellipse cx="130" cy="206" rx="114" ry="19" fill="#23886a" opacity=".25"/>
@@ -75,10 +81,13 @@
         </div>
     </div>
 
-    <div class="frog-mission-progress">
-        <span>Progress</span>
-        <div id="frog-progress-track" class="frog-progress-track" role="progressbar" aria-label="Assessment progress" aria-valuemin="0" aria-valuemax="{{ $questionCount }}" aria-valuenow="0"><div id="frog-progress-bar"></div></div>
-        <span id="frog-progress-count">0 / {{ $questionCount }}</span>
+    <div class="frog-course-footer">
+        <div class="frog-mission-progress">
+            <span>To Finish</span>
+            <div id="frog-progress-track" class="frog-progress-track" role="progressbar" aria-label="Correct answers toward the finish line" aria-valuemin="0" aria-valuemax="{{ $questionCount }}" aria-valuenow="0"><div id="frog-progress-bar"></div></div>
+            <span id="frog-progress-count">0 / {{ $questionCount }}</span>
+        </div>
+        <p class="frog-race-status" id="frog-race-status" role="status" aria-live="polite"></p>
     </div>
 </section>
-<div class="frog-tongue" id="frog-tongue" aria-hidden="true"></div>
+<svg id="frog-jump-sprite" class="frog-jump-sprite" viewBox="0 0 260 230" fill="none" aria-hidden="true"></svg>

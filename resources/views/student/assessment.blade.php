@@ -3,7 +3,12 @@
         $assetPath = $assessment->asset_path;
         $assetExtension = $assetPath ? strtolower(pathinfo($assetPath, PATHINFO_EXTENSION)) : null;
         $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
-        $student = Auth::user();
+        $student = $student ?? Auth::user();
+        $assisted = $assisted ?? false;
+        $assessmentBackUrl = $assisted ? route('assessments.show', $assessment) : route('student.activities', ['subject' => $assessment->subject]);
+        $assessmentBackLabel = $assisted ? 'Back to Assessment' : 'Back to Activities';
+        $attemptSubmitUrl = $assisted ? route('teacher.assessments.submit', [$assessment, $student]) : route('student.assessments.submit', $assessment);
+        $attemptProgressUrl = $assisted ? route('teacher.assessments.progress', [$assessment, $student]) : route('student.assessments.progress', $assessment);
         $studentName = $student?->name ?? 'Student';
         $studentInitials = collect(explode(' ', $studentName))->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
         $manualQuestions = collect($assessment->manual_questions ?? [])->values();
@@ -47,7 +52,7 @@
                         $sentenceWords = collect(preg_split('/(\s+)/u', $sentence, -1, PREG_SPLIT_DELIM_CAPTURE))
                             ->map(fn (string $part): string => trim($part) === ''
                                 ? e($part)
-                                : '<button class="story-word" type="button" data-mark="0">'.e($part).'</button>')
+                                : '<button class="story-word" type="button" data-mark="0" aria-pressed="false"'.(preg_match('/[\p{L}\p{N}]/u', $part) ? '' : ' disabled').'>'.e($part).'</button>')
                             ->implode('');
 
                         return '<span class="story-sentence" data-sentence-mark="0">'.$sentenceWords.'</span>';
@@ -145,32 +150,43 @@
         .story-paragraph:last-child { margin-bottom: 0; }
         .story-sentence { border-radius: 0.55rem; box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: pointer; padding: 0.08rem 0.12rem; transition: background-color 0.15s ease, box-shadow 0.15s ease; }
         .story-sentence:hover { background: rgba(0, 94, 159, 0.06); }
-        .story-sentence-mark-1 { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 0 1px rgba(202, 138, 4, 0.18); }
         .story-sentence-mark-2 { background: rgba(248, 113, 113, 0.2); box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.18); }
         .story-word { appearance: none; display: inline; cursor: pointer; border: 0; border-radius: 0.25rem; background: transparent; margin: 0; padding: 0.03rem 0.1rem; color: inherit; font: inherit; line-height: inherit; text-align: inherit; vertical-align: baseline; transition: background-color 0.15s ease, color 0.15s ease; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         .story-word:hover { background: rgba(0, 94, 159, 0.08); }
-        .story-word-mark-1 { background: rgba(250, 204, 21, 0.32); color: #854d0e; }
-        .story-word-mark-2 { background: rgba(248, 113, 113, 0.28); color: #991b1b; }
+        .story-word.story-word-mark-2 { background: rgba(248, 113, 113, 0.28); color: #991b1b; }
         .mark-mode-button { transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
         .mark-mode-button:hover { transform: translateY(-1px); }
         .mark-mode-button.is-active { background: #005e9f; color: #ffffff; box-shadow: 0 12px 24px rgba(0, 94, 159, 0.18); }
-        .mark-mode-button.mark-mode-yellow.is-active { background: #facc15; color: #713f12; box-shadow: 0 12px 24px rgba(202, 138, 4, 0.18); }
         .mark-mode-button.mark-mode-red.is-active { background: #ef4444; color: #ffffff; box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18); }
         .result-pattern { background-image: radial-gradient(circle at 10px 10px, rgba(68, 165, 255, 0.45) 1px, transparent 1px), radial-gradient(circle at 30px 30px, rgba(145, 247, 142, 0.45) 1px, transparent 1px); background-size: 40px 40px; background-position: 0 0, 20px 20px; opacity: 0.2; }
     </style>
 
-    <div class="student-assessment-page min-h-screen font-body text-on-surface">
-        <x-student-nav active="activities" />
+    <div class="student-assessment-page min-h-screen font-body text-on-surface" x-data="{ mobileMenuOpen: false }">
+        @if ($assisted)
+            @php
+                $teacherName = auth()->user()->name;
+                $teacherInitials = collect(explode(' ', $teacherName))->take(2)->map(fn ($part) => substr($part, 0, 1))->join('');
+            @endphp
+            <div class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full lg:translate-x-0" :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'">
+                <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="assessments" />
+            </div>
+            <button x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-label="Close menu"></button>
+            <div class="lg:ml-72"><x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials"><x-slot:mobileTrigger><button class="lg:hidden" @click="mobileMenuOpen = true" aria-label="Open menu"><span class="material-symbols-outlined">menu</span></button></x-slot:mobileTrigger></x-teacher-topbar></div>
+        @else
+            <x-student-nav active="activities" />
+        @endif
 
         <main class="assessment-workspace lg:ml-72" aria-labelledby="assessment-title">
+            @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
             <header class="assessment-heading">
-                <a class="assessment-back" href="{{ route('student.activities') }}" aria-label="Back to activities" title="Back to activities">
+                <a class="assessment-back" href="{{ $assessmentBackUrl }}" aria-label="{{ $assessmentBackLabel }}" title="{{ $assessmentBackLabel }}">
                     <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                 </a>
                 <div class="assessment-heading-copy">
                     <p>{{ $assessmentTypeLabel }}</p>
                     <h1 id="assessment-title">{{ $assessment->title }}</h1>
                 </div>
+                <x-assessment-text-settings />
                 <div class="assessment-attempt">
                     <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
@@ -303,17 +319,13 @@
                                 <div class="assessment-legend mt-4 flex flex-wrap items-center gap-3 p-3 text-sm font-bold text-on-surface-variant" aria-label="Oral reading marking legend">
                                     <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Legend</span>
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-red-400/70 ring-1 ring-red-500/30"></span>Mispronounced</span>
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm"><span class="h-4 w-4 rounded bg-yellow-300/80 ring-1 ring-yellow-500/30"></span>Getting Closer</span>
+                                    <span id="oral-mark-count" role="status" aria-live="polite">0 red-marked words</span>
                                 </div>
                                 <div class="assessment-mark-tools mt-3 flex flex-wrap items-center gap-2 p-3 text-sm font-bold text-on-surface-variant" aria-label="Oral reading mark mode">
                                     <span class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Mark Mode</span>
                                     <button class="mark-mode-button is-active inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="word" aria-pressed="true">
                                         <span class="material-symbols-outlined text-lg">touch_app</span>
                                         Word
-                                    </button>
-                                    <button class="mark-mode-button mark-mode-yellow inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="sentence-1" aria-pressed="false">
-                                        <span class="material-symbols-outlined text-lg">format_color_fill</span>
-                                        Sentence: Getting Closer
                                     </button>
                                     <button class="mark-mode-button mark-mode-red inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-2" type="button" data-mark-mode="sentence-2" aria-pressed="false">
                                         <span class="material-symbols-outlined text-lg">format_color_fill</span>
@@ -373,9 +385,10 @@
 
                 <div class="assessment-result-metrics">
                     <article class="assessment-result-metric">
-                        <p><span class="material-symbols-outlined" aria-hidden="true">target</span> Accuracy Score</p>
+                        <p><span class="material-symbols-outlined" aria-hidden="true">target</span> {{ $isOralReading ? 'Word Reading' : 'Accuracy Score' }}</p>
                         <div class="assessment-result-value"><strong id="result-accuracy">0</strong><span id="result-accuracy-unit">%</span></div>
                         <div class="assessment-result-track"><div id="result-progress" style="width: 0%"></div></div>
+                        @if ($isOralReading)<p>Provisional / awaiting teacher confirmation</p>@endif
                     </article>
                     <article class="assessment-result-metric assessment-metric-xp">
                         <p><span class="material-symbols-outlined" aria-hidden="true">stars</span> Experience Earned</p>
@@ -383,12 +396,15 @@
                         <p>Assessment points</p>
                     </article>
                     <article class="assessment-result-metric assessment-metric-correct">
-                        <p><span class="material-symbols-outlined" aria-hidden="true">task_alt</span> Correct Answers</p>
+                        <p><span class="material-symbols-outlined" aria-hidden="true">task_alt</span> {{ $isOralReading ? 'Red-marked Words' : 'Correct Answers' }}</p>
                         <div class="assessment-result-value"><strong id="result-correct">0/{{ $questionCount }}</strong></div>
                         <p>{{ $assessmentTypeLabel }}</p>
                     </article>
                 </div>
 
+                @if ($assessment->subject === 'literacy')
+                    <x-phil-iri-result :live="true" />
+                @endif
                 <div class="assessment-result-detail">
                     <section class="assessment-breakdown" aria-labelledby="breakdown-title">
                         <h3 id="breakdown-title">Performance Breakdown</h3>
@@ -399,15 +415,10 @@
                         </dl>
                         @if ($isOralReading)
                             <div class="assessment-pronunciation">
-                                <h4><span class="assessment-color-yellow"></span> Getting Closer</h4>
-                                <div class="flex flex-wrap gap-2" id="result-needs-improvement"><span>No yellow words marked.</span></div>
-                            </div>
-                            <div class="assessment-pronunciation">
                                 <h4><span class="assessment-color-red"></span> Mispronounced</h4>
                                 <div class="flex flex-wrap gap-2" id="result-wrong-pronunciation"><span>No red words marked.</span></div>
                             </div>
                         @else
-                            <div id="result-needs-improvement" hidden></div>
                             <div id="result-wrong-pronunciation" hidden></div>
                         @endif
                     </section>
@@ -419,7 +430,7 @@
                 </div>
 
                 <footer class="assessment-result-actions">
-                    <a class="assessment-primary-action" href="{{ route('student.activities') }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> Back to Activities</a>
+                    <a class="assessment-primary-action" href="{{ $assessmentBackUrl }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> {{ $assessmentBackLabel }}</a>
                     <button class="assessment-secondary-action" id="assessment-result-action" type="button">Retry Saving</button>
                 </footer>
             </section>
@@ -451,7 +462,6 @@
                     const resultCorrect = document.getElementById('result-correct');
                     const resultBadgeTitle = document.getElementById('result-badge-title');
                     const resultBadge = document.getElementById('result-badge');
-                    const resultNeedsImprovement = document.getElementById('result-needs-improvement');
                     const resultWrongPronunciation = document.getElementById('result-wrong-pronunciation');
                     const storyGate = document.getElementById('story-gate');
                     const storyReaderText = document.getElementById('story-reader-text');
@@ -469,11 +479,11 @@
                     const hookReelSound = document.getElementById('multiple-choice-hook-sound');
                     const frogWrongAnswerSound = document.getElementById('frog-wrong-answer-sound');
                     const frogCorrectAnswerSound = document.getElementById('frog-correct-answer-sound');
-                    const submitUrl = @json(route('student.assessments.submit', $assessment));
-                    const progressUrl = @json(route('student.assessments.progress', $assessment));
+                    const submitUrl = @json($attemptSubmitUrl);
+                    const progressUrl = @json($attemptProgressUrl);
                     const attemptKey = @json($progress->attempt_key ?? null);
                     const initialProgress = @json(['revision' => $progress->revision ?? 0, 'state' => $progress->state ?? []]);
-                    const storageKey = @json('assessment-progress:'.auth()->id().':'.$assessment->id.':'.($progress->attempt_key ?? 'preview'));
+                    const storageKey = @json('assessment-progress:'.$student->id.':'.$assessment->id.':'.($progress->attempt_key ?? 'preview'));
                     const saveStatus = document.getElementById('assessment-save-status');
                     const resultAction = document.getElementById('assessment-result-action');
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -489,9 +499,6 @@
                     const frogQuestionText = document.getElementById('frog-question-text');
                     const frogQuestionCard = document.getElementById('frog-question-card');
                     const frogAnswerButtons = Array.from(document.querySelectorAll('[data-frog-answer]'));
-                    const frogTongue = document.getElementById('frog-tongue');
-                    const frogCharacter = document.getElementById('frog-character');
-                    const frogOutcomeAnimations = [];
                     const questions = @json($gameQuestions->values());
                     const targetsNeeded = questions.length;
                     const capturedAnswers = {};
@@ -519,6 +526,7 @@
                     let submissionInFlight = false;
                     let progressRevision = Number(initialProgress.revision || 0);
                     let saveTimeout = null;
+                    let frogRoundEnding = false;
 
                     function progressSnapshot() {
                         if (readingTimer) updateReadingTimer();
@@ -589,6 +597,8 @@
                         timerStatus = state.timer_status === 'running' ? 'paused' : (state.timer_status || 'idle');
                         storyReaderText?.querySelectorAll('.story-sentence').forEach((sentence, index) => setSentenceMark(sentence, Number(state.sentence_marks?.[index] || 0)));
                         storyReaderText?.querySelectorAll('.story-word').forEach((word, index) => setWordMark(word, Number(state.word_marks?.[index] || 0)));
+                        storyReaderText?.querySelectorAll('.story-sentence').forEach(syncSentenceMark);
+                        updateOralMarkCount();
                         setOralMarkMode(state.mark_mode || 'word');
                         requestAnimationFrame(() => progressScrollers.forEach(scroller => {
                             scroller.scrollTop = Number(state.scroll_ratio || 0) * Math.max(0, scroller.scrollHeight - scroller.clientHeight);
@@ -812,19 +822,33 @@
                         });
                     });
                     function setWordMark(word, mark) {
+                        // Old yellow notes are not counted as mispronunciations.
+                        mark = mark === 2 && !word.disabled ? 2 : 0;
                         word.dataset.mark = String(mark);
-                        word.classList.remove('story-word-mark-1', 'story-word-mark-2');
-                        if (mark > 0) word.classList.add(`story-word-mark-${mark}`);
+                        word.classList.toggle('story-word-mark-2', mark === 2);
+                        word.setAttribute('aria-pressed', String(mark === 2));
+                    }
+
+                    function syncSentenceMark(sentence) {
+                        const words = Array.from(sentence.querySelectorAll('.story-word:not(:disabled)'));
+                        const marked = words.length > 0 && words.every(word => word.dataset.mark === '2');
+                        sentence.dataset.sentenceMark = marked ? '2' : '0';
+                        sentence.classList.toggle('story-sentence-mark-2', marked);
+                    }
+
+                    function updateOralMarkCount() {
+                        const count = storyReaderText?.querySelectorAll('.story-word[data-mark="2"]').length || 0;
+                        const counter = document.getElementById('oral-mark-count');
+                        if (counter) counter.textContent = `${count} red-marked ${count === 1 ? 'word' : 'words'}`;
                     }
 
                     function setSentenceMark(sentence, mark) {
-                        sentence.dataset.sentenceMark = String(mark);
-                        sentence.classList.remove('story-sentence-mark-1', 'story-sentence-mark-2');
-                        if (mark > 0) sentence.classList.add(`story-sentence-mark-${mark}`);
                         sentence.querySelectorAll('.story-word').forEach((word) => setWordMark(word, mark));
+                        syncSentenceMark(sentence);
                     }
 
                     function setOralMarkMode(mode) {
+                        mode = mode === 'sentence-2' ? mode : 'word';
                         oralMarkMode = mode;
                         markModeButtons.forEach((button) => {
                             const isActive = button.dataset.markMode === mode;
@@ -850,37 +874,38 @@
                         if (oralMarkMode.startsWith('sentence-')) {
                             if (!sentence) return;
                             event.preventDefault();
-                            const mark = Number(oralMarkMode.replace('sentence-', '')) || 2;
-                            const nextMark = Number(sentence.dataset.sentenceMark || '0') === mark ? 0 : mark;
+                            const nextMark = sentence.dataset.sentenceMark === '2' ? 0 : 2;
                             setSentenceMark(sentence, nextMark);
+                            updateOralMarkCount();
                             return;
                         }
 
                         if (!word) {
                             if (sentence) {
                                 event.preventDefault();
-                                const nextMark = (Number(sentence.dataset.sentenceMark || '0') + 1) % 3;
+                                const nextMark = sentence.dataset.sentenceMark === '2' ? 0 : 2;
                                 setSentenceMark(sentence, nextMark);
+                                updateOralMarkCount();
                             }
 
                             return;
                         }
 
                         event.preventDefault();
-                        const nextMark = (Number(word.dataset.mark || '0') + 1) % 3;
+                        const nextMark = word.dataset.mark === '2' ? 0 : 2;
                         setWordMark(word, nextMark);
+                        if (sentence) syncSentenceMark(sentence);
+                        updateOralMarkCount();
                     });
-                    function renderFlashcardQuestion() {
-                        if (!isFlashcards || isOralReading || !frogQuestionText || !questions[currentQuestionIndex]) return;
+                    function renderFlashcardQuestion(index = currentQuestionIndex) {
+                        if (!isFlashcards || isOralReading || !frogQuestionText || !questions[index]) return;
 
-                        const question = questions[currentQuestionIndex];
+                        const question = questions[index];
                         frogQuestionText.innerText = question.text;
-                        frogLevelText.innerText = `Question ${currentQuestionIndex + 1}/${targetsNeeded}`;
-                        frogOutcomeAnimations.splice(0).forEach((animation) => animation.cancel());
-                        frogTongue?.classList.remove('is-catching');
+                        frogLevelText.innerText = `Question ${index + 1}/${targetsNeeded}`;
                         delete canvas.dataset.frogOutcome;
-                        delete canvas.dataset.frogCatchStart;
-                        delete canvas.dataset.frogCatchDuration;
+                        delete canvas.dataset.frogJumpStart;
+                        delete canvas.dataset.frogJumpDuration;
                         delete frogQuestionCard.dataset.result;
                         document.getElementById('frog-feedback').textContent = '';
                         frogAnswerButtons.forEach((button) => {
@@ -889,7 +914,6 @@
                             const label = button.querySelector('[data-frog-answer-label]');
                             button.disabled = !option;
                             button.hidden = !option;
-                            button.classList.remove('is-caught', 'is-attacking');
                             delete button.dataset.result;
                             button.setAttribute('aria-label', `${letter}: ${option?.t || ''}`);
                             if (label) label.innerText = option?.t || '';
@@ -899,75 +923,53 @@
                     }
 
                     function updateFrogProgress(correct) {
-                        const progress = targetsNeeded > 0 ? (caughtCount / targetsNeeded) * 100 : 0;
+                        const progress = targetsNeeded > 0 ? (totalScore / targetsNeeded) * 100 : 0;
+                        canvas.dataset.frogCorrect = String(totalScore);
+                        canvas.dataset.frogAnswered = String(caughtCount);
+                        canvas.dataset.frogTotal = String(targetsNeeded);
                         if (frogScore) frogScore.innerText = String(totalScore);
                         if (frogProgressBar) frogProgressBar.style.width = `${Math.min(progress, 100)}%`;
-                        if (frogQuestionCard) frogQuestionCard.dataset.result = correct ? 'correct' : 'incorrect';
-                        document.getElementById('frog-progress-track')?.setAttribute('aria-valuenow', caughtCount);
+                        if (frogQuestionCard && typeof correct === 'boolean') frogQuestionCard.dataset.result = correct ? 'correct' : 'incorrect';
+                        document.getElementById('frog-progress-track')?.setAttribute('aria-valuenow', totalScore);
                         const count = document.getElementById('frog-progress-count');
-                        if (count) count.textContent = `${caughtCount} / ${targetsNeeded}`;
+                        if (count) count.textContent = `${totalScore} / ${targetsNeeded}`;
                     }
 
-                    function animateFrogCatch(button, correct, duration) {
-                        if (!frogTongue || !frogCharacter || !button) return;
-                        canvas.dataset.frogOutcome = correct ? 'correct' : 'incorrect';
-                        const startedAt = performance.now();
-                        canvas.dataset.frogCatchStart = String(startedAt);
-                        canvas.dataset.frogCatchDuration = String(duration);
-                        canvas.dispatchEvent(new CustomEvent('frog:catch', { detail: { letter: button.dataset.frogAnswer, correct, duration, startedAt } }));
-                        button.classList.add(correct ? 'is-caught' : 'is-attacking');
-                        if (correct && canvas.dataset.pondState === 'ready') return;
-
-                        const canvasBox = canvas.getBoundingClientRect();
-                        const frogBox = frogCharacter.getBoundingClientRect();
-                        const targetBox = button.querySelector('.frog-target-visual').getBoundingClientRect();
-                        if (!correct) {
-                            const graphic = button.querySelector('.frog-target-fallback');
-                            const body = frogCharacter.querySelector('.frog-character-body');
-                            const gulpMouth = button.querySelector('.frog-target-mouth');
-                            const scale = reducedMotion() ? 1.25 : 1.7;
-                            const attackX = frogBox.left + frogBox.width / 2 - (targetBox.left + targetBox.width / 2);
-                            const attackY = frogBox.top + frogBox.height * .24 - (targetBox.top + targetBox.height / 2);
-                            const destination = `translate(${attackX}px, ${attackY}px) scale(${scale})`;
-                            const bodyBox = body.getBoundingClientRect();
-                            const svgMatrix = frogCharacter.querySelector('svg').getScreenCTM();
-                            const swallowX = reducedMotion() ? 0 : (frogBox.left + frogBox.width / 2 - bodyBox.left - bodyBox.width / 2) / svgMatrix.a;
-                            const swallowY = reducedMotion() ? 0 : (frogBox.top + frogBox.height * .24 + targetBox.height * .143 * scale - bodyBox.top - bodyBox.height / 2) / svgMatrix.d;
-                            const swallowed = `translate(${swallowX}px, ${swallowY}px) scale(.001)`;
-                            frogOutcomeAnimations.push(
-                                graphic.animate([
-                                    { transform: reducedMotion() ? destination : 'translate(0, 0) scale(1)', offset: 0 },
-                                    { transform: destination, offset: .32 },
-                                    { transform: destination, offset: .7 },
-                                    { transform: 'translate(0, 0) scale(1)', offset: 1 },
-                                ], { duration, easing: reducedMotion() ? 'steps(1, end)' : 'ease-in-out', fill: 'forwards' }),
-                                body.animate([
-                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 0 },
-                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: .32 },
-                                    { transform: swallowed, opacity: 0, offset: .58 },
-                                    { transform: swallowed, opacity: 0, offset: .84 },
-                                    { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 1 },
-                                ], { duration, easing: 'linear', fill: 'forwards' }),
-                                gulpMouth.animate([
-                                    { opacity: 1, offset: 0 }, { opacity: 1, offset: .58 },
-                                    { opacity: 0, offset: .64 }, { opacity: 0, offset: 1 },
-                                ], { duration, fill: 'forwards' }),
-                            );
+                    function endFrogRound() {
+                        if (frogRoundEnding) return;
+                        frogRoundEnding = true;
+                        isProcessingCapture = true;
+                        frogAnswerButtons.forEach(button => button.disabled = true);
+                        canvas.classList.remove('assessment-reading');
+                        storyGate?.classList.add('hidden');
+                        updateFrogProgress();
+                        const status = document.getElementById('frog-race-status');
+                        if (targetsNeeded === 0 || totalScore !== targetsNeeded || caughtCount !== targetsNeeded) {
+                            status.textContent = `Round complete: ${totalScore} / ${targetsNeeded} correct.`;
+                            setTimeout(victory, 700);
                             return;
                         }
-                        const startX = frogBox.left + frogBox.width / 2 - canvasBox.left;
-                        const startY = frogBox.top + frogBox.height * .48 - canvasBox.top;
-                        const targetX = targetBox.left + targetBox.width / 2 - canvasBox.left;
-                        const targetY = targetBox.top + targetBox.height / 2 - canvasBox.top;
-                        const dx = targetX - startX;
-                        const dy = targetY - startY;
-                        frogTongue.style.setProperty('--tongue-left', `${startX}px`);
-                        frogTongue.style.setProperty('--tongue-top', `${startY}px`);
-                        frogTongue.style.setProperty('--tongue-width', `${Math.sqrt(dx * dx + dy * dy)}px`);
-                        frogTongue.style.setProperty('--tongue-angle', `${Math.atan2(dy, dx) * 180 / Math.PI}deg`);
-                        frogTongue.classList.remove('is-catching');
-                        void frogTongue.offsetWidth;
-                        frogTongue.classList.add('is-catching');
+
+                        const startedAt = performance.now();
+                        const duration = reducedMotion() ? 650 : 2200;
+                        canvas.dataset.frogFinishing = 'true';
+                        canvas.dataset.frogFinishStart = String(startedAt);
+                        canvas.dataset.frogFinishDuration = String(duration);
+                        frogLevelText.textContent = 'Perfect run';
+                        status.textContent = 'Heading for the finish line!';
+                        canvas.dispatchEvent(new CustomEvent('frog:finish-line', { detail: {
+                            startedAt, duration, correct: totalScore, answered: caughtCount, total: targetsNeeded,
+                        } }));
+                        document.getElementById('frog-finish-line').scrollIntoView({ block: 'center', behavior: 'auto' });
+                        setTimeout(victory, duration + 700);
+                    }
+
+                    function animateFrogJump(button, correct, duration) {
+                        canvas.dataset.frogOutcome = correct ? 'correct' : 'incorrect';
+                        const startedAt = performance.now();
+                        canvas.dataset.frogJumpStart = String(startedAt);
+                        canvas.dataset.frogJumpDuration = String(duration);
+                        canvas.dispatchEvent(new CustomEvent('frog:jump', { detail: { letter: button.dataset.frogAnswer, correct, duration, startedAt } }));
                     }
 
                     function answerFlashcard(letter, button) {
@@ -990,22 +992,22 @@
                         button.dataset.result = correct ? 'correct' : 'incorrect';
                         button.querySelector('.frog-answer-verdict').textContent = correct ? 'check_circle' : 'cancel';
                         document.getElementById('frog-feedback').textContent = correct
-                            ? 'Correct! The frog eats the mosquito.'
-                            : 'Not quite! The mosquito eats the frog. The frog will return for the next question.';
-                        const catchDuration = correct ? 850 : (reducedMotion() ? 650 : 2400);
-                        animateFrogCatch(button, correct, catchDuration);
+                            ? 'Correct! A safe landing on the lily pad.'
+                            : 'The frog and lily pad sank together. On to the next question.';
+                        const jumpDuration = reducedMotion() ? 650 : (correct ? 1600 : 2600);
+                        animateFrogJump(button, correct, jumpDuration);
                         updateFrogProgress(correct);
 
                         setTimeout(() => {
                             if (caughtCount >= targetsNeeded) {
-                                victory();
+                                endFrogRound();
                                 return;
                             }
 
                             currentQuestionIndex++;
                             isProcessingCapture = false;
                             renderFlashcardQuestion();
-                        }, catchDuration + 80);
+                        }, jumpDuration + 80);
                     }
 
                     function fireHook() {
@@ -1292,12 +1294,6 @@
 
                     function updatePronunciationResults() {
                         renderWordList(
-                            resultNeedsImprovement,
-                            uniqueMarkedWords('1'),
-                            'bg-tertiary-container/70 text-on-tertiary-container',
-                            'No yellow words marked.'
-                        );
-                        renderWordList(
                             resultWrongPronunciation,
                             uniqueMarkedWords('2'),
                             'bg-error-container/40 text-error',
@@ -1346,6 +1342,7 @@
                             }
 
                             const result = await response.json();
+                            document.dispatchEvent(new CustomEvent('assessment:graded', { detail: result }));
                             submissionSaved = true;
                             clearTimeout(saveTimeout);
                             try { localStorage.removeItem(storageKey); } catch (_) {}
@@ -1358,7 +1355,32 @@
                             resultPoints.innerText = result.points.toLocaleString();
                             resultCorrect.innerText = `${result.correct_count}/${result.question_count}`;
                             resultSummary.innerText = `${result.correct_count} of ${result.question_count} correct. You earned ${result.points.toLocaleString()} of ${result.possible_points.toLocaleString()} EXP.`;
-                            setResultBadge(accuracy);
+                            if (result.phil_iri) {
+                                resultBadgeTitle.innerText = 'Literacy Assessment';
+                                resultBadge.innerText = result.phil_iri.status === 'awaiting_teacher'
+                                    ? 'Your reading has been saved for teacher scoring.'
+                                    : 'Keep reading and building your skills.';
+                                if (result.question_count === 0) {
+                                    resultAccuracy.innerText = 'N/A';
+                                    resultAccuracyUnit.innerText = '';
+                                    resultCorrect.innerText = 'Not assessed';
+                                    resultSummary.innerText = 'Reading activity saved. Your teacher can complete the Phil-IRI scoring.';
+                                }
+                                if (isOralReading) {
+                                    const wordAccuracy = result.phil_iri.word_reading_percent;
+                                    resultAccuracy.innerText = wordAccuracy == null ? 'N/A' : wordAccuracy.toLocaleString();
+                                    resultAccuracyUnit.innerText = wordAccuracy == null ? '' : '%';
+                                    resultProgress.style.width = `${wordAccuracy ?? 0}%`;
+                                    resultCorrect.innerText = result.phil_iri.marked_miscues == null ? 'Not recorded' : result.phil_iri.marked_miscues.toLocaleString();
+                                    if (wordAccuracy != null) resultSummary.innerText = 'Word-reading score saved. Awaiting teacher confirmation.';
+                                }
+                            } else {
+                                setResultBadge(accuracy);
+                            }
+                            if (isFlashcards && !isOralReading && result.question_count > 0 && result.correct_count === result.question_count) {
+                                resultBadgeTitle.innerText = 'Finish Line Crossed!';
+                                resultBadge.innerText = 'A perfect run. Every answer was correct!';
+                            }
                         } catch (error) {
                             resultPoints.innerText = 'Sync failed';
                             resultAccuracy.innerText = '0';
@@ -1492,7 +1514,12 @@
                         if (!document.hidden && !submissionSaved) persistProgress();
                     }, 5000);
                     restoreProgress();
-                    if (missionFinished) victory();
+                    if (missionFinished) {
+                        if (isFlashcards && !isOralReading) {
+                            renderFlashcardQuestion(Math.max(0, targetsNeeded - 1));
+                            endFrogRound();
+                        } else victory();
+                    }
                     else {
                         if (isFlashcards) renderFlashcardQuestion();
                         if (missionStarted && !isOralReading) startMission();

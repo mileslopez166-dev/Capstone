@@ -129,9 +129,13 @@
                                                     <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
                                                     <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
                                                     <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
+                                                    @if ($submission->assessment?->subject === 'literacy')
+                                                        <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
+                                                    @endif
                                                 </div>
-                                                <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy }}%</span>
+                                                <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $submission->question_count > 0 ? $accuracy.'%' : 'Reading activity' }}</span>
                                             </div>
+                                            <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
                                         </div>
                                     @endforeach
                                 </div>

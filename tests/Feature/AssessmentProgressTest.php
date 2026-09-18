@@ -76,7 +76,7 @@ class AssessmentProgressTest extends TestCase
             $this->postJson(route('student.assessments.submit', $assessment), ['answers' => ['A', 'B']])
                 ->assertOk()->assertJsonPath('attempt_number', $attempt);
             if ($attempt < 3) {
-                $this->get(route('student.activities'))->assertOk()
+                $this->get(route('student.activities', ['subject' => $assessment->subject]))->assertOk()
                     ->assertViewHas('pendingAssessments', fn ($items) => $items->contains('id', $assessment->id))
                     ->assertViewHas('completedSubmissions', fn ($items) => $items->first()->remaining_retake_tries === 3 - $attempt);
                 $this->get(route('student.dashboard'))->assertViewHas('studentMetrics', fn ($metrics) => $metrics['pending_count'] === 1);
@@ -101,7 +101,7 @@ class AssessmentProgressTest extends TestCase
                 ->assertJsonPath('attempt_number', $attempt);
         }
 
-        $this->get(route('student.activities'))->assertOk()
+        $this->get(route('student.activities', ['subject' => $assessment->subject]))->assertOk()
             ->assertViewHas('pendingAssessments', fn ($items) => $items->contains('id', $assessment->id))
             ->assertViewHas('completedSubmissions', fn ($items) => $items->first()->remaining_retake_tries === PHP_INT_MAX);
         $this->assertDatabaseCount('assessment_submissions', 5);

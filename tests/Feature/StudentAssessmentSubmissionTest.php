@@ -243,7 +243,9 @@ class StudentAssessmentSubmissionTest extends TestCase
             ->assertSeeText('Teacher Check')
             ->assertSeeText('Legend')
             ->assertSeeText('Mispronounced')
-            ->assertSeeText('Getting Closer')
+            ->assertDontSeeText('Getting Closer')
+            ->assertDontSee('data-mark-mode="sentence-1"', false)
+            ->assertSee('id="oral-mark-count"', false)
             ->assertSeeText('Mark Mode')
             ->assertSeeText('Sentence: Mispronounced')
             ->assertSee('data-sentence-mark="0"', false)
@@ -253,7 +255,7 @@ class StudentAssessmentSubmissionTest extends TestCase
         $this->assertSame(2, substr_count($response->getContent(), 'data-sync-scroll="oral-story">'));
     }
 
-    public function test_flashcards_assessment_uses_the_frog_mosquito_game(): void
+    public function test_flashcards_assessment_uses_the_lily_pad_jumping_game(): void
     {
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create();
@@ -267,7 +269,7 @@ class StudentAssessmentSubmissionTest extends TestCase
             'assessment_type' => 'listening_comprehension',
             'target_section' => 'all',
             'focus_areas' => ['Reading Fluency'],
-            'instructions' => 'Catch the correct answer.',
+            'instructions' => 'Choose the correct lily pad.',
             'status' => 'published',
             'manual_questions' => [
                 [
@@ -285,6 +287,15 @@ class StudentAssessmentSubmissionTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('frog-flashcards-game')
+            ->assertSeeText('Lily Pad Race')
+            ->assertSeeText('FINISH')
+            ->assertSeeText('To Finish')
+            ->assertSee('id="frog-finish-pad"', false)
+            ->assertSee('frog:finish-line')
+            ->assertSee('frog-jump-sprite')
+            ->assertSee('frog:jump')
+            ->assertDontSee('mosquito')
+            ->assertDontSee('frog-tongue')
             ->assertSee('data-frog-answer="A"', false)
             ->assertSeeText('Which word means quick?')
             ->assertSeeText('Question 1/1');

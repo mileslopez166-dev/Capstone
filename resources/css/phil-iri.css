@@ -1,0 +1,46 @@
+.phil-page { padding: 32px; }
+.phil-content { max-width: 1100px; margin: 0 auto; }
+.phil-content > * + * { margin-top: 24px; }
+.phil-page h1 { font-size: 28px; font-weight: 800; }
+.phil-back, .phil-rubric a { display: inline-flex; align-items: center; gap: 8px; color: #17644f; font-weight: 600; margin-bottom: 12px; }
+.phil-result { --phil-accent: #476276; margin-block: 20px; padding-block: 20px; border-block: 1px solid #b4c8d2; min-width: 0; }
+.phil-result[data-level=Independent] { --phil-accent: #236443; }
+.phil-result[data-level=Instructional] { --phil-accent: #805b16; }
+.phil-result[data-level=Frustration] { --phil-accent: #973e52; }
+.phil-result-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.phil-eyebrow { font-size: 12px; color: #486273; font-weight: 600; }
+.phil-result h3 { margin-top: 4px; font-size: 17px; font-weight: 700; color: #243d4d; }
+.phil-level { color: var(--phil-accent); border-left: 4px solid var(--phil-accent); padding-left: 10px; font-size: 16px; overflow-wrap: anywhere; }
+.phil-measures { display: flex; gap: 20px 28px; flex-wrap: wrap; margin: 18px 0 10px; }
+.phil-measures > div { min-width: 0; }
+.phil-measures dt { font-size: 12px; color: #506571; }
+.phil-measures dd { font-size: 16px; font-weight: 700; color: #253d4b; overflow-wrap: anywhere; }
+.phil-measures small { font-size: 12px; color: #506571; }
+.phil-interpretation { margin-top: 16px; padding-block: 12px; border-top: 1px solid #c8d7df; }
+.phil-interpretation h4 { color: #243d4d; font-size: 13px; font-weight: 700; }
+.phil-interpretation p { max-width: 80ch; margin-top: 6px; color: #3e5664; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.phil-note { color: #526773; font-size: 12px; line-height: 1.7; margin-top: 10px; }
+.phil-scoring-form { border-top: 2px solid #8eb8a1; background: #e0ede5; padding: 24px; }
+.phil-scoring-form h2 { font-size: 20px; font-weight: 700; }
+.phil-scoring-form h3 { font-size: 16px; font-weight: 700; margin-top: 24px; }
+.phil-form-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 18px; margin-block: 18px; }
+.phil-form-fields label { display: grid; align-content: start; gap: 8px; min-width: 0; font-size: 13px; font-weight: 600; }
+.phil-form-fields input { width: 100%; min-width: 0; min-height: 44px; }
+.phil-scoring-form button { margin-top: 20px; }
+.phil-rubric, .phil-passage { border-block: 1px solid #b4c8d2; padding-block: 16px; font-size: 13px; }
+.phil-rubric summary, .phil-passage summary { min-height: 44px; cursor: pointer; font-weight: 700; }
+.phil-rubric summary .material-symbols-outlined { vertical-align: middle; margin-right: 8px; }
+.phil-rubric-scroll { overflow-x: auto; margin-block: 12px; }
+.phil-rubric table { width: 100%; border-collapse: collapse; min-width: 460px; text-align: left; }
+.phil-rubric :is(td, th) { padding: 12px; border-bottom: 1px solid #b4c8d2; }
+.phil-rubric p { line-height: 1.7; margin: 12px 0; }
+.phil-passage p { white-space: pre-wrap; line-height: 1.9; margin-top: 12px; }
+.phil-notice { padding: 14px; border: 1px solid #8fbda2; background: #e2f2e8; color: #245d3e; }
+.phil-errors { padding: 14px; border: 1px solid #cc8e9d; background: #f9e7eb; color: #823a4a; }
+.phil-result[hidden], .phil-result [hidden] { display: none !important; }
+@media (max-width: 767px) {
+    .phil-page { padding: 18px 12px 90px; }
+    .phil-page h1 { font-size: 24px; }
+    .phil-scoring-form { padding: 18px; }
+    .phil-measures { gap: 16px; }
+}

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { frogJumpFrame, frogFinishFrame, isPerfectFrogRun } from './frog-jump';
 
 export function initFrogPond(host) {
     const root = host.closest('.frog-pond-game');
@@ -101,7 +102,6 @@ export function initFrogPond(host) {
     const smile = curve(character, [[-.51, .24, .806], [-.25, .13, .88], [0, .1, .91], [.25, .13, .88], [.51, .24, .806]], .027, '#376c35');
     const mouth = ellipsoid(character, '#472c40', [0, .22, .91], [.31, .18, .035]);
     mouth.visible = false;
-    const mouthPoint = new THREE.Vector3(0, .22, .96);
 
     const lily = new THREE.Group();
     scene.add(lily);
@@ -122,6 +122,9 @@ export function initFrogPond(host) {
     const frogShadow = mesh(scene, circle, '#1e776f', [0, 0, -10], [1, 1, 1], { transparent: true, opacity: .18, depthWrite: false });
 
     const water = mesh(scene, plane, '#63c1ce', [0, 0, -150], [1, 1, 1], { roughness: .25, metalness: .12 });
+    const sinkMask = new THREE.Mesh(plane, water.material);
+    sinkMask.visible = false;
+    scene.add(sinkMask);
     const farBank = ellipsoid(scene, '#a6d3a0', [0, 0, -170], [1, 1, 1]);
     const ripples = Array.from({ length: 5 }, (_, index) => mesh(scene, ring, '#ddfff2', [0, 0, -80], [1, 1, 1], { transparent: true, opacity: .26, depthWrite: false }));
     const plants = [];
@@ -156,64 +159,57 @@ export function initFrogPond(host) {
         flowers.push(flower);
     }
 
-    const wingMaterial = material('#edfaff', { transparent: true, opacity: .8, roughness: .18, metalness: .08, depthWrite: false });
     const targets = [...root.querySelectorAll('[data-frog-answer]')].map((button, index) => {
         const object = new THREE.Group();
         scene.add(object);
-        const color = ['#ed8b7d', '#efc056', '#78b6e5', '#b7a0df'][index];
-        const abdomen = ellipsoid(object, color, [0, -.2, 0], [.25, .39, .2]);
-        for (let stripe = 0; stripe < 3; stripe++) ellipsoid(object, '#50606a', [0, -.16 - stripe * .14, .15], [.235 - stripe * .025, .022, .065]);
-        ellipsoid(object, color, [0, .23, .07], [.29, .27, .24]);
-        const wings = [];
-        for (const side of [-1, 1]) {
-            const pivot = new THREE.Group();
-            pivot.position.set(side * .14, .12, -.06);
-            object.add(pivot);
-            const wing = new THREE.Mesh(sphere, wingMaterial);
-            wing.position.set(side * .39, .12, 0);
-            wing.scale.set(.54, .19, .045);
-            wing.rotation.z = side * .42;
-            pivot.add(wing);
-            const vein = segment(pivot, [0, 0, .04], [side * .8, .3, .04], .008, '#b1d8df');
-            vein.material = wingMaterial;
-            wings.push({ pivot, side });
-            ellipsoid(object, '#fffbed', [side * .12, .25, .26], [.105, .13, .06]);
-            ellipsoid(object, '#2c3748', [side * .1, .24, .315], [.047, .065, .025], { roughness: .12 });
-            curve(object, [[side * .12, .43, .06], [side * .22, .66, .05], [side * .28, .65, .05]], .015, '#576174');
-            for (let leg = 0; leg < 3; leg++) {
-                const y = -.03 - leg * .16;
-                curve(object, [[side * .18, y, 0], [side * (.45 + leg * .03), y - .07, .03], [side * (.58 + leg * .03), y - .25, .1]], .012, '#4b586a');
-            }
+        const leaf = mesh(object, leafGeometry, ['#63b950', '#82b752', '#49aa77', '#69ae56'][index], [0, 0, 0], [1, 1, 1]);
+        leaf.rotation.z = -.36;
+        for (let vein = 0; vein < 8; vein++) {
+            const angle = .5 + vein * .7;
+            segment(object, [0, 0, .09], [Math.cos(angle) * .88, Math.sin(angle) * .88, .09], .009, '#b1d778');
         }
-        const proboscis = segment(object, [0, .12, .3], [.02, -.11, .45], .022, '#5c6070');
-        const gulpMouth = new THREE.Group();
-        gulpMouth.position.set(0, -.055, .38);
-        object.add(gulpMouth);
-        ellipsoid(gulpMouth, color, [0, 0, 0], [.3, .31, .075]);
-        ellipsoid(gulpMouth, '#442d43', [0, 0, .055], [.25, .26, .06]);
-        ellipsoid(gulpMouth, '#e991a5', [0, -.16, .11], [.135, .055, .025]);
-        gulpMouth.visible = false;
-        const target = { button, object, wings, abdomen, proboscis, gulpMouth, base: new THREE.Vector3(), scale: 1, hover: false, index };
+        const color = ['#ed8b7d', '#efc056', '#78b6e5', '#b7a0df'][index];
+        for (let petal = 0; petal < 5; petal++) {
+            const angle = petal * Math.PI * 2 / 5;
+            ellipsoid(object, color, [-.48 + Math.cos(angle) * .13, .23 + Math.sin(angle) * .16, .18], [.16, .16, .08]);
+        }
+        ellipsoid(object, '#fff1a1', [-.48, .23, .28], [.1, .12, .09]);
+        const shadow = mesh(scene, circle, '#286e6c', [0, 0, 0], [1, 1, 1], { transparent: true, opacity: .18, depthWrite: false });
+        const ripple = mesh(scene, ring, '#effff7', [0, 0, 0], [1, 1, 1], { transparent: true, opacity: .6, depthWrite: false });
+        ripple.visible = false;
+        const target = { button, object, shadow, ripple, base: new THREE.Vector3(), width: 1, height: 1, landingScale: 1, hover: false, index };
         button.addEventListener('pointerenter', () => { target.hover = true; });
         button.addEventListener('pointerleave', () => { target.hover = false; });
         button.addEventListener('focus', () => { target.hover = true; });
         button.addEventListener('blur', () => { target.hover = false; });
         return target;
     });
-
-    const tongue = mesh(scene, cylinder, '#ed7293', [0, 0, 0], [1, 1, 1], { roughness: .3 });
-    const tongueTip = ellipsoid(scene, '#f398ac', [0, 0, 0], [1, 1, 1]);
-    tongue.visible = tongueTip.visible = false;
+    const splash = new THREE.Group();
+    scene.add(splash);
+    const drops = Array.from({ length: 8 }, () => ellipsoid(splash, '#c2f5f4', [0, 0, 0], [3, 6, 3], { roughness: .15 }));
+    splash.visible = false;
+    const finishGate = new THREE.Group();
+    scene.add(finishGate);
+    const boxGeometry = geometry(new THREE.BoxGeometry(1, 1, 1));
+    const finishPosts = [-1, 1].map(side => ({ side, object: mesh(finishGate, boxGeometry, '#fff4d7', [0, 0, 0], [1, 1, 1]) }));
+    const finishChecks = Array.from({ length: 16 }, (_, index) => mesh(finishGate, plane, (index + Math.floor(index / 8)) % 2 ? '#fffbe9' : '#254d49', [0, 0, 0], [1, 1, 1]));
+    const finishPad = new THREE.Group();
+    scene.add(finishPad);
+    mesh(finishPad, leafGeometry, '#81b959', [0, 0, 0], [1, 1, 1]).rotation.z = -.36;
+    for (let vein = 0; vein < 8; vein++) {
+        const angle = .5 + vein * .7;
+        segment(finishPad, [0, 0, .09], [Math.cos(angle) * .88, Math.sin(angle) * .88, .09], .009, '#d0e493');
+    }
     const motionQuery = { get matches() { return window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches; } };
     const gaze = new THREE.Vector2();
-    const mouthWorld = new THREE.Vector3();
-    const tip = new THREE.Vector3();
-    const direction = new THREE.Vector3();
-    const attackPosition = new THREE.Vector3();
-    const swallowPosition = new THREE.Vector3();
+    const homePosition = new THREE.Vector3();
+    const landingPosition = new THREE.Vector3();
+    const finishPosition = new THREE.Vector3();
     let dimensions = { width: 0, height: 0 };
     let frogScale = 1;
-    let catchAnimation = null;
+    let jumpAnimation = null;
+    let finishAnimation = null;
+    let finishScale = 1;
     let finished = root.dataset.assessmentFinished === 'true';
     let disposed = false;
     let contextLost = false;
@@ -235,15 +231,32 @@ export function initFrogPond(host) {
 
         const anchor = root.querySelector('#frog-character').getBoundingClientRect();
         frogScale = Math.min(anchor.width / 3.6, anchor.height / 3.45);
-        frog.position.set(anchor.left + anchor.width / 2 - box.left - width / 2, height / 2 - (anchor.top + anchor.height * .46 - box.top), 45);
+        homePosition.set(anchor.left + anchor.width / 2 - box.left - width / 2, height / 2 - (anchor.top + anchor.height * .46 - box.top), 45);
+        frog.position.copy(homePosition);
         frog.scale.setScalar(frogScale);
         lily.position.set(frog.position.x, frog.position.y - frogScale * 1.16, 15);
         lily.scale.set(frogScale * 1.9, frogScale * .48, frogScale * .5);
         frogShadow.position.set(lily.position.x + 7, lily.position.y - 8, -5);
         frogShadow.scale.set(frogScale * 1.92, frogScale * .52, 1);
 
-        const stage = root.querySelector('.frog-stage').getBoundingClientRect();
-        const waterTop = stage.top - box.top + 28;
+        const gateBox = root.querySelector('#frog-finish-line').getBoundingClientRect();
+        finishGate.position.set(gateBox.left + gateBox.width / 2 - box.left - width / 2, height / 2 - (gateBox.bottom - box.top), 30);
+        finishPosts.forEach(({ side, object }) => {
+            object.position.set(side * (gateBox.width / 2 - 2), (gateBox.height - 16) / 2, 0);
+            object.scale.set(4, gateBox.height - 16, 8);
+        });
+        finishChecks.forEach((object, index) => {
+            object.position.set(-gateBox.width / 2 + (index % 8 + .5) * gateBox.width / 8, gateBox.height - 30 - Math.floor(index / 8) * 10, 8);
+            object.scale.set(gateBox.width / 8, 10, 1);
+        });
+        const finishBox = root.querySelector('#frog-finish-pad').getBoundingClientRect();
+        finishPad.position.set(finishBox.left + finishBox.width / 2 - box.left - width / 2, height / 2 - (finishBox.top + finishBox.height / 2 - box.top), 25);
+        finishPad.scale.set(finishBox.width * .49, finishBox.height * .48, 15);
+        finishScale = Math.min(frogScale, finishBox.width / 3.6);
+        finishPosition.copy(finishPad.position).add(new THREE.Vector3(0, finishScale * 1.16, 95));
+
+        const answerZone = root.querySelector('.frog-answer-zone').getBoundingClientRect();
+        const waterTop = answerZone.top - box.top - 14;
         const waterHeight = height - waterTop;
         water.position.y = -waterTop / 2;
         water.scale.set(width, waterHeight, 1);
@@ -261,8 +274,10 @@ export function initFrogPond(host) {
         });
         targets.forEach((target) => {
             const rect = target.button.querySelector('.frog-target-visual').getBoundingClientRect();
-            target.base.set(rect.left + rect.width / 2 - box.left - width / 2, height / 2 - (rect.top + rect.height / 2 - box.top), 60);
-            target.scale = Math.min(rect.width / 2, rect.height / 1.7);
+            target.base.set(rect.left + rect.width / 2 - box.left - width / 2, height / 2 - (rect.top + rect.height * .80 - box.top), 25);
+            target.width = rect.width * .46;
+            target.height = rect.height * .17;
+            target.landingScale = Math.min(frogScale, rect.width / 4, rect.height / 3.6);
         });
         render(performance.now(), true);
     }
@@ -283,17 +298,28 @@ export function initFrogPond(host) {
             pupil.position.x = (index === 0 ? .035 : -.035) + gaze.x * .028;
             pupil.position.y = -.015 + gaze.y * .025;
         });
+        frog.position.copy(homePosition);
+        frog.scale.setScalar(frogScale);
+        character.position.set(0, 0, 0);
+        character.rotation.z = 0;
+        mouth.visible = false;
+        smile.visible = true;
+        splash.visible = false;
+        sinkMask.visible = false;
+        character.visible = true;
+        frogShadow.position.set(lily.position.x + 7, lily.position.y - 8, -5);
+        frogShadow.scale.set(frogScale * 1.92, frogScale * .52, 1);
         targets.forEach((target) => {
-            if (catchAnimation?.target === target) return;
-            target.gulpMouth.visible = false;
-            target.proboscis.visible = true;
-            target.abdomen.scale.set(.25, .39, .2);
-            const bob = reduced ? 0 : Math.sin(time * 2.5 + target.index * 1.6) * 4;
-            target.object.position.copy(target.base).add(new THREE.Vector3(0, bob, 0));
-            target.object.rotation.z = reduced ? 0 : Math.sin(time * 1.6 + target.index) * .055;
-            target.object.scale.setScalar(target.scale * (target.hover && !target.button.disabled ? 1.08 : 1));
-            target.object.visible = !target.button.hidden;
-            target.wings.forEach(({ pivot, side }) => { pivot.rotation.y = reduced ? 0 : side * Math.sin(time * 48) * .52; });
+            const bob = reduced ? 0 : Math.sin(time * 1.8 + target.index * 1.6) * 1.5;
+            const hover = target.hover && !target.button.disabled ? 1.035 : 1;
+            target.object.position.copy(target.base);
+            target.object.position.y += bob;
+            target.object.rotation.z = reduced ? 0 : Math.sin(time * .9 + target.index) * .018;
+            target.object.scale.set(target.width * hover, target.height * hover, target.width * .3);
+            target.object.visible = target.shadow.visible = !target.button.hidden;
+            target.shadow.position.copy(target.base).add(new THREE.Vector3(4, -5, -12));
+            target.shadow.scale.set(target.width * 1.04, target.height * 1.1, 1);
+            target.ripple.visible = false;
         });
         ripples.forEach((ripple, index) => {
             const wave = reduced ? .5 : (time * .14 + index * .23) % 1;
@@ -302,89 +328,94 @@ export function initFrogPond(host) {
             ripple.position.set(lily.position.x, lily.position.y - 6 - index * 4, -65);
         });
 
-        if (catchAnimation && !catchAnimation.correct) {
-            const { target, origin, duration, start } = catchAnimation;
-            const progress = Math.min((now - start) / duration, 1);
-            const smooth = (value) => { const t = THREE.MathUtils.clamp(value, 0, 1); return t * t * (3 - 2 * t); };
-            const approach = reduced ? 1 : smooth(progress / .32);
-            const swallow = smooth((progress - .32) / .26);
-            const retreat = reduced ? (progress >= .84 ? 1 : 0) : smooth((progress - .7) / .3);
-            const reappear = smooth((progress - .84) / .16);
-            attackPosition.copy(frog.position).add(new THREE.Vector3(0, frogScale * .9, 115));
-            target.object.position.copy(origin).lerp(attackPosition, approach).lerp(target.base, retreat);
-            if (!reduced) target.object.position.y += Math.sin(approach * Math.PI) * 45 * (1 - retreat);
-            const enlarged = 1 + (reduced ? .25 : .7) * approach * (1 - retreat);
-            target.object.scale.setScalar(target.scale * enlarged);
-            target.object.rotation.z = reduced ? 0 : Math.sin(progress * Math.PI * 5) * .1 * (1 - retreat);
-            target.object.visible = !target.button.hidden;
-            target.wings.forEach(({ pivot, side }) => { pivot.rotation.y = reduced ? 0 : side * Math.sin(time * 65) * .7; });
-            target.gulpMouth.visible = progress < .64;
-            target.proboscis.visible = !target.gulpMouth.visible;
-            const belly = Math.sin(swallow * Math.PI / 2) * (1 - retreat);
-            target.abdomen.scale.set(.25 * (1 + belly * .45), .39 * (1 + belly * .2), .2);
-
-            // Pull the shrinking character into the mouth, keeping the lily pad in place.
-            target.gulpMouth.getWorldPosition(swallowPosition);
-            frog.worldToLocal(swallowPosition);
-            character.position.copy(swallowPosition).multiplyScalar(reduced ? 0 : swallow * (1 - reappear));
-            character.scale.setScalar(progress < .84 ? Math.max(.001, 1 - swallow) : reappear);
-            character.rotation.z = reduced ? 0 : Math.sin(swallow * Math.PI) * .15;
-            character.visible = progress < .58 || progress > .84;
-            if (progress > .84) character.position.set(0, 0, 0);
-            eyes.forEach((eye) => { eye.scale.y = 1; });
-            tongue.visible = tongueTip.visible = false;
-            mouth.visible = progress < .58;
-            smile.visible = !mouth.visible;
-        } else if (catchAnimation) {
-            const progress = Math.min((now - catchAnimation.start) / catchAnimation.duration, 1);
-            const { target, origin } = catchAnimation;
-            character.updateWorldMatrix(true, true);
-            mouthWorld.copy(mouthPoint);
-            character.localToWorld(mouthWorld);
-            const reach = progress < .32 ? Math.sin(progress / .32 * Math.PI / 2) : progress < .42 ? 1 : Math.max(0, 1 - (progress - .42) / .43);
-            tip.copy(mouthWorld).lerp(origin, reach);
-            direction.copy(tip).sub(mouthWorld);
-            tongue.position.copy(mouthWorld).add(tip).multiplyScalar(.5);
-            tongue.scale.set(frogScale * .045, Math.max(.01, direction.length()), frogScale * .045);
-            tongue.quaternion.setFromUnitVectors(up, direction.normalize());
-            tongueTip.position.copy(tip);
-            tongueTip.scale.setScalar(frogScale * .066);
-            tongue.visible = tongueTip.visible = progress < .86;
-            target.object.position.copy(progress > .42 ? tip : origin);
-            target.object.scale.setScalar(target.scale * (progress > .42 ? Math.max(.02, reach) : 1));
-            target.object.rotation.z = Math.sin(progress * Math.PI * 4) * .12;
-            target.object.visible = progress < .86;
-            target.wings.forEach(({ pivot, side }) => { pivot.rotation.y = side * Math.sin(time * 65) * .65; });
-            mouth.visible = progress < .9;
-            smile.visible = !mouth.visible;
-            character.scale.y += Math.sin(progress * Math.PI) * .06;
-            if (progress === 1) {
-                tongue.visible = tongueTip.visible = mouth.visible = false;
-                smile.visible = true;
+        if (jumpAnimation) {
+            const { target, duration, start, correct } = jumpAnimation;
+            const progress = Math.max(0, Math.min((now - start) / duration, 1));
+            const pose = frogJumpFrame(progress, correct, reduced);
+            landingPosition.copy(target.base).add(new THREE.Vector3(0, target.landingScale * 1.16, 95));
+            const arc = Math.min(90, homePosition.distanceTo(landingPosition) * .18 + 25);
+            frog.position.copy(homePosition).lerp(landingPosition, pose.travel);
+            const depth = pose.dip + pose.sink * target.height * 6.2;
+            frog.position.y += pose.lift * arc - depth;
+            frog.position.z = 120;
+            const size = THREE.MathUtils.lerp(frogScale, target.landingScale, pose.travel);
+            frog.scale.setScalar(size);
+            character.scale.set(1 / pose.squash, pose.squash + pose.lift * .08, 1);
+            character.rotation.z = pose.wobble;
+            target.object.position.copy(target.base);
+            target.object.position.y -= depth;
+            target.object.rotation.z = pose.wobble;
+            target.object.scale.set(target.width, target.height, target.width * .3);
+            if (pose.sink > 0) {
+                sinkMask.visible = !reduced;
+                sinkMask.position.set(target.base.x, target.base.y - target.height * 3.1, 240);
+                sinkMask.scale.set(target.width * 2.3, target.height * 6.2, 1);
+                if (reduced || pose.sink >= .999) character.visible = target.object.visible = false;
+                target.shadow.visible = false;
             }
+            frogShadow.position.set(frog.position.x + 4, THREE.MathUtils.lerp(lily.position.y, target.base.y, pose.travel) - 6, 10);
+            frogShadow.scale.set(size * 1.65, size * .35, 1);
+            if (pose.ripple >= 0) {
+                target.ripple.visible = true;
+                target.ripple.position.copy(target.base).add(new THREE.Vector3(0, -3, -8));
+                target.ripple.scale.set(target.width * (1.1 + pose.ripple * .7), target.height * (1.2 + pose.ripple * .7), 1);
+                target.ripple.material.opacity = (1 - pose.ripple) * .65;
+                if (!correct && !reduced) {
+                    splash.visible = true;
+                    splash.position.copy(target.base).add(new THREE.Vector3(0, 0, 100));
+                    drops.forEach((drop, index) => {
+                        const angle = index * Math.PI * 2 / drops.length;
+                        const spread = .4 + pose.ripple;
+                        drop.position.set(Math.cos(angle) * target.width * spread, Math.sin(angle) * target.height + Math.sin(pose.ripple * Math.PI) * 28, 0);
+                        const size = Math.max(.05, 1 - pose.ripple);
+                        drop.scale.set(3 * size, 6 * size, 3 * size);
+                    });
+                }
+            }
+            mouth.visible = !correct && pose.phase === 'landed';
+            smile.visible = !mouth.visible;
+        }
+        if (finishAnimation) {
+            const pose = frogFinishFrame((now - finishAnimation.start) / finishAnimation.duration, reduced);
+            frog.position.copy(homePosition).lerp(finishPosition, pose.travel);
+            frog.position.y += pose.lift * 28;
+            frog.position.z = 120;
+            const size = THREE.MathUtils.lerp(frogScale, finishScale, pose.travel);
+            frog.scale.setScalar(size);
+            character.scale.set(1 / pose.squash, pose.squash, 1);
+            frogShadow.position.set(frog.position.x, THREE.MathUtils.lerp(lily.position.y, finishPad.position.y, pose.travel) - 5, 10);
+            frogShadow.scale.set(size * 1.65, size * .35, 1);
         }
         renderer.render(scene, camera);
     }
 
-    function onCatch(event) {
+    function onJump(event) {
+        finishAnimation = null;
         const target = targets.find((item) => item.button.dataset.frogAnswer === event.detail.letter);
         if (!target) return;
-        catchAnimation = {
-            target, origin: target.object.position.clone(), start: event.detail.startedAt ?? performance.now(),
+        jumpAnimation = {
+            target, start: event.detail.startedAt ?? performance.now(),
             correct: event.detail.correct !== false,
-            duration: event.detail.duration || 850,
+            duration: event.detail.duration || 1500,
         };
         render(performance.now(), true);
     }
     function onQuestion() {
-        catchAnimation = null;
+        jumpAnimation = null;
+        finishAnimation = null;
         character.position.set(0, 0, 0);
         character.rotation.set(0, 0, 0);
         character.scale.setScalar(1);
         character.visible = true;
-        tongue.visible = tongueTip.visible = mouth.visible = false;
+        mouth.visible = false;
         smile.visible = true;
         layout();
+    }
+    function onFinishLine({ detail }) {
+        if (!isPerfectFrogRun(detail.correct, detail.answered, detail.total)) return;
+        jumpAnimation = null;
+        finishAnimation = { start: detail.startedAt, duration: detail.duration };
+        render(performance.now(), true);
     }
     function onPointer(event) {
         const rect = root.getBoundingClientRect();
@@ -396,7 +427,8 @@ export function initFrogPond(host) {
     const observer = new ResizeObserver(layout);
     observer.observe(root);
     observer.observe(root.querySelector('.frog-interface'));
-    root.addEventListener('frog:catch', onCatch);
+    root.addEventListener('frog:jump', onJump);
+    root.addEventListener('frog:finish-line', onFinishLine);
     root.addEventListener('frog:question', onQuestion);
     root.addEventListener('pointermove', onPointer);
     root.addEventListener('frog:finished', () => { finished = true; updateVisibility(); });
@@ -421,7 +453,8 @@ export function initFrogPond(host) {
         disposed = true;
         observer.disconnect();
         document.removeEventListener('visibilitychange', updateVisibility);
-        root.removeEventListener('frog:catch', onCatch);
+        root.removeEventListener('frog:jump', onJump);
+        root.removeEventListener('frog:finish-line', onFinishLine);
         root.removeEventListener('frog:question', onQuestion);
         root.removeEventListener('pointermove', onPointer);
         geometries.forEach((item) => item.dispose());
@@ -431,13 +464,16 @@ export function initFrogPond(host) {
     window.addEventListener('pageshow', (event) => { if (event.persisted) updateVisibility(); });
 
     layout();
-    const pendingCatch = root.querySelector('[data-frog-answer][data-result]');
-    if (!finished && pendingCatch && root.dataset.frogOutcome) {
-        onCatch({ detail: {
-            letter: pendingCatch.dataset.frogAnswer,
+    const pendingJump = root.querySelector('[data-frog-answer][data-result]');
+    if (!finished && root.dataset.frogFinishing === 'true') {
+        onFinishLine({ detail: { correct: Number(root.dataset.frogCorrect), answered: Number(root.dataset.frogAnswered), total: Number(root.dataset.frogTotal),
+            startedAt: Number(root.dataset.frogFinishStart), duration: Number(root.dataset.frogFinishDuration) } });
+    } else if (!finished && pendingJump && root.dataset.frogOutcome) {
+        onJump({ detail: {
+            letter: pendingJump.dataset.frogAnswer,
             correct: root.dataset.frogOutcome === 'correct',
-            duration: Number(root.dataset.frogCatchDuration),
-            startedAt: Number(root.dataset.frogCatchStart),
+            duration: Number(root.dataset.frogJumpDuration),
+            startedAt: Number(root.dataset.frogJumpStart),
         } });
     }
     root.classList.add('pond-3d-ready');

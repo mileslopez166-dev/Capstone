@@ -19,6 +19,7 @@
                     <div class="teacher-workspace-heading mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                         <div class="space-y-1">
                             <h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Reports</h1>
+                            <a class="ui-button ui-button-secondary" href="{{ route('worksheets.index') }}#review"><span class="material-symbols-outlined">rate_review</span>Worksheet Reviews</a>
                             <p class="text-lg text-on-surface-variant">{{ $submissions->isEmpty() ? 'Reports will populate when student progress is available in the system.' : 'Reports are connected to saved student assessment submissions.' }}</p>
                         </div>
                     </div>

@@ -19,11 +19,13 @@ class AssessmentSubmission extends Model
         'question_count',
         'points',
         'possible_points',
+        'phil_iri',
         'submitted_at',
     ];
 
     protected $casts = [
         'answers' => 'array',
+        'phil_iri' => 'array',
         'submitted_at' => 'datetime',
     ];
 
@@ -35,5 +37,10 @@ class AssessmentSubmission extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function worksheetAttempt(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    {
+        return $this->hasOneThrough(WorksheetAttempt::class, AssessmentProgress::class, 'submission_id', 'progress_id', 'id', 'id');
     }
 }

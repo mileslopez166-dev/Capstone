@@ -29,10 +29,14 @@ class Assessment extends Model
         'status',
         'retry_limit',
         'created_by',
+        'worksheet_number',
+        'worksheet_total',
     ];
 
     protected $casts = [
         'retry_limit' => 'integer',
+        'worksheet_number' => 'integer',
+        'worksheet_total' => 'integer',
         'focus_areas' => 'array',
         'manual_questions' => 'array',
     ];
@@ -45,6 +49,11 @@ class Assessment extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(AssessmentSubmission::class);
+    }
+
+    public function worksheetAttempts(): HasMany
+    {
+        return $this->hasMany(WorksheetAttempt::class);
     }
 
     public static function retryLimitOptions(): array

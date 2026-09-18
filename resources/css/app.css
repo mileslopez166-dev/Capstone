@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+.assisted-picker { margin-bottom: 24px; padding: 20px 0; border-block: 1px solid #bbd1d2; }
+.assisted-picker h2 { margin-bottom: 12px; font-size: 20px; font-weight: 800; }
+.assisted-picker label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 700; }
+.assisted-picker-controls { display: flex; align-items: end; gap: 12px; }
+.assisted-picker-controls select { flex: 1; width: 100%; min-width: 0; border: 1px solid #95afb3; border-radius: 6px; background-color: white; }
+.assisted-picker .ui-button { flex-shrink: 0; }
+.assisted-assignment { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid #d4e2e4; }
+.assisted-assignment p { margin-top: 4px; font-size: 14px; color: #49656a; }
+.assisted-session { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding: 14px 18px; border-left: 4px solid #147362; background: #e8f6f0; color: #173f37; }
+.assisted-session > div { flex: 1; }
+.assisted-session p { font-size: 12px; font-weight: 700; }
+.assisted-session strong { display: block; font-size: 18px; }
+.assisted-session div > span { font-size: 13px; }
+.assisted-session a { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) {
+    .assisted-picker-controls, .assisted-assignment { flex-direction: column; align-items: stretch; }
+    .assisted-session { flex-wrap: wrap; align-items: flex-start; padding: 12px; }
+    .assisted-session > div { flex-basis: calc(100% - 42px); }
+    .assisted-session > a { margin-left: 38px; }
+}
+
 @layer base {
     html {
         min-width: 320px;

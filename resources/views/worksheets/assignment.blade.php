@@ -1,0 +1,12 @@
+<x-worksheet-layout teacher :title="$assessment->title" :back="route('worksheets.index')">
+    <div class="worksheet-summary"><span>Worksheet {{ $assessment->worksheet_number }}</span><span>{{ count($worksheet['pages']) }} parts</span><span>{{ $assessment->worksheet_total }} scored items</span><span>{{ str($assessment->target_section)->replace('_', ' ')->title() }}</span><strong>{{ $assessment->status === 'published' ? 'Published' : 'Locked' }}</strong></div>
+    @if ($assessment->instructions)<p class="worksheet-instructions">{{ $assessment->instructions }}</p>@endif
+    <div class="worksheet-actions">
+        <form method="POST" action="{{ route('assessments.availability', $assessment) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="{{ $assessment->status === 'published' ? 'draft' : 'published' }}"><button class="ui-button"><span class="material-symbols-outlined">{{ $assessment->status === 'published' ? 'lock' : 'lock_open' }}</span>{{ $assessment->status === 'published' ? 'Lock' : 'Publish' }} Worksheet</button></form>
+        <form method="POST" action="{{ route('assessments.retries', $assessment) }}" class="worksheet-inline-form">@csrf @method('PATCH')<label>Retries<select name="retry_limit">@foreach (\App\Models\Assessment::retryLimitOptions() as $value => $label)<option value="{{ $value }}" @selected((string) $value === $assessment->retryLimitFormValue())>{{ $label }}</option>@endforeach</select></label><button class="worksheet-icon" title="Save retry limit" aria-label="Save retry limit"><span class="material-symbols-outlined">save</span></button></form>
+        <a class="ui-button ui-button-secondary" href="{{ route('worksheets.index') }}#review"><span class="material-symbols-outlined">rate_review</span>Review Worksheets</a>
+        <form method="POST" action="{{ route('assessments.destroy', $assessment) }}" onsubmit="return confirm('Delete this worksheet assessment and its submitted work?')">@csrf @method('DELETE')<button class="worksheet-icon" title="Delete assessment" aria-label="Delete assessment"><span class="material-symbols-outlined">delete</span></button></form>
+    </div>
+    <x-assessment-student-picker :assessment="$assessment" :students="$eligibleStudents" />
+    <div class="worksheet-preview">@foreach ($worksheet['pages'] as $page)<section><h2>Part {{ $page['part'] }}</h2><x-worksheet-text :worksheet="$worksheet" :page="$page" /></section>@endforeach</div>
+</x-worksheet-layout>

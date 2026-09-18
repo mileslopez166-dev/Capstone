@@ -44,7 +44,7 @@ class StudentTaskQueueTest extends TestCase
             ->assertViewHas('studentMetrics', fn ($metrics) => $metrics['completed_count'] === 1 && $metrics['total_points'] === 1000 && $metrics['average_accuracy'] === 100)
             ->assertViewHas('nextTask', fn ($task) => $task['title'] === $assessment->title && $task['status'] === 'in_progress' && $task['action'] === 'Continue Assessment')
             ->assertViewHas('recentSubmissions', fn ($results) => $results->count() === 1 && $results->first()->id === $latest->id);
-        $this->get(route('student.activities'))->assertOk()->assertSee('Continue Assessment')->assertSee('result-'.$latest->id);
+        $this->get(route('student.activities', ['subject' => 'literacy']))->assertOk()->assertSee('Continue Assessment')->assertSee('result-'.$latest->id);
     }
 
     public function test_empty_or_stale_progress_is_not_a_current_attempt(): void

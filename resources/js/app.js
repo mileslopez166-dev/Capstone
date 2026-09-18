@@ -9,6 +9,11 @@ import '../css/student-assessment.css';
 import '../css/avatar-wardrobe.css';
 import '../css/practice.css';
 import '../css/ui-polish.css';
+import '../css/phil-iri.css';
+import './phil-iri';
+import '../css/worksheets.css';
+import './worksheet-book';
+import { initFrogJump } from './frog-jump';
 import comfortControls, { preferences } from './ui-preferences';
 import './page-transitions';
 
@@ -26,6 +31,7 @@ Alpine.start();
 
 const frogPond = document.getElementById('frog-pond-scene');
 if (frogPond) {
+    initFrogJump(frogPond.closest('.frog-pond-game'));
     import('./frog-pond').then(({ initFrogPond }) => initFrogPond(frogPond)).catch(() => {
         const game = frogPond.closest('.frog-pond-game');
         game?.classList.remove('pond-3d-ready');

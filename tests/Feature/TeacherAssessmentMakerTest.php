@@ -93,7 +93,7 @@ class TeacherAssessmentMakerTest extends TestCase
             ->assertSessionHasErrors('manual_questions');
     }
 
-    public function test_teacher_can_create_a_numeracy_assessment(): void
+    public function test_numeracy_game_creation_redirects_to_worksheet_missions(): void
     {
         $teacher = User::factory()->teacher()->create();
 
@@ -105,14 +105,9 @@ class TeacherAssessmentMakerTest extends TestCase
             'status' => 'draft',
         ]));
 
-        $response->assertRedirect(route('assessments.index'));
-
-        $this->assertDatabaseHas('assessments', [
-            'title' => 'Number Sense Builder',
-            'subject' => 'numeracy',
-            'status' => 'draft',
-            'created_by' => $teacher->id,
-        ]);
+        $response->assertRedirect(route('worksheets.index'));
+        $this->assertDatabaseMissing('assessments', ['title' => 'Number Sense Builder']);
+        $this->get(route('assessments.index', ['subject' => 'numeracy']))->assertRedirect(route('worksheets.index'));
     }
 
     public function test_teacher_can_lock_and_unlock_an_assessment(): void

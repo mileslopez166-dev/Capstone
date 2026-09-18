@@ -21,6 +21,8 @@
             </div>
             <a class="home-avatar" href="{{ route('student.wardrobe.edit') }}" aria-label="Customize your avatar"><x-student-character :user="$student" /></a>
         </section>
+        <x-worksheet-pending />
+        <x-worksheet-mission-entry />
         <section class="home-stats" aria-label="Your progress">
             <a href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span><div><strong>{{ number_format($coinBalance) }}</strong><span>Practice coins</span></div></a>
             <a href="{{ route('student.activities') }}#recorded-outputs"><span class="material-symbols-outlined" aria-hidden="true">task_alt</span><div><strong>{{ $studentMetrics['completed_count'] }}</strong><span>Assessments done</span></div></a>

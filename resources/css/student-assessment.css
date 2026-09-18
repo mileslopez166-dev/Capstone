@@ -24,16 +24,23 @@
     box-shadow: 0 3px 0 #94c9eb;
 }
 .assessment-back:hover { background: #e3f4ff; }
-.assessment-heading-copy { flex: 1; }
+.assessment-heading-copy { flex: 1; min-width: 0; }
 .assessment-heading-copy > p, .assessment-eyebrow {
     color: #356382;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
 }
-.assessment-heading h1 { margin-top: 3px; font-size: 23px; font-weight: 800; line-height: 1.35; }
+.assessment-heading h1 { margin-top: 3px; font-size: 23px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
 .assessment-attempt { display: flex; align-items: center; gap: 7px; max-width: 220px; font-size: 12px; font-weight: 600; color: #315b7f; }
 .assessment-attempt > .material-symbols-outlined { flex-shrink: 0; font-size: 20px; color: #138359; }
+.assessment-text-settings { position: relative; z-index: 60; flex-shrink: 0; }
+.assessment-text-panel { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; max-width: calc(100vw - 24px); padding: 12px 16px; border: 1px solid #9dc8dd; border-radius: 8px; background: #fff; color: #253d4b; box-shadow: 0 8px 24px #17324b26; }
+.assessment-text-panel-heading { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #d8e9f4; padding-bottom: 8px; font-size: 15px; }
+.assessment-text-panel-heading strong { flex: 1; }
+.assessment-size-option { display: grid; grid-template-columns: minmax(0, 1fr) 48px; align-items: center; padding-top: 12px; font-size: 14px; font-weight: 600; }
+.assessment-size-option output { text-align: right; color: #315b7f; font-variant-numeric: tabular-nums; }
+.assessment-size-option input { grid-column: 1 / -1; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0; accent-color: #0764b7; cursor: pointer; }
 
 /* Reading, gameplay and results share the same page instead of separate overlays. */
 .assessment-workspace #mission-canvas[hidden] { display: none; }
@@ -80,6 +87,7 @@
     line-height: 1.95;
 }
 .assessment-passage { max-width: 900px; max-height: 460px; min-height: 200px; margin-inline: auto; border-block: 1px solid #d8e9f4; background: #fff; }
+.assessment-workspace .story-paragraph { font-size: var(--assessment-story-size, 1.375rem); line-height: 1.85; overflow-wrap: anywhere; }
 .assessment-legend { border-bottom: 1px solid #d8e9f4; }
 .assessment-workspace .assessment-legend > span { box-shadow: none; border: 0; background: none; }
 .assessment-mark-tools { background: #eff6fa; border-radius: 6px; }
@@ -93,7 +101,7 @@
 .assessment-reader-actions button { min-height: 46px; }
 
 .assessment-workspace .hook-game.ocean-game {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: 320px minmax(0, 1fr);
     grid-template-rows: 112px minmax(340px, 1fr);
     height: var(--assessment-stage-height);
     min-height: 580px;
@@ -101,14 +109,18 @@
     padding: 20px 20px 48px;
 }
 .assessment-workspace .ocean-game #question-node { max-height: 420px; padding: 16px; border: 1px solid #9dc8dd; border-bottom: 3px solid #4b95b9; }
-.assessment-workspace .ocean-game #question-node h2 { font-size: 17px; }
+.assessment-workspace .ocean-game #question-node h2 { font-size: var(--assessment-questions-size, 1.5rem); line-height: 1.45; overflow-wrap: anywhere; }
+.assessment-workspace .ocean-game .hook-options > div { font-size: var(--assessment-answers-size, 1.125rem); line-height: 1.55; }
+.assessment-workspace .ocean-game .hook-options > div > span:first-child { font-size: 16px; }
+.assessment-workspace .ocean-game .hook-options > div > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .assessment-workspace .ocean-game #mission-info h1 { font-size: 22px; }
-.assessment-workspace .ocean-game .ocean-catch-status { left: 300px; right: 20px; bottom: 14px; }
+.assessment-workspace .ocean-game .ocean-catch-status { left: 360px; right: 20px; bottom: 14px; }
 .assessment-workspace .frog-pond-game { min-height: max(580px, var(--assessment-stage-height)); }
 .assessment-workspace .frog-interface { min-height: max(580px, var(--assessment-stage-height)); padding: 20px 24px; }
 .assessment-workspace .frog-question-card { border-color: #a7d0d5; border-bottom-color: #328671; box-shadow: 0 3px 0 #acd1c5; }
-.assessment-workspace .frog-question-card h1 { font-size: 21px; }
+.assessment-workspace .frog-question-card h1 { max-height: none; overflow: visible; font-size: var(--assessment-questions-size, 1.5rem); line-height: 1.45; overflow-wrap: anywhere; }
 .assessment-workspace .frog-answer-zone { gap: 16px; }
+.assessment-workspace .frog-answer-copy [data-frog-answer-label] { min-width: 0; font-size: var(--assessment-answers-size, 1.125rem); line-height: 1.55; }
 
 .assessment-results { padding: 28px; background: #fbfdfff7; border-block: 2px solid #8dcefa; outline: none; }
 .assessment-result-heading { display: flex; align-items: center; gap: 20px; padding-bottom: 26px; }
@@ -171,14 +183,13 @@
     .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; gap: 10px; }
     .assessment-workspace .ocean-game #question-node { max-height: 330px; padding: 14px; }
     .assessment-workspace .ocean-game .hook-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .assessment-workspace .ocean-game .hook-options > div { padding: 8px; font-size: 13px; gap: 7px; }
+    .assessment-workspace .ocean-game .hook-options > div { padding: 8px; gap: 7px; }
     .assessment-workspace .ocean-game #fish-container { grid-column: 1; grid-row: 3; margin-top: 24px; }
     .assessment-workspace .ocean-game .ocean-catch-status { left: 14px; right: 14px; }
     .assessment-workspace .frog-interface { padding: 16px 14px; gap: 14px; }
     .assessment-workspace .frog-question-card { padding: 14px; }
-    .assessment-workspace .frog-question-card h1 { font-size: 18px; }
     .assessment-workspace .frog-answer-zone { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 480px; }
-    .assessment-workspace .frog-target-visual { width: 116px; height: 78px; }
+    .assessment-workspace .frog-target-visual { width: 116px; height: 110px; }
     .assessment-workspace .frog-hud { flex-wrap: wrap; }
     .assessment-result-metrics { gap: 10px; }
     .assessment-result-metric { padding: 14px; }
@@ -197,4 +208,10 @@
     .assessment-result-metrics { grid-template-columns: minmax(0, 1fr); }
     .assessment-result-detail { grid-template-columns: minmax(0, 1fr); gap: 20px; }
     .assessment-result-actions > * { width: 100%; }
+}
+@container (max-width: 480px) {
+    .assessment-workspace .ocean-game .hook-options { grid-template-columns: minmax(0, 1fr); }
+    .assessment-workspace .frog-answer-copy { flex-wrap: wrap; align-content: flex-start; }
+    .assessment-workspace .frog-answer-copy [data-frog-answer-label] { flex-basis: 100%; order: 1; }
+    .assessment-workspace .frog-answer-verdict { margin-left: auto; }
 }

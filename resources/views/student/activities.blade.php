@@ -8,7 +8,28 @@
 
         <main class="campus-activities min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl space-y-8">
+                <header class="activity-subject-heading">
+                    <div><p>ASSESSMENTS</p><h1>{{ $subject ? ucfirst($subject).' Assessments' : 'Activities' }}</h1></div>
+                    @if ($subject)<a href="{{ route('student.activities') }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>All Activities</a>@endif
+                </header>
+                <nav class="activity-subjects" aria-label="Assessment subjects">
+                    @foreach (['literacy' => ['auto_stories', 'Reading assessments'], 'numeracy' => ['calculate', 'Math worksheets & assessments']] as $key => [$icon, $label])
+                        <a class="activity-subject" data-activity-subject="{{ $key }}" href="{{ route('student.activities', ['subject' => $key]) }}" @if ($subject === $key) aria-current="page" @endif>
+                            <span class="activity-subject-icon material-symbols-outlined" aria-hidden="true">{{ $icon }}</span>
+                            <span class="activity-subject-copy"><strong>{{ ucfirst($key) }}</strong><span>{{ $label }}</span><small>{{ $subjectCounts->get($key, 0) }} available</small></span>
+                            <span class="activity-subject-arrow material-symbols-outlined" aria-hidden="true">{{ $subject === $key ? 'check_circle' : 'arrow_forward' }}</span>
+                        </a>
+                    @endforeach
+                </nav>
+                @if ($subject === 'literacy')
                 <x-practice-entry />
+                @elseif ($subject === 'numeracy')
+                <x-worksheet-mission-entry />
+                @endif
+                @if ($subject !== 'literacy')
+                <x-worksheet-pending />
+                @endif
+                @if ($subject)
                 <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                     <div class="campus-panel rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="campus-queue-label text-sm font-bold uppercase tracking-[0.2em] text-primary-dim"><span class="material-symbols-outlined" aria-hidden="true">bookmark_star</span>Assessment Queue</p>
@@ -90,13 +111,16 @@
                                                         <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
                                                             {{ $assessment->subject }}
                                                         </span>
-                                                        <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                                                            {{ $quizLabel }}
-                                                        </span>
+                                                        @if ($assessment->assessment_type !== 'oral_reading')
+                                                            <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                                                                {{ $quizLabel }}
+                                                            </span>
+                                                        @endif
                                                         <x-status-badge :status="$assessment->student_state" />
                                                     </div>
 
                                                     <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment->title }}</h4>
+                                                    <x-assessment-type-label :assessment="$assessment" />
                                                     <p class="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
                                                         {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
                                                     </p>
@@ -135,6 +159,7 @@
                     @endif
                 </section>
 
+                @endif
                 <section class="campus-results" id="recorded-outputs">
                     <div class="campus-results-heading mb-6">
                         <h3 class="font-headline text-3xl font-bold text-on-surface"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>Recorded Outputs</h3>
@@ -169,13 +194,14 @@
                                                 @endif
                                             </div>
                                             <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment?->title ?? 'Assessment' }}</h4>
+                                            <x-assessment-type-label :assessment="$assessment" />
                                             <p class="mt-2 text-sm text-on-surface-variant">Submitted {{ $submission->submitted_at?->format('M d, Y h:i A') ?? 'recently' }} | {{ $submission->attempts_count }} total {{ Str::plural('attempt', $submission->attempts_count) }}</p>
                                         </div>
 
                                         <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy }}%</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->question_count > 0 ? $submission->accuracy.'%' : 'N/A' }}</p>
                                             </div>
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
@@ -183,11 +209,15 @@
                                             </div>
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->correct_count }}/{{ $submission->question_count }}</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'N/A' }}</p>
                                             </div>
                                         </div>
                                     </div>
 
+                                    <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
+                                    @if ($submission->worksheetAttempt)
+                                        <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
+                                    @else
                                     <details class="group mt-5 rounded-2xl border border-outline-variant/15 bg-surface-container-low p-5">
                                         <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div>
@@ -237,6 +267,7 @@
                                             @endif
                                         </div>
                                     </details>
+                                    @endif
 
                                     <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                         @if ($assessment && ($assessment->hasUnlimitedRetries() || $submission->remaining_retake_tries > 0))
@@ -261,6 +292,7 @@
                         </div>
                     @endif
                 </section>
+                @if ($subject)
                 <section class="grid gap-6 md:grid-cols-2">
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h4 class="flex items-center gap-2 font-headline text-xl font-bold">
@@ -301,6 +333,7 @@
                         </div>
                     </div>
                 </section>
+                @endif
             </div>
         </main>
 

@@ -5,12 +5,14 @@ use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\TokenRequestController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\WorksheetController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AvatarController;
 use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
 use App\Http\Controllers\Teacher\PracticeController as TeacherPracticeController;
+use App\Http\Controllers\Teacher\PhilIriController;
 use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
 use App\Http\Controllers\Teacher\StudentController;
@@ -54,6 +56,29 @@ Route::view('/support', 'support.developing')
     ->name('support.developing');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/teacher/worksheets', [WorksheetController::class, 'index'])->name('worksheets.index');
+    Route::get('/student/worksheet-mission', [WorksheetController::class, 'mission'])->name('worksheets.mission');
+    Route::get('/teacher/worksheets/{number}', [WorksheetController::class, 'create'])->whereNumber('number')->name('worksheets.create');
+    Route::post('/teacher/worksheets/{number}', [WorksheetController::class, 'store'])->whereNumber('number')->name('worksheets.store');
+    Route::get('/worksheets/attribution', [WorksheetController::class, 'attribution'])->name('worksheets.attribution');
+    Route::get('/worksheets/pages/{number}/{part}', [WorksheetController::class, 'image'])->whereNumber(['number', 'part'])->name('worksheets.image');
+    Route::get('/worksheets/review/{attempt}', [WorksheetController::class, 'review'])->name('worksheets.review');
+    Route::post('/worksheets/review/{attempt}', [WorksheetController::class, 'grade'])->name('worksheets.grade');
+    Route::post('/student/worksheets/{assessment}/progress', [WorksheetController::class, 'save'])->name('worksheets.save');
+    Route::post('/student/worksheets/{assessment}/submit', [WorksheetController::class, 'submit'])->name('worksheets.submit');
+    Route::post('/student/worksheets/{assessment}/multiplication-table', [WorksheetController::class, 'multiplicationTable'])->middleware('throttle:5,1')->name('worksheets.table');
+
+    Route::prefix('/teacher/assessments/{assessment}')->name('teacher.assessments.')->group(function () {
+        Route::get('/start-with-student', [AssessmentController::class, 'startForStudent'])->name('start');
+        Route::get('/students/{student}/take', [AssessmentController::class, 'showStudent'])->name('take');
+        Route::post('/students/{student}/progress', [AssessmentController::class, 'saveStudentProgress'])->name('progress');
+        Route::post('/students/{student}/submit', [AssessmentController::class, 'submitStudentAttempt'])->name('submit');
+        Route::post('/students/{student}/worksheet/progress', [WorksheetController::class, 'save'])->name('worksheet.save');
+        Route::post('/students/{student}/worksheet/submit', [WorksheetController::class, 'submit'])->name('worksheet.submit');
+        Route::post('/students/{student}/worksheet/multiplication-table', [WorksheetController::class, 'multiplicationTable'])->middleware('throttle:5,1')->name('worksheet.table');
+    });
+    Route::get('/teacher/phil-iri/{submission}', [PhilIriController::class, 'show'])->name('teacher.phil-iri.show');
+    Route::patch('/teacher/phil-iri/{submission}', [PhilIriController::class, 'update'])->name('teacher.phil-iri.update');
     Route::get('/student/wardrobe', [AvatarController::class, 'edit'])->name('student.wardrobe.edit');
     Route::patch('/student/wardrobe', [AvatarController::class, 'update'])->name('student.wardrobe.update');
     Route::post('/student/wardrobe/purchase', [AvatarController::class, 'purchase'])->name('student.wardrobe.purchase');
@@ -77,6 +102,7 @@ $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSect
 
     return Assessment::query()
         ->where('status', 'published')
+        ->whereDoesntHave('worksheetAttempts', fn ($query) => $query->where('user_id', $student->id)->whereNull('reviewed_at'))
         ->where(function ($query) use ($targetSection): void {
             $query->where('target_section', 'all')
                 ->orWhereNull('target_section');
@@ -251,6 +277,10 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
 Route::get('/student/activities', function () use ($visibleAssessmentsForStudent, $submissionAccuracy) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
+    $subject = request()->query('subject');
+    if ($subject !== null && ! in_array($subject, ['literacy', 'numeracy'], true)) {
+        return redirect()->route('student.activities');
+    }
 
     $retakeAllowances = AssessmentRetakeRequest::query()
         ->where('user_id', $student->id)
@@ -317,8 +347,10 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->values();
 
     return view('student.activities', [
-        'pendingAssessments' => \App\Support\StudentTaskQueue::assessments($pendingAssessments, $student),
-        'completedSubmissions' => $completedSubmissions,
+        'subject' => $subject,
+        'subjectCounts' => $pendingAssessments->countBy('subject'),
+        'pendingAssessments' => \App\Support\StudentTaskQueue::assessments($subject ? $pendingAssessments->where('subject', $subject)->values() : collect(), $student),
+        'completedSubmissions' => $subject ? $completedSubmissions->filter(fn ($submission) => $submission->assessment?->subject === $subject)->values() : $completedSubmissions,
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');
 
@@ -473,6 +505,8 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
         'subjectBreakdown' => $subjectBreakdown,
         'studentIsOnline' => $studentIsOnline,
         'assessmentRequests' => $assessmentRequests,
+        'assistedAssessments' => $student->isApproved() ? $teacher->createdAssessments()->where('status', 'published')->latest()->get()
+            ->filter(fn ($assessment) => \App\Support\AssessmentParticipant::matchesSection($assessment, $student)) : collect(),
     ]);
 })->middleware(['auth', 'verified'])->name('students.show');
 Route::post('/teacher/students/{student}/assessment-requests/{retakeRequest}/approve', [AssessmentRetakeRequestController::class, 'approve'])
