@@ -72,6 +72,8 @@
                         @endforeach
                     </section>
 
+                    <x-reading-progress-card :progress="$readingProgress" audience="teacher" />
+
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         <div class="teacher-callout relative overflow-hidden rounded-sm bg-on-primary-container p-10 text-on-primary lg:col-span-2">
                             <div class="relative z-10">
@@ -121,9 +123,9 @@
                                 <div class="space-y-3">
                                     @foreach ($submissions as $submission)
                                         @php
-                                            $accuracy = $submission->question_count > 0 ? (int) round(($submission->correct_count / $submission->question_count) * 100) : 0;
+                                            $accuracy = $submission->scorePercentage();
                                         @endphp
-                                        <div class="rounded-sm bg-surface-container-lowest p-5 shadow-sm">
+                                        <div id="submission-{{ $submission->id }}" class="rounded-sm bg-surface-container-lowest p-5 shadow-sm">
                                             <div class="flex items-center justify-between gap-4">
                                                 <div>
                                                     <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
@@ -133,9 +135,10 @@
                                                         <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
                                                     @endif
                                                 </div>
-                                                <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $submission->question_count > 0 ? $accuracy.'%' : 'Reading activity' }}</span>
+                                                <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy === null ? 'Awaiting score' : $accuracy.'%' }}</span>
                                             </div>
-                                            <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
+                                            <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
+                                            <x-intervention-plan :submission="$submission" :assessments="$followUpAssessments" return-to="report" />
                                         </div>
                                     @endforeach
                                 </div>

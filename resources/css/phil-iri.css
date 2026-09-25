@@ -19,6 +19,19 @@
 .phil-interpretation { margin-top: 16px; padding-block: 12px; border-top: 1px solid #c8d7df; }
 .phil-interpretation h4 { color: #243d4d; font-size: 13px; font-weight: 700; }
 .phil-interpretation p { max-width: 80ch; margin-top: 6px; color: #3e5664; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.phil-recommendation { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; margin-top: 14px; padding: 16px; border: 1px solid color-mix(in srgb, var(--phil-accent) 38%, #c8d7df); background: linear-gradient(135deg, color-mix(in srgb, var(--phil-accent) 10%, #fff), #fff); }
+.phil-recommendation > .material-symbols-outlined { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 8px; background: var(--phil-accent); color: #fff; font-size: 22px; }
+.phil-recommendation p:first-child { color: var(--phil-accent); font-size: 11px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+.phil-recommendation h4 { margin-top: 2px; color: #203845; font-size: 15px; font-weight: 800; }
+.phil-recommendation h4 + p { max-width: 78ch; margin-top: 6px; color: #3e5664; font-size: 14px; line-height: 1.65; }
+.phil-recommendation ul { display: grid; gap: 6px; margin-top: 10px; padding-left: 18px; color: #425b67; font-size: 13px; line-height: 1.55; }
+.phil-practice-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; min-height: 40px; margin-top: 12px; padding: 8px 13px; border-radius: 6px; background: var(--phil-accent); color: #fff; font-size: 13px; font-weight: 800; }
+.phil-formula { margin-top: 14px; padding: 14px; border: 1px solid #c8d7df; background: #eef6fa; }
+.phil-formula h4 { color: #243d4d; font-size: 13px; font-weight: 800; }
+.phil-formula dl { display: grid; gap: 8px; margin-top: 10px; }
+.phil-formula div { display: grid; grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.phil-formula dt { color: #506571; font-size: 12px; font-weight: 700; }
+.phil-formula dd { color: #243d4d; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
 .phil-note { color: #526773; font-size: 12px; line-height: 1.7; margin-top: 10px; }
 .phil-scoring-form { border-top: 2px solid #8eb8a1; background: #e0ede5; padding: 24px; }
 .phil-scoring-form h2 { font-size: 20px; font-weight: 700; }
@@ -43,4 +56,6 @@
     .phil-page h1 { font-size: 24px; }
     .phil-scoring-form { padding: 18px; }
     .phil-measures { gap: 16px; }
+    .phil-recommendation { grid-template-columns: 1fr; }
+    .phil-formula div { grid-template-columns: 1fr; gap: 2px; }
 }

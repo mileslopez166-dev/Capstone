@@ -29,9 +29,9 @@ class WorksheetMissionTest extends TestCase
     public function test_numeracy_builder_has_no_quiz_type_and_students_get_a_locked_35_step_mission(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()->assertSee('Numeracy Worksheet Mission')
+        $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()->assertSee('Create Numeracy Assessment')
             ->assertDontSee('Choose Quiz Type')->assertDontSee('Frog Flashcards')->assertDontSee('Interactive Egg');
-        $this->get(route('assessments.index'))->assertSee('data-numeracy-mission', false)->assertDontSee('value="numeracy"', false);
+        $this->get(route('assessments.create'))->assertSee('data-numeracy-mission', false)->assertDontSee('value="numeracy"', false);
         $this->get(route('worksheets.mission'))->assertForbidden();
         $student = User::factory()->create(['section' => 'Section A']);
         $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('0 / 35 submitted')->assertSee('Worksheet 35');

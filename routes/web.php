@@ -10,17 +10,25 @@ use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AvatarController;
+use App\Http\Controllers\Student\TutorController;
+use App\Http\Controllers\Teacher\AiAssistantController;
 use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
 use App\Http\Controllers\Teacher\PracticeController as TeacherPracticeController;
 use App\Http\Controllers\Teacher\PhilIriController;
+use App\Http\Controllers\Teacher\InterventionPlanController;
+use App\Http\Controllers\Teacher\ProfilePhotoController;
 use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
 use App\Http\Controllers\Teacher\StudentController;
 use App\Models\Assessment;
 use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
+use App\Models\InterventionPlan;
 use App\Models\User;
+use App\Support\AssessmentScores;
+use App\Support\InterventionFollowUp;
 use App\Support\StudentLeaderboard;
+use App\Support\StudentProgress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -56,7 +64,18 @@ Route::view('/support', 'support.developing')
     ->name('support.developing');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/student/tutor/{chat?}', [TutorController::class, 'index'])->whereNumber('chat')->name('student.tutor.index');
+    Route::post('/student/tutor/messages', [TutorController::class, 'send'])->middleware('throttle:15,1')->name('student.tutor.send');
+    Route::delete('/student/tutor/{chat}', [TutorController::class, 'destroy'])->whereNumber('chat')->name('student.tutor.destroy');
+    Route::post('/student/tutor/{chat}/teacher-help', [TutorController::class, 'teacherHelp'])->whereNumber('chat')->middleware('throttle:3,1')->name('student.tutor.help');
+    Route::post('/student/assessments/{assessment}/tutor', [TutorController::class, 'assessmentHelp'])->middleware('throttle:15,1')->name('student.assessments.tutor');
+    Route::get('/teacher/ai-assistant', [AiAssistantController::class, 'index'])->name('teacher.ai-assistant.index');
+    Route::post('/teacher/ai-assistant/messages', [AiAssistantController::class, 'send'])->middleware('throttle:15,1')->name('teacher.ai-assistant.send');
+    Route::post('/profile/teacher-photo', [ProfilePhotoController::class, 'store'])->middleware('throttle:10,1')->name('teacher.photo.store');
+    Route::delete('/profile/teacher-photo', [ProfilePhotoController::class, 'destroy'])->name('teacher.photo.destroy');
+    Route::get('/teachers/{teacher}/photo', [ProfilePhotoController::class, 'show'])->whereNumber('teacher')->name('teacher.photo.show');
     Route::get('/teacher/worksheets', [WorksheetController::class, 'index'])->name('worksheets.index');
+    Route::get('/teacher/worksheet-reviews', [WorksheetController::class, 'reviews'])->name('worksheets.reviews');
     Route::get('/student/worksheet-mission', [WorksheetController::class, 'mission'])->name('worksheets.mission');
     Route::get('/teacher/worksheets/{number}', [WorksheetController::class, 'create'])->whereNumber('number')->name('worksheets.create');
     Route::post('/teacher/worksheets/{number}', [WorksheetController::class, 'store'])->whereNumber('number')->name('worksheets.store');
@@ -79,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     Route::get('/teacher/phil-iri/{submission}', [PhilIriController::class, 'show'])->name('teacher.phil-iri.show');
     Route::patch('/teacher/phil-iri/{submission}', [PhilIriController::class, 'update'])->name('teacher.phil-iri.update');
+    Route::put('/teacher/interventions/{submission}', [InterventionPlanController::class, 'update'])->name('teacher.interventions.update');
     Route::get('/student/wardrobe', [AvatarController::class, 'edit'])->name('student.wardrobe.edit');
     Route::patch('/student/wardrobe', [AvatarController::class, 'update'])->name('student.wardrobe.update');
     Route::post('/student/wardrobe/purchase', [AvatarController::class, 'purchase'])->name('student.wardrobe.purchase');
@@ -101,6 +121,7 @@ $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSect
     $targetSection = $studentTargetSection($student);
 
     return Assessment::query()
+        ->with('teacher')
         ->where('status', 'published')
         ->whereDoesntHave('worksheetAttempts', fn ($query) => $query->where('user_id', $student->id)->whereNull('reviewed_at'))
         ->where(function ($query) use ($targetSection): void {
@@ -113,12 +134,9 @@ $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSect
         });
 };
 
-$submissionAccuracy = function (AssessmentSubmission $submission): int {
-    return $submission->question_count > 0
-        ? (int) round(($submission->correct_count / $submission->question_count) * 100)
-        : 0;
-};
-Route::get('/teacher/dashboard', function () use ($submissionAccuracy) {
+$submissionAccuracy = fn (AssessmentSubmission $submission): ?int => AssessmentScores::percentage($submission);
+$submissionAverage = fn (iterable $submissions): ?int => AssessmentScores::average($submissions);
+Route::get('/teacher/dashboard', function () use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
@@ -132,36 +150,34 @@ Route::get('/teacher/dashboard', function () use ($submissionAccuracy) {
         ->count();
 
     $submissions = AssessmentSubmission::query()
-        ->with(['student', 'assessment'])
+        ->with(['student', 'assessment', 'mlPrediction'])
         ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
         ->latest('submitted_at')
         ->get();
 
-    $students = $students->map(function (User $student) use ($submissions, $submissionAccuracy): User {
+    $students = $students->map(function (User $student) use ($submissions, $submissionAverage): User {
         $studentSubmissions = $submissions->where('user_id', $student->id);
         $student->completed_assessments_count = $studentSubmissions->count();
-        $student->average_accuracy = $studentSubmissions->isNotEmpty()
-            ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
-            : null;
+        $student->average_accuracy = $submissionAverage($studentSubmissions);
         $student->total_points = (int) $studentSubmissions->sum('points');
 
         return $student;
     });
 
     $dashboardMetrics = [
-        'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'average_accuracy' => $submissionAverage($submissions),
         'students_with_results' => $submissions->pluck('user_id')->unique()->count(),
         'needs_attention' => $students->filter(fn (User $student): bool => $student->average_accuracy !== null && $student->average_accuracy < 75)->count(),
         'total_points' => (int) $submissions->sum('points'),
     ];
 
     $focusAreas = collect(['literacy' => 'Literacy', 'numeracy' => 'Numeracy'])
-        ->map(function (string $label, string $subject) use ($submissions, $submissionAccuracy): array {
+        ->map(function (string $label, string $subject) use ($submissions, $submissionAverage): array {
             $subjectSubmissions = $submissions->filter(fn ($submission): bool => ($submission->assessment?->subject ?? null) === $subject);
 
             return [
                 'label' => $label,
-                'accuracy' => $subjectSubmissions->isNotEmpty() ? (int) round($subjectSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+                'accuracy' => $submissionAverage($subjectSubmissions),
             ];
         })
         ->values();
@@ -231,7 +247,7 @@ Route::get('/student/search', StudentSearchController::class)
     ->middleware(['auth', 'verified'])
     ->name('student.search');
 
-Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent, $submissionAccuracy) {
+Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent, $submissionAverage) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
 
@@ -260,7 +276,7 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
     $studentMetrics = [
         'pending_count' => $pendingAssessments->count(),
         'completed_count' => $bestSubmissions->count(),
-        'average_accuracy' => $bestSubmissions->isNotEmpty() ? (int) round($bestSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'average_accuracy' => $submissionAverage($bestSubmissions),
         'total_points' => (int) $bestSubmissions->sum('points'),
     ];
 
@@ -268,6 +284,7 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
         'pendingAssessments' => $pendingAssessments,
         'recentSubmissions' => $submissions->unique('assessment_id')->take(3),
         'studentMetrics' => $studentMetrics,
+        'readingProgress' => StudentProgress::literacy($submissions),
         'nextTask' => \App\Support\StudentTaskQueue::next($pendingAssessments, $student),
         'practiceCount' => \App\Models\PracticeMission::where('student_id', $student->id)->where('status', 'assigned')->count(),
         'coinBalance' => $student->practiceCoinBalance(),
@@ -306,7 +323,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->values();
 
     $completedSubmissions = AssessmentSubmission::query()
-        ->with('assessment')
+        ->with(['assessment.teacher', 'coinReward'])
         ->where('user_id', $student->id)
         ->latest('submitted_at')
         ->get()
@@ -390,7 +407,7 @@ Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') {
     ]);
 })->middleware(['auth', 'verified'])->name('student.leaderboard');
 
-Route::get('/student/rewards', function () use ($submissionAccuracy) {
+Route::get('/student/rewards', function () use ($submissionAccuracy, $submissionAverage) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
 
@@ -405,9 +422,9 @@ Route::get('/student/rewards', function () use ($submissionAccuracy) {
         'studentMetrics' => [
             'completed_count' => $submissions->count(),
             'saved_results' => $submissions->count(),
-            'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+            'average_accuracy' => $submissionAverage($submissions),
             'total_points' => (int) $submissions->sum('points'),
-            'rewards_available' => $submissions->filter(fn ($submission) => $submissionAccuracy($submission) >= 75)->count(),
+            'rewards_available' => $submissions->filter(fn ($submission) => ($submissionAccuracy($submission) ?? 0) >= 75)->count(),
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('student.rewards');
@@ -416,7 +433,7 @@ Route::get('/teacher/search', TeacherSearchController::class)
     ->middleware(['auth', 'verified'])
     ->name('teacher.search');
 
-Route::get('/teacher/students', function () use ($submissionAccuracy) {
+Route::get('/teacher/students', function () use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
@@ -436,12 +453,10 @@ Route::get('/teacher/students', function () use ($submissionAccuracy) {
         ->where('role', 'student')
         ->orderBy('name')
         ->get()
-        ->map(function (User $student) use ($teacherSubmissions, $submissionAccuracy, $activeStudentIds): User {
+        ->map(function (User $student) use ($teacherSubmissions, $submissionAverage, $activeStudentIds): User {
             $studentSubmissions = $teacherSubmissions->where('user_id', $student->id);
             $student->completed_assessments_count = $studentSubmissions->count();
-            $student->average_accuracy = $studentSubmissions->isNotEmpty()
-                ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
-                : null;
+            $student->average_accuracy = $submissionAverage($studentSubmissions);
             $student->is_online = in_array($student->id, $activeStudentIds, true);
 
             return $student;
@@ -456,13 +471,13 @@ Route::post('/teacher/students', [StudentController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('students.store');
 
-Route::get('/teacher/students/{student}', function (User $student) use ($submissionAccuracy) {
+Route::get('/teacher/students/{student}', function (User $student) use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
     abort_unless($student->isStudent(), 404);
 
     $submissions = AssessmentSubmission::query()
-        ->with('assessment')
+        ->with(['assessment', 'interventionPlan.followUpAssessment', 'interventionPlan.followUpSubmission.assessment'])
         ->where('user_id', $student->id)
         ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
         ->latest('submitted_at')
@@ -470,7 +485,7 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
 
     $studentMetrics = [
         'completed_count' => $submissions->count(),
-        'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'average_accuracy' => $submissionAverage($submissions),
         'total_points' => (int) $submissions->sum('points'),
     ];
 
@@ -487,22 +502,24 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
         ->get();
 
     $subjectBreakdown = collect(['literacy' => 'Literacy', 'numeracy' => 'Numeracy'])
-        ->map(function (string $label, string $subject) use ($submissions, $submissionAccuracy): array {
+        ->map(function (string $label, string $subject) use ($submissions, $submissionAverage): array {
             $subjectSubmissions = $submissions->filter(fn ($submission): bool => ($submission->assessment?->subject ?? null) === $subject);
 
             return [
                 'label' => $label,
-                'accuracy' => $subjectSubmissions->isNotEmpty() ? (int) round($subjectSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+                'accuracy' => $submissionAverage($subjectSubmissions),
                 'count' => $subjectSubmissions->count(),
             ];
         })
         ->values();
 
     return view('students.show', [
+        'followUpAssessments' => InterventionFollowUp::availableAssessments($teacher, $student),
         'student' => $student,
         'submissions' => $submissions,
         'studentMetrics' => $studentMetrics,
         'subjectBreakdown' => $subjectBreakdown,
+        'readingProgress' => StudentProgress::literacy($submissions),
         'studentIsOnline' => $studentIsOnline,
         'assessmentRequests' => $assessmentRequests,
         'assistedAssessments' => $student->isApproved() ? $teacher->createdAssessments()->where('status', 'published')->latest()->get()
@@ -517,7 +534,7 @@ Route::post('/teacher/students/{student}/assessment-requests/{retakeRequest}/dec
     ->middleware(['auth', 'verified'])
     ->name('students.assessment-requests.decline');
 
-Route::get('/teacher/reports', function () use ($submissionAccuracy) {
+Route::get('/teacher/reports', function () use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
@@ -534,36 +551,42 @@ Route::get('/teacher/reports', function () use ($submissionAccuracy) {
         ->whereIn('id', $studentIdsWithTeacherResults)
         ->orderBy('name')
         ->get()
-        ->map(function (User $student) use ($submissions, $submissionAccuracy): User {
+        ->map(function (User $student) use ($submissions, $submissionAverage): User {
             $studentSubmissions = $submissions->where('user_id', $student->id);
             $student->completed_assessments_count = $studentSubmissions->count();
-            $student->average_accuracy = $studentSubmissions->isNotEmpty()
-                ? (int) round($studentSubmissions->avg(fn ($submission) => $submissionAccuracy($submission)))
-                : null;
+            $student->average_accuracy = $submissionAverage($studentSubmissions);
             $student->total_points = (int) $studentSubmissions->sum('points');
+            $student->latest_submission = $studentSubmissions->sortByDesc('submitted_at')->first();
 
             return $student;
         });
 
     $reportMetrics = [
-        'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'average_accuracy' => $submissionAverage($submissions),
         'completed_count' => $submissions->count(),
         'students_with_results' => $submissions->pluck('user_id')->unique()->count(),
     ];
 
     $subjectBreakdown = collect(['literacy' => 'Literacy', 'numeracy' => 'Numeracy'])
-        ->map(function (string $label, string $subject) use ($submissions, $submissionAccuracy): array {
+        ->map(function (string $label, string $subject) use ($submissions, $submissionAverage): array {
             $subjectSubmissions = $submissions->filter(fn ($submission): bool => ($submission->assessment?->subject ?? null) === $subject);
 
             return [
                 'label' => $label,
-                'accuracy' => $subjectSubmissions->isNotEmpty() ? (int) round($subjectSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+                'accuracy' => $submissionAverage($subjectSubmissions),
                 'count' => $subjectSubmissions->count(),
             ];
         })
         ->values();
 
     return view('reports.index', [
+        'followUpPlans' => InterventionPlan::whereHas('submission.assessment', fn ($query) => $query->where('created_by', $teacher->id))
+            ->whereHas('submission.student', fn ($query) => $query->where('role', 'student'))
+            ->with(['submission.student', 'submission.assessment', 'followUpAssessment'])
+            ->orderByRaw('follow_up_submission_id IS NOT NULL')
+            ->orderByRaw("status = 'done'")
+            ->orderByRaw('follow_up_date IS NULL')->orderBy('follow_up_date')->orderBy('id')
+            ->paginate(10, ['*'], 'followups')->withQueryString(),
         'students' => $students,
         'submissions' => $submissions,
         'reportMetrics' => $reportMetrics,
@@ -571,7 +594,7 @@ Route::get('/teacher/reports', function () use ($submissionAccuracy) {
     ]);
 })->middleware(['auth', 'verified'])->name('reports.index');
 
-Route::get('/teacher/reports/students/{student?}', function (?User $student = null) use ($submissionAccuracy) {
+Route::get('/teacher/reports/students/{student?}', function (?User $student = null) use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
@@ -593,7 +616,7 @@ Route::get('/teacher/reports/students/{student?}', function (?User $student = nu
     }
 
     $submissions = AssessmentSubmission::query()
-        ->with('assessment')
+        ->with(['assessment', 'interventionPlan.followUpAssessment', 'interventionPlan.followUpSubmission.assessment'])
         ->where('user_id', $student->id)
         ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
         ->latest('submitted_at')
@@ -601,33 +624,39 @@ Route::get('/teacher/reports/students/{student?}', function (?User $student = nu
 
     $studentMetrics = [
         'completed_count' => $submissions->count(),
-        'average_accuracy' => $submissions->isNotEmpty() ? (int) round($submissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+        'average_accuracy' => $submissionAverage($submissions),
         'total_points' => (int) $submissions->sum('points'),
     ];
 
     $subjectBreakdown = collect(['literacy' => 'Literacy', 'numeracy' => 'Numeracy'])
-        ->map(function (string $label, string $subject) use ($submissions, $submissionAccuracy): array {
+        ->map(function (string $label, string $subject) use ($submissions, $submissionAverage): array {
             $subjectSubmissions = $submissions->filter(fn ($submission): bool => ($submission->assessment?->subject ?? null) === $subject);
 
             return [
                 'label' => $label,
-                'accuracy' => $subjectSubmissions->isNotEmpty() ? (int) round($subjectSubmissions->avg(fn ($submission) => $submissionAccuracy($submission))) : null,
+                'accuracy' => $submissionAverage($subjectSubmissions),
                 'count' => $subjectSubmissions->count(),
             ];
         })
         ->values();
 
     return view('reports.student', [
+        'followUpAssessments' => InterventionFollowUp::availableAssessments($teacher, $student),
         'student' => $student,
         'submissions' => $submissions,
         'studentMetrics' => $studentMetrics,
         'subjectBreakdown' => $subjectBreakdown,
+        'readingProgress' => StudentProgress::literacy($submissions),
     ]);
 })->middleware(['auth', 'verified'])->name('reports.student');
 
 Route::get('/teacher/assessments', [AssessmentController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('assessments.index');
+
+Route::get('/teacher/assessments/create', [AssessmentController::class, 'create'])
+    ->middleware(['auth', 'verified'])
+    ->name('assessments.create');
 
 Route::post('/teacher/assessments', [AssessmentController::class, 'store'])
     ->middleware(['auth', 'verified'])

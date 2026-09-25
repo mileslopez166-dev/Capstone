@@ -83,6 +83,10 @@
         $questionCount = $gameQuestions->count();
         $firstQuestion = $gameQuestions->first();
         $missionTitle = str($assessment->title)->upper()->limit(28, '');
+        $assessmentTutorConfig = [
+            'available' => (bool) config('tutor.enabled') && filled(config('tutor.key')) && ! $assisted,
+            'sendUrl' => route('student.assessments.tutor', $assessment),
+        ];
     @endphp
 
     <style>
@@ -185,8 +189,50 @@
                 <div class="assessment-heading-copy">
                     <p>{{ $assessmentTypeLabel }}</p>
                     <h1 id="assessment-title">{{ $assessment->title }}</h1>
+                    <x-teacher-identity :teacher="$assessment->teacher" />
                 </div>
                 <x-assessment-text-settings />
+                @unless ($assisted)
+                    <div class="assessment-word-helper" x-data="assessmentWordHelp(@js($assessmentTutorConfig))" @keydown.escape.window="open = false">
+                        <button class="assessment-helper-toggle" type="button" @click="toggle()" :aria-expanded="open.toString()" aria-controls="assessment-word-helper-panel">
+                            <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+                            <span>Ask for help</span>
+                        </button>
+                        <section id="assessment-word-helper-panel" class="assessment-helper-panel" x-show="open" x-transition x-cloak aria-label="Assessment tutor">
+                            <div class="assessment-helper-heading">
+                                <div>
+                                    <strong>Ask Tutor</strong>
+                                    <p>For words or directions you do not understand.</p>
+                                </div>
+                                <button type="button" @click="open = false" aria-label="Close assessment tutor"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                            </div>
+                            <div class="assessment-helper-messages" x-ref="messages" role="log" aria-live="polite">
+                                <p class="assessment-helper-empty" x-show="turns.length === 0">Ask about a word, sentence, or instruction. I can explain, but I will not answer the test for you.</p>
+                                <template x-for="turn in turns" :key="turn.id">
+                                    <article class="assessment-helper-turn">
+                                        <p><strong>You:</strong> <span x-text="turn.question"></span></p>
+                                        <p><strong>Tutor:</strong> <span x-text="turn.answer"></span></p>
+                                    </article>
+                                </template>
+                            </div>
+                            <p class="assessment-helper-status" role="status" x-show="busy" x-cloak>Thinking...</p>
+                            <p class="assessment-helper-error" role="alert" x-show="error" x-text="error" x-cloak></p>
+                            <form class="assessment-helper-form" @submit.prevent="send()" :aria-busy="busy">
+                                <label for="assessment-helper-question">Question</label>
+                                <textarea id="assessment-helper-question" x-ref="question" x-model="draft" :disabled="!available || busy" maxlength="1500" rows="2" placeholder="What word or direction is confusing?" required></textarea>
+                                <div>
+                                    <small x-text="draft.length + ' / 1500'"></small>
+                                    <button type="submit" :disabled="!available || busy || !draft.trim()">
+                                        <span>Send</span>
+                                        <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                                    </button>
+                                </div>
+                            </form>
+                            <p class="assessment-helper-disclosure" x-show="available">Do not share passwords or personal details. Ask your teacher for important help.</p>
+                            <p class="assessment-helper-error" x-show="!available">Ask Tutor is not connected yet. Please ask your teacher for help.</p>
+                        </section>
+                    </div>
+                @endunless
                 <div class="assessment-attempt">
                     <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
@@ -388,7 +434,7 @@
                         <p><span class="material-symbols-outlined" aria-hidden="true">target</span> {{ $isOralReading ? 'Word Reading' : 'Accuracy Score' }}</p>
                         <div class="assessment-result-value"><strong id="result-accuracy">0</strong><span id="result-accuracy-unit">%</span></div>
                         <div class="assessment-result-track"><div id="result-progress" style="width: 0%"></div></div>
-                        @if ($isOralReading)<p>Provisional / awaiting teacher confirmation</p>@endif
+                        @if ($isOralReading)<p>Calculated from red-marked words</p>@endif
                     </article>
                     <article class="assessment-result-metric assessment-metric-xp">
                         <p><span class="material-symbols-outlined" aria-hidden="true">stars</span> Experience Earned</p>
@@ -405,6 +451,7 @@
                 @if ($assessment->subject === 'literacy')
                     <x-phil-iri-result :live="true" />
                 @endif
+                <p class="assessment-coin-reward" role="status"><span class="material-symbols-outlined" aria-hidden="true">toll</span><strong id="result-coins">Saving coin reward...</strong></p>
                 <div class="assessment-result-detail">
                     <section class="assessment-breakdown" aria-labelledby="breakdown-title">
                         <h3 id="breakdown-title">Performance Breakdown</h3>
@@ -459,6 +506,7 @@
                     const resultProgress = document.getElementById('result-progress');
                     const resultAccuracyUnit = document.getElementById('result-accuracy-unit');
                     const resultPoints = document.getElementById('result-points');
+                    const resultCoins = document.getElementById('result-coins');
                     const resultCorrect = document.getElementById('result-correct');
                     const resultBadgeTitle = document.getElementById('result-badge-title');
                     const resultBadge = document.getElementById('result-badge');
@@ -591,8 +639,16 @@
                         currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
                         if (currentQuestionIndex < 0) currentQuestionIndex = targetsNeeded;
                         totalScore = questions.filter((question, index) => question.correct === capturedAnswers[index]).length;
-                        missionStarted = state.phase ? state.phase !== 'reading' : !storyGate;
-                        missionFinished = state.phase === 'finished' || (targetsNeeded > 0 && caughtCount === targetsNeeded);
+                        const savedPhase = typeof state.phase === 'string' ? state.phase : null;
+                        const hasQuestionProgress = Object.keys(capturedAnswers).length > 0;
+                        missionFinished = savedPhase === 'finished' || (targetsNeeded > 0 && caughtCount === targetsNeeded);
+                        missionStarted = !storyGate;
+                        if (storyGate && savedPhase === 'questions') {
+                            // Starting questions without answering should not skip the story on the next open.
+                            missionStarted = hasQuestionProgress || missionFinished;
+                        } else if (savedPhase) {
+                            missionStarted = savedPhase !== 'reading';
+                        }
                         readingElapsedSeconds = Math.max(0, Number(state.reading_seconds || 0));
                         timerStatus = state.timer_status === 'running' ? 'paused' : (state.timer_status || 'idle');
                         storyReaderText?.querySelectorAll('.story-sentence').forEach((sentence, index) => setSentenceMark(sentence, Number(state.sentence_marks?.[index] || 0)));
@@ -1323,6 +1379,7 @@
                         submissionInFlight = true;
                         resultAction.disabled = true;
                         resultPoints.innerText = 'Saving...';
+                        resultCoins.textContent = 'Saving coin reward...';
                         resultSummary.innerText = 'Checking your real score...';
 
                         try {
@@ -1353,18 +1410,21 @@
                             resultAccuracy.innerText = accuracy.toLocaleString();
                             resultProgress.style.width = `${Math.min(accuracy, 100)}%`;
                             resultPoints.innerText = result.points.toLocaleString();
+                            resultCoins.textContent = result.coins_pending
+                                ? 'Coins awaiting teacher score'
+                                : `${Number(result.coins_earned || 0).toLocaleString()} coins earned`;
                             resultCorrect.innerText = `${result.correct_count}/${result.question_count}`;
                             resultSummary.innerText = `${result.correct_count} of ${result.question_count} correct. You earned ${result.points.toLocaleString()} of ${result.possible_points.toLocaleString()} EXP.`;
                             if (result.phil_iri) {
                                 resultBadgeTitle.innerText = 'Literacy Assessment';
-                                resultBadge.innerText = result.phil_iri.status === 'awaiting_teacher'
-                                    ? 'Your reading has been saved for teacher scoring.'
+                                resultBadge.innerText = result.phil_iri.status === 'complete'
+                                    ? 'Your score was calculated from the assessment formula.'
                                     : 'Keep reading and building your skills.';
                                 if (result.question_count === 0) {
                                     resultAccuracy.innerText = 'N/A';
                                     resultAccuracyUnit.innerText = '';
                                     resultCorrect.innerText = 'Not assessed';
-                                    resultSummary.innerText = 'Reading activity saved. Your teacher can complete the Phil-IRI scoring.';
+                                    resultSummary.innerText = 'Reading activity saved. The score will appear after the reading marks are recorded.';
                                 }
                                 if (isOralReading) {
                                     const wordAccuracy = result.phil_iri.word_reading_percent;
@@ -1372,7 +1432,7 @@
                                     resultAccuracyUnit.innerText = wordAccuracy == null ? '' : '%';
                                     resultProgress.style.width = `${wordAccuracy ?? 0}%`;
                                     resultCorrect.innerText = result.phil_iri.marked_miscues == null ? 'Not recorded' : result.phil_iri.marked_miscues.toLocaleString();
-                                    if (wordAccuracy != null) resultSummary.innerText = 'Word-reading score saved. Awaiting teacher confirmation.';
+                                    if (wordAccuracy != null) resultSummary.innerText = 'Word-reading score calculated from the red-marked words.';
                                 }
                             } else {
                                 setResultBadge(accuracy);
@@ -1383,6 +1443,7 @@
                             }
                         } catch (error) {
                             resultPoints.innerText = 'Sync failed';
+                            resultCoins.textContent = 'Coin reward not confirmed. Retry saving.';
                             resultAccuracy.innerText = '0';
                             resultProgress.style.width = '0%';
                             resultSummary.innerText = 'Your answers were captured, but the score could not be saved. Please try again.';

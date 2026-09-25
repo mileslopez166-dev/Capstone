@@ -13,7 +13,7 @@
                 <a class="wardrobe-back" href="{{ route('profile.edit') }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> Profile</a>
                 <h1>My Wardrobe</h1>
             </div>
-            <a class="wardrobe-owner" href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span> {{ $coinBalance }} practice coins</a>
+            <a class="wardrobe-owner" href="{{ route('student.rewards') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span> {{ $coinBalance }} coins</a>
         </header>
 
         @if (session('status') === 'avatar-saved')
@@ -110,7 +110,7 @@
                                             @if ($locked)
                                                 <button class="wardrobe-try-on" type="button" @click="tryOn('{{ $key }}', '{{ $value }}')" :aria-pressed="(preview?.{{ $key }} === '{{ $value }}').toString()" aria-label="Preview {{ $item['label'] }}"><span class="material-symbols-outlined" aria-hidden="true">visibility</span>Try on</button>
                                                 <button class="wardrobe-unlock" type="submit" form="wardrobe-purchase" name="item" value="{{ $key.':'.$value }}"
-                                                    @disabled($coinBalance < $item['cost']) aria-label="Unlock {{ $item['label'] }} for {{ $item['cost'] }} coins" title="{{ $coinBalance < $item['cost'] ? 'Earn more coins in Practice Missions' : 'Unlock '.$item['label'] }}">
+                                                    @disabled($coinBalance < $item['cost']) aria-label="Unlock {{ $item['label'] }} for {{ $item['cost'] }} coins" title="{{ $coinBalance < $item['cost'] ? 'Earn more coins in assessments or Practice Missions' : 'Unlock '.$item['label'] }}">
                                                     <span class="material-symbols-outlined" aria-hidden="true">lock</span> {{ $item['cost'] }} coins
                                                 </button>
                                             @elseif (isset($item['cost']))<span class="wardrobe-owned">Unlocked</span>@endif

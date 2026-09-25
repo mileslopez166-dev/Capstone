@@ -106,27 +106,12 @@
         </div>
     </div>
 
-    <nav class="campus-sidebar-links space-y-1 px-2">
-        @foreach ($links as $link)
-            <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase tracking-widest transition-all {{ $active === $link['key'] ? 'border-r-4 border-blue-600 font-bold text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:bg-slate-200' }}" href="{{ $link['href'] }}" @if ($active === $link['key']) aria-current="page" @endif>
-                <span class="material-symbols-outlined">{{ $link['icon'] }}</span>
-                <span>{{ $link['label'] }}</span>
-            </a>
-        @endforeach
+    <nav class="campus-sidebar-links px-2" aria-label="Student pages">
+        <x-role-navigation role="student" />
     </nav>
-
-    <a class="flex items-center gap-3 px-6 py-3 text-sm font-bold text-primary {{ $active === 'practice' ? 'border-r-4 border-blue-600 bg-blue-100' : '' }}" href="{{ route('student.practice.index') }}" @if ($active === 'practice') aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">flag</span>Practice Missions</a>
     <x-student-companion :user="$student" :page="$active" />
 
     <div class="campus-sidebar-footer mt-auto space-y-1 px-2">
-        <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase tracking-widest text-slate-500 transition-all hover:bg-slate-200" href="{{ route('student.wardrobe.edit') }}" @if (request()->routeIs('student.wardrobe.*')) aria-current="page" @endif>
-            <span class="material-symbols-outlined">checkroom</span>
-            <span>Wardrobe</span>
-        </a>
-        <a class="flex items-center gap-3 px-4 py-3 font-headline text-sm uppercase tracking-widest transition-all {{ $active === 'profile' ? 'border-r-4 border-blue-600 font-bold text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:bg-slate-200' }}" href="{{ route('profile.edit') }}">
-            <span class="material-symbols-outlined">settings</span>
-            <span>Profile</span>
-        </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="flex w-full items-center gap-3 px-4 py-3 text-left font-headline text-sm uppercase tracking-widest text-slate-500 transition-all hover:bg-slate-200" type="submit">
@@ -139,6 +124,7 @@
 
 <header class="campus-topbar campus-student-topbar sticky top-0 z-30 flex items-center justify-between bg-white/80 px-5 py-5 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl sm:px-8 sm:py-6 lg:ml-72">
     <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+        <x-role-mobile-menu role="student" />
         <a class="hidden font-headline text-xl font-black uppercase tracking-tighter text-blue-700 sm:inline lg:hidden" href="{{ route('student.dashboard') }}">AI-PGAALS</a>
         <form class="campus-search flex min-w-0 items-center rounded-full border border-outline-variant/10 bg-surface-container-low px-3 py-2 sm:px-4" method="GET" action="{{ route('student.search') }}">
             <button class="mr-2 inline-flex text-outline transition-colors hover:text-primary" type="submit" aria-label="Search student activities">

@@ -12,6 +12,12 @@ import '../css/ui-polish.css';
 import '../css/phil-iri.css';
 import './phil-iri';
 import '../css/worksheets.css';
+import '../css/sidebar-navigation.css';
+import '../css/app-footer.css';
+import '../css/teacher-photo.css';
+import '../css/student-tutor.css';
+import '../css/teacher-ai-assistant.css';
+import '../css/dark-mode.css';
 import './worksheet-book';
 import { initFrogJump } from './frog-jump';
 import comfortControls, { preferences } from './ui-preferences';
@@ -20,12 +26,20 @@ import './page-transitions';
 import Alpine from 'alpinejs';
 import studentCompanion from './student-companion';
 import avatarWardrobe from './avatar-wardrobe';
+import teacherPhotoUpload from './teacher-photo-upload';
+import studentTutor from './student-tutor';
+import assessmentWordHelp from './assessment-word-help';
+import teacherAiAssistant from './teacher-ai-assistant';
 
 window.Alpine = Alpine;
 
 Alpine.data('studentCompanion', studentCompanion);
 Alpine.data('avatarWardrobe', avatarWardrobe);
 Alpine.data('comfortControls', comfortControls);
+Alpine.data('teacherPhotoUpload', teacherPhotoUpload);
+Alpine.data('studentTutor', studentTutor);
+Alpine.data('assessmentWordHelp', assessmentWordHelp);
+Alpine.data('teacherAiAssistant', teacherAiAssistant);
 
 Alpine.start();
 

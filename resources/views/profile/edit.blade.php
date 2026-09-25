@@ -44,6 +44,8 @@
                     <div class="mt-8 flex items-center gap-4">
                         @if ($isStudent)
                             <x-student-pixel-avatar :user="$user" :name="$user->name" size="sm" :rank-tier="$studentRankTier" :rank="$studentRank" />
+                        @elseif ($isTeacher)
+                            <x-teacher-avatar :teacher="$user" />
                         @else
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl font-black text-white shadow-inner">
                                 {{ $initials }}
@@ -74,6 +76,7 @@
 
             <div class="teacher-profile-forms grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <section class="space-y-6">
+                    @if ($isTeacher) @include('profile.partials.teacher-photo-form') @endif
                     <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <div class="mb-6">
                             <h2 class="font-headline text-2xl font-bold text-on-surface">Profile Information</h2>

@@ -46,13 +46,42 @@ class TeacherReportsPageTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create(['name' => 'Juan Dela Cruz']);
         $assessment = $this->createAssessment($teacher, ['title' => 'Owned Reading Mission']);
-        $this->createSubmission($assessment, $student);
+        $submission = $this->createSubmission($assessment, $student);
 
         $response = $this->actingAs($teacher)->get(route('reports.student'));
 
         $response->assertOk();
         $response->assertSeeText('Juan Dela Cruz');
         $response->assertSeeText('Owned Reading Mission');
+        $response->assertSee('id="submission-'.$submission->id.'"', false);
+    }
+
+    public function test_individual_report_shows_reading_progress_over_time(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Progress Learner']);
+        $first = $this->createAssessment($teacher, ['title' => 'First Story']);
+        $latest = $this->createAssessment($teacher, ['title' => 'Latest Story']);
+        $this->createSubmission($first, $student, [
+            'correct_count' => 2, 'question_count' => 4, 'points' => 500,
+            'possible_points' => 1000, 'submitted_at' => now()->subDays(2),
+        ]);
+        $this->createSubmission($latest, $student, [
+            'correct_count' => 3, 'question_count' => 4, 'points' => 750,
+            'possible_points' => 1000, 'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($teacher)->get(route('reports.student', ['student' => $student]));
+
+        $response->assertOk()
+            ->assertViewHas('readingProgress', fn ($progress) => $progress['latest_score'] === 75
+                && $progress['previous_score'] === 50
+                && $progress['change'] === 25
+                && $progress['status_label'] === 'Improved'
+                && $progress['level_transition'] === 'Frustration to Instructional')
+            ->assertSeeText('Reading Progress Over Time')
+            ->assertSeeText('+25 pts')
+            ->assertSeeText('Frustration to Instructional');
     }
 
     public function test_teacher_cannot_open_report_for_student_without_teacher_owned_answers(): void
@@ -101,10 +130,27 @@ class TeacherReportsPageTest extends TestCase
         $response = $this->actingAs($teacher)->get(route('reports.index'));
 
         $response->assertOk();
-        $response->assertSeeText('1 completed assessments');
+        $response->assertSeeText('1 finished assessment');
         $response->assertSeeText('Students with results: 1');
         $response->assertSee(route('reports.student', ['student' => $ownedStudent]));
         $response->assertDontSee(route('reports.student', ['student' => $foreignStudent]));
+    }
+
+    public function test_reports_index_class_comparison_lists_students_with_finished_assessments(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Miles Lopez']);
+        $assessment = $this->createAssessment($teacher, ['title' => 'The School Garden Project']);
+        $this->createSubmission($assessment, $student);
+
+        $response = $this->actingAs($teacher)->get(route('reports.index'));
+
+        $response->assertOk();
+        $response->assertSeeText('Class Comparison');
+        $response->assertSeeText('Miles Lopez');
+        $response->assertSeeText('1 finished assessment');
+        $response->assertSeeText('Latest: The School Garden Project');
+        $response->assertSee(route('reports.student', ['student' => $student]), false);
     }
 
     private function createAssessment(User $teacher, array $overrides = []): Assessment

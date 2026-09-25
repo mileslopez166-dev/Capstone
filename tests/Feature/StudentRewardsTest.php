@@ -27,7 +27,7 @@ class StudentRewardsTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Rewards');
-        $response->assertSeeText('Practice Wardrobe');
+        $response->assertSeeText('Wardrobe');
         $response->assertSeeText('0 rewards unlocked');
         $response->assertDontSeeText('No Reward Data');
         $response->assertSeeText('Performance Breakdown');

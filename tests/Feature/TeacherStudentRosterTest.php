@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Assessment;
 use App\Models\AssessmentRetakeRequest;
+use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class TeacherStudentRosterTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_teacher_dashboard_lists_real_student_accounts_from_database(): void
+    public function test_teacher_dashboard_keeps_summaries_without_the_student_roster(): void
     {
         $teacher = User::factory()->teacher()->create();
         $studentA = User::factory()->create([
@@ -28,10 +29,49 @@ class TeacherStudentRosterTest extends TestCase
         $response = $this->actingAs($teacher)->get(route('teacher.dashboard'));
 
         $response->assertOk();
-        $response->assertSeeText($studentA->name);
-        $response->assertSeeText($studentB->name);
-        $response->assertSeeText($studentA->email);
-        $response->assertSeeText($studentB->email);
+        $response->assertDontSeeText('Student Roster');
+        $response->assertDontSeeText('Open roster');
+        $response->assertDontSee('class="teacher-roster"', false);
+        $response->assertDontSeeText($studentA->email);
+        $response->assertDontSeeText($studentB->email);
+        $response->assertSeeText('2 student accounts');
+        $response->assertSeeText('Student Performance Overview');
+        $response->assertSeeText('Focus Areas');
+        $response->assertSee('href="'.route('students.index').'"', false);
+    }
+
+    public function test_teacher_dashboard_recent_finished_assessments_are_clickable(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Miles Lopez']);
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Finished Reading Check',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'assessment_type' => 'silent_reading',
+            'focus_areas' => ['Comprehension Depth'],
+            'manual_questions' => [],
+            'status' => 'published',
+        ]);
+        $submission = AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'attempt_number' => 1,
+            'answers' => [],
+            'correct_count' => 0,
+            'question_count' => 0,
+            'points' => 0,
+            'possible_points' => 0,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($teacher)->get(route('teacher.dashboard'))
+            ->assertOk()
+            ->assertSeeText('Finished Reading Check')
+            ->assertSee('href="'.route('teacher.phil-iri.show', $submission).'"', false);
     }
 
     public function test_students_index_lists_real_student_accounts_from_database(): void

@@ -112,7 +112,9 @@
 .teacher-section-heading > a { display: inline-flex; align-items: center; gap: 5px; color: #18745b; font-size: 12px; font-weight: 600; flex-shrink: 0; }
 .teacher-section-heading > a .material-symbols-outlined { font-size: 17px; }
 .teacher-results { background: #fff; border-top: 1px solid #e4ebe6; }
-.teacher-result { display: flex; align-items: center; gap: 12px; padding: 16px 12px; border-bottom: 1px solid #e4ebe6; }
+.teacher-result { display: flex; align-items: center; gap: 12px; padding: 16px 12px; border-bottom: 1px solid #e4ebe6; color: inherit; text-decoration: none; }
+.teacher-result:hover { background: #f5faf7; }
+.teacher-result:focus-visible { outline: 3px solid #1f7a5f; outline-offset: -3px; }
 .teacher-result > .material-symbols-outlined { display: grid; place-items: center; width: 36px; height: 36px; background: #eef5f1; border-radius: 6px; color: #43816a; font-size: 19px; flex-shrink: 0; }
 .teacher-result > div { flex: 1; }
 .teacher-result strong { display: block; font-size: 13px; font-weight: 600; }
@@ -243,7 +245,7 @@
     .admin-topbar { gap: 14px; }
     .admin-theme main { padding: 24px 18px; }
     .admin-theme main h1.text-4xl { font-size: 24px; }
-    .admin-topbar details > div, .teacher-theme .campus-topbar details:not(.campus-mobile-menu) > div { position: fixed; top: 68px; left: 12px; right: 12px; width: auto; max-height: calc(100dvh - 150px); overflow-y: auto; }
+    .admin-topbar details > div, .teacher-theme .campus-topbar-actions > details > div { position: fixed; top: 68px; left: 12px; right: 12px; width: auto; max-height: calc(100dvh - 150px); overflow-y: auto; }
     .admin-topbar details > div { top: 130px; }
 }
 @media (max-width: 380px) {
@@ -301,6 +303,7 @@
 .teacher-theme .teacher-results { background: #f3f7f9; border: 1px solid #aec4d1; }
 .teacher-theme .teacher-result { padding: 16px; border-bottom-color: #c2d3dc; }
 .teacher-theme .teacher-result:nth-child(even) { background: #e8f0f5; }
+.teacher-theme .teacher-result:hover { background: #dfeaf0; }
 .teacher-theme .teacher-result:last-child { border-bottom: 0; }
 .teacher-theme .teacher-result > div { min-width: 0; overflow-wrap: anywhere; }
 .teacher-theme .teacher-result > .material-symbols-outlined { background: #d4e8df; border: 1px solid #a1c3b1; color: #246249; }
@@ -401,6 +404,19 @@
 .teacher-theme .assessment-type-reference > div { min-width: 540px; }
 .teacher-theme .teacher-report-overview > section:nth-child(2) { background-color: #dfede5; border-color: #9bbca9; }
 .teacher-theme .teacher-report-overview > section:nth-child(3) { background-color: #f4ecd7; border-color: #c9b888; }
+.class-comparison-list { display: grid; gap: 10px; max-height: 22rem; overflow-y: auto; padding-right: 4px; }
+.class-comparison-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 14px; border: 1px solid #bfd4c8; border-radius: 8px; background: #f6fbf8; color: #183d32; text-decoration: none; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.class-comparison-row:hover { transform: translateY(-1px); border-color: #7dad91; background: #edf7f1; }
+.class-comparison-row:focus-visible { outline: 3px solid #1f7a5f; outline-offset: 3px; }
+.class-comparison-row > .material-symbols-outlined:first-child { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #9fc2ad; border-radius: 8px; background: #dcefe4; color: #246249; font-size: 21px; }
+.class-comparison-row > div { min-width: 0; }
+.class-comparison-row strong { display: block; overflow-wrap: anywhere; font-size: 14px; color: #183d32; }
+.class-comparison-row p { margin-top: 4px; color: #526973; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.class-comparison-row dl { display: flex; gap: 8px; margin: 0; }
+.class-comparison-row dl div { min-width: 72px; padding: 8px 10px; border: 1px solid #b6cec1; border-radius: 6px; background: #fff; text-align: center; }
+.class-comparison-row dt { color: #60756b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.class-comparison-row dd { color: #1e7652; font-size: 13px; font-weight: 800; }
+.class-comparison-row > .material-symbols-outlined:last-child { color: #1f6b53; font-size: 20px; }
 .teacher-theme .teacher-summary-metrics > div:nth-child(2) { background-color: #dfede5; border-color: #9bbca9; }
 .teacher-theme .teacher-summary-metrics > div:nth-child(3) { background-color: #f4ecd7; border-color: #c9b888; }
 .teacher-theme .teacher-summary-metrics > div { border-left-width: 4px; }
@@ -435,4 +451,7 @@
     .teacher-theme .teacher-report-identity { align-items: flex-start; flex-direction: column; }
     .teacher-theme .teacher-report-actions :is(button, a) { padding-inline: 14px; }
     .teacher-theme .practice-stats > div + div { border-left: 0; border-top: 1px solid #a6becb; }
+    .class-comparison-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .class-comparison-row dl { grid-column: 1 / -1; flex-wrap: wrap; }
+    .class-comparison-row dl div { flex: 1 1 8rem; }
 }

@@ -57,7 +57,7 @@
                 <div class="teacher-workspace-heading mb-8 flex flex-wrap items-center justify-between gap-4">
                     <a class="inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary-dim" href="{{ route('assessments.index') }}">
                         <span class="material-symbols-outlined text-lg">arrow_back</span>
-                        Back to Assessment Builder
+                        Back to Created Assessments
                     </a>
                     <div class="flex flex-wrap gap-2">
                         <form method="POST" action="{{ route('assessments.availability', $assessment) }}" data-confirm-message="{{ $availabilityConfirm }}" onsubmit="return confirm(this.dataset.confirmMessage);">

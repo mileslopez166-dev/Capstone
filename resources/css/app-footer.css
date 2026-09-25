@@ -1,0 +1,36 @@
+.app-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 32px;
+    border-top: 1px solid #a4d6f6;
+    background: #eff9ff;
+    color: #315b7f;
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0;
+}
+.app-footer-brand { display: flex; align-items: center; gap: 10px; }
+.app-footer-brand > svg { width: 32px; height: 32px; flex-shrink: 0; color: #0764b7; }
+.app-footer-brand strong { display: block; font-size: 14px; }
+.app-footer-brand p { margin-top: 2px; }
+.app-footer nav { display: flex; align-items: center; gap: 8px; }
+.app-footer nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px; font-weight: 600; }
+.app-footer nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.app-footer nav a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+.teacher-theme .app-footer { border-color: #b6cbbf; background: #edf4ef; color: #466255; }
+.teacher-theme .app-footer-brand > svg { color: #175c43; }
+@media (min-width: 1024px) {
+    .campus-theme .app-footer { margin-left: var(--campus-sidebar-width); }
+    .teacher-theme .app-footer { margin-left: 244px; }
+}
+@media (max-width: 1023px) {
+    .campus-theme .app-footer { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 639px) {
+    .app-footer { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding-inline: 20px; }
+    .app-footer-brand { grid-column: 1 / -1; }
+    .app-footer nav { gap: 0; }
+    .app-footer nav a { padding-inline: 6px; }
+}

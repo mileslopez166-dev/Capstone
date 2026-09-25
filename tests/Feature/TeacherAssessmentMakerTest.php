@@ -15,11 +15,11 @@ class TeacherAssessmentMakerTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create();
 
-        $response = $this->actingAs($teacher)->get(route('assessments.index'));
+        $response = $this->actingAs($teacher)->get(route('assessments.create'));
 
         $response->assertOk();
         $response->assertSeeText('Create New Assessment');
-        $response->assertSeeText('No assessments yet');
+        $response->assertDontSee('assessment-list-item', false);
         $response->assertSeeText('Import Story and Questions from TXT');
         $response->assertSee('question-text-file');
         $response->assertSeeText('Frog Flashcards');
@@ -87,9 +87,9 @@ class TeacherAssessmentMakerTest extends TestCase
         unset($payload['manual_questions']);
 
         $this->actingAs($teacher)
-            ->from(route('assessments.index'))
+            ->from(route('assessments.create'))
             ->post(route('assessments.store'), $payload)
-            ->assertRedirect(route('assessments.index'))
+            ->assertRedirect(route('assessments.create'))
             ->assertSessionHasErrors('manual_questions');
     }
 
@@ -107,7 +107,7 @@ class TeacherAssessmentMakerTest extends TestCase
 
         $response->assertRedirect(route('worksheets.index'));
         $this->assertDatabaseMissing('assessments', ['title' => 'Number Sense Builder']);
-        $this->get(route('assessments.index', ['subject' => 'numeracy']))->assertRedirect(route('worksheets.index'));
+        $this->get(route('assessments.create', ['subject' => 'numeracy']))->assertRedirect(route('worksheets.index'));
     }
 
     public function test_teacher_can_lock_and_unlock_an_assessment(): void

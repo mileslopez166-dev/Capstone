@@ -8,7 +8,7 @@
         @forelse ($missions as $mission)
             <a class="practice-mission-card" href="{{ route('student.practice.show', $mission) }}">
                 <div class="practice-toolbar"><span class="practice-icon material-symbols-outlined" aria-hidden="true">{{ $mission->status === 'completed' ? 'task_alt' : 'flag' }}</span><x-status-badge :status="$mission->displayStatus(false)" /></div>
-                <h2>{{ $mission->title }}</h2><p>{{ $mission->teacher?->name ?? 'Your teacher' }}</p>
+                <h2>{{ $mission->title }}</h2><x-teacher-identity :teacher="$mission->teacher" />
                 <div class="practice-mission-meta"><span>{{ count($mission->words) }} words &middot; {{ count($mission->questions) }} questions</span><strong>{{ $mission->reward_coins }} coins</strong></div>
                 <span class="practice-link">{{ $mission->status === 'assigned' ? ($mission->progress ? 'Continue practice' : 'Start practice') : 'View mission' }} <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
             </a>

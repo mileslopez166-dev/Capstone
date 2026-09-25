@@ -9,6 +9,7 @@ use App\Models\AssessmentSubmission;
 use App\Models\User;
 use App\Models\WorksheetAttempt;
 use App\Support\AssessmentParticipant;
+use App\Support\AssessmentCoinRewards;
 use App\Support\NotificationSender;
 use App\Support\NumeracyWorksheets;
 use Illuminate\Http\Request;
@@ -31,7 +32,13 @@ class WorksheetController extends Controller
         abort_unless($request->user()->isTeacher(), 403);
         return view('worksheets.index', [
             'worksheets' => NumeracyWorksheets::all(),
-            'assignments' => $request->user()->createdAssessments()->whereNotNull('worksheet_number')->latest()->get(),
+        ]);
+    }
+
+    public function reviews(Request $request)
+    {
+        abort_unless($request->user()->isTeacher(), 403);
+        return view('worksheets.reviews', [
             'reviews' => WorksheetAttempt::with(['assessment', 'student'])
                 ->whereHas('assessment', fn ($query) => $query->where('created_by', $request->user()->id))
                 ->whereNull('reviewed_at')->oldest()->get(),
@@ -214,7 +221,7 @@ class WorksheetController extends Controller
 
     public function review(Request $request, WorksheetAttempt $attempt)
     {
-        $attempt->load(['assessment', 'student', 'progress.submission', 'progress.administrator']);
+        $attempt->load(['assessment', 'student', 'progress.submission.coinReward', 'progress.administrator']);
         $teacher = $request->user()->isTeacher() && $attempt->assessment->created_by === $request->user()->id;
         abort_unless($teacher || ($request->user()->isStudent() && $attempt->user_id === $request->user()->id), 404);
         return view('worksheets.review', ['attempt' => $attempt, 'assessment' => $attempt->assessment,
@@ -264,6 +271,7 @@ class WorksheetController extends Controller
             ]);
             $attempt->progress->update(['submission_id' => $submission->id]);
             $attempt->update(['score' => $data['score'], 'feedback' => $data['feedback'], 'reviewed_at' => now()]);
+            AssessmentCoinRewards::award($submission);
             NotificationSender::sendToUsers([$attempt->student], 'worksheet_graded', 'Your worksheet has been checked',
                 $attempt->assessment->title, route('worksheets.review', $attempt));
         });

@@ -18,6 +18,7 @@ class StudentLeaderboard
             ->get();
 
         $submissions = AssessmentSubmission::query()
+            ->with('assessment')
             ->whereIn('user_id', $students->pluck('id'))
             ->orderBy('id')
             ->get()
@@ -34,11 +35,7 @@ class StudentLeaderboard
                     'student' => $student,
                     'points' => (int) $bestAttempts->sum('points'),
                     'completed' => $bestAttempts->count(),
-                    'accuracy' => $bestAttempts->isNotEmpty()
-                        ? (int) round($bestAttempts->avg(fn (AssessmentSubmission $attempt): int => $attempt->question_count > 0
-                            ? (int) round(($attempt->correct_count / $attempt->question_count) * 100)
-                            : 0))
-                        : null,
+                    'accuracy' => AssessmentScores::average($bestAttempts),
                 ];
             })
             ->filter(fn (array $entry): bool => $entry['completed'] > 0)

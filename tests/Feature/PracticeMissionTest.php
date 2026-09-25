@@ -238,7 +238,7 @@ class PracticeMissionTest extends TestCase
         $this->assertDatabaseCount('practice_coin_transactions', 2);
         $this->patch(route('student.wardrobe.update'), ['avatar' => $look])->assertSessionHasNoErrors();
         $this->assertSame('star_cap', $student->fresh()->avatar_config['headwear']);
-        $this->get(route('student.wardrobe.edit'))->assertOk()->assertSee('75 practice coins')->assertViewHas('options', fn ($items) => !$items['headwear']['items']['star_cap']['locked'] && $items['headwear']['items']['crown']['locked']);
+        $this->get(route('student.wardrobe.edit'))->assertOk()->assertSee('75 coins')->assertViewHas('options', fn ($items) => !$items['headwear']['items']['star_cap']['locked'] && $items['headwear']['items']['crown']['locked']);
         $this->post(route('student.wardrobe.purchase'), ['item' => 'headwear:crown'])->assertSessionHasNoErrors();
         $this->assertSame(0, $student->practiceCoinBalance());
         $this->post(route('student.wardrobe.purchase'), ['item' => 'accessory:medal'])->assertSessionHasErrors('item');

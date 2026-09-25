@@ -19,7 +19,7 @@
                     <div class="teacher-workspace-heading mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                         <div class="space-y-1">
                             <h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Reports</h1>
-                            <a class="ui-button ui-button-secondary" href="{{ route('worksheets.index') }}#review"><span class="material-symbols-outlined">rate_review</span>Worksheet Reviews</a>
+                            <a class="ui-button ui-button-secondary" href="{{ route('worksheets.reviews') }}"><span class="material-symbols-outlined">rate_review</span>Worksheet Reviews</a>
                             <p class="text-lg text-on-surface-variant">{{ $submissions->isEmpty() ? 'Reports will populate when student progress is available in the system.' : 'Reports are connected to saved student assessment submissions.' }}</p>
                         </div>
                     </div>
@@ -30,6 +30,7 @@
                         </div>
                     @endif
 
+                    <x-intervention-follow-up-list :plans="$followUpPlans" />
                     <div class="teacher-report-overview grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <section class="rounded-sm border border-outline-variant/10 bg-surface-container-lowest p-6 lg:col-span-4">
                             <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-on-surface-variant">Student Distribution</h3>
@@ -42,11 +43,34 @@
 
                         <section class="rounded-sm border border-outline-variant/10 bg-surface-container-lowest p-6 lg:col-span-8">
                             <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-on-surface-variant">Class Comparison</h3>
-                            <div class="flex min-h-[18rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-6 text-center">
-                                <span class="material-symbols-outlined text-5xl text-outline-variant">analytics</span>
-                                <p class="mt-4 font-headline text-xl font-bold text-on-surface">{{ $reportMetrics['completed_count'] > 0 ? number_format($reportMetrics['completed_count']).' completed assessments' : 'No class performance yet' }}</p>
-                                <p class="mt-2 text-sm text-on-surface-variant">{{ $submissions->isEmpty() ? 'Literacy and numeracy comparisons will stay empty until real student results exist.' : 'Class comparison is calculated from completed assessments.' }}</p>
-                            </div>
+                            @if ($students->isEmpty())
+                                <div class="flex min-h-[18rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-6 text-center">
+                                    <span class="material-symbols-outlined text-5xl text-outline-variant">analytics</span>
+                                    <p class="mt-4 font-headline text-xl font-bold text-on-surface">No class performance yet</p>
+                                    <p class="mt-2 text-sm text-on-surface-variant">Students will appear here after they finish at least one assessment.</p>
+                                </div>
+                            @else
+                                <div class="class-comparison-list">
+                                    @foreach ($students as $student)
+                                        @php
+                                            $latestSubmission = $student->latest_submission;
+                                            $latestAssessment = $latestSubmission?->assessment;
+                                        @endphp
+                                        <a class="class-comparison-row" href="{{ route('reports.student', ['student' => $student]) }}">
+                                            <span class="material-symbols-outlined" aria-hidden="true">school</span>
+                                            <div>
+                                                <strong>{{ $student->name }}</strong>
+                                                <p>{{ $student->completed_assessments_count }} finished {{ Str::plural('assessment', $student->completed_assessments_count) }}{{ $latestAssessment ? ' / Latest: '.$latestAssessment->title : '' }}</p>
+                                            </div>
+                                            <dl>
+                                                <div><dt>Average</dt><dd>{{ $student->average_accuracy === null ? 'Pending' : $student->average_accuracy.'%' }}</dd></div>
+                                                <div><dt>Points</dt><dd>{{ number_format($student->total_points) }}</dd></div>
+                                            </dl>
+                                            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
                         </section>
 
                         <section class="rounded-sm border border-outline-variant/10 bg-surface-container-lowest p-6 lg:col-span-7">

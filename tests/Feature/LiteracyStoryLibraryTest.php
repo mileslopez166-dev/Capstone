@@ -51,10 +51,10 @@ class LiteracyStoryLibraryTest extends TestCase
 
     public function test_only_teachers_can_open_the_library_and_opening_it_creates_no_assessments(): void
     {
-        $this->get(route('assessments.index'))->assertRedirect(route('login'));
-        $this->actingAs(User::factory()->create())->get(route('assessments.index'))->assertForbidden();
-        $this->actingAs(User::factory()->admin()->create())->get(route('assessments.index'))->assertForbidden();
-        $response = $this->actingAs(User::factory()->teacher()->create())->get(route('assessments.index'));
+        $this->get(route('assessments.create'))->assertRedirect(route('login'));
+        $this->actingAs(User::factory()->create())->get(route('assessments.create'))->assertForbidden();
+        $this->actingAs(User::factory()->admin()->create())->get(route('assessments.create'))->assertForbidden();
+        $response = $this->actingAs(User::factory()->teacher()->create())->get(route('assessments.create'));
         $response->assertOk()->assertSeeText('Default story')->assertSeeText('Use Story');
         foreach ($this->stories() as $story) $response->assertSeeText($story['story_title']);
         $this->assertDatabaseCount('assessments', 0);

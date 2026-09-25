@@ -30,16 +30,18 @@ class StudentTaskQueue
     {
         $tasks = $assessments->map(fn ($assessment) => [
             'title' => $assessment->title, 'kind' => 'Assessment',
+            'teacher' => $assessment->teacher,
             'status' => $assessment->student_state, 'action' => $assessment->student_action,
             'url' => route('student.assessments.show', $assessment),
             'priority' => match ($assessment->student_state) { 'in_progress' => 0, 'not_started' => 2, default => 4 },
             'updated' => $assessment->student_progress_at?->timestamp ?? 0,
         ]);
-        $missions = PracticeMission::query()->where('student_id', $student->id)->where('status', 'assigned')->get();
+        $missions = PracticeMission::query()->with('teacher')->where('student_id', $student->id)->where('status', 'assigned')->get();
         foreach ($missions as $mission) {
             $started = ! empty($mission->progress);
             $tasks->push([
                 'title' => $mission->title, 'kind' => 'Practice Mission',
+                'teacher' => $mission->teacher,
                 'status' => $started ? 'in_progress' : 'not_started',
                 'action' => $started ? 'Continue Practice' : 'Start Practice',
                 'url' => route('student.practice.show', $mission),

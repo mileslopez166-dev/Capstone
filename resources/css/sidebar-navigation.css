@@ -1,0 +1,56 @@
+.role-navigation {
+    --nav-ink: #315b7f;
+    --nav-accent: #0764b7;
+    --nav-selected: #dcefff;
+    --nav-hover: #e6f3fb;
+    --nav-line: #b5d5ec;
+    display: grid;
+    gap: 4px;
+    padding: 0;
+}
+.teacher-theme .role-navigation { --nav-ink: #466255; --nav-accent: #175c43; --nav-selected: #c5e3d3; --nav-hover: #d4e9dd; --nav-line: #a9caba; }
+.role-navigation :is(.navigation-link, summary) { display: flex; align-items: center; gap: 10px; min-height: 44px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; color: var(--nav-ink); font-size: 13px; font-weight: 600; line-height: 1.5; text-transform: none; letter-spacing: 0; }
+.role-navigation :is(.navigation-link, summary):hover { background: var(--nav-hover); }
+.role-navigation .material-symbols-outlined { flex: 0 0 20px; width: 20px; color: inherit; font-size: 20px; }
+.role-navigation summary { cursor: pointer; list-style: none; user-select: none; }
+.role-navigation summary::-webkit-details-marker { display: none; }
+.role-navigation .navigation-chevron { margin-left: auto; transition: transform 180ms ease; }
+.navigation-group[open] > summary > .navigation-chevron { transform: rotate(180deg); }
+.role-navigation .navigation-group-active > summary { color: var(--nav-accent); font-weight: 800; }
+.role-navigation .navigation-children { display: grid; gap: 3px; margin: 4px 0 8px 22px; padding-left: 8px; border-left: 1px solid var(--nav-line); }
+.role-navigation .navigation-children .navigation-link { gap: 8px; padding: 9px 8px; font-size: 12px; }
+.role-navigation .navigation-link[aria-current="page"] { background: var(--nav-selected); color: var(--nav-accent); font-weight: 800; box-shadow: inset 3px 0 var(--nav-accent); }
+.role-navigation :is(summary, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: -2px; }
+.campus-theme .campus-sidebar, .teacher-theme .campus-sidebar { overflow-y: hidden; }
+.campus-sidebar .campus-sidebar-links { min-height: 0; flex: 0 1 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.teacher-theme .campus-sidebar-links { flex: 1 1 auto; }
+.teacher-section-label { flex-shrink: 0; }
+.role-mobile-menu { flex-shrink: 0; }
+.role-mobile-menu > nav { max-height: calc(100dvh - 170px); overflow-y: auto; overscroll-behavior: contain; }
+.campus-student-topbar .role-mobile-menu > nav { max-height: calc(100dvh - 230px); }
+.role-mobile-menu .navigation-mobile-logout { margin-top: 8px; padding-top: 8px; border-top: 1px solid #c5d8df; }
+.assessment-list-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.assessment-list-tools .worksheet-subjects { margin-bottom: 0; }
+.assessment-list-search { display: flex; align-items: center; gap: 8px; flex: 0 1 360px; }
+.assessment-list-search input { width: 100%; min-width: 0; }
+.assessment-list-item { padding: 20px; border: 1px solid #b6cbc1; border-radius: 8px; background: #fbfdfc; }
+.assessment-list-item-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 16px; border-top: 1px solid #d3dfd8; }
+.assessment-list-item-actions time { margin-left: auto; }
+@media (max-width: 480px) {
+    .campus-student-topbar .campus-search { flex: 1; padding-inline: 4px; }
+    .campus-student-topbar .campus-search input { width: 100%; padding-inline: 2px; }
+    .campus-student-topbar > div:first-child { gap: 8px; }
+    .campus-student-topbar .campus-topbar-actions { gap: 5px; }
+    .assessment-list-search { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .role-navigation .navigation-chevron { transition: none; } }
+@media (min-width: 1024px) and (max-height: 800px) {
+    .campus-theme .campus-sidebar, .teacher-theme .campus-sidebar { padding-top: 16px; padding-bottom: 8px; }
+    .campus-sidebar .campus-sidebar-brand { margin-bottom: 14px; }
+    .campus-sidebar .campus-sidebar-identity { margin-bottom: 12px; }
+    .teacher-theme .campus-sidebar-identity { padding-block: 10px; }
+    .teacher-section-label { margin-block: 12px; padding-block: 8px; }
+    .campus-sidebar .campus-companion { flex: 1 0 210px; min-height: 210px; max-height: 240px; margin-top: 8px; }
+    .campus-sidebar .campus-companion-character { height: 130px; max-height: 130px; }
+    .campus-sidebar .campus-speech { top: 0; bottom: auto; width: 214px; height: auto; min-height: 108px; }
+}

@@ -13,6 +13,7 @@
                 @if ($nextTask)
                     <x-status-badge :status="$nextTask['status']" />
                     <h2 id="next-task-heading">{{ $nextTask['title'] }}</h2>
+                    <x-teacher-identity :teacher="$nextTask['teacher']" />
                     <a class="ui-button" href="{{ $nextTask['url'] }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $nextTask['status'] === 'in_progress' ? 'play_arrow' : 'arrow_forward' }}</span>{{ $nextTask['action'] }}</a>
                 @else
                     <h2 id="next-task-heading">You're all caught up!</h2><p>Your next assignment will appear here.</p>
@@ -24,16 +25,25 @@
         <x-worksheet-pending />
         <x-worksheet-mission-entry />
         <section class="home-stats" aria-label="Your progress">
-            <a href="{{ route('student.practice.index') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span><div><strong>{{ number_format($coinBalance) }}</strong><span>Practice coins</span></div></a>
+            <a href="{{ route('student.rewards') }}"><span class="material-symbols-outlined" aria-hidden="true">toll</span><div><strong>{{ number_format($coinBalance) }}</strong><span>Coins</span></div></a>
             <a href="{{ route('student.activities') }}#recorded-outputs"><span class="material-symbols-outlined" aria-hidden="true">task_alt</span><div><strong>{{ $studentMetrics['completed_count'] }}</strong><span>Assessments done</span></div></a>
             <div><span class="material-symbols-outlined" aria-hidden="true">target</span><div><strong>{{ $studentMetrics['average_accuracy'] === null ? '--' : $studentMetrics['average_accuracy'].'%' }}</strong><span>Best-score accuracy</span></div></div>
             <a href="{{ route('student.leaderboard') }}"><span class="material-symbols-outlined" aria-hidden="true">stars</span><div><strong>{{ number_format($studentMetrics['total_points']) }}</strong><span>Best-score points</span></div></a>
         </section>
+        <x-reading-progress-card :progress="$readingProgress" audience="student" />
         <div class="home-columns">
             <section class="home-section" aria-labelledby="recent-results">
                 <header><h2 id="recent-results">Recent Results</h2><a href="{{ route('student.activities') }}#recorded-outputs">View all<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></header>
                 @forelse ($recentSubmissions as $submission)
-                    <a class="home-result" href="{{ route('student.activities') }}#result-{{ $submission->id }}"><span class="home-result-icon material-symbols-outlined" aria-hidden="true">assignment_turned_in</span><div><strong>{{ $submission->assessment?->title ?? 'Assessment' }}</strong><span>{{ $submission->submitted_at?->format('M j, Y') }} &middot; {{ $submission->correct_count }} / {{ $submission->question_count }} correct</span></div><strong>{{ number_format($submission->points) }}<small>points</small></strong><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
+                    @php
+                        $score = $submission->scorePercentage();
+                        $philResult = \App\Support\PhilIri::forSubmission($submission);
+                        $recommendation = $philResult['practice_recommendation'] ?? null;
+                        $scoreLabel = $submission->question_count > 0
+                            ? $submission->correct_count.' / '.$submission->question_count.' correct'
+                            : ($score === null ? 'Reading marks needed' : $score.'% Phil-IRI score');
+                    @endphp
+                    <a class="home-result" href="{{ route('student.activities') }}#result-{{ $submission->id }}"><span class="home-result-icon material-symbols-outlined" aria-hidden="true">assignment_turned_in</span><div><strong>{{ $submission->assessment?->title ?? 'Assessment' }}</strong><span>{{ $submission->submitted_at?->format('M j, Y') }} &middot; {{ $scoreLabel }}</span>@if ($recommendation)<span class="home-result-next">Next: {{ $recommendation['label'] }}</span>@endif</div><strong>{{ number_format($submission->points) }}<small>points</small></strong><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
                 @empty
                     <div class="home-empty"><span class="material-symbols-outlined" aria-hidden="true">assignment</span><p>No results yet. Your completed assessments will appear here.</p></div>
                 @endforelse

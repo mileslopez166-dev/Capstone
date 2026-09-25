@@ -6,7 +6,7 @@
         $breakdown = [
             ['label' => 'Completed Assessments', 'value' => number_format($studentMetrics['completed_count']), 'tone' => 'text-secondary'],
             ['label' => 'Saved Results', 'value' => number_format($studentMetrics['saved_results']), 'tone' => 'text-primary'],
-            ['label' => 'Practice Coins', 'value' => number_format($practiceCoins), 'tone' => 'text-tertiary'],
+            ['label' => 'Coins', 'value' => number_format($practiceCoins), 'tone' => 'text-tertiary'],
             ['label' => 'Wardrobe Rewards', 'value' => number_format($unlockedRewards), 'tone' => 'text-secondary'],
         ];
     @endphp
@@ -22,7 +22,7 @@
             <section class="relative z-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
                 <div class="mb-4 text-center lg:col-span-12">
                     <h1 class="mb-2 font-headline text-5xl font-extrabold tracking-tight text-primary md:text-7xl">Rewards</h1>
-                    <p class="text-xl font-medium text-on-surface-variant md:text-2xl">Your practice coins and wardrobe collection</p>
+                    <p class="text-xl font-medium text-on-surface-variant md:text-2xl">Your coins and wardrobe collection</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 lg:col-span-7 md:grid-cols-2">
@@ -58,7 +58,7 @@
                         <img class="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay" alt="" src="{{ asset('images/campus/pixel-world.png') }}">
                         <div class="relative flex flex-col items-center justify-between gap-8 md:flex-row">
                             <div class="text-center md:text-left">
-                                <h3 class="mb-2 font-headline text-3xl font-bold">Practice Wardrobe</h3>
+                                <h3 class="mb-2 font-headline text-3xl font-bold">Wardrobe</h3>
                                 <p class="max-w-sm text-lg text-on-primary/80">{{ number_format($practiceCoins) }} coins &middot; {{ $unlockedRewards }} rewards unlocked</p>
                                 <a class="practice-button practice-secondary mt-4" href="{{ route('student.wardrobe.edit') }}"><span class="material-symbols-outlined" aria-hidden="true">checkroom</span> Open wardrobe</a>
                             </div>

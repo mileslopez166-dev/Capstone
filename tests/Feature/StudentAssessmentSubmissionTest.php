@@ -96,6 +96,7 @@ class StudentAssessmentSubmissionTest extends TestCase
         $this->actingAs($student)
             ->get(route('student.assessments.show', $assessment))
             ->assertOk()
+            ->assertSee('data-phil-formula', false)
             ->assertSee('multiple-choice-hook-sound')
             ->assertSee('audio/multiple-choice-hook-reel.mp3');
 

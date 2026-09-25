@@ -121,6 +121,7 @@
 
                                                     <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment->title }}</h4>
                                                     <x-assessment-type-label :assessment="$assessment" />
+                                                    <x-teacher-identity :teacher="$assessment->teacher" />
                                                     <p class="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
                                                         {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
                                                     </p>
@@ -195,13 +196,14 @@
                                             </div>
                                             <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment?->title ?? 'Assessment' }}</h4>
                                             <x-assessment-type-label :assessment="$assessment" />
+                                            <x-teacher-identity :teacher="$assessment?->teacher" />
                                             <p class="mt-2 text-sm text-on-surface-variant">Submitted {{ $submission->submitted_at?->format('M d, Y h:i A') ?? 'recently' }} | {{ $submission->attempts_count }} total {{ Str::plural('attempt', $submission->attempts_count) }}</p>
                                         </div>
 
                                         <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->question_count > 0 ? $submission->accuracy.'%' : 'N/A' }}</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy === null ? 'Pending' : $submission->accuracy.'%' }}</p>
                                             </div>
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
@@ -209,12 +211,14 @@
                                             </div>
                                             <div class="rounded-xl bg-surface-container-low p-4 text-center">
                                                 <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'N/A' }}</p>
+                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'Phil-IRI' }}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
+                                    <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
+                                    <x-assessment-coin-reward :submission="$submission" />
+                                    <a class="ui-button ui-button-secondary mt-4" href="{{ route('student.tutor.index', ['submission' => $submission->id]) }}"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>Ask Tutor about this assessment</a>
                                     @if ($submission->worksheetAttempt)
                                         <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
                                     @else

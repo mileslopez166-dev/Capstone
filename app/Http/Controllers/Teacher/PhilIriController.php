@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\AssessmentSubmission;
+use App\Models\User;
+use App\Support\AssessmentCoinRewards;
 use App\Support\PhilIri;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,7 @@ class PhilIriController extends Controller
         $this->authorizeSubmission($request, $submission);
 
         return view('teacher.phil-iri', [
-            'submission' => $submission->load('student'),
+            'submission' => $submission->load(['student', 'coinReward']),
             'result' => PhilIri::forSubmission($submission),
         ]);
     }
@@ -45,6 +47,7 @@ class PhilIriController extends Controller
         $data = $request->validate($rules);
 
         DB::transaction(function () use ($submission, $request, $data) {
+            User::whereKey($submission->user_id)->lockForUpdate()->firstOrFail();
             $attempt = AssessmentSubmission::whereKey($submission->id)->lockForUpdate()->firstOrFail();
             $result = PhilIri::forSubmission($attempt);
             $result['word_count'] = (int) $data['word_count'];
@@ -57,6 +60,7 @@ class PhilIriController extends Controller
             $result['reviewed_by'] = $request->user()->id;
             $result['reviewed_at'] = now()->toIso8601String();
             $attempt->update(['phil_iri' => PhilIri::calculate($result)]);
+            AssessmentCoinRewards::award($attempt);
         });
 
         return redirect()->route('teacher.phil-iri.show', $submission)->with('status', 'Phil-IRI scoring saved.');

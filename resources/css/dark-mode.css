@@ -1,0 +1,430 @@
+html.dark {
+    --dark-bg: #07131f;
+    --dark-surface: #0d1b2a;
+    --dark-surface-2: #12243a;
+    --dark-surface-3: #18324d;
+    --dark-line: #29435f;
+    --dark-line-soft: #1f354d;
+    --dark-ink: #e8f2ff;
+    --dark-muted: #a7b8ca;
+    --dark-primary: #6ab8ff;
+    --dark-primary-strong: #2d8bd8;
+    --dark-success: #78e1b9;
+    --dark-warning: #ffd36b;
+    color-scheme: dark;
+}
+
+html.dark body {
+    background: var(--dark-bg);
+    color: var(--dark-ink);
+}
+
+html.dark :is(.bg-background, .bg-surface) { background-color: var(--dark-bg); }
+html.dark .bg-white,
+html.dark .bg-surface-container-lowest { background-color: var(--dark-surface); }
+html.dark .bg-surface-container-low { background-color: var(--dark-surface-2); }
+html.dark .bg-surface-container,
+html.dark .bg-surface-container-high { background-color: var(--dark-surface-3); }
+html.dark .bg-surface-container-highest { background-color: #203b5a; }
+html.dark .text-on-surface,
+html.dark :is(.text-slate-900, .text-gray-900, .text-zinc-900) { color: var(--dark-ink); }
+html.dark .text-on-surface-variant,
+html.dark :is(.text-slate-500, .text-slate-600, .text-gray-500, .text-gray-600, .text-zinc-500) { color: var(--dark-muted); }
+html.dark .text-primary { color: var(--dark-primary); }
+html.dark :is(.border-outline-variant, [class*="border-outline-variant"]) { border-color: var(--dark-line); }
+html.dark :is(.shadow-2xl, .shadow-xl, .shadow-lg, .shadow-md, [class*="shadow-"]) { --tw-shadow-color: rgba(0, 0, 0, .45); }
+
+html.dark :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    background-color: #0b1725;
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark :is(input, textarea)::placeholder { color: #7f95aa; }
+html.dark :is(input, select, textarea):focus {
+    border-color: var(--dark-primary);
+    box-shadow: 0 0 0 2px rgba(106, 184, 255, .24);
+}
+html.dark :is(input[type=checkbox], input[type=radio]) {
+    background-color: #0c1a2a;
+    border-color: #55708d;
+}
+html.dark :is(table thead, .bg-gray-50, .bg-slate-50) { background-color: #13263b; }
+html.dark tbody tr { border-color: var(--dark-line-soft); }
+html.dark tbody tr:hover { background-color: #132b43; }
+html.dark :is(dialog, [role=dialog]) { color: var(--dark-ink); }
+html.dark :is([role=dialog] > section, .modal-content) {
+    background-color: var(--dark-surface);
+    border-color: var(--dark-line);
+}
+
+html.dark .ui-icon-button {
+    background: #0f2236;
+    border-color: #355571;
+    color: var(--dark-ink);
+}
+html.dark .ui-icon-button:hover,
+html.dark .ui-icon-button[aria-expanded="true"] {
+    background: #183655;
+    color: #ffffff;
+}
+html.dark .comfort-panel,
+html.dark .assessment-text-panel,
+html.dark .worksheet-settings-panel {
+    background: #0e1d2e;
+    border-color: #365976;
+    color: var(--dark-ink);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, .42);
+}
+html.dark .comfort-heading,
+html.dark .assessment-text-panel-heading {
+    border-color: var(--dark-line);
+}
+html.dark .comfort-option:hover { color: #ffffff; }
+
+html.dark .login-page {
+    background: linear-gradient(rgba(5, 16, 30, .8), rgba(5, 16, 30, .92)), url('/images/campus/pixel-world.png') center bottom / cover fixed no-repeat;
+    color: var(--dark-ink);
+}
+html.dark .login-header,
+html.dark .login-footer {
+    background: rgba(9, 24, 39, .94);
+    border-color: #294765;
+    color: var(--dark-muted);
+}
+html.dark .login-brand,
+html.dark .login-options a,
+html.dark .login-register a { color: #77c8ff; }
+html.dark .login-form-panel {
+    background: rgba(10, 26, 43, .96);
+    border-color: #345875;
+    border-top-color: #60b7ff;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, .36);
+}
+html.dark .login-heading h1 { color: var(--dark-ink); }
+html.dark .login-heading p,
+html.dark .login-options label,
+html.dark .login-register { color: var(--dark-muted); }
+html.dark .login-page .auth-input {
+    background: #0d1c2d;
+    border-color: #35536c;
+    color: var(--dark-ink);
+}
+html.dark .login-password-toggle:hover { background: #17324d; color: #91d4ff; }
+html.dark .login-register { border-color: var(--dark-line); }
+
+html.dark .campus-theme {
+    --campus-ink: #eaf6ff;
+    --campus-line: #24557a;
+    --campus-blue: #64b7ff;
+    background: #061827;
+    color: var(--campus-ink);
+}
+html.dark .campus-theme::before {
+    background: linear-gradient(rgba(4, 18, 31, .78), rgba(4, 18, 31, .92)), url('/images/campus/pixel-world.png') center bottom / cover no-repeat;
+}
+html.dark .campus-theme .text-on-surface { color: #eaf6ff; }
+html.dark .campus-theme .text-on-surface-variant { color: #a4bfd5; }
+html.dark .campus-theme :is(.campus-sidebar, .campus-sidebar-footer, .campus-topbar, .campus-bottom-nav) {
+    background: rgba(8, 25, 42, .94);
+    border-color: #24557a;
+    color: #eaf6ff;
+}
+html.dark .campus-brand { color: #7fc8ff; }
+html.dark .campus-brand > span:last-child { text-shadow: 1px 1px 0 #061423, 2px 2px 0 #2a78c2; }
+html.dark .campus-sidebar-links > a,
+html.dark .campus-sidebar-footer :is(a, button) { color: #bdd7eb; }
+html.dark .campus-sidebar-links > a .material-symbols-outlined { color: #75c3ff; }
+html.dark .campus-sidebar-links > a.border-r-4,
+html.dark .campus-sidebar-links > a:hover,
+html.dark .campus-sidebar-footer :is(a, button):hover {
+    background: #12375a;
+    color: #ffffff;
+}
+html.dark .campus-sidebar-identity .border-slate-50,
+html.dark .campus-account-link .border-white { border-color: #0b1f33; }
+html.dark .campus-theme main :is(.bg-surface-container-lowest, .bg-white),
+html.dark .campus-theme .campus-panel {
+    background: rgba(9, 27, 45, .96);
+    border-color: #2f668e;
+    box-shadow: 0 3px 0 #17415f, 0 12px 26px rgba(0, 0, 0, .22);
+}
+html.dark .campus-theme main .bg-surface-container-low,
+html.dark .campus-topbar .campus-search,
+html.dark .campus-topbar .campus-account-link {
+    background: #102b45;
+    border-color: #315f83;
+}
+html.dark .campus-xp {
+    background: #0c253c;
+    border-color: #3c91d3;
+    color: #eaf6ff;
+    box-shadow: 2px 2px 0 #0a4c82;
+}
+html.dark .campus-xp-track { background: #10263b; border-color: #5ca2d8; }
+html.dark .campus-speech,
+html.dark .campus-avatar-chat-panel {
+    background: #0c2034;
+    border-color: #4b9ade;
+    color: #eaf6ff;
+    box-shadow: 4px 5px 0 #0a4c82, 0 18px 38px rgba(0, 0, 0, .35);
+}
+html.dark .campus-speech::after { background: #0c2034; border-color: #4b9ade; }
+html.dark .campus-speech-pause,
+html.dark .campus-avatar-chat-prompt,
+html.dark .campus-avatar-chat-new,
+html.dark .campus-avatar-chat-close {
+    background: #132f4b;
+    border-color: #3e789f;
+    color: #bfe5ff;
+}
+html.dark .campus-avatar-chat-log,
+html.dark .campus-avatar-chat-empty { background: #091b2d; border-color: #2e5577; color: #c4d9eb; }
+html.dark .campus-avatar-chat-bubble.is-student { background: #17446e; color: #eaf6ff; }
+html.dark .campus-avatar-chat-bubble.is-tutor { background: #10263b; color: #eaf6ff; border-color: #315b7b; }
+html.dark .campus-quick-tutor :is(select, input) { background: #091b2d; border-color: #3a6a8d; color: #eaf6ff; }
+html.dark .campus-mobile-menu > summary,
+html.dark .campus-mobile-menu > nav {
+    background: #0d2135;
+    border-color: #3a77a8;
+    color: #eaf6ff;
+}
+html.dark .activity-subject,
+html.dark .activity-subject-heading > a {
+    background: #0d2338;
+    border-color: #2e668d;
+    color: #eaf6ff;
+}
+html.dark .activity-subject:hover,
+html.dark .activity-subject[aria-current=page] { background: #12375a; }
+html.dark .activity-subject-copy > span,
+html.dark .activity-subject-heading p { color: #a9bfd1; }
+
+html.dark .staff-theme {
+    --workspace-bg: #07131f;
+    --workspace-line: #29435f;
+    --workspace-muted: #a5b4c3;
+    --workspace-ink: #e8f2ff;
+    --workspace-soft: #132b43;
+    --workspace-accent: #71d5b3;
+    --workspace-hover: #49b790;
+    background: var(--workspace-bg);
+    color: var(--workspace-ink);
+}
+html.dark .admin-theme {
+    --workspace-accent: #8bb6ff;
+    --workspace-hover: #6e9bed;
+    --workspace-soft: #172b48;
+}
+html.dark .staff-theme :is(.bg-background, .bg-surface),
+html.dark .staff-theme #user-management > div:first-child { background-color: var(--workspace-bg); }
+html.dark .teacher-theme :is(.campus-sidebar, .campus-sidebar-footer, .campus-topbar),
+html.dark .admin-topbar {
+    background: rgba(10, 24, 38, .96);
+    border-color: var(--workspace-line);
+}
+html.dark .teacher-brand,
+html.dark .teacher-brand small,
+html.dark .teacher-section-label,
+html.dark .teacher-page-heading p,
+html.dark .teacher-eyebrow,
+html.dark .teacher-result p,
+html.dark .teacher-empty p,
+html.dark .admin-breadcrumb { color: var(--workspace-muted); }
+html.dark .teacher-brand strong,
+html.dark .teacher-page-heading h1,
+html.dark .teacher-section-heading h2,
+html.dark .teacher-metric strong,
+html.dark .admin-breadcrumb strong,
+html.dark .admin-overview-metric > strong { color: var(--workspace-ink); }
+html.dark .teacher-theme .campus-search,
+html.dark .admin-search,
+html.dark .teacher-theme .campus-account-link > div,
+html.dark .admin-account {
+    background: #0f2236;
+    border-color: #31506c;
+    color: var(--workspace-ink);
+}
+html.dark .teacher-theme .campus-sidebar-links > a,
+html.dark .teacher-theme .campus-sidebar-footer :is(a, button) { color: #bac9d7; }
+html.dark .teacher-theme .campus-sidebar-links > a.border-r-4,
+html.dark .teacher-theme .campus-sidebar-links > a:hover,
+html.dark .teacher-theme .campus-sidebar-footer :is(a, button):hover {
+    background: #123d35;
+    color: #eafff7;
+}
+html.dark .teacher-theme .teacher-page-heading,
+html.dark .teacher-theme .teacher-workspace-heading,
+html.dark .teacher-theme .practice-heading {
+    background: #0f2a24;
+    border-color: #2f7e68;
+}
+html.dark .teacher-theme .teacher-metric,
+html.dark .teacher-theme .teacher-section > .teacher-section-heading,
+html.dark .teacher-theme .teacher-results,
+html.dark .teacher-theme .teacher-result,
+html.dark .teacher-theme .teacher-focus,
+html.dark .teacher-theme .teacher-roster,
+html.dark .teacher-theme .teacher-empty,
+html.dark .teacher-theme main :is(div, section, aside).bg-surface-container-lowest:where(:not(.teacher-workspace-heading)) {
+    background: #0d1f31;
+    border-color: var(--workspace-line);
+    color: var(--workspace-ink);
+}
+html.dark .teacher-theme .teacher-result:nth-child(even),
+html.dark .teacher-theme .teacher-roster tbody tr:nth-child(even),
+html.dark .teacher-theme .teacher-result:hover,
+html.dark .teacher-theme .teacher-roster tbody tr:hover { background: #132b43; }
+html.dark .teacher-theme .teacher-result > .material-symbols-outlined,
+html.dark .teacher-theme .teacher-metric-label .material-symbols-outlined { background: #143b32; border-color: #2e725f; color: #7ee0bd; }
+html.dark .teacher-theme .teacher-focus-track { background: #132639; border-color: #36516a; }
+html.dark .teacher-theme .teacher-quicklinks a {
+    background: #10263a;
+    border-color: #36516a;
+    color: #c5d8e8;
+}
+html.dark .admin-sidebar { background: #101923; color: #cdd8e4; border-right: 1px solid #23384f; }
+html.dark .admin-nav-links a:hover,
+html.dark .admin-nav-bottom > a:hover,
+html.dark .admin-nav-bottom button:hover,
+html.dark .admin-nav-links a.bg-surface-container-high { background: #1b3049; color: #ffffff; }
+html.dark .admin-overview-metrics,
+html.dark .admin-overview-metric,
+html.dark .admin-analytics > div,
+html.dark .admin-distribution > div {
+    background: #0d1d2e;
+    border-color: var(--workspace-line);
+    color: var(--workspace-ink);
+}
+html.dark .admin-overview-metric > div,
+html.dark .admin-overview-metric > small,
+html.dark .admin-page-label { color: var(--workspace-muted); }
+
+html.dark .student-assessment-page,
+html.dark .assessment-workspace { background: transparent; color: #eaf6ff; }
+html.dark .assessment-back,
+html.dark .assessment-text-panel,
+html.dark .assessment-helper-panel,
+html.dark .assessment-reader,
+html.dark .assessment-reading-pane,
+html.dark .assessment-passage {
+    background: #0d2135;
+    border-color: #376a91;
+    color: #eaf6ff;
+}
+html.dark .assessment-heading-copy > p,
+html.dark .assessment-eyebrow,
+html.dark .assessment-attempt,
+html.dark .assessment-helper-heading p,
+html.dark .assessment-helper-empty,
+html.dark .assessment-helper-form label,
+html.dark .assessment-helper-form small,
+html.dark .assessment-size-option output { color: #a9bfd1; }
+html.dark .assessment-helper-heading,
+html.dark .assessment-helper-form,
+html.dark .assessment-reader-actions,
+html.dark .assessment-legend { border-color: #294d6b; background: #102b45; }
+html.dark .assessment-helper-toggle { background: #2e2613; border-color: #6d5421; color: #ffd36b; box-shadow: 0 3px 0 #4b3917; }
+html.dark .assessment-helper-status,
+html.dark .assessment-helper-disclosure { background: #0f2b42; color: #b9d2e7; }
+html.dark .assessment-helper-error { background: #321b20; color: #ffb4b9; }
+html.dark .assessment-mark-tools,
+html.dark .assessment-timer { background: #10283d; border-color: #2e5577; }
+
+html.dark .worksheet-page,
+html.dark .worksheet-text-page { color: #e8f2ff; }
+html.dark .worksheet-heading p,
+html.dark .worksheet-row p,
+html.dark .worksheet-tabs span,
+html.dark .worksheet-save-state,
+html.dark .worksheet-area-title > span:last-child,
+html.dark .worksheet-problem-number,
+html.dark .worksheet-original summary { color: var(--dark-muted); }
+html.dark .worksheet-tile,
+html.dark .worksheet-row,
+html.dark .worksheet-reader,
+html.dark .worksheet-reading,
+html.dark .worksheet-text-page,
+html.dark .worksheet-table-dialog,
+html.dark .worksheet-settings-panel,
+html.dark .worksheet-paper,
+html.dark .worksheet-preview .worksheet-text-page {
+    background: #0d1f31;
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .worksheet-viewport { background: #07131f; border-color: var(--dark-line); }
+html.dark .worksheet-icon,
+html.dark .worksheet-response-options label,
+html.dark .worksheet-fraction-model button,
+html.dark .worksheet-digital {
+    background: #10263a;
+    border-color: #36516a;
+    color: var(--dark-ink);
+}
+html.dark .worksheet-response-options label:has(:checked),
+html.dark .worksheet-icon:hover:not(:disabled),
+html.dark .worksheet-icon[aria-pressed=true] {
+    background: #123d35;
+    border-color: #50b99a;
+    color: #dffef4;
+}
+html.dark .worksheet-item-response :disabled { background: #132338; color: #b5c5d5; }
+html.dark .worksheet-text-section + .worksheet-text-section,
+html.dark .worksheet-problems > li,
+html.dark .worksheet-reader-progress,
+html.dark .worksheet-reader > .worksheet-actions,
+html.dark .worksheet-original { border-color: var(--dark-line); }
+
+html.dark .student-tutor,
+html.dark .teacher-ai-page { background: transparent; color: var(--dark-ink); }
+html.dark .tutor-workspace,
+html.dark .tutor-history,
+html.dark .tutor-chat,
+html.dark .teacher-ai-prompts,
+html.dark .teacher-ai-chat,
+html.dark .teacher-ai-compose {
+    background: #0d1f31;
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .tutor-toolbar,
+html.dark .teacher-ai-toolbar {
+    background: #10263a;
+    border-color: var(--dark-line);
+}
+html.dark .tutor-heading p,
+html.dark .tutor-toolbar p,
+html.dark .tutor-compose-actions small,
+html.dark .teacher-ai-prompts p,
+html.dark .teacher-ai-toolbar p,
+html.dark .teacher-ai-empty,
+html.dark .teacher-ai-empty p,
+html.dark .teacher-ai-compose small { color: var(--dark-muted); }
+html.dark .tutor-history-link:hover,
+html.dark .tutor-history-link[aria-current="page"],
+html.dark .tutor-prompts button:hover,
+html.dark .teacher-ai-prompts button:hover { background: #132b43; }
+html.dark .tutor-icon,
+html.dark .tutor-prompts button,
+html.dark .tutor-subject,
+html.dark .teacher-ai-prompts button {
+    background: #10263a;
+    border-color: #36516a;
+    color: var(--dark-ink);
+}
+html.dark .tutor-question,
+html.dark .teacher-ai-question { background: #312615; border-color: #71561f; color: #fff0ca; }
+html.dark .tutor-status,
+html.dark .tutor-disclosure,
+html.dark .teacher-ai-status,
+html.dark .teacher-ai-disclosure { background: #0f2b42; color: #c3d9eb; border-color: #31516f; }
+html.dark .tutor-notice { background: #0f3028; color: #c8f7e6; }
+html.dark .tutor-error,
+html.dark .teacher-ai-error,
+html.dark .tutor-delete { background: #321b20; color: #ffb4b9; border-color: #71434b; }
+
+@media (prefers-reduced-motion: reduce) {
+    html.dark *, html.dark *::before, html.dark *::after {
+        transition: none !important;
+    }
+}

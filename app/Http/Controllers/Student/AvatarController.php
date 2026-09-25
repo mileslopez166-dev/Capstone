@@ -50,7 +50,7 @@ class AvatarController extends Controller
         $unlocked = $request->user()->unlockedAvatarItems();
         foreach ($validated['avatar'] as $key => $value) {
             if (isset($options[$key]['items'][$value]['cost']) && !in_array($key.':'.$value, $unlocked, true)) {
-                throw ValidationException::withMessages(['avatar.'.$key => 'Unlock this item with practice coins first.']);
+                throw ValidationException::withMessages(['avatar.'.$key => 'Unlock this item with coins first.']);
             }
         }
         $request->user()->avatar_config = $validated['avatar'];
@@ -75,7 +75,7 @@ class AvatarController extends Controller
                 return;
             }
             if ($student->practiceCoinBalance() < $item['cost']) {
-                throw ValidationException::withMessages(['item' => 'You need '.$item['cost'].' practice coins for this item.']);
+                throw ValidationException::withMessages(['item' => 'You need '.$item['cost'].' coins for this item.']);
             }
             $student->practiceCoinTransactions()->create([
                 'item_key' => $data['item'], 'amount' => -$item['cost'],

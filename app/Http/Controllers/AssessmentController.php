@@ -8,6 +8,9 @@ use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
 use App\Support\AssessmentParticipant;
+use App\Support\AssessmentCoinRewards;
+use App\Support\AssessmentScores;
+use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\PhilIri;
 use Illuminate\Http\JsonResponse;
@@ -20,18 +23,32 @@ use Illuminate\View\View;
 
 class AssessmentController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request): View
+    {
+        abort_unless($request->user()?->isTeacher(), 403);
+        $filters = $request->validate([
+            'subject' => ['nullable', Rule::in(['literacy', 'numeracy'])],
+            'q' => ['nullable', 'string', 'max:255'],
+        ]);
+        $subject = $filters['subject'] ?? null;
+        $search = trim($filters['q'] ?? '');
+
+        $assessments = Assessment::query()
+            ->where('created_by', $request->user()->id)
+            ->when($subject, fn ($query) => $query->where('subject', $subject))
+            ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
+            ->latest()
+            ->paginate(12)->withQueryString();
+
+        return view('assessments.index', compact('assessments', 'subject', 'search'));
+    }
+
+    public function create(Request $request): View|RedirectResponse
     {
         abort_unless($request->user()?->isTeacher(), 403);
         if ($request->query('subject') === 'numeracy') return redirect()->route('worksheets.index');
 
-        $assessments = Assessment::query()
-            ->where('created_by', $request->user()->id)
-            ->latest()
-            ->get();
-
-        return view('assessments.index', [
-            'assessments' => $assessments,
+        return view('assessments.create', [
             'storyTemplates' => json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true, 512, JSON_THROW_ON_ERROR),
         ]);
     }
@@ -402,12 +419,16 @@ class AssessmentController extends Controller
             $progress->update(['submission_id' => $submission->id, 'state' => $state]);
             $progress->recordAssistance($request->user());
 
+            AssessmentCoinRewards::award($submission);
             return $submission;
         });
 
         if ($submission->wasRecentlyCreated) {
             NotificationSender::notifyAssessmentCompleted($submission->load(['assessment.teacher', 'student']));
+            app(MLPredictionService::class)->predictForSubmission($submission);
         }
+
+        $submission->loadMissing('mlPrediction');
 
         return response()->json([
             'attempt_number' => $submission->attempt_number,
@@ -415,8 +436,15 @@ class AssessmentController extends Controller
             'question_count' => $submission->question_count,
             'points' => $submission->points,
             'possible_points' => $submission->possible_points,
+            'coins_earned' => (int) ($submission->coinReward?->amount ?? 0),
+            'coins_pending' => AssessmentCoinRewards::percentage($submission) === null,
             'phil_iri' => PhilIri::forSubmission($submission),
-            'accuracy' => $submission->question_count > 0 ? round(($submission->correct_count / $submission->question_count) * 100) : 0,
+            'accuracy' => AssessmentScores::percentage($submission),
+            'ml_prediction' => $submission->mlPrediction ? [
+                'prediction' => $submission->mlPrediction->prediction,
+                'confidence' => $submission->mlPrediction->confidence_score,
+                'recommendation' => $submission->mlPrediction->recommendation,
+            ] : null,
         ]);
     }
 }

@@ -41,25 +41,46 @@ class PhilIriScoringTest extends TestCase
         $student = User::factory()->create();
         $assessment = $this->assessment($teacher);
         $this->submit($assessment, $student, 4)->assertOk()->assertJsonPath('phil_iri.level', 'Independent')
+            ->assertJsonPath('phil_iri.assessment_type_label', 'Silent Reading Assessment')
+            ->assertJsonPath('phil_iri.measure', 'Silent reading comprehension')
+            ->assertJsonPath('phil_iri.practice_recommendation.label', 'Enrichment challenge')
             ->assertJsonPath('points', 1000)->assertJsonPath('possible_points', 1250);
         $submission = AssessmentSubmission::firstOrFail();
         $this->assertSame(PhilIri::VERSION, $submission->phil_iri['version']);
         $this->assertSame('Independent', $submission->phil_iri['comprehension_level']);
         $interpretation = $submission->phil_iri['comprehension_interpretation'];
         $this->assertStringContainsString('strong understanding', $interpretation);
-        $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Phil-IRI-based result')->assertSee('Independent')->assertSee('Comprehension interpretation')->assertSee($interpretation);
-        $this->actingAs($teacher)->get(route('reports.student', $student))->assertOk()->assertSee('Phil-IRI scoring')->assertSee('Independent')->assertSee($interpretation);
+        $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Silent Reading Assessment')->assertSee('Independent')->assertSee('Comprehension interpretation')->assertSee($interpretation)
+            ->assertSeeText('Enrichment challenge')->assertSeeText('Move into a harder reading task')->assertSeeText('Open enrichment practice')
+            ->assertSeeText('Score and points formula')->assertSeeText('Reading comprehension')->assertSeeText('4 / 5 x 100 = 80%')
+            ->assertSeeText('4 correct x 250 = 1,000 points')->assertSeeText('5 questions x 250 = 1,250 points');
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk()->assertSeeText('Next: Enrichment challenge');
+        $this->actingAs($teacher)->get(route('reports.student', $student))->assertOk()->assertSee('Phil-IRI scoring')->assertSee('Independent')->assertSee($interpretation)->assertSeeText('Assign practice mission');
         $this->get(route('students.show', $student))->assertOk()->assertSee($interpretation);
-        $this->get(route('teacher.phil-iri.show', $submission))->assertOk()->assertSee('80% and above')->assertSee($interpretation);
+        $this->get(route('teacher.phil-iri.show', $submission))->assertOk()
+            ->assertSee('Silent Reading Assessment')->assertSee('Silent reading comprehension')
+            ->assertSee('80% and above')->assertSee($interpretation);
     }
 
     public function test_listening_uses_comprehension_without_word_reading_or_speed(): void
     {
-        $assessment = $this->assessment(User::factory()->teacher()->create(), 'listening_comprehension');
-        $this->submit($assessment, User::factory()->create(), 3)->assertOk()
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = $this->assessment($teacher, 'listening_comprehension');
+        $this->submit($assessment, $student, 3)->assertOk()
             ->assertJsonPath('phil_iri.level', 'Instructional')
             ->assertJsonPath('phil_iri.measure', 'Listening comprehension')
             ->assertJsonPath('phil_iri.word_reading_percent', null)->assertJsonPath('phil_iri.words_per_minute', null);
+        $submission = AssessmentSubmission::firstOrFail();
+        $this->actingAs($student)->get(route('student.activities'))->assertOk()
+            ->assertSeeText('Listening Comprehension Assessment')
+            ->assertSeeText('Listening comprehension')
+            ->assertSeeText('3 / 5 x 100 = 60%')
+            ->assertSeeText('3 correct x 250 = 750 points');
+        $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
+            ->assertSeeText('Listening Comprehension Assessment')
+            ->assertSeeText('Listening comprehension')
+            ->assertSeeText('3 / 5 x 100 = 60%');
     }
 
     public function test_numeracy_keeps_existing_scoring_and_has_no_phil_iri_result(): void
@@ -81,7 +102,7 @@ class PhilIriScoringTest extends TestCase
             'phil_iri' => ['level' => 'Independent', 'miscues' => 0, 'reviewed_by' => $teacher->id],
             'revision' => 1,
             'state' => ['answers' => [], 'phase' => 'finished', 'reading_seconds' => 90, 'timer_status' => 'finished', 'word_marks' => [1, 2, 0]],
-        ])->assertOk()->assertJsonPath('phil_iri.status', 'awaiting_teacher')->assertJsonPath('phil_iri.level', null)
+        ])->assertOk()->assertJsonPath('phil_iri.status', 'incomplete')->assertJsonPath('phil_iri.level', null)
             ->assertJsonPath('phil_iri.miscues', null)->assertJsonPath('phil_iri.comprehension_percent', null);
         $submission = AssessmentSubmission::firstOrFail();
         $this->actingAs($teacher)->patch(route('teacher.phil-iri.update', $submission), [
@@ -99,6 +120,12 @@ class PhilIriScoringTest extends TestCase
         $this->assertEquals(0, $submission->fresh()->points);
         $this->assertEquals(0, $submission->fresh()->question_count);
         $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Instructional')->assertSee('96%');
+        $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
+            ->assertSeeText('Score and points formula')
+            ->assertSeeText('(100 words - 4 miscues) / 100 x 100 = 96%')
+            ->assertSeeText('100 words / 120 seconds x 60 = 50 WPM')
+            ->assertSeeText('Lower of Instructional word reading and Independent comprehension = Instructional')
+            ->assertSeeText('0 question points; oral reading is scored through Phil-IRI.');
     }
 
     public function test_missing_comprehension_is_not_treated_as_zero_and_zero_is_not_nonreader(): void
@@ -109,8 +136,8 @@ class PhilIriScoringTest extends TestCase
         $submission = AssessmentSubmission::firstOrFail();
         $route = route('teacher.phil-iri.update', $submission);
         $this->actingAs($teacher)->patch($route, ['word_count' => 100, 'miscues' => 0])->assertRedirect();
-        $this->assertSame('incomplete', $submission->fresh()->phil_iri['status']);
-        $this->assertNull($submission->fresh()->phil_iri['level']);
+        $this->assertSame('complete', $submission->fresh()->phil_iri['status']);
+        $this->assertSame('Independent', $submission->fresh()->phil_iri['level']);
         $this->assertNull($submission->fresh()->phil_iri['words_per_minute']);
         $this->patch($route, ['word_count' => 100, 'miscues' => 100, 'comprehension_correct' => 0, 'comprehension_questions' => 5])->assertRedirect();
         $this->assertSame('Frustration', $submission->fresh()->phil_iri['level']);
@@ -127,25 +154,31 @@ class PhilIriScoringTest extends TestCase
                 'word_marks' => array_merge(array_fill(0, 4, 2), array_fill(0, 96, 0))],
         ])->assertOk()->assertJsonPath('phil_iri.marked_miscues', 4)
             ->assertJsonPath('phil_iri.word_reading_percent', 96)->assertJsonPath('phil_iri.word_reading_level', 'Instructional')
-            ->assertJsonPath('phil_iri.word_reading_provisional', true)->assertJsonPath('phil_iri.level', null)
+            ->assertJsonPath('phil_iri.word_reading_provisional', false)->assertJsonPath('phil_iri.word_reading_source', 'red_marks')
+            ->assertJsonPath('phil_iri.level', 'Instructional')->assertJsonPath('phil_iri.status', 'complete')
             ->assertJsonPath('phil_iri.reviewed_by', null)->assertJsonPath('points', 0);
         $submission = AssessmentSubmission::firstOrFail();
         $snapshot = $submission->phil_iri;
         $this->assertSame(4, $snapshot['marked_miscues']);
-        $this->get(route('student.activities'))->assertOk()->assertSee('96%')->assertSee('Provisional word-reading score');
+        $this->get(route('student.activities'))->assertOk()
+            ->assertSee('96%')
+            ->assertSee('Word-reading score calculated from the red marks recorded during the assessment.')
+            ->assertSeeText('Word reading')
+            ->assertSeeText('(100 words - 4 red-marked words) / 100 x 100 = 96%')
+            ->assertDontSeeText('(100 words - 0 miscues) / 100 x 100 = 96%');
         $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
             ->assertSee('name="miscues" type="number" min="0" max="10000" value="4"', false);
         // Subsequent content edits must not regrade the already submitted marks.
         $assessment->update(['story_description' => 'A changed passage.']);
-        $this->assertSame($snapshot, PhilIri::forSubmission($submission->fresh()));
+        $this->assertEquals($snapshot, PhilIri::forSubmission($submission->fresh()));
         $this->patch(route('teacher.phil-iri.update', $submission), ['word_count' => 100, 'miscues' => 2])->assertRedirect();
         $result = $submission->fresh()->phil_iri;
         $this->assertSame(4, $result['marked_miscues']);
         $this->assertSame(2, $result['miscues']);
         $this->assertEquals(98, $result['word_reading_percent']);
         $this->assertFalse($result['word_reading_provisional']);
-        $this->assertNull($result['level']);
-        $this->assertSame('incomplete', $result['status']);
+        $this->assertSame('Independent', $result['level']);
+        $this->assertSame('complete', $result['status']);
     }
 
     public function test_word_grade_boundaries_use_complete_saved_red_marks(): void
@@ -159,8 +192,10 @@ class PhilIriScoringTest extends TestCase
             ])->assertOk()->assertJsonPath('phil_iri.marked_miscues', $errors)
                 ->assertJsonPath('phil_iri.word_reading_percent', 100 - $errors)
                 ->assertJsonPath('phil_iri.word_reading_level', $level)
-                ->assertJsonPath('phil_iri.word_reading_provisional', true)
-                ->assertJsonPath('phil_iri.status', 'awaiting_teacher');
+                ->assertJsonPath('phil_iri.word_reading_provisional', false)
+                ->assertJsonPath('phil_iri.word_reading_source', 'red_marks')
+                ->assertJsonPath('phil_iri.level', $level)
+                ->assertJsonPath('phil_iri.status', 'complete');
         }
     }
 
@@ -214,13 +249,25 @@ class PhilIriScoringTest extends TestCase
     public function test_group_screening_uses_twenty_item_cutoff_not_reading_levels(): void
     {
         $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
         $assessment = $this->assessment($teacher, 'group_screening', 20);
-        $this->submit($assessment, User::factory()->create(), 13)->assertOk()
+        $this->submit($assessment, $student, 13)->assertOk()
             ->assertJsonPath('phil_iri.label', 'Further assessment needed')->assertJsonPath('phil_iri.level', null);
         $this->submit($assessment, User::factory()->create(), 14)->assertOk()
             ->assertJsonPath('phil_iri.label', 'At or above screening cutoff')->assertJsonPath('phil_iri.level', null);
         $this->submit($this->assessment($teacher, 'group_screening', 5), User::factory()->create(), 5)->assertOk()
             ->assertJsonPath('phil_iri.status', 'unsupported_screening')->assertJsonPath('phil_iri.level', null);
+        $submission = AssessmentSubmission::where('user_id', $student->id)->firstOrFail();
+        $this->actingAs($student)->get(route('student.activities'))->assertOk()
+            ->assertSeeText('Group Screening Test')
+            ->assertSeeText('Group screening result')
+            ->assertSeeText('Screening score')
+            ->assertSeeText('13 / 20 x 100 = 65%')
+            ->assertSeeText('13 / 20 compared with 14 / 20 cutoff = Further assessment needed');
+        $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
+            ->assertSeeText('Group Screening Test')
+            ->assertSeeText('Screening interpretation')
+            ->assertSeeText('GST cutoff');
     }
 
     public function test_only_finished_silent_timer_is_used_for_reading_rate(): void
@@ -256,7 +303,7 @@ class PhilIriScoringTest extends TestCase
             $submission = new AssessmentSubmission(['correct_count' => 4, 'question_count' => 5]);
             $submission->setRelation('assessment', $assessment);
             $result = PhilIri::forSubmission($submission);
-            $this->assertSame($type === 'oral_reading' ? 'awaiting_teacher' : 'complete', $result['status']);
+            $this->assertSame($type === 'oral_reading' ? 'incomplete' : 'complete', $result['status']);
             $this->assertNull($result['miscues']);
             $this->assertStringContainsString('strong understanding', $result['comprehension_interpretation']);
         }

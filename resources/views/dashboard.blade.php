@@ -15,7 +15,7 @@
                         <h1>Welcome, {{ str($teacherName)->before(' ') }}</h1>
                         <p>Your classroom at a glance{{ $teacher->section ? ' / '.$teacher->section : '' }}.</p>
                     </div>
-                    <a class="teacher-primary-action" href="{{ route('assessments.index') }}"><span class="material-symbols-outlined" aria-hidden="true">add</span>Create assessment</a>
+                    <a class="teacher-primary-action" href="{{ route('assessments.create') }}"><span class="material-symbols-outlined" aria-hidden="true">add</span>Create assessment</a>
                 </header>
 
                 <section class="teacher-metrics" aria-label="Class performance">
@@ -48,15 +48,24 @@
                         @else
                             <div class="teacher-results">
                                 @foreach ($recentSubmissions as $submission)
-                                    @php $accuracy = $submission->question_count > 0 ? (int) round(($submission->correct_count / $submission->question_count) * 100) : 0; @endphp
-                                    <div class="teacher-result">
+                                    @php
+                                        $accuracy = $submission->scorePercentage();
+                                        $assessment = $submission->assessment;
+                                        $student = $submission->student;
+                                        $reviewUrl = $student && $assessment
+                                            ? ($assessment->subject === 'literacy'
+                                                ? route('teacher.phil-iri.show', $submission)
+                                                : route('reports.student', ['student' => $student]).'#submission-'.$submission->id)
+                                            : route('reports.index');
+                                    @endphp
+                                    <a class="teacher-result" href="{{ $reviewUrl }}" aria-label="Review {{ $student?->name ?? 'student' }} assessment submission">
                                         <span class="material-symbols-outlined" aria-hidden="true">task_alt</span>
                                         <div>
-                                            <strong>{{ $submission->student?->name ?? 'Student' }}</strong>
-                                            <p>{{ $submission->assessment?->title ?? 'Assessment' }}</p>
+                                            <strong>{{ $student?->name ?? 'Student' }}</strong>
+                                            <p>{{ $assessment?->title ?? 'Assessment' }}</p>
                                         </div>
-                                        <span>{{ $accuracy }}%</span>
-                                    </div>
+                                        <span>{{ $accuracy === null ? 'Pending' : $accuracy.'%' }}</span>
+                                    </a>
                                 @endforeach
                             </div>
                         @endif
@@ -73,31 +82,49 @@
                     </section>
                 </div>
 
+                @php
+                    $mlInsights = $recentSubmissions->filter(fn ($submission) => $submission->mlPrediction)->take(4);
+                @endphp
                 <section class="teacher-section">
                     <div class="teacher-section-heading">
-                        <div><h2>Student Roster</h2><p>{{ $students->count() }} students &middot; Grade 6</p></div>
-                        <a href="{{ route('students.index') }}">Open roster<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+                        <div>
+                            <h2>AI Learning Insights</h2>
+                            <p>Reading classification predictions for recent completed assessments</p>
+                        </div>
+                        <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
                     </div>
-                    @if ($students->isEmpty())
-                        <div class="teacher-empty"><span class="material-symbols-outlined" aria-hidden="true">group</span><h3>No student accounts yet</h3><p>Your student roster is empty.</p></div>
+                    <p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                        AI prediction is a support tool. Teachers should validate results before making educational decisions.
+                    </p>
+                    @if ($mlInsights->isEmpty())
+                        <div class="teacher-empty">
+                            <span class="material-symbols-outlined" aria-hidden="true">model_training</span>
+                            <h3>No ML predictions yet</h3>
+                            <p>Predictions will appear after the local ML API is enabled and students complete assessments.</p>
+                        </div>
                     @else
-                        <div class="teacher-roster">
-                            <table>
-                                <thead><tr><th>Student</th><th>Section</th><th>Progress</th><th class="text-right">Profile</th></tr></thead>
-                                <tbody>
-                                    @foreach ($students->take(8) as $student)
-                                        <tr>
-                                            <td><a class="roster-name" href="{{ route('students.show', $student) }}">{{ $student->name }}</a><small>{{ $student->email }}</small></td>
-                                            <td>{{ $student->section ?: 'Unassigned' }}</td>
-                                            <td>{{ $student->average_accuracy === null ? 'No Data Yet' : $student->average_accuracy.'% Avg' }}</td>
-                                            <td class="text-right"><a class="inline-flex p-2" href="{{ route('students.show', $student) }}" aria-label="View {{ $student->name }} profile" title="View student profile"><span class="material-symbols-outlined" aria-hidden="true">arrow_outward</span></a></td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="teacher-results">
+                            @foreach ($mlInsights as $submission)
+                                @php
+                                    $prediction = $submission->mlPrediction;
+                                    $philResult = \App\Support\PhilIri::forSubmission($submission);
+                                    $confidence = $prediction->confidence_score !== null ? round($prediction->confidence_score * 100) : null;
+                                @endphp
+                                <a class="teacher-result" href="{{ route('reports.student', ['student' => $submission->student]).'#submission-'.$submission->id }}" aria-label="Open AI learning insight for anonymized student {{ $submission->user_id }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">insights</span>
+                                    <div>
+                                        <strong>Student_{{ str_pad((string) $submission->user_id, 3, '0', STR_PAD_LEFT) }}</strong>
+                                        <p>Current Phil-IRI Result: {{ $philResult['label'] ?? 'Not available' }}</p>
+                                        <p>ML Prediction: {{ $prediction->prediction }}{{ $confidence !== null ? ' | Confidence: '.$confidence.'%' : '' }}</p>
+                                        <p>Recommendation: {{ $prediction->recommendation }}</p>
+                                    </div>
+                                    <span>{{ $prediction->prediction }}</span>
+                                </a>
+                            @endforeach
                         </div>
                     @endif
                 </section>
+
                 <nav class="teacher-quicklinks" aria-label="Classroom actions">
                     <a href="{{ route('assessments.index') }}"><span class="material-symbols-outlined" aria-hidden="true">assignment</span>Assessments ({{ $assessmentCount }})</a>
                     <a href="{{ route('students.index') }}#add-student"><span class="material-symbols-outlined" aria-hidden="true">person_add</span>Add student</a>

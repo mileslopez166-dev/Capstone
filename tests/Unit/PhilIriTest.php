@@ -67,6 +67,22 @@ class PhilIriTest extends TestCase
         }
     }
 
+    public function test_practice_recommendations_follow_reading_level(): void
+    {
+        foreach ([
+            'Independent' => 'Enrichment challenge',
+            'Instructional' => 'Guided practice',
+            'Frustration' => 'Remediation support',
+        ] as $level => $label) {
+            $recommendation = PhilIri::practiceRecommendation(['level' => $level]);
+            $this->assertSame($label, $recommendation['label']);
+            $this->assertNotEmpty($recommendation['steps']);
+            $this->assertNotEmpty($recommendation['action_label']);
+        }
+
+        $this->assertNull(PhilIri::practiceRecommendation(['level' => null]));
+    }
+
     public function test_red_marks_count_occurrences_not_unique_words_and_ignore_punctuation(): void
     {
         $passage = "Read read.\n\nRead again! -- ...";

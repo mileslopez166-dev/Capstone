@@ -1,4 +1,5 @@
 <x-worksheet-layout :teacher="$assisted" :title="$assessment->title" :back="$assisted ? route('assessments.show', $assessment) : route('worksheets.mission')">
+    <x-teacher-identity :teacher="$assessment->teacher" />
     @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
     @if ($assessment->instructions)<p class="worksheet-instructions">{{ $assessment->instructions }}</p>@endif
     @php

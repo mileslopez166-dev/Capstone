@@ -101,11 +101,41 @@
 }
 .campus-speech::after { content: ''; position: absolute; left: 16px; bottom: -9px; width: 14px; height: 14px; background: white; border-right: 2px solid #156abe; border-bottom: 2px solid #156abe; transform: skewY(-35deg); }
 .campus-speech-copy { white-space: normal; }
+.campus-speech-message { min-height: 34px; padding-right: 2px; }
 .campus-speech-cursor { display: none; width: 5px; height: 12px; margin-left: 3px; vertical-align: -1px; background: #16835d; }
 .is-speaking .campus-speech-cursor { display: inline-block; animation: campus-speech-caret .7s step-end infinite; }
 .campus-speech-pause { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 4px; color: #246598; background: #edf7ff; }
 .campus-speech-pause:hover { color: #0e447b; background: #cceaff; }
 .campus-speech-pause .material-symbols-outlined { font-size: 16px; }
+.campus-avatar-chat-prompt { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; margin-top: 8px; padding: 5px 8px; border: 1px solid #bdddf2; border-radius: 4px; background: #edf7ff; color: #075ca5; font-size: 11px; font-weight: 900; }
+.campus-avatar-chat-prompt:disabled { opacity: .6; }
+.campus-avatar-chat-prompt .material-symbols-outlined { font-size: 15px; }
+.campus-avatar-chat-shell { position: fixed; z-index: 80; left: calc(var(--campus-sidebar-width) + 18px); bottom: 24px; width: min(410px, calc(100vw - var(--campus-sidebar-width) - 36px)); pointer-events: none; }
+.campus-avatar-chat-panel { display: grid; gap: 10px; max-height: min(560px, calc(100dvh - 64px)); padding: 14px; border: 2px solid #156abe; border-radius: 8px; background: #fffffffa; box-shadow: 6px 8px 0 #0c4989, 0 18px 38px #123f6a35; color: #17324b; pointer-events: auto; }
+.campus-quick-tutor { display: grid; gap: 7px; margin-top: 0; }
+.campus-avatar-chat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; color: #0e4e86; font-size: 12px; font-weight: 900; }
+.campus-avatar-chat-head strong, .campus-avatar-chat-head span { display: block; }
+.campus-avatar-chat-head span { margin-top: 2px; color: #44677f; font-size: 11px; font-weight: 700; }
+.campus-quick-tutor .campus-avatar-chat-new { display: grid; flex: 0 0 28px; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 4px; background: #edf7ff; color: #075ca5; box-shadow: none; }
+.campus-avatar-chat-new, .campus-avatar-chat-close { display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 34px; border: 1px solid #bdddf2; border-radius: 4px; background: #edf7ff; color: #075ca5; box-shadow: none; }
+.campus-avatar-chat-new .material-symbols-outlined { font-size: 17px; }
+.campus-avatar-chat-log { display: grid; gap: 8px; min-height: 118px; max-height: 260px; overflow-y: auto; padding: 8px; border: 1px solid #bdddf2; border-radius: 6px; background: #f1f9ff; scrollbar-width: thin; }
+.campus-avatar-chat-turn { display: grid; gap: 4px; }
+.campus-avatar-chat-bubble { max-width: 92%; padding: 8px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
+.campus-avatar-chat-bubble.is-student { justify-self: end; background: #dcefff; color: #0d4173; }
+.campus-avatar-chat-bubble.is-tutor { justify-self: start; background: #fff; color: #17324b; border: 1px solid #d6eafa; }
+.campus-avatar-chat-empty { padding: 12px; border: 1px dashed #b8d7eb; border-radius: 6px; background: #f4fbff; color: #315576; font-size: 13px; font-weight: 750; line-height: 1.5; }
+.campus-quick-tutor-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.campus-quick-tutor :is(select, input) { min-width: 0; height: 30px; border: 1px solid #9bcbed; border-radius: 4px; background: #f5fbff; color: #173a60; font-size: 12px; font-weight: 700; }
+.campus-quick-tutor select { flex: 0 0 82px; padding: 0 20px 0 7px; }
+.campus-quick-tutor input { flex: 1; padding: 0 8px; }
+.campus-quick-tutor button { display: grid; flex: 0 0 32px; place-items: center; width: 32px; height: 30px; border: 0; border-radius: 4px; background: #0764b7; color: white; box-shadow: 0 2px 0 #073b79; }
+.campus-quick-tutor button:disabled { opacity: .55; box-shadow: none; }
+.campus-quick-tutor button .material-symbols-outlined { font-size: 17px; }
+.campus-quick-tutor-status { color: #315576; font-size: 11px; font-weight: 700; line-height: 1.45; }
+.campus-companion-sidebar .campus-speech { top: 0; bottom: auto; width: 214px; height: auto; min-height: 108px; max-height: 152px; padding: 10px 10px 10px 12px; overflow: visible; }
+.campus-companion-sidebar .campus-speech::after { bottom: -9px; }
+.campus-companion-sidebar .campus-companion-character { height: 150px; }
 @keyframes campus-companion-idle {
     0%, 100% { transform: translateY(0) rotate(0); }
     50% { transform: translateY(-2px) rotate(.35deg); }
@@ -236,10 +266,13 @@
     .campus-theme .campus-topbar { gap: 14px; padding-inline: 24px; }
 }
 @media (max-width: 1023px) {
-    .campus-companion-mobile { display: flex; align-items: center; gap: 14px; min-height: 108px; height: 108px; margin: 14px 20px 0; }
+    .campus-companion-mobile { display: flex; align-items: flex-start; gap: 14px; min-height: 108px; height: auto; margin: 14px 20px 0; }
     .campus-companion-mobile .campus-companion-character { position: relative; order: -1; height: 104px; flex-shrink: 0; }
-    .campus-companion-mobile .campus-speech { position: relative; bottom: auto; right: auto; width: min(320px, calc(100% - 84px)); height: 78px; padding-top: 13px; }
+    .campus-companion-mobile .campus-speech { position: relative; bottom: auto; right: auto; width: min(390px, calc(100% - 84px)); height: auto; min-height: 88px; max-height: 132px; padding: 13px 10px 10px 12px; overflow: visible; }
     .campus-companion-mobile .campus-speech::after { left: -9px; bottom: 24px; transform: rotate(135deg); }
+    .campus-avatar-chat-shell { left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); width: auto; }
+    .campus-avatar-chat-panel { max-height: min(560px, calc(100dvh - 116px)); box-shadow: 0 -5px 0 #0c4989, 0 -18px 34px #123f6a30; }
+    .campus-avatar-chat-log { max-height: 230px; }
     .campus-theme .campus-topbar { min-height: 76px; gap: 16px; padding: 14px 20px; }
     .campus-student-topbar > div:first-child > a { display: none; }
     .campus-theme .campus-bottom-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; border-top: 2px solid #8fcdf3; border-radius: 0; padding: 7px 8px max(7px, env(safe-area-inset-bottom)); background: #f8fcfff5; }

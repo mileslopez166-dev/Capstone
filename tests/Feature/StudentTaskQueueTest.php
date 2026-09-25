@@ -47,6 +47,26 @@ class StudentTaskQueueTest extends TestCase
         $this->get(route('student.activities', ['subject' => 'literacy']))->assertOk()->assertSee('Continue Assessment')->assertSee('result-'.$latest->id);
     }
 
+    public function test_dashboard_shows_reading_progress_over_time(): void
+    {
+        $student = User::factory()->create();
+        $first = $this->assessment(['title' => 'First Passage']);
+        $latest = $this->assessment(['title' => 'Latest Passage']);
+        $this->submission($first, $student, 1, 2)->update(['submitted_at' => now()->subDay()]);
+        $this->submission($latest, $student, 1, 4)->update(['submitted_at' => now()]);
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk()
+            ->assertViewHas('readingProgress', fn ($progress) => $progress['latest_score'] === 100
+                && $progress['previous_score'] === 50
+                && $progress['change'] === 50
+                && $progress['status_label'] === 'Improved'
+                && $progress['level_transition'] === 'Frustration to Independent')
+            ->assertSeeText('My Reading Progress')
+            ->assertSeeText('Improved')
+            ->assertSeeText('+50 pts')
+            ->assertSeeText('Frustration to Independent');
+    }
+
     public function test_empty_or_stale_progress_is_not_a_current_attempt(): void
     {
         $student = User::factory()->create();

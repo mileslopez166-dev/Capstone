@@ -16,7 +16,8 @@
             </header>
             @if (session('status'))<p class="phil-notice" role="status">{{ session('status') }}</p>@endif
             @if ($errors->any())<div class="phil-errors" role="alert"><strong>Please check the scoring details.</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-            <x-phil-iri-result :result="$result" />
+            <x-phil-iri-result :result="$result" :submission="$submission" />
+            <x-assessment-coin-reward :submission="$submission" />
             @if ($oral)
                 <form class="phil-scoring-form" method="POST" action="{{ route('teacher.phil-iri.update', $submission) }}">
                     @csrf

@@ -4,7 +4,7 @@
         $practiced = array_map('intval', (array) old('practiced_words', $mission->progress['practiced_words'] ?? []));
         $reviewLabels = ['clear' => 'Read clearly', 'getting_closer' => 'Getting Closer', 'mispronounced' => 'Mispronounced'];
     @endphp
-    <div class="practice-summary"><div><p>{{ $mission->source_title }} &middot; {{ $mission->teacher?->name ?? 'Your teacher' }}</p><x-status-badge :status="$mission->displayStatus(false)" /></div><span class="practice-coins"><span class="material-symbols-outlined" aria-hidden="true">toll</span>{{ $mission->reward_coins }} coins{{ $mission->status === 'completed' ? ' earned' : '' }}</span></div>
+    <div class="practice-summary"><div><p>{{ $mission->source_title }}</p><x-teacher-identity :teacher="$mission->teacher" /><x-status-badge :status="$mission->displayStatus(false)" /></div><span class="practice-coins"><span class="material-symbols-outlined" aria-hidden="true">toll</span>{{ $mission->reward_coins }} coins{{ $mission->status === 'completed' ? ' earned' : '' }}</span></div>
     @if ($mission->instructions)<p class="practice-note">{{ $mission->instructions }}</p>@endif
     @if ($mission->status === 'completed')
         <section class="practice-complete"><span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span><div><h2>Mission complete!</h2><p>{{ $mission->words && !$mission->reviewed_at ? 'Words practiced. Waiting for your teacher to check your reading.' : 'Nice work finishing your practice.' }}</p><a class="practice-link" href="{{ route('student.wardrobe.edit') }}">Visit your wardrobe <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></div></section>

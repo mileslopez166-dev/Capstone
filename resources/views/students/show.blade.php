@@ -68,19 +68,7 @@
                 </section>
 
                 <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)] md:col-span-2">
-                        <div class="mb-8 flex items-start justify-between">
-                            <div>
-                                <h3 class="font-headline text-xl font-bold">Score Trends</h3>
-                                <p class="text-sm text-on-surface-variant">{{ $submissions->isEmpty() ? 'No completed activities have been recorded for this student.' : 'Recent completed assessments from this teacher.' }}</p>
-                            </div>
-                            <span class="material-symbols-outlined text-primary">trending_up</span>
-                        </div>
-                        <div class="flex min-h-[12rem] flex-col items-center justify-center rounded-xl bg-surface-container-low p-6 text-center">
-                            <span class="material-symbols-outlined text-5xl text-outline-variant">show_chart</span>
-                            <p class="mt-4 font-headline text-xl font-bold text-on-surface">No score history yet</p>
-                        </div>
-                    </div>
+                    <x-reading-progress-card :progress="$readingProgress" audience="teacher" class="md:col-span-2 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" />
 
                     <div class="flex flex-col justify-between rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <div>
@@ -183,7 +171,7 @@
                             <div class="space-y-3">
                                 @foreach ($submissions as $submission)
                                     @php
-                                        $accuracy = $submission->question_count > 0 ? (int) round(($submission->correct_count / $submission->question_count) * 100) : 0;
+                                        $accuracy = $submission->scorePercentage();
                                     @endphp
                                     <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
                                         <div class="flex items-center justify-between gap-4">
@@ -195,9 +183,10 @@
                                                     <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
                                                 @endif
                                             </div>
-                                            <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $submission->question_count > 0 ? $accuracy.'%' : 'Reading activity' }}</span>
+                                            <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy === null ? 'Awaiting score' : $accuracy.'%' }}</span>
                                         </div>
-                                        <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" />
+                                        <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
+                                        <x-intervention-plan :submission="$submission" :assessments="$followUpAssessments" return-to="profile" />
                                     </div>
                                 @endforeach
                             </div>

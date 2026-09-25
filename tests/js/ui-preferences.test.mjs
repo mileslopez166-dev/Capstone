@@ -6,15 +6,30 @@ async function loadPreferences(t, stored = null, blocked = false) {
     const styles = new Map();
     const events = new Map();
     const audio = { muted: false };
+    const classes = new Set();
     let value = stored;
+    let prefersDark = false;
     const globals = {
         window: {
-            matchMedia: () => ({ matches: false, addEventListener() {} }),
+            matchMedia: query => ({
+                matches: query.includes('prefers-color-scheme') ? prefersDark : false,
+                addEventListener(name, handler) { events.set(query, handler); },
+            }),
             addEventListener: (name, handler) => events.set(name, handler),
             dispatchEvent() {},
         },
         document: {
-            documentElement: { dataset: {}, style: { setProperty: (name, size) => styles.set(name, size) } },
+            documentElement: {
+                dataset: {},
+                style: {
+                    setProperty: (name, size) => styles.set(name, size),
+                    colorScheme: '',
+                },
+                classList: {
+                    toggle(name, enabled) { enabled ? classes.add(name) : classes.delete(name); },
+                    contains(name) { return classes.has(name); },
+                },
+            },
             querySelectorAll: () => [audio], addEventListener() {},
         },
         localStorage: {
@@ -29,7 +44,7 @@ async function loadPreferences(t, stored = null, blocked = false) {
         t.after(() => descriptor ? Object.defineProperty(globalThis, key, descriptor) : delete globalThis[key]);
     }
     const module = await import(new URL(`../../resources/js/ui-preferences.js?test=${++loadNumber}`, import.meta.url));
-    return { ...module, styles, events, audio, stored: () => JSON.parse(value) };
+    return { ...module, styles, events, audio, classes, setSystemDark: next => { prefersDark = next; }, stored: () => JSON.parse(value) };
 }
 
 test('existing preferences keep the larger default reading sizes', async t => {
@@ -47,12 +62,27 @@ test('sliders save independently without losing sound or motion preferences', as
     preferences.setReadingSize('story', '32');
     preferences.setReadingSize('questions', '34');
     preferences.setReadingSize('answers', '28');
-    assert.deepEqual(stored(), { sound: false, motion: 'reduce', readingSizes: { story: 32, questions: 34, answers: 28 } });
+    assert.deepEqual(stored(), { sound: false, motion: 'reduce', theme: 'system', readingSizes: { story: 32, questions: 34, answers: 28 } });
     assert.equal(styles.get('--assessment-story-size'), '2rem');
     preferences.set('sound', true);
     assert.equal(stored().readingSizes.answers, 28);
     preferences.resetReadingSizes();
-    assert.deepEqual(stored(), { sound: true, motion: 'reduce', readingSizes: { story: 22, questions: 24, answers: 18 } });
+    assert.deepEqual(stored(), { sound: true, motion: 'reduce', theme: 'system', readingSizes: { story: 22, questions: 24, answers: 18 } });
+});
+
+test('dark mode toggles the html class and saves with other preferences', async t => {
+    const { preferences, classes, stored, default: controls } = await loadPreferences(t, JSON.stringify({ theme: 'dark', sound: false }));
+    const ui = controls();
+
+    assert.equal(preferences.darkMode, true);
+    assert.equal(classes.has('dark'), true);
+    assert.equal(ui.darkMode, true);
+
+    ui.set('theme', 'light');
+
+    assert.equal(classes.has('dark'), false);
+    assert.equal(stored().theme, 'light');
+    assert.equal(stored().sound, false);
 });
 
 test('saved sizes restore and invalid values cannot create broken CSS', async t => {
@@ -76,11 +106,12 @@ test('malformed or partial saved preferences fall back per field', async t => {
 test('other-tab updates and removing preferences update all reading sizes', async t => {
     const { preferences, events, styles, default: controls } = await loadPreferences(t);
     const ui = controls();
-    events.get('storage')({ key: 'pgaals-comfort', newValue: JSON.stringify({ sound: false, motion: 'reduce', readingSizes: { story: 16, questions: 18, answers: 16 } }) });
+    events.get('storage')({ key: 'pgaals-comfort', newValue: JSON.stringify({ sound: false, motion: 'reduce', theme: 'dark', readingSizes: { story: 16, questions: 18, answers: 16 } }) });
     ui.refresh();
     assert.deepEqual(ui.readingSizes, { story: 16, questions: 18, answers: 16 });
     assert.equal(styles.get('--assessment-answers-size'), '1rem');
     assert.equal(preferences.sound, false);
+    assert.equal(preferences.darkMode, true);
     events.get('storage')({ key: 'pgaals-comfort', newValue: null });
     assert.deepEqual(preferences.readingSizes, { story: 22, questions: 24, answers: 18 });
 });

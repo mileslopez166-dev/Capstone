@@ -6,9 +6,15 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script>
             (() => {
-                let motion;
-                try { motion = JSON.parse(localStorage.getItem('pgaals-comfort'))?.motion; } catch {}
+                let preferences = {};
+                try { preferences = JSON.parse(localStorage.getItem('pgaals-comfort')) || {}; } catch {}
+                const motion = preferences.motion;
+                const theme = ['light', 'dark', 'system'].includes(preferences.theme) ? preferences.theme : 'system';
+                const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
                 document.documentElement.dataset.reducedMotion = String(motion === 'reduce' || matchMedia('(prefers-reduced-motion: reduce)').matches);
+                document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+                document.documentElement.classList.toggle('dark', dark);
+                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
             })();
         </script>
 
@@ -27,5 +33,8 @@
     @endphp
     <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }}">
         {{ $slot }}
+        @if (in_array($campusRole, ['teacher', 'student'], true))
+            <x-app-footer />
+        @endif
     </body>
 </html>

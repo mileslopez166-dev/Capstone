@@ -14,6 +14,15 @@ Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
+__pycache__/
+*.py[cod]
+.student.zip_old
+/ai_pgaals_ml/datasets/raw/**/*
+!/ai_pgaals_ml/datasets/raw/**/
+!/ai_pgaals_ml/datasets/raw/**/.gitkeep
+/ai_pgaals_ml/processed/*.csv
+!/ai_pgaals_ml/processed/feature_importance.csv
+/ai_pgaals_ml/models/*.pkl
 /.fleet
 /.idea
 /.vscode

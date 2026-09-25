@@ -1,8 +1,14 @@
-<x-worksheet-layout :teacher="$teacher" :title="$assessment->title" :back="$teacher ? route('worksheets.index').'#review' : route('worksheets.mission')">
+<x-worksheet-layout :teacher="$teacher" :title="$assessment->title" :back="$teacher ? route('worksheets.reviews') : route('worksheets.mission')">
+    @unless ($teacher)<x-teacher-identity :teacher="$assessment->teacher" />@endunless
     <section class="worksheet-review-summary">
         <div><h2>{{ $teacher ? $attempt->student->name : 'Your Worksheet' }}</h2><p>Attempt {{ $attempt->progress->attempt_number }} &middot; Submitted {{ $attempt->created_at->format('M d, Y H:i') }}</p></div>
         @if ($attempt->reviewed_at)<strong class="worksheet-score">{{ $attempt->score }} / {{ $attempt->total }} <small>{{ round($attempt->score / $attempt->total * 100) }}%</small></strong>@else<strong class="worksheet-pending">Awaiting Teacher Review</strong>@endif
     </section>
+    @if ($attempt->progress->submission)
+        <x-assessment-coin-reward :submission="$attempt->progress->submission" />
+    @else
+        <p class="assessment-coin-reward"><span class="material-symbols-outlined" aria-hidden="true">toll</span>Coins awaiting teacher score</p>
+    @endif
     @if ($attempt->progress->administrator)
         <p class="worksheet-notice">Teacher-assisted: {{ $attempt->progress->administrator->name }}</p>
     @endif
