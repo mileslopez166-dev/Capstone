@@ -1,0 +1,86 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      APP_NAME: ${APP_NAME:-AI-PGAALS}
+      APP_ENV: ${APP_ENV:-production}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-https://smartlearn6.site}
+      ASSET_URL: ${ASSET_URL:-}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-*}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stderr}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST:-database}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-pgaals}
+      DB_USERNAME: ${DB_USERNAME:-pgaals}
+      DB_PASSWORD: ${DB_PASSWORD}
+      BROADCAST_DRIVER: ${BROADCAST_DRIVER:-log}
+      CACHE_DRIVER: ${CACHE_DRIVER:-file}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+      SESSION_DRIVER: ${SESSION_DRIVER:-database}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-smartlearn6.site}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-120}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-smartlearn6.site}
+      TEACHER_REGISTRATION_CODE: ${TEACHER_REGISTRATION_CODE}
+      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      ADMIN_NAME: ${ADMIN_NAME:-System Administrator}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_SECTION: ${ADMIN_SECTION:-Admin-Office}
+      ADMIN_SYNC_PASSWORD: ${ADMIN_SYNC_PASSWORD:-false}
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@smartlearn6.site}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-AI-PGAALS}
+      OPENAI_TUTOR_ENABLED: ${OPENAI_TUTOR_ENABLED:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_TUTOR_MODEL: ${OPENAI_TUTOR_MODEL:-gpt-6-astra}
+      ML_PREDICTIONS_ENABLED: ${ML_PREDICTIONS_ENABLED:-false}
+      ML_PREDICTION_API_URL: ${ML_PREDICTION_API_URL:-}
+      ML_PREDICTION_TIMEOUT: ${ML_PREDICTION_TIMEOUT:-5}
+      ML_READING_MODEL_NAME: ${ML_READING_MODEL_NAME:-reading_level_random_forest_v1}
+      VITE_APP_NAME: ${VITE_APP_NAME:-AI-PGAALS}
+      VITE_PUSHER_APP_KEY: ${VITE_PUSHER_APP_KEY:-}
+      VITE_PUSHER_HOST: ${VITE_PUSHER_HOST:-}
+      VITE_PUSHER_PORT: ${VITE_PUSHER_PORT:-443}
+      VITE_PUSHER_SCHEME: ${VITE_PUSHER_SCHEME:-https}
+      VITE_PUSHER_APP_CLUSTER: ${VITE_PUSHER_APP_CLUSTER:-mt1}
+    volumes:
+      - app_storage:/var/www/html/storage
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-pgaals}
+      MYSQL_USER: ${DB_USERNAME:-pgaals}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  app_storage:
+  db_data:
