@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\AssessmentParticipant;
 use App\Support\AssessmentCoinRewards;
 use App\Support\AssessmentScores;
+use App\Support\AdaptiveQuestions;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\PhilIri;
@@ -61,7 +62,8 @@ class AssessmentController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'subject' => ['required', 'in:literacy,numeracy'],
-            'quiz_type' => ['required', Rule::in(['multiple_choice', 'data_egg', 'flashcards'])],
+            'quiz_type' => ['required', Rule::in(['multiple_choice', 'data_egg', 'flashcards', 'treasure_quest'])],
+            'question_selection' => ['sometimes', Rule::in(['fixed', 'automatic'])],
             'delivery_method' => ['required', Rule::in(['manual'])],
             'target_section' => ['required', Rule::in(['all', 'section_a', 'section_b', 'section_c'])],
             'assessment_type' => ['required', Rule::in(['silent_reading', 'oral_reading', 'listening_comprehension', 'group_screening'])],
@@ -81,6 +83,7 @@ class AssessmentController extends Controller
             'manual_questions.*.answers.C' => ['required_unless:assessment_type,oral_reading', 'nullable', 'string', 'max:255'],
             'manual_questions.*.answers.D' => ['required_unless:assessment_type,oral_reading', 'nullable', 'string', 'max:255'],
             'manual_questions.*.correct_answer' => ['required_unless:assessment_type,oral_reading', 'nullable', Rule::in(['A', 'B', 'C', 'D'])],
+            'manual_questions.*.difficulty' => ['nullable', Rule::in(['frustration', 'instructional', 'independent', 'advanced'])],
             'instructions' => ['nullable', 'string', 'max:2000'],
             'story_title' => ['nullable', 'string', 'max:255'],
             'story_description' => ['nullable', 'string', 'max:10000'],
@@ -101,8 +104,18 @@ class AssessmentController extends Controller
                         'D' => $question['answers']['D'] ?? '',
                     ],
                     'correct_answer' => $question['correct_answer'] ?? null,
+                    ...(! empty($question['difficulty']) ? ['difficulty' => $question['difficulty']] : []),
                 ])
                 ->all();
+
+        $selection = $validated['question_selection'] ?? 'fixed';
+        if ($validated['assessment_type'] === 'oral_reading') $selection = 'fixed';
+        if ($selection === 'automatic') {
+            if (!in_array($validated['assessment_type'], ['silent_reading', 'listening_comprehension'], true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['question_selection' => 'Automatic question selection is available for silent reading and listening comprehension.']);
+            }
+            AdaptiveQuestions::validateBank($manualQuestions);
+        }
 
         $assessment = $request->user()->createdAssessments()->create([
             'title' => $validated['title'],
@@ -114,6 +127,7 @@ class AssessmentController extends Controller
             'focus_areas' => $validated['focus_areas'],
             'asset_path' => null,
             'manual_questions' => $manualQuestions,
+            'question_selection' => $selection,
             'instructions' => $validated['instructions'] ?? null,
             'story_title' => $validated['story_title'] ?? null,
             'story_description' => $validated['story_description'] ?? null,
@@ -280,7 +294,9 @@ class AssessmentController extends Controller
                 ]);
             }
 
-            return view('student.assessment', compact('assessment', 'progress', 'student', 'assisted'));
+            return view('student.assessment', compact('assessment', 'progress', 'student', 'assisted') + [
+                'attemptQuestions' => $progress->question_snapshot,
+            ]);
         });
     }
 
@@ -303,11 +319,11 @@ class AssessmentController extends Controller
         ];
     }
 
-    private function validateAnswerIndexes(array $answers, Assessment $assessment): void
+    private function validateAnswerIndexes(array $answers, array $questions): void
     {
-        $questionCount = count($assessment->manual_questions ?? []);
+        $questionCount = count($questions);
         foreach (array_keys($answers) as $index) {
-            abort_unless(ctype_digit((string) $index) && (int) $index < $questionCount, 422, 'Invalid question index.');
+            abort_unless(ctype_digit((string) $index) && (string) (int) $index === (string) $index && (int) $index < $questionCount, 422, 'Invalid question index.');
         }
     }
 
@@ -319,7 +335,6 @@ class AssessmentController extends Controller
             'attempt_key' => ['required', 'uuid'],
             'state' => ['required', $this->progressRules()['state'][1]],
         ]));
-        $this->validateAnswerIndexes($validated['state']['answers'], $assessment);
 
         return DB::transaction(function () use ($request, $student, $assessment, $validated) {
             User::query()->lockForUpdate()->findOrFail($student->id);
@@ -327,6 +342,8 @@ class AssessmentController extends Controller
                 ->where('assessment_id', $assessment->id)->where('user_id', $student->id)
                 ->where('attempt_key', $validated['attempt_key'])->firstOrFail();
             abort_if($progress->submission_id !== null, 409, 'This attempt has already been submitted.');
+            $progress = AdaptiveQuestions::freeze($progress, $assessment, $student);
+            $this->validateAnswerIndexes($validated['state']['answers'], $progress->question_snapshot ?? []);
 
             // Delayed autosaves must not overwrite a newer snapshot.
             if ($validated['revision'] > $progress->revision) {
@@ -344,28 +361,12 @@ class AssessmentController extends Controller
         abort_if($assessment->worksheet_number, 422, 'This worksheet requires teacher review.');
 
         $validated = $request->validate(array_merge($this->progressRules(), [
-            'attempt_key' => [$request->user()->isTeacher() ? 'required' : 'sometimes', 'required', 'uuid'],
-            'answers' => ['present', 'array', 'size:'.count($assessment->manual_questions ?? [])],
+            'attempt_key' => [$request->user()->isTeacher() || $assessment->question_selection === 'automatic' ? 'required' : 'sometimes', 'required', 'uuid'],
+            'answers' => ['present', 'array', 'max:1000'],
             'answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
         ]));
-        $this->validateAnswerIndexes($validated['answers'], $assessment);
-
-        $manualQuestions = collect($assessment->manual_questions ?? [])->values();
-        $questionCount = $manualQuestions->count();
-        $validIndexes = range(0, max(0, $questionCount - 1));
-        $answers = collect($validated['answers'])
-            ->mapWithKeys(fn ($answer, $index): array => [(int) $index => $answer])
-            ->only($validIndexes);
-
-        $correctCount = $manualQuestions
-            ->filter(fn (array $question, int $index): bool => ($question['correct_answer'] ?? null) === $answers->get($index))
-            ->count();
-
-        $pointsPerQuestion = 250;
-        $points = $correctCount * $pointsPerQuestion;
-        $possiblePoints = $questionCount * $pointsPerQuestion;
         $studentId = $student->id;
-        $submission = DB::transaction(function () use ($request, $assessment, $validated, $studentId, $answers, $correctCount, $questionCount, $points, $possiblePoints) {
+        $submission = DB::transaction(function () use ($request, $assessment, $validated, $studentId) {
             // Serialize attempts and token consumption for this student, including multiple tabs.
             $student = User::query()->lockForUpdate()->findOrFail($studentId);
             $progress = isset($validated['attempt_key']) ? AssessmentProgress::query()
@@ -395,6 +396,18 @@ class AssessmentController extends Controller
 
             $progress ??= AssessmentProgress::forAttempt($assessment, $student, $previousAttempts + 1);
             abort_unless($progress->attempt_number === $previousAttempts + 1, 409, 'This attempt is no longer current.');
+            $progress = AdaptiveQuestions::freeze($progress, $assessment, $student);
+            $questions = $progress->question_snapshot ?? [];
+            $this->validateAnswerIndexes($validated['answers'], $questions);
+            if (isset($validated['state']['answers'])) $this->validateAnswerIndexes($validated['state']['answers'], $questions);
+            $questionCount = count($questions);
+            if (count($validated['answers']) !== $questionCount) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['answers' => 'Answer every question in this attempt before submitting.']);
+            }
+            $answers = collect($validated['answers'])->mapWithKeys(fn ($answer, $index) => [(int) $index => $answer]);
+            $correctCount = collect($questions)->filter(fn ($question, $index) => ($question['correct_answer'] ?? null) === $answers->get($index))->count();
+            $points = $correctCount * 250;
+            $possiblePoints = $questionCount * 250;
 
             $state = $validated['state'] ?? $progress->state ?? [];
             $submission = AssessmentSubmission::query()->create([
@@ -402,6 +415,8 @@ class AssessmentController extends Controller
                 'user_id' => $studentId,
                 'attempt_number' => $previousAttempts + 1,
                 'answers' => $answers->all(),
+                'question_snapshot' => $questions,
+                'selection_context' => $progress->selection_context,
                 'correct_count' => $correctCount,
                 'question_count' => $questionCount,
                 'points' => $points,
@@ -443,6 +458,7 @@ class AssessmentController extends Controller
             'ml_prediction' => $submission->mlPrediction ? [
                 'prediction' => $submission->mlPrediction->prediction,
                 'confidence' => $submission->mlPrediction->confidence_score,
+                'evaluation' => $submission->mlPrediction->model_evaluation,
                 'recommendation' => $submission->mlPrediction->recommendation,
             ] : null,
         ]);

@@ -37,7 +37,7 @@
                         <h2 class="text-xl font-bold"><a href="{{ route('assessments.show', $assessment) }}">{{ $assessment->title }}</a></h2>
                         <dl class="my-4 grid grid-cols-2 gap-4 text-sm">
                             <div><dt class="text-on-surface-variant">Section</dt><dd class="mt-1 font-semibold">{{ str($assessment->target_section ?? 'all')->replace('_', ' ')->title() }}</dd></div>
-                            <div><dt class="text-on-surface-variant">{{ $assessment->worksheet_number ? 'Worksheet' : 'Questions' }}</dt><dd class="mt-1 font-semibold">{{ $assessment->worksheet_number ? '#'.$assessment->worksheet_number.' / '.$assessment->worksheet_total.' items' : count($assessment->manual_questions ?? []) }}</dd></div>
+                            <div><dt class="text-on-surface-variant">{{ $assessment->worksheet_number ? 'Worksheet' : 'Questions' }}</dt><dd class="mt-1 font-semibold">{{ $assessment->worksheet_number ? '#'.$assessment->worksheet_number.' / '.$assessment->worksheet_total.' items' : ($assessment->question_selection === 'automatic' ? '8 per student' : count($assessment->manual_questions ?? [])) }}</dd></div>
                         </dl>
                         <div class="assessment-list-item-actions">
                             <a class="ui-button" href="{{ route('assessments.show', $assessment) }}"><span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>View Assessment</a>

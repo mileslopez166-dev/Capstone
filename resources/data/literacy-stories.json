@@ -1,77 +1,2383 @@
 [
     {
-        "id": "school-garden-project",
-        "story_title": "The School Garden Project",
-        "story_description": "Lara noticed that the empty space behind their classroom was full of weeds and dried leaves. She suggested creating a small garden where students could plant vegetables and flowers. Her classmates helped clean the area and prepared the soil. They planted tomatoes, carrots, and sunflowers. After several weeks, the garden became colorful and useful. Students used it during science activities to learn about plants. The project taught everyone that teamwork and patience can turn a simple idea into something valuable.",
-        "manual_questions": [
-            { "question": "What did Lara notice behind their classroom?", "answers": { "A": "A playground", "B": "An empty space with weeds", "C": "A new building", "D": "A reading corner" }, "correct_answer": "B" },
-            { "question": "What did Lara suggest creating?", "answers": { "A": "A library", "B": "A garden", "C": "A classroom", "D": "A playground" }, "correct_answer": "B" },
-            { "question": "Who helped Lara prepare the garden?", "answers": { "A": "Her classmates", "B": "Her parents", "C": "The principal", "D": "The visitors" }, "correct_answer": "A" },
-            { "question": "What did the students plant?", "answers": { "A": "Trees only", "B": "Flowers only", "C": "Vegetables and flowers", "D": "Fruits only" }, "correct_answer": "C" },
-            { "question": "Why did students use the garden during science activities?", "answers": { "A": "To play games", "B": "To learn about plants", "C": "To sell vegetables", "D": "To hold events" }, "correct_answer": "B" },
-            { "question": "What lesson did the project teach?", "answers": { "A": "Teamwork is important", "B": "Gardens are expensive", "C": "Plants grow quickly", "D": "Work should be avoided" }, "correct_answer": "A" },
-            { "question": "What does the word \"valuable\" mean?", "answers": { "A": "Important", "B": "Broken", "C": "Small", "D": "Hidden" }, "correct_answer": "A" },
-            { "question": "What is the main idea of the story?", "answers": { "A": "Gardens are difficult to build", "B": "Teamwork can create positive results", "C": "Students dislike gardening", "D": "Plants do not need care" }, "correct_answer": "B" }
+        "id": "a-clearer-book-fair",
+        "story_title": "A Clearer Book Fair",
+        "story_description": "On Saturday, Liza\u2019s Grade 6 class held a free book fair at their barangay hall. Each visitor could take one book home. Thirty donated books lay mixed on three tables, and visitors kept asking where to look. Ben suggested sorting by size. Liza chose stories, science, and poems instead. Classmates sorted the books and made cardboard signs. A younger visitor still needed help reading a sign, so Ben added drawings. Soon, visitors found books without help. The science table became empty before closing. Liza noted this in her notebook, saved the signs for next month, and thanked Ben for making them clearer.",
+        "question_sets": {
+            "frustration": [
+                {
+                    "question": "Where was the book fair held?",
+                    "answers": {
+                        "A": "At the school canteen",
+                        "B": "At the barangay hall",
+                        "C": "At the town market",
+                        "D": "At the class garden"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "On which day was the fair held?",
+                    "answers": {
+                        "A": "Monday",
+                        "B": "Wednesday",
+                        "C": "Friday",
+                        "D": "Saturday"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Which class held the fair?",
+                    "answers": {
+                        "A": "Grade 6",
+                        "B": "Grade 5",
+                        "C": "Grade 4",
+                        "D": "Grade 3"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "How many books were there at the start?",
+                    "answers": {
+                        "A": "Ten",
+                        "B": "Twenty",
+                        "C": "Thirty",
+                        "D": "Forty"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "How many books could each visitor take home?",
+                    "answers": {
+                        "A": "Three books",
+                        "B": "Two books",
+                        "C": "One book",
+                        "D": "Four books"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What were the signs made from?",
+                    "answers": {
+                        "A": "Cardboard",
+                        "B": "Cloth",
+                        "C": "Wood",
+                        "D": "Plastic"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who added drawings to the signs?",
+                    "answers": {
+                        "A": "Liza",
+                        "B": "A teacher",
+                        "C": "A visitor",
+                        "D": "Ben"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Which table became empty before closing?",
+                    "answers": {
+                        "A": "The stories table",
+                        "B": "The science table",
+                        "C": "The poems table",
+                        "D": "The drawing table"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                }
+            ],
+            "instructional": [
+                {
+                    "question": "Why did visitors first keep asking where to look?",
+                    "answers": {
+                        "A": "The books were mixed together.",
+                        "B": "The tables had been moved outside.",
+                        "C": "The signs showed the wrong prices.",
+                        "D": "The class had packed the books away."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Which action happened after the books were sorted but before Ben added drawings?",
+                    "answers": {
+                        "A": "Liza saved the signs.",
+                        "B": "The science table emptied.",
+                        "C": "Classmates made signs.",
+                        "D": "Liza thanked Ben."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u2018donated\u2019 mean in \u2018Thirty donated books\u2019?",
+                    "answers": {
+                        "A": "Borrowed for a short time",
+                        "B": "Bought for a higher price",
+                        "C": "Hidden for a later event",
+                        "D": "Given for others to use"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u2018noted\u2019 mean in \u2018Liza noted this in her notebook\u2019?",
+                    "answers": {
+                        "A": "Changed it",
+                        "B": "Wrote it down",
+                        "C": "Read it aloud",
+                        "D": "Passed it around"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did Ben add drawings?",
+                    "answers": {
+                        "A": "A visitor wanted to draw a book.",
+                        "B": "A classmate had lost the signs.",
+                        "C": "A teacher asked for brighter tables.",
+                        "D": "A visitor needed help reading a sign."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "How were the books grouped in Liza\u2019s plan?",
+                    "answers": {
+                        "A": "By their kind or subject",
+                        "B": "By their height or width",
+                        "C": "By their age or condition",
+                        "D": "By their cover or color"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did Liza save the signs for next month?",
+                    "answers": {
+                        "A": "To count how many visitors came",
+                        "B": "To replace the donated books",
+                        "C": "To use them at the next fair",
+                        "D": "To record the size of each table"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What change followed Ben\u2019s addition of drawings?",
+                    "answers": {
+                        "A": "Visitors asked for larger tables.",
+                        "B": "Visitors found books without help.",
+                        "C": "Classmates grouped books by size.",
+                        "D": "Classmates stopped giving books away."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                }
+            ],
+            "independent": [
+                {
+                    "question": "Which statement best expresses the story\u2019s main idea?",
+                    "answers": {
+                        "A": "A class prepares signs to keep for another book fair.",
+                        "B": "A pupil records which table runs out of books early.",
+                        "C": "A class improves a book fair by making choices easier.",
+                        "D": "A visitor receives help with reading a book fair sign."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What most likely guided Liza\u2019s choice of book groups?",
+                    "answers": {
+                        "A": "Keeping books with similar sizes together",
+                        "B": "Helping visitors find the reading they wanted",
+                        "C": "Making each table hold the same number",
+                        "D": "Showing visitors which donations were newest"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Ben\u2019s actions across the story show about him?",
+                    "answers": {
+                        "A": "He keeps finding ways to help the group.",
+                        "B": "He insists that only his first idea matters.",
+                        "C": "He prefers working without his classmates.",
+                        "D": "He wants to choose every visitor\u2019s book."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What does Liza\u2019s final thanks reveal about her?",
+                    "answers": {
+                        "A": "She believes Ben chose all the book groups.",
+                        "B": "She thinks her classmates need no credit.",
+                        "C": "She regrets allowing visitors to take books.",
+                        "D": "She recognizes the value of Ben\u2019s contribution."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which lesson is best supported by the whole story?",
+                    "answers": {
+                        "A": "A shared project improves when people respond to others\u2019 needs.",
+                        "B": "A shared project succeeds when everyone follows the first plan.",
+                        "C": "A shared project needs equal amounts of every donated item.",
+                        "D": "A shared project works best when one person does every task."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which is the best summary of the story?",
+                    "answers": {
+                        "A": "Visitors struggle with mixed books, so pupils sort by size and remove all the signs.",
+                        "B": "Pupils add drawings first, visitors request categories, and Liza brings more science books.",
+                        "C": "Visitors struggle to find books, pupils improve the display, and Liza saves useful information.",
+                        "D": "Pupils sort the books, visitors still need help, and Liza ends the fair without further changes."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which evidence best supports the idea that the solution was a team effort?",
+                    "answers": {
+                        "A": "The fair used three tables and offered thirty donated books.",
+                        "B": "Liza chose groups, classmates sorted books, and Ben improved signs.",
+                        "C": "Visitors took books home and the science table became empty.",
+                        "D": "Liza kept a notebook and saved the signs for next month."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Liza\u2019s notes and saved signs together suggest?",
+                    "answers": {
+                        "A": "She expects visitors to bring all the books back.",
+                        "B": "She intends to replace her classmates at the fair.",
+                        "C": "She plans to keep the remaining books for herself.",
+                        "D": "She wants to carry useful experience into the next fair."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                }
+            ],
+            "advanced": [
+                {
+                    "question": "Why was sorting by kind or subject a better response than sorting by size?",
+                    "answers": {
+                        "A": "It gave visitors clues about what they could read.",
+                        "B": "It made every group contain the same number of books.",
+                        "C": "It showed which books had been donated most recently.",
+                        "D": "It guaranteed that each visitor would choose a science book."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "A reader says, \u2018Because Liza did not choose Ben\u2019s first idea, Ben did not help.\u2019 Which response is best supported?",
+                    "answers": {
+                        "A": "The reader is right because only the first idea affects a project.",
+                        "B": "The reader is right because the sorting was finished before the drawings.",
+                        "C": "The reader is mistaken because Ben\u2019s later drawings made the signs clearer.",
+                        "D": "The reader is mistaken because the class eventually sorted all books by size."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "Does the empty science table prove that science books were the most popular?",
+                    "answers": {
+                        "A": "Yes, because any empty table must have started with the most books.",
+                        "B": "No, because we do not know how many books each group started with.",
+                        "C": "Yes, because sorting the books shows that all visitors preferred science.",
+                        "D": "No, because the story says visitors returned all the science books."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "Which extra record would best help Liza compare how many books were taken from each group?",
+                    "answers": {
+                        "A": "The width of each table and the length of its sign",
+                        "B": "The size of each drawing and the color of its sign",
+                        "C": "The names of each helper and the time they arrived",
+                        "D": "The starting and remaining book counts for each group"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "Suppose the next fair uses the same words on the signs but leaves out the drawings. What is most likely?",
+                    "answers": {
+                        "A": "Every visitor will need someone to choose a book.",
+                        "B": "All three tables will become empty at the same time.",
+                        "C": "Visitors will be allowed to take more than one book.",
+                        "D": "Some visitors may again need help reading the signs."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "A reader claims, \u2018Sorting the books solved every problem at the fair.\u2019 Which detail most strongly challenges that claim?",
+                    "answers": {
+                        "A": "Ben first suggested placing books into groups by size.",
+                        "B": "A younger visitor still needed help after the signs were made.",
+                        "C": "Liza saved the cardboard signs for the following month.",
+                        "D": "Each visitor could choose one book to take home."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "Another class has mixed art supplies, and some younger pupils cannot read its labels. Which plan best applies the story\u2019s lesson?",
+                    "answers": {
+                        "A": "Group supplies by use and add words with matching pictures.",
+                        "B": "Group supplies by size and keep the same written labels.",
+                        "C": "Put supplies in one box and add a longer written list.",
+                        "D": "Put supplies on more tables and remove the existing labels."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "advanced"
+                },
+                {
+                    "question": "Which plan best combines Liza\u2019s useful signs with what she noticed about the books?",
+                    "answers": {
+                        "A": "Reuse every sign and stop recording which books visitors take.",
+                        "B": "Replace every sign and request only science books for all visitors.",
+                        "C": "Reuse the clear signs and use book counts to guide new requests.",
+                        "D": "Keep the books mixed and use the saved signs as table covers."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "advanced"
+                }
+            ]
+        },
+        "answer_guide": [
+            {
+                "number": 1,
+                "difficulty": "frustration",
+                "skill": "Literal setting",
+                "correct_answer": "B",
+                "explanation": "The opening sentence places the fair at the barangay hall."
+            },
+            {
+                "number": 2,
+                "difficulty": "frustration",
+                "skill": "Literal time",
+                "correct_answer": "D",
+                "explanation": "The story begins with \u2018On Saturday.\u2019"
+            },
+            {
+                "number": 3,
+                "difficulty": "frustration",
+                "skill": "Identifying participants",
+                "correct_answer": "A",
+                "explanation": "Liza\u2019s Grade 6 class held the fair."
+            },
+            {
+                "number": 4,
+                "difficulty": "frustration",
+                "skill": "Recalling a quantity",
+                "correct_answer": "C",
+                "explanation": "Thirty donated books were mixed on the tables."
+            },
+            {
+                "number": 5,
+                "difficulty": "frustration",
+                "skill": "Recalling a stated rule",
+                "correct_answer": "C",
+                "explanation": "Each visitor could take one book home."
+            },
+            {
+                "number": 6,
+                "difficulty": "frustration",
+                "skill": "Recalling a material",
+                "correct_answer": "A",
+                "explanation": "The classmates made cardboard signs."
+            },
+            {
+                "number": 7,
+                "difficulty": "frustration",
+                "skill": "Matching a character to an action",
+                "correct_answer": "D",
+                "explanation": "Ben added drawings after a younger visitor needed help."
+            },
+            {
+                "number": 8,
+                "difficulty": "frustration",
+                "skill": "Recalling an outcome",
+                "correct_answer": "B",
+                "explanation": "The science table became empty before closing."
+            },
+            {
+                "number": 9,
+                "difficulty": "instructional",
+                "skill": "Cause and effect",
+                "correct_answer": "A",
+                "explanation": "Mixed books and repeated questions appear together; the class responds by sorting and labeling."
+            },
+            {
+                "number": 10,
+                "difficulty": "instructional",
+                "skill": "Sequencing nearby events",
+                "correct_answer": "C",
+                "explanation": "The classmates sorted books and made signs before the younger visitor\u2019s difficulty led to drawings."
+            },
+            {
+                "number": 11,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "D",
+                "explanation": "The donated books are provided at a free fair for visitors to take home."
+            },
+            {
+                "number": 12,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "B",
+                "explanation": "The notebook shows that Liza recorded what happened."
+            },
+            {
+                "number": 13,
+                "difficulty": "instructional",
+                "skill": "Linking a problem and response",
+                "correct_answer": "D",
+                "explanation": "The younger visitor\u2019s difficulty reading a sign directly leads to Ben\u2019s drawings."
+            },
+            {
+                "number": 14,
+                "difficulty": "instructional",
+                "skill": "Classifying information",
+                "correct_answer": "A",
+                "explanation": "Stories, science, and poems describe kinds or subjects rather than physical size."
+            },
+            {
+                "number": 15,
+                "difficulty": "instructional",
+                "skill": "Straightforward inference",
+                "correct_answer": "C",
+                "explanation": "Saving the signs \u2018for next month\u2019 suggests using them again."
+            },
+            {
+                "number": 16,
+                "difficulty": "instructional",
+                "skill": "Tracing a result",
+                "correct_answer": "B",
+                "explanation": "After the drawings were added, visitors soon found books without help."
+            },
+            {
+                "number": 17,
+                "difficulty": "independent",
+                "skill": "Main idea",
+                "correct_answer": "C",
+                "explanation": "Sorting and clearer signs address visitors\u2019 difficulty choosing books throughout the story; the other choices focus on individual details."
+            },
+            {
+                "number": 18,
+                "difficulty": "independent",
+                "skill": "Character motivation",
+                "correct_answer": "B",
+                "explanation": "Visitors ask where to look, and Liza responds with meaningful reading categories."
+            },
+            {
+                "number": 19,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "A",
+                "explanation": "Ben first suggests sorting by size, then contributes useful drawings when another need appears."
+            },
+            {
+                "number": 20,
+                "difficulty": "independent",
+                "skill": "Interpreting character response",
+                "correct_answer": "D",
+                "explanation": "Liza thanks Ben specifically for making the signs clearer, acknowledging his help."
+            },
+            {
+                "number": 21,
+                "difficulty": "independent",
+                "skill": "Theme",
+                "correct_answer": "A",
+                "explanation": "The class responds to mixed books and a reading difficulty, improving visitors\u2019 experience."
+            },
+            {
+                "number": 22,
+                "difficulty": "independent",
+                "skill": "Summarizing",
+                "correct_answer": "C",
+                "explanation": "This choice includes the problem, the combined solution, and Liza\u2019s notes and saved signs."
+            },
+            {
+                "number": 23,
+                "difficulty": "independent",
+                "skill": "Selecting evidence across the story",
+                "correct_answer": "B",
+                "explanation": "The solution combines decisions and work by Liza, her classmates, and Ben."
+            },
+            {
+                "number": 24,
+                "difficulty": "independent",
+                "skill": "Combining details to infer intention",
+                "correct_answer": "D",
+                "explanation": "Recording the empty science table and keeping signs for next month indicate preparation for another fair."
+            },
+            {
+                "number": 25,
+                "difficulty": "advanced",
+                "skill": "Evaluating alternative decisions",
+                "correct_answer": "A",
+                "explanation": "The problem concerns finding books; story, science, and poem groups provide content clues that size does not."
+            },
+            {
+                "number": 26,
+                "difficulty": "advanced",
+                "skill": "Comparing interpretations with evidence",
+                "correct_answer": "C",
+                "explanation": "Ben\u2019s first sorting idea is not adopted, but his drawings help; Liza explicitly thanks him."
+            },
+            {
+                "number": 27,
+                "difficulty": "advanced",
+                "skill": "Evaluating the limits of evidence",
+                "correct_answer": "B",
+                "explanation": "The story gives a total of thirty books but no starting count for each group, so relative popularity is uncertain."
+            },
+            {
+                "number": 28,
+                "difficulty": "advanced",
+                "skill": "Choosing relevant evidence",
+                "correct_answer": "D",
+                "explanation": "Starting and remaining counts would show how many books left each group; the story supplies only an overall total and one empty table."
+            },
+            {
+                "number": 29,
+                "difficulty": "advanced",
+                "skill": "Predicting a consequence",
+                "correct_answer": "D",
+                "explanation": "A younger visitor needed help with a written sign before Ben added drawings."
+            },
+            {
+                "number": 30,
+                "difficulty": "advanced",
+                "skill": "Testing a claim against event order",
+                "correct_answer": "B",
+                "explanation": "The younger visitor\u2019s difficulty occurs after sorting and sign-making, showing that another improvement was needed."
+            },
+            {
+                "number": 31,
+                "difficulty": "advanced",
+                "skill": "Applying a lesson to a new situation",
+                "correct_answer": "A",
+                "explanation": "The fair combines meaningful groups with drawings to address both finding items and reading signs."
+            },
+            {
+                "number": 32,
+                "difficulty": "advanced",
+                "skill": "Integrating evidence to improve a plan",
+                "correct_answer": "C",
+                "explanation": "The signs helped visitors, while the empty science table prompted a note; keeping effective signs and gathering counts builds on both."
+            }
         ]
     },
     {
-        "id": "lost-notebook",
-        "story_title": "The Lost Notebook",
-        "story_description": "During a busy school day, Carlo discovered that his science notebook was missing. He searched his classroom, but he could not find it anywhere. His friend Ana helped him look around the school. They checked the library, hallway, and playground. Finally, they found the notebook on a table near the science laboratory. Carlo thanked Ana for helping him. He learned that staying calm and asking for help can solve problems faster.",
-        "manual_questions": [
-            { "question": "What did Carlo lose?", "answers": { "A": "His book", "B": "His notebook", "C": "His bag", "D": "His pencil" }, "correct_answer": "B" },
-            { "question": "What subject was Carlo's notebook for?", "answers": { "A": "Mathematics", "B": "English", "C": "Science", "D": "History" }, "correct_answer": "C" },
-            { "question": "Who helped Carlo search?", "answers": { "A": "Ana", "B": "His teacher", "C": "His brother", "D": "His parents" }, "correct_answer": "A" },
-            { "question": "Where did they find the notebook?", "answers": { "A": "Library", "B": "Classroom", "C": "Playground", "D": "Science laboratory table" }, "correct_answer": "D" },
-            { "question": "What did Carlo learn?", "answers": { "A": "Ignore problems", "B": "Stay calm and ask for help", "C": "Buy a new notebook", "D": "Avoid friends" }, "correct_answer": "B" },
-            { "question": "Why did Carlo thank Ana?", "answers": { "A": "She gave him a notebook", "B": "She helped him find it", "C": "She wrote his notes", "D": "She cleaned his room" }, "correct_answer": "B" },
-            { "question": "What does \"missing\" mean?", "answers": { "A": "Lost", "B": "New", "C": "Clean", "D": "Finished" }, "correct_answer": "A" },
-            { "question": "What is the lesson of the story?", "answers": { "A": "Problems can be solved with cooperation", "B": "School supplies are unnecessary", "C": "Friends create problems", "D": "Searching is useless" }, "correct_answer": "A" }
+        "id": "the-garden-schedule",
+        "story_title": "The Garden Schedule",
+        "story_description": "Niko\u2019s Grade 6 class planted pechay behind their school. By Wednesday, several plants had drooping leaves. Two teams had watered on Monday, but nobody had come on Tuesday. Niko first wanted to add more volunteers. His classmate Aya suggested checking their schedule instead. They discovered that both teams had copied the same date. Together, they made a weekly chart with names and spaces for completed tasks. Their teacher reminded them to check the soil before watering. On Friday, an absent pupil\u2019s partner covered her turn. The plants grew stronger, and the class kept using the chart to share the work.",
+        "question_sets": {
+            "frustration": [
+                {
+                    "question": "What did the class plant?",
+                    "answers": {
+                        "A": "Tomatoes",
+                        "B": "Corn",
+                        "C": "Pechay",
+                        "D": "Eggplants"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Where was the garden?",
+                    "answers": {
+                        "A": "Behind the school",
+                        "B": "Beside the market",
+                        "C": "Inside the classroom",
+                        "D": "Across the playground"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What problem did the pupils notice?",
+                    "answers": {
+                        "A": "Some pots were missing.",
+                        "B": "The chart had fallen.",
+                        "C": "The garden gate was locked.",
+                        "D": "Some leaves were drooping."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who suggested checking the schedule?",
+                    "answers": {
+                        "A": "Niko",
+                        "B": "Aya",
+                        "C": "The teacher",
+                        "D": "The absent pupil"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did Niko first want to add?",
+                    "answers": {
+                        "A": "More garden signs",
+                        "B": "More volunteers",
+                        "C": "More plant pots",
+                        "D": "More garden rows"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What had both teams copied?",
+                    "answers": {
+                        "A": "The same date",
+                        "B": "The same plant name",
+                        "C": "The same soil note",
+                        "D": "The same pupil list"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did the teacher say to check before watering?",
+                    "answers": {
+                        "A": "The gate",
+                        "B": "The date",
+                        "C": "The tools",
+                        "D": "The soil"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "When did a partner cover an absent pupil\u2019s turn?",
+                    "answers": {
+                        "A": "On Monday",
+                        "B": "On Tuesday",
+                        "C": "On Friday",
+                        "D": "On Wednesday"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                }
+            ],
+            "instructional": [
+                {
+                    "question": "Why did checking the schedule help explain the missed watering day?",
+                    "answers": {
+                        "A": "It showed that the garden had too few plants.",
+                        "B": "It showed that both teams had copied one date.",
+                        "C": "It showed that the teacher had cancelled watering.",
+                        "D": "It showed that the class had changed its classroom."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201cdrooping\u201d describe in the story?",
+                    "answers": {
+                        "A": "Leaves turning blue",
+                        "B": "Leaves growing taller",
+                        "C": "Leaves opening wide",
+                        "D": "Leaves hanging down"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What are \u201cvolunteers\u201d in Niko\u2019s first idea?",
+                    "answers": {
+                        "A": "People willing to help",
+                        "B": "Tools used for digging",
+                        "C": "Plants ready for picking",
+                        "D": "Dates chosen for watering"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201ccovered her turn\u201d mean?",
+                    "answers": {
+                        "A": "Erased her name from the chart",
+                        "B": "Moved her task to next month",
+                        "C": "Did the task in her place",
+                        "D": "Hid her plant from the class"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What did the pupils do after discovering the repeated date?",
+                    "answers": {
+                        "A": "They planted the first seeds.",
+                        "B": "They noticed the first drooping leaves.",
+                        "C": "They made a weekly chart.",
+                        "D": "They asked for more volunteers."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why were names useful on the weekly chart?",
+                    "answers": {
+                        "A": "They showed which plants had the longest leaves.",
+                        "B": "They showed how many seeds were in each packet.",
+                        "C": "They showed which pupils preferred eating pechay.",
+                        "D": "They showed who was responsible for each turn."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What was the purpose of spaces for completed tasks?",
+                    "answers": {
+                        "A": "To show which plants belonged to each family",
+                        "B": "To show which jobs had already been done",
+                        "C": "To show which pupils had the best handwriting",
+                        "D": "To show which vegetables the class would plant next"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Which change best explains why the plants later grew stronger?",
+                    "answers": {
+                        "A": "The pupils organized and carried out their care more reliably.",
+                        "B": "The pupils moved all the plants inside their classroom.",
+                        "C": "The pupils replaced the pechay with another vegetable.",
+                        "D": "The pupils stopped checking the soil before watering."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                }
+            ],
+            "independent": [
+                {
+                    "question": "Which statement best gives the main idea?",
+                    "answers": {
+                        "A": "A class studies the appearance of pechay leaves on Wednesday.",
+                        "B": "A pupil suggests finding extra helpers for a school garden.",
+                        "C": "A teacher reminds pupils to look at soil before watering.",
+                        "D": "A class improves its garden care by organizing shared work."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Niko\u2019s first idea and later teamwork suggest about him?",
+                    "answers": {
+                        "A": "He follows his first idea even when another one helps.",
+                        "B": "He can reconsider an idea and join a different solution.",
+                        "C": "He prefers to leave difficult tasks to the teacher.",
+                        "D": "He wants the garden to become his own project."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What does Aya\u2019s approach reveal about how she solves problems?",
+                    "answers": {
+                        "A": "She looks for the cause before changing the plan.",
+                        "B": "She chooses more helpers before checking the work.",
+                        "C": "She waits for other pupils to finish every task.",
+                        "D": "She changes the plants before reading the schedule."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which detail best supports the idea that the pupils helped one another?",
+                    "answers": {
+                        "A": "Several plants had drooping leaves by Wednesday.",
+                        "B": "Both teams had copied exactly the same date.",
+                        "C": "A partner completed the turn of a pupil who was absent.",
+                        "D": "The class planted pechay behind the school."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which lesson is best supported by the whole story?",
+                    "answers": {
+                        "A": "Clear plans work better when people follow them and help each other.",
+                        "B": "More helpers always solve a problem without changing the plan.",
+                        "C": "One missed task means a group should stop its whole project.",
+                        "D": "Keeping a schedule matters more than carrying out its tasks."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which is the best summary?",
+                    "answers": {
+                        "A": "A class needs more garden space, so pupils move the pechay and ask for extra volunteers.",
+                        "B": "A teacher makes a schedule, but pupils copy one date and decide to stop growing pechay.",
+                        "C": "A watering mistake harms the garden\u2019s progress, so pupils improve their schedule and share the care.",
+                        "D": "A pupil misses Friday, so both teams water only on Monday and leave the chart unused."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Why did the class most likely keep using the chart after the plants improved?",
+                    "answers": {
+                        "A": "They wanted to record who liked eating the vegetables most.",
+                        "B": "They wanted the successful way of sharing work to continue.",
+                        "C": "They wanted to replace all checking of the soil with writing.",
+                        "D": "They wanted every pupil to water only on the same day."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which pair of details best shows that planning led to action?",
+                    "answers": {
+                        "A": "They planted pechay, and the garden was behind the school.",
+                        "B": "The leaves drooped, and Niko first suggested more volunteers.",
+                        "C": "Both teams copied one date, and both watered on Monday.",
+                        "D": "They made a chart, and a partner later completed a needed turn."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                }
+            ]
+        },
+        "answer_guide": [
+            {
+                "number": 1,
+                "difficulty": "frustration",
+                "skill": "Recalling a detail",
+                "correct_answer": "C",
+                "explanation": "The class planted pechay."
+            },
+            {
+                "number": 2,
+                "difficulty": "frustration",
+                "skill": "Setting",
+                "correct_answer": "A",
+                "explanation": "The plants were behind the school."
+            },
+            {
+                "number": 3,
+                "difficulty": "frustration",
+                "skill": "Identifying a stated problem",
+                "correct_answer": "D",
+                "explanation": "By Wednesday, several plants had drooping leaves."
+            },
+            {
+                "number": 4,
+                "difficulty": "frustration",
+                "skill": "Character and action",
+                "correct_answer": "B",
+                "explanation": "Aya suggested checking the schedule."
+            },
+            {
+                "number": 5,
+                "difficulty": "frustration",
+                "skill": "Recalling an initial decision",
+                "correct_answer": "B",
+                "explanation": "Niko first wanted to add more volunteers."
+            },
+            {
+                "number": 6,
+                "difficulty": "frustration",
+                "skill": "Recalling a discovery",
+                "correct_answer": "A",
+                "explanation": "Both teams had copied the same date."
+            },
+            {
+                "number": 7,
+                "difficulty": "frustration",
+                "skill": "Recalling an instruction",
+                "correct_answer": "D",
+                "explanation": "The teacher reminded them to check the soil before watering."
+            },
+            {
+                "number": 8,
+                "difficulty": "frustration",
+                "skill": "Recalling time",
+                "correct_answer": "C",
+                "explanation": "The partner covered the turn on Friday."
+            },
+            {
+                "number": 9,
+                "difficulty": "instructional",
+                "skill": "Cause and effect",
+                "correct_answer": "B",
+                "explanation": "Both teams copied the same date; both watered Monday and nobody came Tuesday."
+            },
+            {
+                "number": 10,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "D",
+                "explanation": "Drooping describes the hanging leaves noticed before the plants grew stronger."
+            },
+            {
+                "number": 11,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "A",
+                "explanation": "Niko considers adding people to help with the garden work."
+            },
+            {
+                "number": 12,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "C",
+                "explanation": "Because the pupil was absent, her partner carried out her turn."
+            },
+            {
+                "number": 13,
+                "difficulty": "instructional",
+                "skill": "Sequencing",
+                "correct_answer": "C",
+                "explanation": "They discovered the matching dates and then made a weekly chart."
+            },
+            {
+                "number": 14,
+                "difficulty": "instructional",
+                "skill": "Inferring a practical purpose",
+                "correct_answer": "D",
+                "explanation": "Names on a work schedule identify the pupils assigned to turns."
+            },
+            {
+                "number": 15,
+                "difficulty": "instructional",
+                "skill": "Inferring a practical purpose",
+                "correct_answer": "B",
+                "explanation": "The spaces were specifically for marking completed tasks."
+            },
+            {
+                "number": 16,
+                "difficulty": "instructional",
+                "skill": "Connecting actions and results",
+                "correct_answer": "A",
+                "explanation": "The chart, soil checks, and covered turn preceded the plants growing stronger."
+            },
+            {
+                "number": 17,
+                "difficulty": "independent",
+                "skill": "Main idea",
+                "correct_answer": "D",
+                "explanation": "The problem, revised schedule, shared duties, and stronger plants form the central idea."
+            },
+            {
+                "number": 18,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "B",
+                "explanation": "Niko first proposes more volunteers but then helps make the chart with Aya."
+            },
+            {
+                "number": 19,
+                "difficulty": "independent",
+                "skill": "Inferring a character\u2019s approach",
+                "correct_answer": "A",
+                "explanation": "Aya checks the schedule, and this reveals the repeated date that explains the problem."
+            },
+            {
+                "number": 20,
+                "difficulty": "independent",
+                "skill": "Selecting evidence for an inference",
+                "correct_answer": "C",
+                "explanation": "Covering an absent pupil\u2019s turn shows practical support for a classmate."
+            },
+            {
+                "number": 21,
+                "difficulty": "independent",
+                "skill": "Theme",
+                "correct_answer": "A",
+                "explanation": "The chart, completed tasks, and partner support all contribute to the stronger plants."
+            },
+            {
+                "number": 22,
+                "difficulty": "independent",
+                "skill": "Summarizing",
+                "correct_answer": "C",
+                "explanation": "The summary connects the missed watering, schedule correction, shared care, and improvement."
+            },
+            {
+                "number": 23,
+                "difficulty": "independent",
+                "skill": "Inferring motivation",
+                "correct_answer": "B",
+                "explanation": "The plants improved after work was organized, and the class kept the chart to share the work."
+            },
+            {
+                "number": 24,
+                "difficulty": "independent",
+                "skill": "Combining evidence across events",
+                "correct_answer": "D",
+                "explanation": "The chart establishes a plan; the covered turn shows the work actually being carried out."
+            }
         ]
     },
     {
-        "id": "helpful-neighbor",
-        "story_title": "The Helpful Neighbor",
-        "story_description": "Ben lived near an elderly neighbor named Mr. Santos. One afternoon, Ben saw him carrying heavy bags from the market. Ben offered to help carry the bags to his house. Mr. Santos thanked him and shared stories about his childhood. From that day, Ben visited him regularly. They became good friends and learned many things from each other. Ben discovered that a small act of kindness could make someone feel appreciated.",
-        "manual_questions": [
-            { "question": "Who was Ben's neighbor?", "answers": { "A": "Mr. Santos", "B": "Mr. Cruz", "C": "Teacher Ana", "D": "Carlo" }, "correct_answer": "A" },
-            { "question": "What was Mr. Santos carrying?", "answers": { "A": "Books", "B": "Heavy bags", "C": "Plants", "D": "Toys" }, "correct_answer": "B" },
-            { "question": "How did Ben help?", "answers": { "A": "He cooked food", "B": "He cleaned the house", "C": "He carried the bags", "D": "He bought groceries" }, "correct_answer": "C" },
-            { "question": "What happened after Ben helped?", "answers": { "A": "They became friends", "B": "They moved away", "C": "They stopped talking", "D": "They argued" }, "correct_answer": "A" },
-            { "question": "What did Ben learn?", "answers": { "A": "Kindness is valuable", "B": "Helping is difficult", "C": "Friends are unnecessary", "D": "Older people cannot teach" }, "correct_answer": "A" },
-            { "question": "What does \"appreciated\" mean?", "answers": { "A": "Forgotten", "B": "Valued", "C": "Ignored", "D": "Lost" }, "correct_answer": "B" },
-            { "question": "Why did Mr. Santos share stories?", "answers": { "A": "To teach Ben", "B": "To sell something", "C": "To complain", "D": "To leave" }, "correct_answer": "A" },
-            { "question": "What is the main idea?", "answers": { "A": "Small kindness can help others", "B": "Neighbors should avoid each other", "C": "Helping people wastes time", "D": "Stories are not useful" }, "correct_answer": "A" }
+        "id": "the-changed-meeting-time",
+        "story_title": "The Changed Meeting Time",
+        "story_description": "Mara reached her school\u2019s covered court at two, ready for the storytelling club. Only Paolo was there. Their teacher had moved the meeting to three, but an old notice still showed two. Paolo wanted to write the new time over the old one. Mara worried that both times might remain visible. After checking with their teacher, they replaced the notice and wrote the date clearly. They also told classmates who had already read the earlier announcement. At three, the club gathered as planned. Before leaving, Mara asked who would remove outdated notices. Paolo volunteered and added the task to his notebook.",
+        "question_sets": {
+            "frustration": [
+                {
+                    "question": "Where did Mara go for the club meeting?",
+                    "answers": {
+                        "A": "The school canteen",
+                        "B": "The school garden",
+                        "C": "The reading classroom",
+                        "D": "The covered court"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What time did Mara arrive?",
+                    "answers": {
+                        "A": "One",
+                        "B": "Three",
+                        "C": "Two",
+                        "D": "Four"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Which club was meeting?",
+                    "answers": {
+                        "A": "The storytelling club",
+                        "B": "The gardening club",
+                        "C": "The badminton club",
+                        "D": "The drawing club"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who was already there when Mara arrived?",
+                    "answers": {
+                        "A": "The teacher",
+                        "B": "Paolo",
+                        "C": "Every club member",
+                        "D": "A group of parents"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What was the new meeting time?",
+                    "answers": {
+                        "A": "Two",
+                        "B": "Three",
+                        "C": "Four",
+                        "D": "Five"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did Paolo first want to do?",
+                    "answers": {
+                        "A": "Move the meeting to another classroom",
+                        "B": "Ask the club to meet the next day",
+                        "C": "Take the notice home after the meeting",
+                        "D": "Write the new time over the old one"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did the pupils write clearly on the replacement notice?",
+                    "answers": {
+                        "A": "The date",
+                        "B": "The story title",
+                        "C": "The club rules",
+                        "D": "The teacher\u2019s name"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who volunteered to remove outdated notices?",
+                    "answers": {
+                        "A": "Mara",
+                        "B": "The teacher",
+                        "C": "Paolo",
+                        "D": "A parent"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                }
+            ],
+            "instructional": [
+                {
+                    "question": "Why did the old notice lead Mara to arrive early?",
+                    "answers": {
+                        "A": "It still showed two after the meeting had moved to three.",
+                        "B": "It said the club would meet in another part of the school.",
+                        "C": "It listed a different activity for the storytelling club.",
+                        "D": "It asked only Mara and Paolo to attend the meeting."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did Mara prefer replacing the notice to writing over the time?",
+                    "answers": {
+                        "A": "The old notice had no room for any story titles.",
+                        "B": "The teacher wanted every pupil to write a new notice.",
+                        "C": "Both times might still be visible on the old notice.",
+                        "D": "Paolo had already taken the original notice home."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201coutdated\u201d mean in the story?",
+                    "answers": {
+                        "A": "Written with unusually large letters",
+                        "B": "Posted outside the covered court",
+                        "C": "Saved carefully inside a notebook",
+                        "D": "No longer giving current information"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201cvolunteered\u201d mean when Paolo accepted the task?",
+                    "answers": {
+                        "A": "Forgot to do it",
+                        "B": "Offered to do it",
+                        "C": "Refused to do it",
+                        "D": "Finished doing it"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What happened just before the pupils replaced the notice?",
+                    "answers": {
+                        "A": "The club finished its meeting.",
+                        "B": "They checked with their teacher.",
+                        "C": "Paolo removed every club notice.",
+                        "D": "The classmates gathered at three."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did the pupils also speak to classmates who had read the old notice?",
+                    "answers": {
+                        "A": "Those classmates had already decided to leave the club.",
+                        "B": "Those classmates had been asked to write the club rules.",
+                        "C": "Those classmates might still be following the earlier time.",
+                        "D": "Those classmates needed to choose a different meeting place."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "How could a clearly written date help readers of the new notice?",
+                    "answers": {
+                        "A": "It could show which day the announcement concerned.",
+                        "B": "It could show how many stories the club would read.",
+                        "C": "It could show which pupil would arrive before Mara.",
+                        "D": "It could show why Paolo preferred the earlier time."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did Paolo most likely put his new task in his notebook?",
+                    "answers": {
+                        "A": "To change the teacher\u2019s meeting time again",
+                        "B": "To record the titles of stories already read",
+                        "C": "To keep the new notice away from classmates",
+                        "D": "To help him remember his responsibility"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                }
+            ],
+            "independent": [
+                {
+                    "question": "Which statement best expresses the main idea?",
+                    "answers": {
+                        "A": "Two pupils arrive at a covered court before their storytelling club gathers.",
+                        "B": "Two pupils correct confusing meeting information and plan to keep notices current.",
+                        "C": "A pupil writes a newly accepted school responsibility in his notebook.",
+                        "D": "A teacher changes a club meeting from an earlier time to a later one."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Mara\u2019s concern and her check with the teacher show?",
+                    "answers": {
+                        "A": "She values information that is both accurate and clear.",
+                        "B": "She believes old notices should stay unchanged forever.",
+                        "C": "She prefers making decisions without consulting others.",
+                        "D": "She wants classmates to arrive before the correct time."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What change in Paolo\u2019s role is shown from the beginning to the end?",
+                    "answers": {
+                        "A": "He moves from leading the club to refusing any responsibility.",
+                        "B": "He moves from correcting a date to changing the meeting place.",
+                        "C": "He moves from waiting for the meeting to accepting an ongoing task.",
+                        "D": "He moves from checking notices to leaving the storytelling club."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which lesson is best supported by the story?",
+                    "answers": {
+                        "A": "When plans change, the first notice should remain the one everyone follows.",
+                        "B": "When plans change, each pupil should decide a different time to arrive.",
+                        "C": "When plans change, telling one person removes the need to update a notice.",
+                        "D": "When plans change, clear updates and shared responsibility help prevent confusion."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which is the best summary?",
+                    "answers": {
+                        "A": "A teacher cancels storytelling, two pupils choose another club, and Mara writes a new meeting place.",
+                        "B": "Paolo changes the meeting to two, Mara writes over the old time, and classmates arrive before lunch.",
+                        "C": "Two pupils wait at the court, leave the old notice unchanged, and ask the club to meet the next day.",
+                        "D": "An old notice causes confusion, two pupils share the corrected information, and Paolo accepts future notice duties."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which conclusion about the initial problem is best supported?",
+                    "answers": {
+                        "A": "The meeting plan had changed, but the posted information had not kept up.",
+                        "B": "The storytelling club had been cancelled without any explanation.",
+                        "C": "The covered court had been closed to pupils for the whole day.",
+                        "D": "The teacher had asked Mara and Paolo to attend a separate meeting."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which event gives the strongest evidence that the correction worked?",
+                    "answers": {
+                        "A": "Mara reached the covered court at two.",
+                        "B": "Paolo suggested writing over the old time.",
+                        "C": "The club gathered at the planned time of three.",
+                        "D": "An old notice remained visible before the correction."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Why were replacing the notice and speaking to earlier readers useful together?",
+                    "answers": {
+                        "A": "They allowed each pupil to choose between the earlier and later meeting times.",
+                        "B": "They reached both future readers and people already using the old information.",
+                        "C": "They made it unnecessary to check whether the teacher had changed the time.",
+                        "D": "They let the pupils keep the old notice without creating further confusion."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                }
+            ]
+        },
+        "answer_guide": [
+            {
+                "number": 1,
+                "difficulty": "frustration",
+                "skill": "Setting",
+                "correct_answer": "D",
+                "explanation": "Mara reached the school\u2019s covered court."
+            },
+            {
+                "number": 2,
+                "difficulty": "frustration",
+                "skill": "Recalling time",
+                "correct_answer": "C",
+                "explanation": "Mara arrived at two."
+            },
+            {
+                "number": 3,
+                "difficulty": "frustration",
+                "skill": "Identifying a group",
+                "correct_answer": "A",
+                "explanation": "Mara was ready for the storytelling club."
+            },
+            {
+                "number": 4,
+                "difficulty": "frustration",
+                "skill": "Identifying a character",
+                "correct_answer": "B",
+                "explanation": "Only Paolo was there."
+            },
+            {
+                "number": 5,
+                "difficulty": "frustration",
+                "skill": "Recalling a changed detail",
+                "correct_answer": "B",
+                "explanation": "The teacher had moved the meeting to three."
+            },
+            {
+                "number": 6,
+                "difficulty": "frustration",
+                "skill": "Recalling an initial decision",
+                "correct_answer": "D",
+                "explanation": "Paolo wanted to write the new time over the old time."
+            },
+            {
+                "number": 7,
+                "difficulty": "frustration",
+                "skill": "Recalling a detail",
+                "correct_answer": "A",
+                "explanation": "They replaced the notice and wrote the date clearly."
+            },
+            {
+                "number": 8,
+                "difficulty": "frustration",
+                "skill": "Matching a character and task",
+                "correct_answer": "C",
+                "explanation": "Paolo volunteered after Mara asked who would remove outdated notices."
+            },
+            {
+                "number": 9,
+                "difficulty": "instructional",
+                "skill": "Cause and effect",
+                "correct_answer": "A",
+                "explanation": "The old notice showed two, but the actual meeting had been moved to three."
+            },
+            {
+                "number": 10,
+                "difficulty": "instructional",
+                "skill": "Comparing nearby decisions",
+                "correct_answer": "C",
+                "explanation": "Mara worried that writing over the time would leave both times visible."
+            },
+            {
+                "number": 11,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "D",
+                "explanation": "The old notice gave a time that was no longer current."
+            },
+            {
+                "number": 12,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "B",
+                "explanation": "Paolo offered to take responsibility when Mara asked who would remove old notices."
+            },
+            {
+                "number": 13,
+                "difficulty": "instructional",
+                "skill": "Sequencing",
+                "correct_answer": "B",
+                "explanation": "They checked with the teacher before replacing the notice."
+            },
+            {
+                "number": 14,
+                "difficulty": "instructional",
+                "skill": "Straightforward inference",
+                "correct_answer": "C",
+                "explanation": "People who had already read the old announcement might not see the replacement before acting on the old time."
+            },
+            {
+                "number": 15,
+                "difficulty": "instructional",
+                "skill": "Inferring a practical purpose",
+                "correct_answer": "A",
+                "explanation": "A date identifies the day to which a meeting announcement applies."
+            },
+            {
+                "number": 16,
+                "difficulty": "instructional",
+                "skill": "Inferring a practical purpose",
+                "correct_answer": "D",
+                "explanation": "After volunteering to remove outdated notices, Paolo recorded that task."
+            },
+            {
+                "number": 17,
+                "difficulty": "independent",
+                "skill": "Main idea",
+                "correct_answer": "B",
+                "explanation": "The story follows the confusion, correction, successful meeting, and plan for future notices."
+            },
+            {
+                "number": 18,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "A",
+                "explanation": "Mara considers whether both times would remain visible and checks the teacher\u2019s information before replacing the notice."
+            },
+            {
+                "number": 19,
+                "difficulty": "independent",
+                "skill": "Tracking a character\u2019s development",
+                "correct_answer": "C",
+                "explanation": "Paolo is first waiting at the court and later volunteers to remove outdated notices."
+            },
+            {
+                "number": 20,
+                "difficulty": "independent",
+                "skill": "Theme",
+                "correct_answer": "D",
+                "explanation": "The pupils replace the notice, tell earlier readers, and assign responsibility for outdated notices."
+            },
+            {
+                "number": 21,
+                "difficulty": "independent",
+                "skill": "Summarizing",
+                "correct_answer": "D",
+                "explanation": "This covers the outdated time, the pupils\u2019 correction, and the final responsibility."
+            },
+            {
+                "number": 22,
+                "difficulty": "independent",
+                "skill": "Evidence-based inference",
+                "correct_answer": "A",
+                "explanation": "The teacher moved the meeting to three while an old notice still showed two."
+            },
+            {
+                "number": 23,
+                "difficulty": "independent",
+                "skill": "Selecting evidence of a result",
+                "correct_answer": "C",
+                "explanation": "After the updates, the club gathered as planned at three."
+            },
+            {
+                "number": 24,
+                "difficulty": "independent",
+                "skill": "Combining actions to explain a solution",
+                "correct_answer": "B",
+                "explanation": "The new notice helps later readers; speaking to classmates updates those who had already read the old notice."
+            }
         ]
     },
     {
-        "id": "clean-river-campaign",
-        "story_title": "The Clean River Campaign",
-        "story_description": "A group of Grade 6 students noticed that the river near their community had become polluted. They organized a clean-up activity with the help of their teacher and parents. The students collected plastic waste and reminded people to properly throw their garbage. After several weeks, the river became cleaner. The community thanked the students for their effort. The experience showed them that protecting nature requires cooperation from everyone.",
-        "manual_questions": [
-            { "question": "What problem did the students notice?", "answers": { "A": "A broken bridge", "B": "A polluted river", "C": "A missing road", "D": "A damaged school" }, "correct_answer": "B" },
-            { "question": "Who helped the students?", "answers": { "A": "Teachers and parents", "B": "Tourists", "C": "Drivers", "D": "Business owners" }, "correct_answer": "A" },
-            { "question": "What did students collect?", "answers": { "A": "Books", "B": "Plastic waste", "C": "Plants", "D": "Rocks" }, "correct_answer": "B" },
-            { "question": "What did they remind people to do?", "answers": { "A": "Plant flowers", "B": "Throw garbage properly", "C": "Build houses", "D": "Catch fish" }, "correct_answer": "B" },
-            { "question": "What happened after several weeks?", "answers": { "A": "The river became cleaner", "B": "The river disappeared", "C": "The students stopped", "D": "The community moved" }, "correct_answer": "A" },
-            { "question": "What lesson did students learn?", "answers": { "A": "Nature protection needs cooperation", "B": "Cleaning is unnecessary", "C": "Rivers cannot change", "D": "Students cannot help" }, "correct_answer": "A" },
-            { "question": "What does \"polluted\" mean?", "answers": { "A": "Dirty", "B": "Beautiful", "C": "Empty", "D": "Safe" }, "correct_answer": "A" },
-            { "question": "What is the main idea?", "answers": { "A": "Students can help protect the environment", "B": "Rivers are dangerous", "C": "Communities should ignore problems", "D": "Cleaning is difficult" }, "correct_answer": "A" }
+        "id": "a-fair-turn-on-the-court",
+        "story_title": "A Fair Turn on the Court",
+        "story_description": "During recess, six pupils wanted to use their school\u2019s only badminton court. Two players had started first and hoped to stay until the bell. Bea suggested changing players after every five points. Luis worried that a close game might end too quickly. They agreed to finish each five-point turn, then let the next pair enter. Bea wrote the order on scrap paper, while Luis kept score. When two new pupils arrived, they added their names to the next round instead of skipping anyone. Everyone played before recess ended. The group kept the list for tomorrow and agreed to rotate the first pair.",
+        "question_sets": {
+            "frustration": [
+                {
+                    "question": "How many pupils wanted the court at first?",
+                    "answers": {
+                        "A": "Four",
+                        "B": "Six",
+                        "C": "Eight",
+                        "D": "Ten"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Which sport did the pupils want to play?",
+                    "answers": {
+                        "A": "Basketball",
+                        "B": "Volleyball",
+                        "C": "Badminton",
+                        "D": "Football"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "When did the pupils want to play?",
+                    "answers": {
+                        "A": "During recess",
+                        "B": "Before sunrise",
+                        "C": "During a lesson",
+                        "D": "After dinner"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "How many players had started first?",
+                    "answers": {
+                        "A": "Three",
+                        "B": "Four",
+                        "C": "Six",
+                        "D": "Two"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who suggested changing players after five points?",
+                    "answers": {
+                        "A": "Luis",
+                        "B": "A teacher",
+                        "C": "A new pupil",
+                        "D": "Bea"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did Bea write the order on?",
+                    "answers": {
+                        "A": "A classroom wall",
+                        "B": "A new notebook",
+                        "C": "Scrap paper",
+                        "D": "A scoreboard"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What job did Luis do?",
+                    "answers": {
+                        "A": "He kept score.",
+                        "B": "He wrote the list.",
+                        "C": "He rang the bell.",
+                        "D": "He moved the court net."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "How many new pupils arrived later?",
+                    "answers": {
+                        "A": "One",
+                        "B": "Two",
+                        "C": "Three",
+                        "D": "Four"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                }
+            ],
+            "instructional": [
+                {
+                    "question": "Why was Luis worried about changing players after five points?",
+                    "answers": {
+                        "A": "The court might close before recess.",
+                        "B": "The list might contain too many teachers.",
+                        "C": "The players might forget which sport to play.",
+                        "D": "A close game might end too quickly."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201cturn\u201d mean in \u201ceach five-point turn\u201d?",
+                    "answers": {
+                        "A": "A chance to play",
+                        "B": "A change in the weather",
+                        "C": "A mark on the paper",
+                        "D": "A walk around the court"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201crotate the first pair\u201d mean?",
+                    "answers": {
+                        "A": "Keep one pair first every day",
+                        "B": "Change which pair starts first",
+                        "C": "Ask the first pair to stop playing",
+                        "D": "Let the first pair choose all players"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why was writing the order useful?",
+                    "answers": {
+                        "A": "It helped the group move the court to another place.",
+                        "B": "It helped the group choose a different school sport.",
+                        "C": "It helped the group know who should play next.",
+                        "D": "It helped the group make each game last until the bell."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What happened when each five-point turn finished?",
+                    "answers": {
+                        "A": "The next pair entered the court.",
+                        "B": "The same pair started another turn.",
+                        "C": "Everyone left the court for the day.",
+                        "D": "Luis removed the names from the list."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why were the new pupils added to the next round?",
+                    "answers": {
+                        "A": "So they could stay on the court until recess ended",
+                        "B": "So they could replace Bea and Luis as the only players",
+                        "C": "So they could join without taking someone else\u2019s place in line",
+                        "D": "So they could avoid following the five-point turn rule"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201ceveryone played before recess ended\u201d tell us?",
+                    "answers": {
+                        "A": "All the pupils played on the court at the same time.",
+                        "B": "All the pupils had a chance before the break finished.",
+                        "C": "All the pupils stayed on the court after the bell.",
+                        "D": "All the pupils won the same number of points."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What happened after Bea wrote the order and Luis began keeping score?",
+                    "answers": {
+                        "A": "The first pair decided to start playing for the first time.",
+                        "B": "Bea first suggested changing players after five points.",
+                        "C": "Luis first raised his worry about a close game.",
+                        "D": "Two more pupils arrived and joined the next round."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                }
+            ],
+            "independent": [
+                {
+                    "question": "Which statement best gives the main idea?",
+                    "answers": {
+                        "A": "A pupil records the playing order on a piece of scrap paper.",
+                        "B": "Two new pupils arrive at a badminton court during recess.",
+                        "C": "Pupils organize turns so a limited play space can be shared.",
+                        "D": "A pupil worries that a close badminton game could finish early."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What most likely motivated Bea\u2019s suggestion?",
+                    "answers": {
+                        "A": "She wanted the first pair to stay until the bell rang.",
+                        "B": "She wanted more pupils to get a fair chance to play.",
+                        "C": "She wanted Luis to stop taking part in the activity.",
+                        "D": "She wanted the group to use a different sports court."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Luis\u2019s concern and later scorekeeping suggest about him?",
+                    "answers": {
+                        "A": "He can express a concern and still help a group decision work.",
+                        "B": "He refuses to take part whenever his first preference changes.",
+                        "C": "He wants the same players to remain on the court every day.",
+                        "D": "He believes writing names is more important than playing fairly."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which lesson is best supported by the story?",
+                    "answers": {
+                        "A": "The first people to arrive should control a shared space all day.",
+                        "B": "New people should always move ahead of those already waiting.",
+                        "C": "A group can share a space only when nobody raises a concern.",
+                        "D": "Fair rules can help a group share something that everyone wants."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which detail best shows fairness to both waiting pupils and newcomers?",
+                    "answers": {
+                        "A": "The new pupils joined the next round without anyone being skipped.",
+                        "B": "The first pair hoped to keep playing until the bell rang.",
+                        "C": "Luis worried that a close game might end too quickly.",
+                        "D": "Bea used scrap paper to write the players\u2019 names."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which is the best summary?",
+                    "answers": {
+                        "A": "Pupils let the first pair stay until the bell, remove newcomers from the list, and choose another court.",
+                        "B": "Pupils begin keeping score, stop changing pairs, and leave before every player can enter the court.",
+                        "C": "Pupils change the sport, choose a new scorekeeper, and decide that only the first pair may return.",
+                        "D": "Pupils agree on short turns and a playing order, include newcomers, and plan to share starting turns tomorrow."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Why did the group agree to rotate the first pair tomorrow?",
+                    "answers": {
+                        "A": "They wanted tomorrow\u2019s first pair to play without any limit.",
+                        "B": "They wanted fairness to continue across more than one recess.",
+                        "C": "They wanted to remove the need for a playing order.",
+                        "D": "They wanted newcomers to choose all of tomorrow\u2019s rules."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "How did Bea\u2019s list and Luis\u2019s scorekeeping support each other?",
+                    "answers": {
+                        "A": "The list showed who had won, and the score showed who had arrived.",
+                        "B": "The list chose the sport, and the score decided where the court would be.",
+                        "C": "The list showed who came next, and the score showed when to change.",
+                        "D": "The list removed late pupils, and the score allowed the first pair to stay."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                }
+            ]
+        },
+        "answer_guide": [
+            {
+                "number": 1,
+                "difficulty": "frustration",
+                "skill": "Recalling a quantity",
+                "correct_answer": "B",
+                "explanation": "Six pupils wanted to use the court at the start."
+            },
+            {
+                "number": 2,
+                "difficulty": "frustration",
+                "skill": "Recalling an activity",
+                "correct_answer": "C",
+                "explanation": "The pupils wanted to use the badminton court."
+            },
+            {
+                "number": 3,
+                "difficulty": "frustration",
+                "skill": "Setting in time",
+                "correct_answer": "A",
+                "explanation": "The story takes place during recess."
+            },
+            {
+                "number": 4,
+                "difficulty": "frustration",
+                "skill": "Recalling a quantity",
+                "correct_answer": "D",
+                "explanation": "Two players had started before the others."
+            },
+            {
+                "number": 5,
+                "difficulty": "frustration",
+                "skill": "Character and action",
+                "correct_answer": "D",
+                "explanation": "Bea suggested the five-point turns."
+            },
+            {
+                "number": 6,
+                "difficulty": "frustration",
+                "skill": "Recalling a material",
+                "correct_answer": "C",
+                "explanation": "Bea wrote the order on scrap paper."
+            },
+            {
+                "number": 7,
+                "difficulty": "frustration",
+                "skill": "Matching a character and task",
+                "correct_answer": "A",
+                "explanation": "Luis kept score while Bea wrote the order."
+            },
+            {
+                "number": 8,
+                "difficulty": "frustration",
+                "skill": "Recalling a later detail",
+                "correct_answer": "B",
+                "explanation": "Two new pupils arrived after the turn system was established."
+            },
+            {
+                "number": 9,
+                "difficulty": "instructional",
+                "skill": "Cause and effect",
+                "correct_answer": "D",
+                "explanation": "Luis specifically worried that a close game might end too quickly."
+            },
+            {
+                "number": 10,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "A",
+                "explanation": "Pairs take turns playing before the next pair enters."
+            },
+            {
+                "number": 11,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "B",
+                "explanation": "Rotating the first pair means sharing who gets to start on different days."
+            },
+            {
+                "number": 12,
+                "difficulty": "instructional",
+                "skill": "Inferring a practical purpose",
+                "correct_answer": "C",
+                "explanation": "A written playing order identifies the next pair."
+            },
+            {
+                "number": 13,
+                "difficulty": "instructional",
+                "skill": "Sequencing",
+                "correct_answer": "A",
+                "explanation": "The pupils agreed to finish each five-point turn and then let the next pair enter."
+            },
+            {
+                "number": 14,
+                "difficulty": "instructional",
+                "skill": "Connecting a decision and its purpose",
+                "correct_answer": "C",
+                "explanation": "The group added the newcomers without skipping anyone already waiting."
+            },
+            {
+                "number": 15,
+                "difficulty": "instructional",
+                "skill": "Interpreting a stated outcome",
+                "correct_answer": "B",
+                "explanation": "Everyone received a turn during the available recess period; the story does not say they played together or won equally."
+            },
+            {
+                "number": 16,
+                "difficulty": "instructional",
+                "skill": "Sequencing connected events",
+                "correct_answer": "D",
+                "explanation": "The new pupils arrive after the written order and scorekeeping begin."
+            },
+            {
+                "number": 17,
+                "difficulty": "independent",
+                "skill": "Main idea",
+                "correct_answer": "C",
+                "explanation": "The story centers on sharing one court through a turn system."
+            },
+            {
+                "number": 18,
+                "difficulty": "independent",
+                "skill": "Character motivation",
+                "correct_answer": "B",
+                "explanation": "Six pupils want one court, and Bea proposes turns that eventually allow everyone to play."
+            },
+            {
+                "number": 19,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "A",
+                "explanation": "Luis raises a concern but then keeps score under the agreed turn system."
+            },
+            {
+                "number": 20,
+                "difficulty": "independent",
+                "skill": "Theme",
+                "correct_answer": "D",
+                "explanation": "Turns, a written order, and inclusion of newcomers let everyone use the court."
+            },
+            {
+                "number": 21,
+                "difficulty": "independent",
+                "skill": "Selecting evidence for an interpretation",
+                "correct_answer": "A",
+                "explanation": "The decision includes newcomers while protecting the turns of those already waiting."
+            },
+            {
+                "number": 22,
+                "difficulty": "independent",
+                "skill": "Summarizing",
+                "correct_answer": "D",
+                "explanation": "This includes the sharing problem, agreed system, newcomers, and continuing plan."
+            },
+            {
+                "number": 23,
+                "difficulty": "independent",
+                "skill": "Inferring a longer-term intention",
+                "correct_answer": "B",
+                "explanation": "Everyone gets a turn today, and rotating the first pair extends fairness to who starts on later days."
+            },
+            {
+                "number": 24,
+                "difficulty": "independent",
+                "skill": "Combining details across the story",
+                "correct_answer": "C",
+                "explanation": "The agreed system needs both a pair order and a way to track the five-point turns."
+            }
         ]
     },
     {
-        "id": "reading-challenge",
-        "story_title": "The Reading Challenge",
-        "story_description": "The school library announced a reading challenge for students. Each participant needed to read several books and write short reflections about them. Mia joined the activity because she wanted to improve her reading skills. At first, she found some books difficult, but she continued practicing every day. After a month, Mia finished many books and became more confident. She realized that regular practice helped her become a better reader.",
-        "manual_questions": [
-            { "question": "What did the library announce?", "answers": { "A": "A sports event", "B": "A reading challenge", "C": "A music contest", "D": "A science fair" }, "correct_answer": "B" },
-            { "question": "Why did Mia join?", "answers": { "A": "To improve reading skills", "B": "To win money", "C": "To avoid classes", "D": "To meet teachers" }, "correct_answer": "A" },
-            { "question": "What did participants write?", "answers": { "A": "Letters", "B": "Stories", "C": "Reflections", "D": "Poems" }, "correct_answer": "C" },
-            { "question": "What problem did Mia experience?", "answers": { "A": "Books were missing", "B": "Some books were difficult", "C": "The library closed", "D": "She disliked reading" }, "correct_answer": "B" },
-            { "question": "How did Mia improve?", "answers": { "A": "By practicing daily", "B": "By stopping reading", "C": "By avoiding books", "D": "By asking others to read" }, "correct_answer": "A" },
-            { "question": "What happened after a month?", "answers": { "A": "Mia became more confident", "B": "Mia quit reading", "C": "Mia forgot books", "D": "Mia left school" }, "correct_answer": "A" },
-            { "question": "What does \"regular\" mean?", "answers": { "A": "Daily or repeated", "B": "Rare", "C": "Short", "D": "Difficult" }, "correct_answer": "A" },
-            { "question": "What is the main idea?", "answers": { "A": "Practice improves skills", "B": "Reading is unnecessary", "C": "Challenges should be avoided", "D": "Libraries are boring" }, "correct_answer": "A" }
+        "id": "the-quiet-recording-corner",
+        "story_title": "The Quiet Recording Corner",
+        "story_description": "Rafi\u2019s group needed to record a short story for their Grade 6 English project. They tried beside the school canteen, but voices covered parts of the recording. Rafi suggested speaking louder. Ella asked them to listen carefully first. They noticed that the noise came mainly during recess. With their teacher\u2019s permission, they moved to an empty classroom after lunch. Ella placed a handwritten reminder outside, and Rafi tested one sentence before the group began. This time, every word sounded clear. They finished early enough to check the whole recording together. Rafi saved the test clip to remind them to check their location next time.",
+        "question_sets": {
+            "frustration": [
+                {
+                    "question": "Which subject was the recording project for?",
+                    "answers": {
+                        "A": "English",
+                        "B": "Mathematics",
+                        "C": "Science",
+                        "D": "Araling Panlipunan"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did the group need to record?",
+                    "answers": {
+                        "A": "A weather report",
+                        "B": "A school song",
+                        "C": "A sports interview",
+                        "D": "A short story"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Where did the group first try recording?",
+                    "answers": {
+                        "A": "Inside an empty classroom",
+                        "B": "Behind the school library",
+                        "C": "Beside the school canteen",
+                        "D": "Near the school garden"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What covered parts of the first recording?",
+                    "answers": {
+                        "A": "Heavy rain",
+                        "B": "Other voices",
+                        "C": "Loud music",
+                        "D": "A ringing phone"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did Rafi suggest at first?",
+                    "answers": {
+                        "A": "Speaking faster",
+                        "B": "Speaking louder",
+                        "C": "Changing the story",
+                        "D": "Cancelling the project"
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "Who asked the group to listen carefully?",
+                    "answers": {
+                        "A": "Rafi",
+                        "B": "The teacher",
+                        "C": "A canteen worker",
+                        "D": "Ella"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "When did the group move to the empty classroom?",
+                    "answers": {
+                        "A": "Before school",
+                        "B": "During recess",
+                        "C": "After lunch",
+                        "D": "After sunset"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "frustration"
+                },
+                {
+                    "question": "What did Ella place outside the classroom?",
+                    "answers": {
+                        "A": "A handwritten reminder",
+                        "B": "A list of story titles",
+                        "C": "A printed lunch menu",
+                        "D": "A recording device"
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "frustration"
+                }
+            ],
+            "instructional": [
+                {
+                    "question": "How did listening carefully help the group choose a different time?",
+                    "answers": {
+                        "A": "They discovered that their story needed a longer ending.",
+                        "B": "They learned that the teacher wanted a different subject.",
+                        "C": "They noticed that the noise came mainly during recess.",
+                        "D": "They heard that the classroom would close after lunch."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201cvoices covered parts of the recording\u201d mean?",
+                    "answers": {
+                        "A": "Other voices replaced the written story with a song.",
+                        "B": "Other voices made some story words hard to hear.",
+                        "C": "Other voices helped the group read every sentence.",
+                        "D": "Other voices told the group where to save the file."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201cwith their teacher\u2019s permission\u201d mean?",
+                    "answers": {
+                        "A": "Their teacher allowed them to use the classroom.",
+                        "B": "Their teacher recorded every sentence for them.",
+                        "C": "Their teacher asked them to return to the canteen.",
+                        "D": "Their teacher changed the story they had chosen."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What does \u201ctested one sentence\u201d mean?",
+                    "answers": {
+                        "A": "Copied a sentence to decorate the door",
+                        "B": "Removed a sentence to shorten the story",
+                        "C": "Memorized a sentence to avoid recording",
+                        "D": "Tried a small sample to check the sound"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What happened just before the group began the full recording?",
+                    "answers": {
+                        "A": "Rafi tested one sentence.",
+                        "B": "The group checked the whole recording.",
+                        "C": "Ella first noticed the canteen noise.",
+                        "D": "Rafi saved the finished test clip."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "What was the most likely purpose of the reminder outside?",
+                    "answers": {
+                        "A": "To invite a crowd to talk inside the classroom",
+                        "B": "To tell pupils that lunch would begin in the room",
+                        "C": "To advertise a different story for another group",
+                        "D": "To help others avoid disturbing the recording"
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did the group have time to check the whole recording?",
+                    "answers": {
+                        "A": "They cancelled the rest of their English project.",
+                        "B": "They finished the recording early enough.",
+                        "C": "They skipped the classroom recording completely.",
+                        "D": "They asked another group to do their work."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "instructional"
+                },
+                {
+                    "question": "Why did Rafi save the test clip?",
+                    "answers": {
+                        "A": "To replace the whole story with one sentence",
+                        "B": "To show that the canteen was always silent",
+                        "C": "To remember to check the location next time",
+                        "D": "To avoid listening to any future recordings"
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "instructional"
+                }
+            ],
+            "independent": [
+                {
+                    "question": "Which statement best gives the main idea?",
+                    "answers": {
+                        "A": "A group chooses a short story to record for a Grade 6 English classroom project.",
+                        "B": "A pupil puts a handwritten reminder outside a classroom after the group moves there.",
+                        "C": "A pupil keeps a short test clip after completing a school recording with classmates.",
+                        "D": "A group improves a recording by studying the problem and changing its working conditions."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What do Rafi\u2019s first suggestion and later actions show about him?",
+                    "answers": {
+                        "A": "He insists that speaking louder is the only way to solve every problem.",
+                        "B": "He prefers to leave testing and reviewing entirely to the other pupils.",
+                        "C": "He is willing to move beyond his first idea and learn from the result.",
+                        "D": "He thinks a recording should be submitted before anyone checks it."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "What does Ella\u2019s approach suggest about her?",
+                    "answers": {
+                        "A": "She wants to finish quickly without listening to any recorded words.",
+                        "B": "She pays attention to the problem before helping prevent more noise.",
+                        "C": "She believes the story should change whenever other pupils speak.",
+                        "D": "She expects a different pupil to make every decision for the group."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Why was testing one sentence a sensible step toward the group\u2019s goal?",
+                    "answers": {
+                        "A": "It let them check clarity before recording the whole story.",
+                        "B": "It let them finish without recording the rest of the story.",
+                        "C": "It let them prove that the canteen had been a quiet place.",
+                        "D": "It let them replace the teacher\u2019s permission with a recording."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which lesson is best supported by the whole story?",
+                    "answers": {
+                        "A": "Investigating a problem and checking a solution can improve the final work.",
+                        "B": "The fastest way to finish a project is to skip all tests and reviews.",
+                        "C": "A noisy location becomes suitable whenever someone speaks more loudly.",
+                        "D": "The first idea offered by a group should always be followed unchanged."
+                    },
+                    "correct_answer": "A",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which is the best summary?",
+                    "answers": {
+                        "A": "Pupils speak louder beside the canteen, finish without listening, and submit a short test sentence.",
+                        "B": "Noise spoils a first attempt, so pupils find a quieter setting, test it, and check their clear recording.",
+                        "C": "A teacher changes the group\u2019s story, moves lunch into the classroom, and records the project alone.",
+                        "D": "Pupils hear noise during recess, cancel the story recording, and save the unfinished attempt instead."
+                    },
+                    "correct_answer": "B",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which evidence best supports the idea that the group worked together?",
+                    "answers": {
+                        "A": "The first recording happened beside the canteen, where voices could be heard.",
+                        "B": "The classroom was empty after lunch, and every recorded word sounded clear.",
+                        "C": "Ella posted a reminder, Rafi tested a sentence, and they reviewed the recording together.",
+                        "D": "The project was for Grade 6 English and required the recording of a short story."
+                    },
+                    "correct_answer": "C",
+                    "difficulty": "independent"
+                },
+                {
+                    "question": "Which detail best shows that the group checked the completed work rather than trusting only the short test?",
+                    "answers": {
+                        "A": "They first tried to record the story beside the canteen.",
+                        "B": "They noticed that most of the noise came during recess.",
+                        "C": "They asked for permission to move to an empty classroom.",
+                        "D": "They listened to the whole recording together after finishing."
+                    },
+                    "correct_answer": "D",
+                    "difficulty": "independent"
+                }
+            ]
+        },
+        "answer_guide": [
+            {
+                "number": 1,
+                "difficulty": "frustration",
+                "skill": "Recalling a subject",
+                "correct_answer": "A",
+                "explanation": "The group needed the recording for its Grade 6 English project."
+            },
+            {
+                "number": 2,
+                "difficulty": "frustration",
+                "skill": "Recalling the task",
+                "correct_answer": "D",
+                "explanation": "The group needed to record a short story."
+            },
+            {
+                "number": 3,
+                "difficulty": "frustration",
+                "skill": "Initial setting",
+                "correct_answer": "C",
+                "explanation": "The first attempt was beside the canteen."
+            },
+            {
+                "number": 4,
+                "difficulty": "frustration",
+                "skill": "Identifying a stated problem",
+                "correct_answer": "B",
+                "explanation": "Voices covered parts of the recording."
+            },
+            {
+                "number": 5,
+                "difficulty": "frustration",
+                "skill": "Recalling an initial decision",
+                "correct_answer": "B",
+                "explanation": "Rafi first suggested speaking louder."
+            },
+            {
+                "number": 6,
+                "difficulty": "frustration",
+                "skill": "Character and action",
+                "correct_answer": "D",
+                "explanation": "Ella asked them to listen carefully first."
+            },
+            {
+                "number": 7,
+                "difficulty": "frustration",
+                "skill": "Recalling time",
+                "correct_answer": "C",
+                "explanation": "They moved to the classroom after lunch."
+            },
+            {
+                "number": 8,
+                "difficulty": "frustration",
+                "skill": "Recalling an action",
+                "correct_answer": "A",
+                "explanation": "Ella placed a handwritten reminder outside."
+            },
+            {
+                "number": 9,
+                "difficulty": "instructional",
+                "skill": "Connecting observation and decision",
+                "correct_answer": "C",
+                "explanation": "Listening revealed when the noise was greatest; they later recorded after lunch."
+            },
+            {
+                "number": 10,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "B",
+                "explanation": "The noisy first recording contrasts with the later recording in which every word sounded clear."
+            },
+            {
+                "number": 11,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "A",
+                "explanation": "The teacher allowed the move to the empty classroom."
+            },
+            {
+                "number": 12,
+                "difficulty": "instructional",
+                "skill": "Vocabulary in context",
+                "correct_answer": "D",
+                "explanation": "Rafi tried a sentence before the full recording began, and the sound was clear."
+            },
+            {
+                "number": 13,
+                "difficulty": "instructional",
+                "skill": "Sequencing",
+                "correct_answer": "A",
+                "explanation": "Rafi tested one sentence before the group began."
+            },
+            {
+                "number": 14,
+                "difficulty": "instructional",
+                "skill": "Straightforward inference",
+                "correct_answer": "D",
+                "explanation": "A reminder outside a room chosen for clearer recording would support a quieter working space; its exact words are not stated."
+            },
+            {
+                "number": 15,
+                "difficulty": "instructional",
+                "skill": "Cause and effect",
+                "correct_answer": "B",
+                "explanation": "The story explicitly connects finishing early enough with being able to check the recording together."
+            },
+            {
+                "number": 16,
+                "difficulty": "instructional",
+                "skill": "Connecting an action and purpose",
+                "correct_answer": "C",
+                "explanation": "The ending says the clip would remind them to check their location next time."
+            },
+            {
+                "number": 17,
+                "difficulty": "independent",
+                "skill": "Main idea",
+                "correct_answer": "D",
+                "explanation": "The story follows a sound problem, observation, a changed setting, testing, and a successful recording."
+            },
+            {
+                "number": 18,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "C",
+                "explanation": "Rafi first suggests speaking louder but later tests the new location and saves a reminder for next time."
+            },
+            {
+                "number": 19,
+                "difficulty": "independent",
+                "skill": "Character inference across events",
+                "correct_answer": "B",
+                "explanation": "Ella asks the group to listen, then posts a reminder at the quieter location."
+            },
+            {
+                "number": 20,
+                "difficulty": "independent",
+                "skill": "Connecting a decision to a goal",
+                "correct_answer": "A",
+                "explanation": "The goal was a clear story recording; testing preceded the full attempt, which sounded clear."
+            },
+            {
+                "number": 21,
+                "difficulty": "independent",
+                "skill": "Theme",
+                "correct_answer": "A",
+                "explanation": "The group listens, changes its conditions, tests, and reviews before completing the project."
+            },
+            {
+                "number": 22,
+                "difficulty": "independent",
+                "skill": "Summarizing",
+                "correct_answer": "B",
+                "explanation": "This covers the original difficulty, response, test, and successful review."
+            },
+            {
+                "number": 23,
+                "difficulty": "independent",
+                "skill": "Selecting evidence across events",
+                "correct_answer": "C",
+                "explanation": "Different pupils contribute distinct actions, and the group checks the finished recording together."
+            },
+            {
+                "number": 24,
+                "difficulty": "independent",
+                "skill": "Evidence-based inference about verification",
+                "correct_answer": "D",
+                "explanation": "The full review checks the finished recording beyond Rafi\u2019s initial one-sentence test."
+            }
         ]
     }
 ]

@@ -11,7 +11,7 @@
         $attemptProgressUrl = $assisted ? route('teacher.assessments.progress', [$assessment, $student]) : route('student.assessments.progress', $assessment);
         $studentName = $student?->name ?? 'Student';
         $studentInitials = collect(explode(' ', $studentName))->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
-        $manualQuestions = collect($assessment->manual_questions ?? [])->values();
+        $manualQuestions = collect($attemptQuestions ?? $assessment->manual_questions ?? [])->values();
         $storyTitle = $assessment->story_title;
         $assessmentTypeLabels = [
             'silent_reading' => 'Silent Reading',
@@ -25,6 +25,8 @@
         $isSilentReading = $assessmentType === 'silent_reading';
         $isListeningComprehension = $assessmentType === 'listening_comprehension';
         $isFlashcards = ($assessment->quiz_type ?? 'multiple_choice') === 'flashcards';
+        $isTreasureQuest = ($assessment->quiz_type ?? 'multiple_choice') === 'treasure_quest';
+        $isFishing = ! $isOralReading && ! $isFlashcards && ! $isTreasureQuest;
         $storyDescription = $assessment->story_description;
         $hasReadingStage = ($storyTitle || $storyDescription) && ! $isListeningComprehension;
         $storyText = $storyDescription ?: $assessment->instructions;
@@ -186,6 +188,9 @@
 
         <main class="assessment-workspace lg:ml-72" aria-labelledby="assessment-title">
             @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
+            @if ($assisted)
+                <x-teacher-answer-key :questions="$manualQuestions->all()" :context="$progress->selection_context ?? []" />
+            @endif
             <header class="assessment-heading">
                 <a class="assessment-back" href="{{ $assessmentBackUrl }}" aria-label="{{ $assessmentBackLabel }}" title="{{ $assessmentBackLabel }}">
                     <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -248,12 +253,12 @@
             <audio id="multiple-choice-hook-sound" src="{{ asset('audio/multiple-choice-hook-reel.mp3') }}" preload="auto"></audio>
             <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
             <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
-            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game ocean-game' : '' }}" id="mission-canvas" data-fish-species="{{ $fishSpecies }}" aria-label="Assessment activity">
-                @if (! $isOralReading && ! $isFlashcards)
+            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ $isFishing ? 'hook-game ocean-game' : '' }} {{ ($isTreasureQuest && ! $isOralReading) ? 'treasure-game' : '' }}" id="mission-canvas" data-fish-species="{{ $fishSpecies }}" aria-label="Assessment activity">
+                @if ($isFishing)
                     <div id="fishing-sea-scene" aria-hidden="true"></div>
                     <div class="ocean-catch-status" id="ocean-catch-status" role="status" aria-live="polite"></div>
                 @endif
-                <div id="hook-hud" class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}">
+                <div id="hook-hud" class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ! $isFishing ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
                         <div class="glass-hud pointer-events-auto flex items-center gap-4 rounded-lg border border-white/40 p-3 shadow-sm">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-container text-tertiary-dim shadow-sm"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span></div>
@@ -282,13 +287,13 @@
                     </div>
                 </div>
 
-                <div class="pointer-events-none absolute right-3 top-3 z-30 max-w-[calc(100%-1.5rem)] text-right sm:right-5 sm:top-5 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="mission-info">
+                <div class="pointer-events-none absolute right-3 top-3 z-30 max-w-[calc(100%-1.5rem)] text-right sm:right-5 sm:top-5 {{ ! $isFishing ? 'hidden' : '' }}" id="mission-info">
                     <div class="ocean-eyebrow"><span class="material-symbols-outlined" aria-hidden="true">sailing</span> Ocean Expedition</div>
                     <h1 class="font-headline mb-1 text-xl font-black italic leading-none tracking-tighter text-primary-dim">{{ $assessment->title }}</h1>
                     <p class="font-body font-medium text-slate-500">{{ $questionCount }} questions</p>
                 </div>
 
-                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="hook-assembly" aria-hidden="true">
+                <div class="pointer-events-none absolute left-1/2 top-0 z-40 flex -translate-x-1/2 flex-col items-center {{ ! $isFishing ? 'hidden' : '' }}" id="hook-assembly" aria-hidden="true">
                     <svg class="fishing-boat-fallback" viewBox="0 0 140 100" aria-hidden="true">
                         <path d="M7 62h115c-10 21-22 26-39 26H37C22 88 14 77 7 62Z" fill="#f3ead9" stroke="#316c79" stroke-width="3"/>
                         <path d="M35 35h33v27H35Z" fill="#fff9e5" stroke="#316c79" stroke-width="2"/>
@@ -302,7 +307,7 @@
                     </div>
                 </div>
 
-                <div class="absolute inset-0 z-20 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="fish-container" role="group" aria-label="Answer fish"></div>
+                <div class="absolute inset-0 z-20 {{ ! $isFishing ? 'hidden' : '' }}" id="fish-container" role="group" aria-label="Answer fish"></div>
                 <template id="answer-fish-template">
                     <button type="button" class="answer-fish">
                         <svg class="fish-visual" viewBox="0 0 132 80" aria-hidden="true">
@@ -353,7 +358,7 @@
                     </button>
                 </template>
 
-                <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ ($isOralReading || $isFlashcards) ? 'hidden' : '' }}" id="egg-wrapper">
+                <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ ! $isFishing ? 'hidden' : '' }}" id="egg-wrapper">
                     <div class="egg-glow"></div><div class="hatch-light" id="hatch-flash"></div>
                     <div class="data-egg-container pulse-bag" id="power-core" style="--base-scale: 1;">
                         <div class="data-egg" id="shell-main">
@@ -366,6 +371,9 @@
 
                 @if ($isFlashcards && ! $isOralReading)
                     <x-frog-pond :question="$firstQuestion" :question-count="$questionCount" />
+                @endif
+                @if ($isTreasureQuest && ! $isOralReading)
+                    <x-treasure-quest :student="$student" :question-count="$questionCount" />
                 @endif
                 @if ($hasReadingStage)
                     <div id="story-gate" class="assessment-story-gate">
@@ -488,6 +496,7 @@
                 @if ($assessment->subject === 'literacy')
                     <x-phil-iri-result :live="true" />
                 @endif
+                <x-ml-prediction-result :live="true" />
                 <p class="assessment-coin-reward" role="status"><span class="material-symbols-outlined" aria-hidden="true">toll</span><strong id="result-coins">Saving coin reward...</strong></p>
                 <div class="assessment-result-detail">
                     <section class="assessment-breakdown" aria-labelledby="breakdown-title">
@@ -574,6 +583,11 @@
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const assessmentType = @json($assessmentType);
                     const isFlashcards = @json($isFlashcards);
+                    const isTreasureQuest = @json($isTreasureQuest);
+                    const isFishing = @json($isFishing);
+                    const treasureGame = document.querySelector('.treasure-quest');
+                    const treasureButtons = Array.from(document.querySelectorAll('[data-treasure-answer]'));
+                    const treasureNext = document.getElementById('treasure-next');
                     const isOralReading = assessmentType === 'oral_reading';
                     const isSilentReading = assessmentType === 'silent_reading';
                     const canTrackPronunciation = isOralReading;
@@ -612,6 +626,86 @@
                     let progressRevision = Number(initialProgress.revision || 0);
                     let saveTimeout = null;
                     let frogRoundEnding = false;
+                    let treasureRoundEnding = false;
+
+                    function updateTreasureProgress() {
+                        if (!treasureGame) return;
+                        treasureGame.dataset.answered = String(caughtCount);
+                        treasureGame.style.setProperty('--treasure-route', String(targetsNeeded ? caughtCount / targetsNeeded : 0));
+                        document.getElementById('treasure-gems').textContent = String(totalScore);
+                        document.getElementById('treasure-progress').value = caughtCount;
+                        document.getElementById('treasure-progress-text').textContent = `${caughtCount} / ${targetsNeeded} explored`;
+                    }
+
+                    function renderTreasureQuestion(focus = false) {
+                        if (!treasureGame || !questions[currentQuestionIndex]) return;
+                        const question = questions[currentQuestionIndex];
+                        treasureGame.dataset.selected = '';
+                        treasureGame.dataset.outcome = '';
+                        treasureNext.hidden = true;
+                        document.getElementById('treasure-feedback').textContent = '';
+                        document.getElementById('treasure-question-number').textContent = `Question ${currentQuestionIndex + 1} / ${targetsNeeded}`;
+                        const heading = document.getElementById('treasure-question-text');
+                        heading.textContent = question.text;
+                        treasureButtons.forEach(button => {
+                            const option = question.options.find(item => item.l === button.dataset.treasureAnswer);
+                            button.hidden = !option;
+                            button.disabled = !option || !missionStarted;
+                            delete button.dataset.result;
+                            button.querySelector('[data-treasure-answer-label]').textContent = option?.t || '';
+                            button.querySelector('.treasure-verdict').textContent = '';
+                            const label = treasureGame.querySelector(`[data-chest-label="${button.dataset.treasureAnswer}"]`);
+                            delete label.dataset.result;
+                        });
+                        updateTreasureProgress();
+                        if (focus) heading.focus({ preventScroll: true });
+                    }
+
+                    function answerTreasure(letter, button) {
+                        if (!treasureGame || !missionStarted || missionFinished || isProcessingCapture) return;
+                        const question = questions[currentQuestionIndex];
+                        if (!question || capturedAnswers[currentQuestionIndex] || !question.options.some(option => option.l === letter)) return;
+                        isProcessingCapture = true;
+                        playGameMusic();
+                        capturedAnswers[currentQuestionIndex] = letter;
+                        caughtCount++;
+                        const correct = question.correct === letter;
+                        if (correct) totalScore++;
+                        treasureButtons.forEach(item => item.disabled = true);
+                        button.dataset.result = correct ? 'correct' : 'incorrect';
+                        button.querySelector('.treasure-verdict').textContent = correct ? 'check_circle' : 'cancel';
+                        treasureGame.dataset.selected = letter;
+                        treasureGame.dataset.outcome = correct ? 'correct' : 'incorrect';
+                        treasureGame.querySelector(`[data-chest-label="${letter}"]`).dataset.result = button.dataset.result;
+                        document.getElementById('treasure-feedback').textContent = correct
+                            ? 'Correct! You found a gem.'
+                            : 'Not quite. This chest holds sand. Keep exploring!';
+                        updateTreasureProgress();
+                        persistProgress(true);
+                        treasureNext.hidden = false;
+                        treasureNext.disabled = true;
+                        document.getElementById('treasure-next-label').textContent = caughtCount >= targetsNeeded ? 'Open the vault' : 'Continue';
+                        setTimeout(() => {
+                            if (missionFinished) return;
+                            treasureNext.disabled = false;
+                            treasureNext.focus({ preventScroll: true });
+                        }, reducedMotion() ? 150 : 1000);
+                    }
+
+                    function endTreasureRound() {
+                        if (!treasureGame || treasureRoundEnding) return;
+                        treasureRoundEnding = true;
+                        isProcessingCapture = true;
+                        canvas.classList.remove('assessment-reading');
+                        storyGate?.classList.add('hidden');
+                        treasureGame.dataset.finished = 'true';
+                        treasureNext.hidden = true;
+                        treasureButtons.forEach(button => button.disabled = true);
+                        updateTreasureProgress();
+                        document.getElementById('treasure-feedback').textContent = `Trail complete! ${totalScore} of ${targetsNeeded} answers correct.`;
+                        treasureGame.querySelector('.treasure-map').scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
+                        setTimeout(victory, reducedMotion() ? 200 : 1600);
+                    }
 
                     function progressSnapshot() {
                         if (readingTimer) updateReadingTimer();
@@ -709,6 +803,7 @@
                         }
                         if (progressRevision > 0) saveStatus.textContent = 'Progress restored';
                         if (isFlashcards) updateFrogProgress();
+                        else if (isTreasureQuest) updateTreasureProgress();
                         else if (!isOralReading && targetsNeeded > 0) {
                             scoreEl.textContent = `${caughtCount}/${targetsNeeded}`;
                             progressEl.style.width = `${caughtCount / targetsNeeded * 100}%`;
@@ -778,7 +873,7 @@
                     }
 
                     function playHookReelSound() {
-                        if (!hookReelSound || isOralReading || isFlashcards) return;
+                        if (!hookReelSound || !isFishing) return;
                         clearInterval(hookReelFadeTimer);
                         hookReelSound.pause();
                         hookReelSound.currentTime = 0;
@@ -870,13 +965,13 @@
                     }
 
                     canvas.addEventListener('pointermove', (event) => {
-                        if (!isOralReading && !isFlashcards && missionStarted && !isHooking && !isHatching && !isProcessingCapture && container.contains(event.target)) {
+                        if (isFishing && missionStarted && !isHooking && !isHatching && !isProcessingCapture && container.contains(event.target)) {
                             positionHook(event.clientX);
                         }
                     });
 
                     canvas.addEventListener('click', (event) => {
-                        if (!missionStarted || isOralReading || isFlashcards || !container.contains(event.target)) return;
+                        if (!missionStarted || !isFishing || !container.contains(event.target)) return;
                         if (isHooking || isHatching || isProcessingCapture) return;
                         const fish = event.target.closest('.answer-fish');
                         const fishRect = fish?.getBoundingClientRect();
@@ -885,7 +980,7 @@
                         fireHook();
                     });
 
-                    if (!isOralReading && !isFlashcards) {
+                    if (isFishing) {
                         new ResizeObserver(() => {
                             positionHook(canvas.getBoundingClientRect().left + currentHookX + 18);
                         }).observe(container);
@@ -1503,6 +1598,7 @@
                         frogAnswerButtons.forEach(button => button.disabled = true);
                         canvas.dispatchEvent(new CustomEvent('frog:finished'));
                         canvas.dispatchEvent(new CustomEvent('fishing:finished'));
+                        treasureGame?.dispatchEvent(new CustomEvent('treasure:finished'));
                         fadeOutGameMusic();
                         fadeHookReelSound();
                         updatePronunciationResults();
@@ -1560,7 +1656,7 @@
 
                     function startMission() {
                         if (isOralReading || missionFinished || !questions[currentQuestionIndex]) return;
-                        if (missionStarted && (fishFrame || frogGame?.dataset.started === 'true')) return;
+                        if (missionStarted && (fishFrame || frogGame?.dataset.started === 'true' || treasureGame?.dataset.started === 'true')) return;
                         missionStarted = true;
                         persistProgress();
                         playGameMusic();
@@ -1569,6 +1665,11 @@
                         if (isFlashcards) {
                             if (frogGame) frogGame.dataset.started = 'true';
                             renderFlashcardQuestion();
+                            return;
+                        }
+                        if (isTreasureQuest) {
+                            treasureGame.dataset.started = 'true';
+                            renderTreasureQuestion();
                             return;
                         }
                         renderHookQuestion();
@@ -1582,6 +1683,14 @@
                     endTimerButton?.addEventListener('click', endReadingTimer);
                     frogAnswerButtons.forEach((button) => {
                         button.addEventListener('click', () => answerFlashcard(button.dataset.frogAnswer, button));
+                    });
+                    treasureButtons.forEach(button => button.addEventListener('click', () => answerTreasure(button.dataset.treasureAnswer, button)));
+                    treasureNext?.addEventListener('click', () => {
+                        if (treasureNext.disabled || !isProcessingCapture || treasureRoundEnding) return;
+                        if (caughtCount >= targetsNeeded) { endTreasureRound(); return; }
+                        currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                        isProcessingCapture = false;
+                        renderTreasureQuestion(true);
                     });
                     startQuestionsButton?.addEventListener('click', () => {
                         if (isOralReading) {
@@ -1612,10 +1721,16 @@
                         if (isFlashcards && !isOralReading) {
                             renderFlashcardQuestion(Math.max(0, targetsNeeded - 1));
                             endFrogRound();
-                        } else victory();
+                        } else if (isTreasureQuest && !isOralReading) {
+                            currentQuestionIndex = Math.max(0, targetsNeeded - 1);
+                            renderTreasureQuestion();
+                            endTreasureRound();
+                        }
+                        else victory();
                     }
                     else {
                         if (isFlashcards) renderFlashcardQuestion();
+                        if (isTreasureQuest) renderTreasureQuestion();
                         if (missionStarted && !isOralReading) startMission();
                     }
                 })();

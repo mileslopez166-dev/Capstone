@@ -9,8 +9,12 @@ import '../css/student-assessment.css';
 import '../css/avatar-wardrobe.css';
 import '../css/practice.css';
 import '../css/ui-polish.css';
+import '../css/data-tables.css';
 import '../css/phil-iri.css';
 import './phil-iri';
+import './ml-prediction';
+import './teacher-ml-level';
+import '../css/ml-prediction.css';
 import '../css/worksheets.css';
 import '../css/numeracy-games.css';
 import '../css/sidebar-navigation.css';
@@ -19,6 +23,9 @@ import '../css/teacher-photo.css';
 import '../css/student-tutor.css';
 import '../css/teacher-ai-assistant.css';
 import '../css/dark-mode.css';
+import '../css/treasure-quest.css';
+import '../css/answer-key.css';
+import '../css/answer-feedback.css';
 import './worksheet-book';
 import { initFrogJump } from './frog-jump';
 import comfortControls, { preferences } from './ui-preferences';
@@ -31,6 +38,7 @@ import teacherPhotoUpload from './teacher-photo-upload';
 import studentTutor from './student-tutor';
 import assessmentWordHelp from './assessment-word-help';
 import teacherAiAssistant from './teacher-ai-assistant';
+import answerFeedback from './answer-feedback';
 
 window.Alpine = Alpine;
 
@@ -41,6 +49,7 @@ Alpine.data('teacherPhotoUpload', teacherPhotoUpload);
 Alpine.data('studentTutor', studentTutor);
 Alpine.data('assessmentWordHelp', assessmentWordHelp);
 Alpine.data('teacherAiAssistant', teacherAiAssistant);
+Alpine.data('answerFeedback', answerFeedback);
 
 Alpine.start();
 
@@ -66,6 +75,14 @@ if (fishingSea) {
 }
 
 const buttonClickSound = new Audio('/audio/button-click.mp3');
+const treasureScene = document.getElementById('treasure-scene');
+if (treasureScene) {
+    import('./treasure-quest').then(({ initTreasureQuest }) => initTreasureQuest(treasureScene)).catch(() => {
+        treasureScene.closest('.treasure-quest').dataset.sceneState = 'fallback';
+        treasureScene.replaceChildren();
+    });
+}
+
 buttonClickSound.preload = 'auto';
 buttonClickSound.volume = 0.45;
 preferences.register(buttonClickSound);

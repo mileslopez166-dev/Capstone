@@ -10,7 +10,8 @@
             $link('Dashboard', route('teacher.dashboard'), 'dashboard', request()->routeIs('teacher.dashboard', 'dashboard')),
             $link('Teachers AI Assistant', route('teacher.ai-assistant.index'), 'psychology', request()->routeIs('teacher.ai-assistant.*')),
             ['label' => 'Classroom', 'icon' => 'groups', 'key' => 'classroom', 'children' => [
-                $link('Students', route('students.index'), 'group', request()->routeIs('students.*')),
+                $link('Student List', route('students.index'), 'group', request()->routeIs('students.*') && ! request()->routeIs('students.create')),
+                $link('Add Student', route('students.create'), 'person_add', request()->routeIs('students.create')),
                 $link('Reports', route('reports.index'), 'assessment', request()->routeIs('reports.*', 'teacher.phil-iri.*')),
                 $link('Practice', route('teacher.practice.index'), 'flag', request()->routeIs('teacher.practice.*')),
             ]],

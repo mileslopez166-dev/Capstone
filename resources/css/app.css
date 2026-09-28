@@ -8,7 +8,11 @@
 .assisted-picker-controls { display: flex; align-items: end; gap: 12px; }
 .assisted-picker-controls select { flex: 1; width: 100%; min-width: 0; border: 1px solid #95afb3; border-radius: 6px; background-color: white; }
 .assisted-picker .ui-button { flex-shrink: 0; }
-.assisted-assignment { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid #d4e2e4; }
+.assisted-assignment { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding: 18px 20px; border: 1px solid #acc9bf; border-radius: 8px; background: #f4faf7; color: #183d32; }
+.assisted-assignment > div { min-width: 0; overflow-wrap: anywhere; }
+.assisted-assignment strong { display: block; font-size: 16px; line-height: 1.5; }
+.assisted-assignment .ui-button { min-height: 44px; border-radius: 8px; }
+.assisted-assignment:focus-within { border-color: #187451; outline: 2px solid #187451; outline-offset: 2px; }
 .assisted-assignment p { margin-top: 4px; font-size: 14px; color: #49656a; }
 .assisted-session { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding: 14px 18px; border-left: 4px solid #147362; background: #e8f6f0; color: #173f37; }
 .assisted-session > div { flex: 1; }
@@ -18,6 +22,7 @@
 .assisted-session a { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 640px) {
     .assisted-picker-controls, .assisted-assignment { flex-direction: column; align-items: stretch; }
+    .assisted-assignment { padding: 16px; gap: 12px; }
     .assisted-session { flex-wrap: wrap; align-items: flex-start; padding: 12px; }
     .assisted-session > div { flex-basis: calc(100% - 42px); }
     .assisted-session > a { margin-left: 38px; }
@@ -45,7 +50,12 @@
     }
 
     p, h1, h2, h3, h4, h5, h6, a, span, dd, dt, label {
-        overflow-wrap: anywhere;
+        overflow-wrap: break-word;
+    }
+
+    button, [role="button"] {
+        overflow-wrap: normal;
+        word-break: normal;
     }
 }
 

@@ -52,6 +52,7 @@ class SidebarNavigationTest extends TestCase
             ['teacher.dashboard', [], 'teacher.dashboard', null],
             ['teacher.ai-assistant.index', [], 'teacher.ai-assistant.index', null],
             ['students.index', [], 'students.index', 'classroom'],
+            ['students.create', [], 'students.create', 'classroom'],
             ['students.show', [$student], 'students.index', 'classroom'],
             ['reports.index', [], 'reports.index', 'classroom'],
             ['teacher.practice.index', [], 'teacher.practice.index', 'classroom'],

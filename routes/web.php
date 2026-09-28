@@ -69,6 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/student/tutor/{chat}', [TutorController::class, 'destroy'])->whereNumber('chat')->name('student.tutor.destroy');
     Route::post('/student/tutor/{chat}/teacher-help', [TutorController::class, 'teacherHelp'])->whereNumber('chat')->middleware('throttle:3,1')->name('student.tutor.help');
     Route::post('/student/assessments/{assessment}/tutor', [TutorController::class, 'assessmentHelp'])->middleware('throttle:15,1')->name('student.assessments.tutor');
+    Route::post('/student/submissions/{submission}/answers/{question}/help', [TutorController::class, 'answerReview'])
+        ->whereNumber('submission')->whereNumber('question')->middleware('throttle:15,1')->name('student.answers.help');
     Route::get('/teacher/ai-assistant', [AiAssistantController::class, 'index'])->name('teacher.ai-assistant.index');
     Route::post('/teacher/ai-assistant/messages', [AiAssistantController::class, 'send'])->middleware('throttle:15,1')->name('teacher.ai-assistant.send');
     Route::post('/profile/teacher-photo', [ProfilePhotoController::class, 'store'])->middleware('throttle:10,1')->name('teacher.photo.store');
@@ -324,7 +326,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         ->values();
 
     $completedSubmissions = AssessmentSubmission::query()
-        ->with(['assessment.teacher', 'coinReward'])
+        ->with(['assessment.teacher', 'coinReward', 'mlPrediction'])
         ->where('user_id', $student->id)
         ->latest('submitted_at')
         ->get()
@@ -339,7 +341,7 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
                 : $includedRemaining + (int) ($retakeAllowances[$latestAttempt->assessment_id] ?? 0);
             $latestAttempt->latest_retake_request = $latestRequests[$latestAttempt->assessment_id] ?? null;
             $answers = collect($latestAttempt->answers ?? []);
-            $latestAttempt->review_items = collect($latestAttempt->assessment?->manual_questions ?? [])
+            $latestAttempt->review_items = collect($latestAttempt->questionsForReview())
                 ->values()
                 ->map(function (array $question, int $index) use ($answers): array {
                     $selectedLetter = (string) ($answers->get($index) ?? $answers->get((string) $index) ?? '');
@@ -471,6 +473,17 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
 Route::post('/teacher/students', [StudentController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('students.store');
+
+Route::get('/teacher/students/create', [StudentController::class, 'create'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.create');
+
+Route::get('/teacher/students/{student}/ml-level', function (User $student, \App\Support\MLPredictionService $ml) {
+    abort_unless(auth()->user()?->isTeacher(), 403);
+
+    return response()->json($ml->overallForStudent(auth()->user(), $student))
+        ->header('Cache-Control', 'private, no-store');
+})->middleware(['auth', 'verified'])->name('students.ml-level');
 
 Route::get('/teacher/students/{student}', function (User $student) use ($submissionAverage) {
     $teacher = auth()->user();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
+use App\Models\AssessmentAnswerFeedback;
 use App\Models\AssessmentSubmission;
 use App\Models\TutorChat;
 use App\Models\TutorTurn;
@@ -94,10 +95,67 @@ class TutorController extends Controller
         });
     }
 
+    public function answerReview(Request $request, int $submission, int $question, StudentTutor $tutor)
+    {
+        $student = $this->student($request);
+        $submission = $this->submission($student, $submission);
+        abort_unless($submission?->assessment && $submission->scorePercentage() !== null && ! $submission->worksheetAttempt, 404);
+        $item = array_values($submission->questionsForReview())[$question] ?? null;
+        abort_unless(is_array($item), 404);
+        $correct = $item['correct_answer'] ?? null;
+        $selected = ($submission->answers ?? [])[$question] ?? null;
+        abort_unless(is_string($correct) && isset($item['answers'][$correct]), 422, 'Ask your teacher to check the answer key for this question.');
+        abort_if($selected === $correct, 422, 'This answer is already correct. You can ask the tutor about the topic.');
+
+        $material = $tutor->reviewMaterial($submission, $item);
+        $material['selected_answer'] = is_string($selected) && isset($item['answers'][$selected]) ? $selected : null;
+        $hash = hash('sha256', json_encode($material, JSON_INVALID_UTF8_SUBSTITUTE));
+
+        return $this->locked($student, function () use ($student, $submission, $question, $tutor, $material, $hash) {
+            $identity = ['assessment_submission_id' => $submission->id, 'question_index' => $question];
+            $saved = AssessmentAnswerFeedback::where($identity)->first();
+            if ($saved && hash_equals($saved->source_hash, $hash)) {
+                return response()->json(['answer' => $saved->answer, 'saved' => true])->header('Cache-Control', 'private, no-store');
+            }
+            if (! $tutor->available()) {
+                return response()->json(['message' => 'The AI helper is unavailable. Your result is saved; please ask your teacher for help.'], 503);
+            }
+            foreach (['minute' => [config('tutor.per_minute'), 60], 'day' => [config('tutor.per_day'), 86400]] as $period => [$limit, $seconds]) {
+                if (RateLimiter::tooManyAttempts('tutor:'.$student->id.':'.$period, $limit)) {
+                    return response()->json(['message' => $period === 'day'
+                        ? 'You have reached today\'s tutor limit. Saved explanations are still available. Ask your teacher for more help.'
+                        : 'Give the tutor a moment. Please try again in a minute.'], 429);
+                }
+            }
+            RateLimiter::hit('tutor:'.$student->id.':minute', 60);
+            RateLimiter::hit('tutor:'.$student->id.':day', 86400);
+            try {
+                $reply = $tutor->replyForAnswerReview($material);
+            } catch (TutorUnavailable $exception) {
+                $this->notifyTeacherAttention($student, null, $submission, $material['subject'], $exception->teacherAttentionReason);
+
+                return response()->json(['message' => $exception->getMessage()], $exception->status);
+            }
+            if ($reply->teacherAttentionReason) {
+                $this->notifyTeacherAttention($student, null, $submission, $material['subject'], $reply->teacherAttentionReason);
+
+                return response()->json(['message' => 'Please ask your teacher to help review this question.'], 422);
+            }
+            AssessmentAnswerFeedback::updateOrCreate($identity, ['source_hash' => $hash, 'answer' => $reply->answer]);
+
+            return response()->json(['answer' => $reply->answer, 'saved' => true])->header('Cache-Control', 'private, no-store');
+        });
+    }
+
     public function assessmentHelp(Request $request, Assessment $assessment, StudentTutor $tutor)
     {
         $student = $this->student($request);
         abort_unless($assessment->status === 'published' && AssessmentParticipant::matchesSection($assessment, $student), 404);
+        $assessment = clone $assessment;
+        $active = \App\Models\AssessmentProgress::where('assessment_id', $assessment->id)
+            ->where('user_id', $student->id)->whereNull('submission_id')->latest('attempt_number')->first();
+        $assessment->manual_questions = $active?->question_snapshot
+            ?? ($assessment->question_selection === 'automatic' ? [] : $assessment->manual_questions);
 
         $data = $request->validate([
             'chat_id' => ['nullable', 'integer'],

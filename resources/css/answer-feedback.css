@@ -1,0 +1,8 @@
+.answer-feedback { margin-top: 16px; min-width: 0; }
+.answer-feedback .ui-button { min-height: 44px; max-width: 100%; white-space: normal; text-align: left; }
+.answer-feedback__panel { margin-top: 12px; padding: 16px; border-left: 3px solid #087c76; background: #f0faf7; color: #153c38; border-radius: 8px; font-size: 16px; line-height: 1.65; overflow-wrap: anywhere; }
+.answer-feedback__label { font-weight: 700; margin-bottom: 8px; }
+.answer-feedback__answer { white-space: pre-wrap; }
+.answer-feedback__note { font-size: 14px; margin-top: 12px; }
+:root[data-theme="dark"] .answer-feedback__panel { background: #123b35; color: #fff; border-color: #70d6c1; }
+:root[data-theme="dark"] .answer-feedback__panel p { color: #fff; }

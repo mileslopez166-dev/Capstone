@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 import joblib
 import pandas as pd
@@ -29,10 +29,17 @@ class PredictionInput(BaseModel):
     intervention_count: Optional[float] = Field(default=0, ge=0)
 
 
+class ModelEvaluation(BaseModel):
+    method: Literal["held_out_test"]
+    accuracy: float = Field(ge=0, le=1)
+    test_rows: int = Field(gt=0)
+
+
 class PredictionOutput(BaseModel):
     prediction: str
     confidence: float
     model_name: str
+    evaluation: Optional[ModelEvaluation] = None
 
 
 def load_package():
@@ -63,4 +70,5 @@ def predict(payload: PredictionInput) -> PredictionOutput:
         prediction=prediction,
         confidence=round(confidence, 4),
         model_name=package.get("model_name", "reading_level_model"),
+        evaluation=package.get("evaluation"),
     )

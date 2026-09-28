@@ -52,6 +52,20 @@ Output:
 - `processed/feature_importance.csv`
 
 Current baseline model: 44,497 cleaned training rows from CRLA, NAT, LaNA, and student performance data.
+Training now packages held-out test accuracy and test sample count with the model.
+Student results keep a snapshot of those metrics alongside prediction confidence;
+neither value replaces the formula-based assessment score. These are internal
+validation metrics, not proof of accuracy on new Grade 6 students; some baseline
+labels are derived from score thresholds.
+
+Older models and saved predictions show "Not available" for model test accuracy.
+To produce metrics for future predictions, run training again and restart the ML
+API. Existing predictions are not relabeled or backfilled. Apply the Laravel
+migration with `php artisan migrate` before using this update.
+
+`evaluate_model.py` writes `processed/full_dataset_diagnostic_report.md` separately:
+it evaluates all rows (including training data), so it must not overwrite or be
+presented as the held-out test result.
 Trained `.pkl` model files are kept local and ignored by Git. Run the training command again on another device after adding the local datasets.
 
 ## 5. Run API

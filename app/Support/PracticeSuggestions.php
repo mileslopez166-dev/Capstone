@@ -11,7 +11,7 @@ class PracticeSuggestions
     {
         $assessment = $submission->assessment;
         $questions = [];
-        foreach ($assessment->manual_questions ?? [] as $index => $question) {
+        foreach ($submission->questionsForReview() as $index => $question) {
             $answer = $submission->answers[$index] ?? null;
             if (isset($question['correct_answer'], $question['answers'][$question['correct_answer']])
                 && $answer !== $question['correct_answer']) {

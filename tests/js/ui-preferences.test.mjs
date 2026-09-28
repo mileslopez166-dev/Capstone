@@ -2,17 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 let loadNumber = 0;
-async function loadPreferences(t, stored = null, blocked = false) {
+async function loadPreferences(t, stored = null, blocked = false, initialDark = false) {
     const styles = new Map();
     const events = new Map();
     const audio = { muted: false };
     const classes = new Set();
     let value = stored;
-    let prefersDark = false;
+    let prefersDark = initialDark;
     const globals = {
         window: {
             matchMedia: query => ({
-                matches: query.includes('prefers-color-scheme') ? prefersDark : false,
+                get matches() { return query.includes('prefers-color-scheme') ? prefersDark : false; },
                 addEventListener(name, handler) { events.set(query, handler); },
             }),
             addEventListener: (name, handler) => events.set(name, handler),
@@ -62,12 +62,12 @@ test('sliders save independently without losing sound or motion preferences', as
     preferences.setReadingSize('story', '32');
     preferences.setReadingSize('questions', '34');
     preferences.setReadingSize('answers', '28');
-    assert.deepEqual(stored(), { sound: false, motion: 'reduce', theme: 'system', readingSizes: { story: 32, questions: 34, answers: 28 } });
+    assert.deepEqual(stored(), { sound: false, motion: 'reduce', theme: 'light', readingSizes: { story: 32, questions: 34, answers: 28 } });
     assert.equal(styles.get('--assessment-story-size'), '2rem');
     preferences.set('sound', true);
     assert.equal(stored().readingSizes.answers, 28);
     preferences.resetReadingSizes();
-    assert.deepEqual(stored(), { sound: true, motion: 'reduce', theme: 'system', readingSizes: { story: 16, questions: 18, answers: 16 } });
+    assert.deepEqual(stored(), { sound: true, motion: 'reduce', theme: 'light', readingSizes: { story: 16, questions: 18, answers: 16 } });
 });
 
 test('dark mode toggles the html class and saves with other preferences', async t => {
@@ -83,6 +83,49 @@ test('dark mode toggles the html class and saves with other preferences', async 
     assert.equal(classes.has('dark'), false);
     assert.equal(stored().theme, 'light');
     assert.equal(stored().sound, false);
+});
+
+test('first visit stays light even when the device prefers dark', async t => {
+    const { preferences, classes, setSystemDark, events } = await loadPreferences(t, null, false, true);
+    assert.equal(preferences.theme, 'light');
+    assert.equal(preferences.darkMode, false);
+    assert.equal(classes.has('dark'), false);
+    assert.equal(document.documentElement.style.colorScheme, 'light');
+    setSystemDark(false);
+    events.get('(prefers-color-scheme: dark)')();
+    setSystemDark(true);
+    events.get('(prefers-color-scheme: dark)')();
+    assert.equal(preferences.darkMode, false);
+});
+
+test('saved system preference still follows device changes', async t => {
+    const { preferences, classes, setSystemDark, events } = await loadPreferences(t, '{"theme":"system"}', false, true);
+    assert.equal(preferences.darkMode, true);
+    setSystemDark(false);
+    events.get('(prefers-color-scheme: dark)')();
+    assert.equal(classes.has('dark'), false);
+    assert.equal(preferences.theme, 'system');
+});
+
+test('invalid themes and cleared settings fall back to light on a dark device', async t => {
+    const { preferences, classes, events } = await loadPreferences(t, '{"theme":"invalid"}', false, true);
+    assert.equal(preferences.theme, 'light');
+    preferences.set('theme', 'dark');
+    assert.equal(classes.has('dark'), true);
+    preferences.set('theme', 'invalid');
+    assert.equal(preferences.theme, 'light');
+    for (const newValue of ['{"theme":"dark"}', null, '{bad json', '{}']) {
+        events.get('storage')({ key: 'pgaals-comfort', newValue });
+        assert.equal(preferences.darkMode, newValue === '{"theme":"dark"}');
+    }
+});
+
+test('blocked browser storage still opens in light mode and allows a manual dark toggle', async t => {
+    const { preferences, classes } = await loadPreferences(t, null, true, true);
+    assert.equal(preferences.theme, 'light');
+    assert.equal(classes.has('dark'), false);
+    preferences.set('theme', 'dark');
+    assert.equal(classes.has('dark'), true);
 });
 
 test('saved sizes restore and invalid values cannot create broken CSS', async t => {

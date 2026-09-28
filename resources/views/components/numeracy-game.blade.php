@@ -1,7 +1,7 @@
 <div class="numeracy-mode" data-numeracy-mode hidden>
     <div class="numeracy-mode-switch" role="group" aria-label="Answer mode">
-        <button type="button" data-numeracy-view="game" aria-pressed="true"><span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>Games</button>
-        <button type="button" data-numeracy-view="worksheet" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Worksheet</button>
+        <button type="button" data-numeracy-view="worksheet" aria-pressed="true"><span class="material-symbols-outlined" aria-hidden="true">table_rows</span>Worksheet</button>
+        <button type="button" data-numeracy-view="game" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>Games</button>
     </div>
     <label class="sr-only" for="numeracy-game-select">Choose game</label>
     <select id="numeracy-game-select" data-numeracy-select aria-label="Choose game"></select>

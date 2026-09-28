@@ -1,0 +1,62 @@
+.assessment-workspace .treasure-game { height: auto; min-height: 0; background: #f5fbf9; cursor: default; color: #183e39; }
+.treasure-quest { --quest-border: #bed9d0; --quest-paper: #fff; --quest-ink: #183e39; color: var(--quest-ink); padding-bottom: 18px; }
+.treasure-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; }
+.treasure-heading h2 { display: flex; align-items: center; gap: 9px; font-size: 20px; font-weight: 800; }
+.treasure-gems { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.treasure-gems .material-symbols-outlined { color: #00816e; }
+.treasure-map { position: relative; height: 300px; overflow: hidden; isolation: isolate; background: #66cbc6; }
+#treasure-scene, .treasure-fallback { position: absolute; inset: 0; pointer-events: none; }
+#treasure-scene { z-index: 1; }
+#treasure-scene canvas, .treasure-fallback svg { display: block; width: 100%; height: 100%; }
+.treasure-quest[data-scene-state='ready'] .treasure-fallback, .treasure-quest[data-scene-state='ready'] .treasure-fallback-chest { display: none; }
+#treasure-explorer { position: absolute; z-index: 2; width: 66px; height: 94px; left: 25%; top: 53%; transform: translate(-50%, -90%); pointer-events: none; filter: drop-shadow(0 5px 2px #254c4133); }
+#treasure-explorer .campus-character { display: block; width: 100%; height: 100%; }
+#treasure-explorer img, #treasure-explorer svg { width: 100%; height: 100%; object-fit: contain; }
+.treasure-quest:not([data-scene-state='ready']) #treasure-explorer { left: calc(25% + var(--treasure-route, 0) * 45%) !important; top: 53% !important; }
+.treasure-map-label { position: absolute; z-index: 2; top: 77%; left: 23%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 30px; min-height: 30px; border-radius: 6px; background: #fffdf0; border: 2px solid #b78838; color: #503b12; font-size: 15px; font-weight: 900; pointer-events: none; }
+.treasure-map-label[data-chest-label='B'] { left: 41%; }
+.treasure-map-label[data-chest-label='C'] { left: 59%; }
+.treasure-map-label[data-chest-label='D'] { left: 77%; }
+.treasure-map-label[data-result='correct'] { background: #176550; color: #fff; border-color: #fff; }
+.treasure-map-label[data-result='incorrect'] { background: #963e33; color: #fff; border-color: #fff; }
+.treasure-vault-label { position: absolute; z-index: 2; top: 20%; left: 70%; transform: translate(-50%, -50%); color: #254633; background: #fffdf0; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.treasure-trail { display: flex; align-items: center; gap: 18px; padding: 14px 24px; font-size: 13px; font-weight: 700; }
+.treasure-trail span { flex-shrink: 0; }
+.treasure-trail progress { display: block; width: 100%; height: 9px; appearance: none; border: 0; border-radius: 5px; background: #d3e5df; overflow: hidden; }
+.treasure-trail progress::-webkit-progress-bar { background: #d3e5df; }
+.treasure-trail progress::-webkit-progress-value { background: #2c8768; }
+.treasure-trail progress::-moz-progress-bar { background: #2c8768; }
+.treasure-question { padding: 8px 24px 0; }
+#treasure-question-number { color: #457064; font-weight: 700; font-size: 12px; margin-bottom: 7px; }
+.treasure-question h3 { font-size: var(--assessment-questions-size, 18px); font-weight: 800; line-height: 1.5; overflow-wrap: anywhere; margin: 0 0 18px; }
+.treasure-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.treasure-answers button { display: flex; gap: 12px; align-items: center; min-width: 0; min-height: 64px; padding: 12px 14px; border: 1px solid var(--quest-border); border-radius: 8px; text-align: left; color: var(--quest-ink); background: var(--quest-paper); touch-action: manipulation; }
+.treasure-answers button:hover:not(:disabled) { border-color: #278265; box-shadow: 0 2px 0 #278265; }
+.treasure-answers button:focus-visible, #treasure-next:focus-visible { outline: 3px solid #1678af; outline-offset: 3px; }
+.treasure-answer-letter { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 6px; background: #e8f3e5; color: #295636; font-weight: 800; }
+[data-treasure-answer-label] { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: var(--assessment-answers-size, 16px); line-height: 1.55; }
+.treasure-verdict { width: 22px; flex: 0 0 22px; font-size: 22px; }
+.treasure-answers button[data-result='correct'] { border: 2px solid #28855d; background: #e8f6ee; }
+.treasure-answers button[data-result='incorrect'] { border: 2px solid #bd6654; background: #fff0e9; }
+.treasure-answers button:disabled { cursor: default; }
+.treasure-round-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 74px; padding-top: 12px; }
+#treasure-feedback { font-size: 14px; line-height: 1.6; }
+#treasure-next { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 6px; background: #176550; color: #fff; font-size: 14px; font-weight: 800; }
+#treasure-next[hidden], .treasure-answers button[hidden] { display: none; }
+#treasure-next:disabled { opacity: .55; }
+html[data-theme='dark'] .assessment-workspace .treasure-game { background: #112d2a; color: #fff; }
+html[data-theme='dark'] .treasure-quest { --quest-ink: #fff; --quest-paper: #163834; --quest-border: #557f74; }
+html[data-theme='dark'] .treasure-quest h2, html[data-theme='dark'] .treasure-quest h3, html[data-theme='dark'] #treasure-question-number, html[data-theme='dark'] .treasure-gems .material-symbols-outlined { color: #fff; }
+html[data-theme='dark'] .treasure-answers button[data-result='correct'] { background: #18543c; }
+html[data-theme='dark'] .treasure-answers button[data-result='incorrect'] { background: #633b31; }
+@container (max-width: 600px) {
+    .treasure-heading { padding: 14px; }
+    .treasure-heading h2 { font-size: 17px; }
+    .treasure-map { height: 240px; }
+    #treasure-explorer { width: 48px; height: 70px; }
+    .treasure-trail { padding: 12px 14px; gap: 10px; }
+    .treasure-question { padding: 6px 14px 0; }
+    .treasure-answers { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .treasure-answers button { min-height: 56px; padding: 10px; }
+    .treasure-round-footer { align-items: stretch; flex-direction: column; gap: 10px; }
+}

@@ -233,6 +233,7 @@
 
                                     <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
                                     <x-assessment-coin-reward :submission="$submission" />
+                                    <x-ml-prediction-result :prediction="$submission->mlPrediction" />
                                     <a class="ui-button ui-button-secondary mt-4" href="{{ route('student.tutor.index', ['submission' => $submission->id]) }}"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>Ask Tutor about this assessment</a>
                                     @if ($submission->worksheetAttempt)
                                         <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
@@ -280,6 +281,9 @@
                                                                     <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['correct_letter'] ?: '-' }}. {{ $reviewItem['correct_text'] }}</p>
                                                                 </div>
                                                             </div>
+                                                            @if ($reviewItem['correct_letter'] && $submission->scorePercentage() !== null)
+                                                                <x-answer-feedback :submission="$submission" :index="$reviewItem['number'] - 1" />
+                                                            @endif
                                                         </div>
                                                     @endforeach
                                                 </div>

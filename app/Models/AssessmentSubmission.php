@@ -21,6 +21,8 @@ class AssessmentSubmission extends Model
         'user_id',
         'attempt_number',
         'answers',
+        'question_snapshot',
+        'selection_context',
         'correct_count',
         'question_count',
         'points',
@@ -31,6 +33,8 @@ class AssessmentSubmission extends Model
 
     protected $casts = [
         'answers' => 'array',
+        'question_snapshot' => 'array',
+        'selection_context' => 'array',
         'phil_iri' => 'array',
         'submitted_at' => 'datetime',
     ];
@@ -38,6 +42,13 @@ class AssessmentSubmission extends Model
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);
+    }
+
+    protected $hidden = ['question_snapshot', 'selection_context'];
+
+    public function questionsForReview(): array
+    {
+        return $this->question_snapshot ?? $this->assessment?->manual_questions ?? [];
     }
 
     public function student(): BelongsTo

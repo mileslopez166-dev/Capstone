@@ -92,7 +92,7 @@
                             <p class="mt-1 text-sm text-on-surface-variant">Showing matches for "{{ $filters['search'] }}"</p>
                         @endif
                     </div>
-                    <form class="flex w-full max-w-md gap-2" method="GET" action="{{ route('admin.token-requests.index') }}">
+                    <form class="ui-table-search flex w-full max-w-md gap-2" method="GET" action="{{ route('admin.token-requests.index') }}">
                         <div class="relative flex-1">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant">search</span>
                             <input class="w-full rounded-DEFAULT border-none bg-surface py-2 pl-9 pr-3 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary" list="token-search-suggestions" name="search" placeholder="Search name, email, role, section" type="search" value="{{ $filters['search'] ?? '' }}">
@@ -104,8 +104,8 @@
                     </form>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left">
+                <x-data-table-scroll label="Pending account requests">
+                    <table class="w-full min-w-[800px] border-collapse text-left">
                         <thead>
                             <tr class="border-b border-outline-variant/15 bg-surface text-sm font-semibold text-on-surface-variant">
                                 <th class="px-6 py-4 font-headline text-xs uppercase tracking-wider">Account Name</th>
@@ -120,7 +120,7 @@
                                 <tr class="transition-colors duration-150 hover:bg-surface-container-low">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-container text-xs font-bold text-on-primary-container">
+                                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-xs font-bold text-on-primary-container">
                                                 {{ \Illuminate\Support\Str::of($requestUser->name)->explode(' ')->filter()->take(2)->map(fn ($segment) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($segment, 0, 1)))->implode('') }}
                                             </div>
                                             <div>
@@ -145,7 +145,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <span class="inline-flex items-center justify-center rounded-full bg-surface-container px-3 py-1 text-sm font-semibold text-on-surface">
+                                        <span class="ui-table-badge inline-flex items-center justify-center rounded-full bg-surface-container px-3 py-1 text-sm font-semibold text-on-surface">
                                             {{ ucfirst($requestUser->role) }} Approval
                                         </span>
                                     </td>
@@ -179,9 +179,9 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
+                </x-data-table-scroll>
 
-                <div class="flex items-center justify-between border-t border-outline-variant/15 bg-surface px-6 py-4 text-sm text-on-surface-variant">
+                <div class="ui-table-footer border-t border-outline-variant/15 bg-surface px-6 py-4 text-sm text-on-surface-variant">
                     <span>
                         Showing {{ $pendingRequests->count() > 0 ? $pendingRequests->firstItem() : 0 }} to {{ $pendingRequests->count() > 0 ? $pendingRequests->lastItem() : 0 }} of {{ $pendingRequests->total() }} entries
                     </span>

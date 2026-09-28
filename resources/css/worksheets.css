@@ -122,10 +122,24 @@
 .worksheet-text-page p { margin: 0 0 16px; }
 .worksheet-text-section + .worksheet-text-section { border-top: 1px solid #d2dfe4; margin-top: 24px; padding-top: 24px; }
 .worksheet-text-instruction { color: #1b6658; font-weight: 700; }
-.worksheet-problems { list-style: none; padding: 0; display: grid; gap: 22px; }
-.worksheet-problems > li { display: flex; gap: 12px; align-items: start; padding-bottom: 18px; border-bottom: 1px solid #e2eaee; }
+.worksheet-question-head { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 20px; padding: 12px 16px 12px 68px; background: #e4f2ee; border-block: 1px solid #a8c7be; color: #24594d; font-size: 14px; font-weight: 800; }
+.worksheet-problems { list-style: none; padding: 0; display: grid; gap: 0; }
+.worksheet-problems > li { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: 12px; align-items: start; padding: 20px 16px; border-bottom: 1px solid #cbdce3; }
+.worksheet-problems > li:nth-child(even) { background: #f3f8fb; }
 .worksheet-problem-number { flex: 0 0 auto; max-width: 5.5em; font-weight: 700; color: #3c606f; font-size: .8em; line-height: 2.1; }
-.worksheet-problem-content { flex: 1; min-width: 0; }
+.worksheet-problem-content { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+.worksheet-question-copy { min-width: 0; }
+.worksheet-problem-content > .worksheet-item-response { margin-top: 0; padding: 0 0 0 20px; border-left: 1px solid #cbdce3; }
+.worksheet-reader[data-step=read] .worksheet-problem-content { grid-template-columns: minmax(0, 1fr); }
+.worksheet-reader[data-step=read] .worksheet-question-head { grid-template-columns: minmax(0, 1fr); }
+.worksheet-reader[data-step=answer] .worksheet-reading { max-height: none; overflow: visible; }
+.worksheet-problems > li:focus-within { background: #edf8f3; box-shadow: inset 3px 0 #288173; }
+@media (max-width: 700px) {
+    .worksheet-question-head { display: none; }
+    .worksheet-problems > li { grid-template-columns: 1.75rem minmax(0, 1fr); padding: 18px 8px; gap: 8px; }
+    .worksheet-problem-content { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .worksheet-problem-content > .worksheet-item-response { padding: 14px 0 0; border-left: 0; border-top: 1px solid #cbdce3; }
+}
 .worksheet-problem-content p:last-child { margin: 0; }
 .worksheet-shape, .worksheet-clock { width: min(100%, 210px); height: auto; aspect-ratio: 1; display: block; margin: 18px 0; }
 .worksheet-prism { width: min(100%, 360px); height: auto; display: block; margin: 18px 0; }

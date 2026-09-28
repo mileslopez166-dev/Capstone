@@ -56,11 +56,12 @@
 
                                 <div class="mt-8">
                                     <label class="mb-4 block text-sm font-bold text-on-surface-variant">Choose Quiz Type</label>
-                                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                                         @foreach ([
                                             ['value' => 'multiple_choice', 'icon' => 'checklist', 'label' => 'Multiple Choice'],
                                             ['value' => 'data_egg', 'icon' => 'egg_alt', 'label' => 'Interactive Egg'],
                                             ['value' => 'flashcards', 'icon' => 'pest_control', 'label' => 'Frog Flashcards'],
+                                            ['value' => 'treasure_quest', 'icon' => 'explore', 'label' => 'Treasure Quest'],
                                         ] as $quizType)
                                             <label class="group relative cursor-pointer">
                                                 <input class="peer sr-only" name="quiz_type" type="radio" value="{{ $quizType['value'] }}" {{ old('quiz_type', 'multiple_choice') === $quizType['value'] ? 'checked' : '' }}>
@@ -219,6 +220,14 @@
                                                     </button>
                                                 </div>
                                                 <div class="space-y-4">
+                                                    <label class="block text-sm font-bold">Question difficulty
+                                                        <select class="mt-2 w-full rounded border-outline-variant/20 bg-white px-4 py-3 text-sm" name="manual_questions[{{ $questionIndex }}][difficulty]">
+                                                            <option value="">Unspecified</option>
+                                                            @foreach (\App\Support\AdaptiveQuestions::LABELS as $value => $label)
+                                                                <option value="{{ $value }}" @selected(($manualQuestion['difficulty'] ?? '') === $value)>{{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </label>
                                                     <div>
                                                         <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Question</label>
                                                         <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[{{ $questionIndex }}][question]" rows="3" placeholder="Type the question here...">{{ $manualQuestion['question'] ?? '' }}</textarea>
@@ -379,6 +388,9 @@
         const storyTemplates = {{ \Illuminate\Support\Js::from($storyTemplates) }};
         const storyLibrary = document.getElementById('story-library');
         const storyLibrarySelect = document.getElementById('story-library-select');
+        const storyLibraryLevel = document.getElementById('story-library-level');
+        const difficultyLabels = { frustration: 'Easier', instructional: 'Moderate', independent: 'Challenging', advanced: 'Enrichment' };
+        const questionSelection = document.getElementById('question-selection');
         const loadStoryTemplateButton = document.getElementById('load-story-template');
         const storyLibraryStatus = document.getElementById('story-library-status');
         const assessmentTitleInput = document.getElementById('title');
@@ -455,6 +467,12 @@
                         </button>
                     </div>
                     <div class="space-y-4">
+                        <label class="block text-sm font-bold">Question difficulty
+                            <select class="mt-2 w-full rounded border-outline-variant/20 bg-white px-4 py-3 text-sm" name="manual_questions[${index}][difficulty]">
+                                <option value="">Unspecified</option>
+                                ${Object.entries(difficultyLabels).map(([value, label]) => `<option value="${value}" ${question.difficulty === value ? 'selected' : ''}>${label}</option>`).join('')}
+                            </select>
+                        </label>
                         <div>
                             <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Question</label>
                             <textarea class="w-full rounded-sm border-outline-variant/20 bg-white px-4 py-3 text-sm focus:border-primary focus:ring-primary" name="manual_questions[${index}][question]" rows="3" placeholder="Type the question here...">${escapeHtml(question.question || '')}</textarea>
@@ -494,6 +512,13 @@
 
         function toggleQuestionBuilder() {
             const requiresQuestions = assessmentTypeRequiresQuestions();
+            const allowsAutomatic = ['silent_reading', 'listening_comprehension'].includes(selectedAssessmentType());
+            questionSelection.querySelector('[value="automatic"]').disabled = !allowsAutomatic;
+            if (!allowsAutomatic) questionSelection.value = 'fixed';
+            const autoChoice = storyLibraryLevel.querySelector('[value="automatic"]');
+            if (autoChoice) autoChoice.disabled = !allowsAutomatic;
+            if (!allowsAutomatic && storyLibraryLevel.value === 'automatic') storyLibraryLevel.value = 'instructional';
+            updateStorySetPreview();
 
             if (requiresQuestions) {
                 ensureManualQuestionCard();
@@ -647,34 +672,52 @@
         assessmentTypeInputs.forEach((input) => {
             input.addEventListener('change', toggleQuestionBuilder);
         });
+        function updateStorySetPreview() {
+            const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
+            const automatic = storyLibraryLevel.value === 'automatic';
+            const questions = automatic ? Object.values(template?.question_sets || {}).flat() : template?.question_sets[storyLibraryLevel.value] || [];
+            loadStoryTemplateButton.disabled = !template || storyLibrarySelect.disabled;
+            document.getElementById('story-library-count').textContent = template ? `${automatic ? '8 per student' : questions.length + ' questions selected'} / ${Object.values(template.question_sets).flat().length} in story bank` : '';
+            document.getElementById('story-library-guide').classList.toggle('hidden', !template);
+            document.getElementById('story-library-guide-items').innerHTML = (template?.answer_guide || []).filter(item => automatic || item.difficulty === storyLibraryLevel.value).map(item => `<li value="${item.number}"><strong>${escapeHtml(item.skill)} - Answer ${escapeHtml(item.correct_answer)}</strong><p>${escapeHtml(item.explanation)}</p></li>`).join('');
+        }
         storyLibrarySelect.addEventListener('change', () => {
             const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
-            loadStoryTemplateButton.disabled = !template || storyLibrarySelect.disabled;
-            document.getElementById('story-library-count').textContent = template ? `${template.manual_questions.length} questions` : '';
+            const previous = storyLibraryLevel.value;
+            storyLibraryLevel.disabled = !template;
+            const allowsAutomatic = ['silent_reading', 'listening_comprehension'].includes(selectedAssessmentType());
+            storyLibraryLevel.innerHTML = template ? `<option value="automatic" ${allowsAutomatic ? '' : 'disabled'}>Automatic</option>` + Object.keys(template.question_sets).map(level => `<option value="${level}">${difficultyLabels[level]} - fixed</option>`).join('') : '<option value="">Choose a story first</option>';
+            if (template) storyLibraryLevel.value = template.question_sets[previous] ? previous : (allowsAutomatic ? 'automatic' : 'instructional');
+            updateStorySetPreview();
         });
+        storyLibraryLevel.addEventListener('change', updateStorySetPreview);
         loadStoryTemplateButton.addEventListener('click', () => {
             if (storyLibrarySelect.disabled) return;
             const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
             if (!template) return;
+            const automatic = storyLibraryLevel.value === 'automatic';
+            const questions = automatic ? Object.values(template.question_sets).flat() : template.question_sets[storyLibraryLevel.value];
+            if (!questions?.length) return;
 
             const hasContent = storyTitleInput.value.trim() || storyDescriptionInput.value.trim()
                 || Array.from(manualQuestions.querySelectorAll('textarea, input')).some(field => field.value.trim());
             if (hasContent && !confirm(`Replace the current story and questions with "${template.story_title}"?`)) return;
 
             applyImportedStory({ storyTitle: template.story_title, storyDescription: template.story_description });
+            questionSelection.value = automatic ? 'automatic' : 'fixed';
             if (!assessmentTitleInput.value.trim() || assessmentTitleInput.value === templateAssessmentTitle) {
                 assessmentTitleInput.value = template.story_title;
                 assessmentTitleInput.dispatchEvent(new Event('input', { bubbles: true }));
                 templateAssessmentTitle = template.story_title;
             }
-            manualQuestions.innerHTML = template.manual_questions.map((question, index) => questionTemplate(index, question)).join('');
+            manualQuestions.innerHTML = questions.map((question, index) => questionTemplate(index, question)).join('');
             renumberQuestions();
             // Oral reading keeps these cards disabled; switching back restores the comprehension questions.
             toggleQuestionBuilder();
             questionTextFile.value = '';
             questionImportStatus.classList.add('hidden');
             const summary = assessmentTypeRequiresQuestions()
-                ? `${template.manual_questions.length} questions loaded.`
+                ? (automatic ? `${questions.length} bank questions loaded. Each student receives 8 questions; the first set is balanced.` : `${questions.length} questions loaded (${difficultyLabels[storyLibraryLevel.value]}).`)
                 : 'Passage loaded for oral reading.';
             const screeningNote = selectedAssessmentType() === 'group_screening' ? ' Grade 6 GST scoring requires 20 questions.' : '';
             storyLibraryStatus.textContent = `${template.story_title}: ${summary}${screeningNote}`;
@@ -737,6 +780,7 @@
                 return;
             }
 
+            questionSelection.value = 'fixed';
             manualQuestions.innerHTML = importedQuestions
                 .map((question, index) => questionTemplate(index, question))
                 .join('');

@@ -85,6 +85,10 @@
                 @endif
 
                 <x-assessment-student-picker :assessment="$assessment" :students="$eligibleStudents" />
+                <x-teacher-answer-key :questions="$manualQuestions" />
+                @if ($assessment->question_selection === 'automatic')
+                    <p class="mb-6 text-sm text-on-surface">Automatic selection: 8 questions per attempt from this bank. New learners start with a balanced set; later sets use recent comparable results. Enrichment questions are reserved for manual selection.</p>
+                @endif
 
                 <form class="mb-8 flex flex-wrap items-end gap-4 border-b border-outline-variant/20 pb-6" method="POST" action="{{ route('assessments.retries', $assessment) }}">
                     @csrf
@@ -170,7 +174,7 @@
                                 </div>
                                 <div class="rounded-xl bg-surface-container-low p-4">
                                     <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Questions</dt>
-                                    <dd class="mt-2 font-bold text-on-surface">{{ count($manualQuestions) }}</dd>
+                                    <dd class="mt-2 font-bold text-on-surface">{{ $assessment->question_selection === 'automatic' ? '8 per attempt / '.count($manualQuestions).' in bank' : count($manualQuestions) }}</dd>
                                 </div>
                             </dl>
                         </div>

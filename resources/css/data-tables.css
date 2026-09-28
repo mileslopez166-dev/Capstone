@@ -1,0 +1,18 @@
+.ui-data-table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
+.ui-data-table-scroll table { width: 100%; table-layout: auto; }
+.ui-data-table-scroll :is(th, td) { overflow-wrap: normal; word-break: normal; }
+.ui-data-table-scroll th { white-space: nowrap; }
+.ui-data-table-scroll td:first-child:not([colspan]) { min-width: 14rem; max-width: 24rem; }
+.ui-data-table-scroll td:first-child p, .ui-data-table-scroll .ui-table-copy { overflow-wrap: anywhere; white-space: normal; }
+.ui-data-table-scroll .ui-table-copy { min-width: 12rem; max-width: 22rem; }
+.ui-data-table-scroll :is(button, select, .ui-table-badge), .ui-data-table-scroll td:last-child a { white-space: nowrap; overflow-wrap: normal; flex-shrink: 0; }
+.ui-data-table-scroll td:last-child :is(button, a) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
+.ui-table-badge { display: inline-flex; align-items: center; flex-shrink: 0; white-space: nowrap; }
+.ui-table-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.ui-table-footer > :last-child { flex-shrink: 0; }
+.ui-table-search { flex-wrap: wrap; align-items: center; }
+.ui-table-search > div { flex: 1 1 12rem; min-width: 0; }
+.ui-table-search :is(a, button) { flex-shrink: 0; white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 640px) {
+    .ui-data-table-scroll :is(th, td) { padding-inline: 14px; }
+}

@@ -15,12 +15,14 @@ class MLPrediction extends Model
         'model_name',
         'prediction',
         'confidence_score',
+        'model_evaluation',
         'input_data',
         'recommendation',
     ];
 
     protected $casts = [
         'confidence_score' => 'float',
+        'model_evaluation' => 'array',
         'input_data' => 'array',
     ];
 

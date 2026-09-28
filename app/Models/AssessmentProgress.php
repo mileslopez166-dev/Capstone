@@ -15,11 +15,14 @@ class AssessmentProgress extends Model
         'state', 'revision', 'submission_id',
     ];
 
-    protected $casts = ['state' => 'array', 'revision' => 'integer', 'multiplication_table_unlocked_at' => 'datetime'];
+    protected $casts = ['state' => 'array', 'revision' => 'integer', 'multiplication_table_unlocked_at' => 'datetime',
+        'question_snapshot' => 'array', 'selection_context' => 'array'];
+
+    protected $hidden = ['question_snapshot', 'selection_context'];
 
     public static function forAttempt(Assessment $assessment, User $student, int $attemptNumber): self
     {
-        return static::query()->firstOrCreate([
+        $progress = static::query()->firstOrCreate([
             'assessment_id' => $assessment->id,
             'user_id' => $student->id,
             'attempt_number' => $attemptNumber,
@@ -27,6 +30,8 @@ class AssessmentProgress extends Model
             'attempt_key' => (string) Str::uuid(),
             'state' => [],
         ]);
+
+        return \App\Support\AdaptiveQuestions::freeze($progress, $assessment, $student);
     }
 
     public function submission(): BelongsTo

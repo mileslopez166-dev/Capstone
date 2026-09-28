@@ -10,16 +10,16 @@ class AppFooterTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_teacher_pages_share_a_footer_with_teacher_dashboard_and_support_links(): void
+    public function test_teacher_pages_share_a_compact_footer_with_support_only(): void
     {
         $this->assertRoleFooter(User::factory()->teacher()->create(), [
-            'teacher.dashboard', 'students.index', 'reports.index', 'assessments.index',
+            'teacher.dashboard', 'students.index', 'students.create', 'reports.index', 'assessments.index',
             'assessments.create', 'worksheets.index', 'worksheets.reviews',
             'teacher.practice.index', 'profile.edit', 'support.developing',
         ]);
     }
 
-    public function test_student_pages_share_a_footer_with_student_dashboard_and_support_links(): void
+    public function test_student_pages_share_a_compact_footer_with_support_only(): void
     {
         $this->assertRoleFooter(User::factory()->create(), [
             'student.dashboard', 'student.activities', 'student.leaderboard',
@@ -42,10 +42,14 @@ class AppFooterTest extends TestCase
             $this->assertStringContainsString((string) now()->year, $footer->textContent);
             $this->assertStringContainsString('AI-PGAALS', $footer->textContent);
             $links = $xpath->query('.//nav[@aria-label="Footer navigation"]/a', $footer);
-            $this->assertSame(2, $links->length);
-            $this->assertSame(route($user->dashboardRouteName()), $links->item(0)->getAttribute('href'));
-            $this->assertSame(route('support.developing'), $links->item(1)->getAttribute('href'));
+            $this->assertSame(1, $links->length);
+            $this->assertSame(route('support.developing'), $links->item(0)->getAttribute('href'));
+            $this->assertStringNotContainsString('Dashboard', $footer->textContent);
+            $this->assertSame(1, substr_count($footer->textContent, 'AI-PGAALS'));
             $this->assertSame(1, $xpath->query('preceding::main', $footer)->length);
+            if (getenv('CAPTURE_FOOTER_FIXTURES') && in_array($page, ['student.activities', 'students.index'])) {
+                file_put_contents(storage_path('app/footer-'.$user->role.'.html'), $response->getContent());
+            }
         }
     }
 }

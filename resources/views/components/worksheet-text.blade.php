@@ -7,6 +7,7 @@
             @foreach ($section['paragraphs'] ?? [] as $paragraph)<p>{{ str_replace([' x ', ' / '], [' × ', ' ÷ '], $paragraph) }}</p>@endforeach
             @if (isset($section['instruction']))<p class="worksheet-text-instruction">{{ ($page['responses'][$sectionIndex.'-0']['fields'][0]['type'] ?? null) === 'checkbox' ? 'Check the box for every number by which the given number is divisible.' : $section['instruction'] }}</p>@endif
             @if (!empty($section['items']))
+                <div class="worksheet-question-head" aria-hidden="true"><span>Question</span><span data-book-answer-only>{{ $readonly ? 'Your submitted answer' : 'Your answer' }}</span></div>
                 <ol class="worksheet-problems">
                     @foreach ($section['items'] as $itemIndex => $item)
                         @php
@@ -16,7 +17,7 @@
                         @endphp
                         <li>
                             <span class="worksheet-problem-number">{{ $label }}.</span>
-                            <div class="worksheet-problem-content"><p>{{ str_replace([' x ', ' / '], [' × ', ' ÷ '], $item['text']) }}</p>
+                            <div class="worksheet-problem-content"><div class="worksheet-question-copy"><p>{{ str_replace([' x ', ' / '], [' × ', ' ÷ '], $item['text']) }}</p>
                                 @if (isset($item['shape']))
                                     @php
                                         if (is_int($item['shape'])) {
@@ -63,6 +64,7 @@
                                         <label>Temperature mark <output data-temperature-output>Not marked</output><input type="range" min="-30" max="50" step="1" value="-30" data-temperature-input aria-label="Temperature mark for item {{ $label }}" @disabled($readonly)></label>
                                     </div>
                                 @endif
+                                </div>
                                 <x-worksheet-response :definition="$page['responses'][$gridKey]" :item-key="$gridKey" :page-index="$pageIndex" :readonly="$readonly" />
                             </div>
                         </li>

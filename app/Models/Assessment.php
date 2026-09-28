@@ -25,6 +25,7 @@ class Assessment extends Model
         'focus_areas',
         'asset_path',
         'manual_questions',
+        'question_selection',
         'instructions',
         'story_title',
         'story_description',

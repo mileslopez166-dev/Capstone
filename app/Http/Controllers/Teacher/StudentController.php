@@ -12,6 +12,13 @@ use Illuminate\Validation\Rules;
 
 class StudentController extends Controller
 {
+    public function create(Request $request): \Illuminate\View\View
+    {
+        abort_unless($request->user()?->isTeacher(), 403);
+
+        return view('students.create');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $teacher = $request->user();

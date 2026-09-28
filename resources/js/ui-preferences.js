@@ -15,7 +15,7 @@ try { saved = JSON.parse(localStorage.getItem(key)) || {}; } catch { /* Storage 
 export const preferences = {
     sound: saved.sound !== false,
     motion: ['system', 'reduce'].includes(saved.motion) ? saved.motion : 'system',
-    theme: ['system', 'light', 'dark'].includes(saved.theme) ? saved.theme : 'system',
+    theme: ['system', 'light', 'dark'].includes(saved.theme) ? saved.theme : 'light',
     readingSizes: normalizeReadingSizes(saved.readingSizes),
     get reducedMotion() { return this.motion === 'reduce' || systemMotion.matches; },
     get darkMode() { return this.theme === 'dark' || (this.theme === 'system' && systemTheme.matches); },
@@ -34,7 +34,7 @@ export const preferences = {
     set(name, value) {
         if (name === 'sound') this.sound = Boolean(value);
         if (name === 'motion') this.motion = value === 'reduce' ? 'reduce' : 'system';
-        if (name === 'theme') this.theme = ['light', 'dark', 'system'].includes(value) ? value : 'system';
+        if (name === 'theme') this.theme = ['light', 'dark', 'system'].includes(value) ? value : 'light';
         this.save();
     },
     setReadingSize(name, value) {
@@ -60,7 +60,7 @@ window.addEventListener('storage', event => {
     try { saved = JSON.parse(event.newValue) || {}; } catch { saved = {}; }
     preferences.sound = saved.sound !== false;
     preferences.motion = saved.motion === 'reduce' ? 'reduce' : 'system';
-    preferences.theme = ['light', 'dark', 'system'].includes(saved.theme) ? saved.theme : 'system';
+    preferences.theme = ['light', 'dark', 'system'].includes(saved.theme) ? saved.theme : 'light';
     preferences.readingSizes = normalizeReadingSizes(saved.readingSizes);
     preferences.apply();
 });

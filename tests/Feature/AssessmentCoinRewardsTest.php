@@ -56,7 +56,7 @@ class AssessmentCoinRewardsTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create();
-        foreach (['multiple_choice', 'data_egg', 'flashcards'] as $game) {
+        foreach (['multiple_choice', 'data_egg', 'flashcards', 'treasure_quest'] as $game) {
             foreach (['silent_reading', 'listening_comprehension', 'group_screening'] as $type) {
                 $assessment = $this->assessment($teacher, 20, ['quiz_type' => $game, 'assessment_type' => $type]);
                 $progress = AssessmentProgress::forAttempt($assessment, $student, 1);
@@ -64,7 +64,7 @@ class AssessmentCoinRewardsTest extends TestCase
                     ->assertOk()->assertJsonPath('coins_earned', 20);
             }
         }
-        $this->assertSame(180, $student->practiceCoinBalance());
+        $this->assertSame(240, $student->practiceCoinBalance());
     }
 
     public function test_saving_and_invalid_answers_give_nothing_and_repeat_submissions_reward_only_once(): void

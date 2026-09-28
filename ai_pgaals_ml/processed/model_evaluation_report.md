@@ -2,22 +2,28 @@
 
 Model: reading_level_random_forest_v1
 
-Rows evaluated: 44497
+Rows: 44497
 
-Accuracy: 0.9998
+Features used: reading_score, comprehension_score, numeracy_score, assessment_attempts, previous_score, intervention_count
+
+Ignored empty features: reading_accuracy, reading_speed, listening_score, completion_time
+
+Held-out test rows: 8900
+
+Held-out test accuracy: 0.9996
 
 ## Classification Report
 
 ```text
                precision    recall  f1-score   support
 
-  Frustration       1.00      1.00      1.00     27341
-  Independent       1.00      1.00      1.00      2780
-Instructional       1.00      1.00      1.00     14376
+  Frustration       1.00      1.00      1.00      5469
+  Independent       1.00      1.00      1.00       556
+Instructional       1.00      1.00      1.00      2875
 
-     accuracy                           1.00     44497
-    macro avg       1.00      1.00      1.00     44497
- weighted avg       1.00      1.00      1.00     44497
+     accuracy                           1.00      8900
+    macro avg       1.00      1.00      1.00      8900
+ weighted avg       1.00      1.00      1.00      8900
 
 ```
 
@@ -26,11 +32,11 @@ Instructional       1.00      1.00      1.00     14376
 Labels: ['Frustration', 'Independent', 'Instructional']
 
 ```text
-[[27340     0     1]
- [    0  2780     0]
- [    5     1 14370]]
+[[5468    0    1]
+ [   0  556    0]
+ [   2    1 2872]]
 ```
 
-## Teacher Decision Notice
+## Note
 
-AI prediction is a support tool. Teachers should validate results before making educational decisions.
+This model is a support tool only. It does not replace Phil-IRI scoring or teacher judgment.

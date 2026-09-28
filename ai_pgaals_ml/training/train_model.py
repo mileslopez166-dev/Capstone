@@ -87,6 +87,11 @@ def train() -> dict:
         "ignored_features": ignored_features,
         "classes": list(model.classes_),
         "model_name": "reading_level_random_forest_v1",
+        "evaluation": {
+            "method": "held_out_test",
+            "accuracy": float(accuracy),
+            "test_rows": len(y_test),
+        },
     }
     joblib.dump(package, MODEL_PATH)
 
@@ -102,7 +107,8 @@ def train() -> dict:
         f"Rows: {len(frame)}\n\n"
         f"Features used: {', '.join(features)}\n\n"
         f"Ignored empty features: {', '.join(ignored_features) if ignored_features else 'None'}\n\n"
-        f"Accuracy: {accuracy:.4f}\n\n"
+        f"Held-out test rows: {len(y_test)}\n\n"
+        f"Held-out test accuracy: {accuracy:.4f}\n\n"
         "## Classification Report\n\n"
         f"```text\n{report}\n```\n\n"
         "## Confusion Matrix\n\n"

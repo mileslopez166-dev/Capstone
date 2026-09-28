@@ -9,7 +9,7 @@
                 let preferences = {};
                 try { preferences = JSON.parse(localStorage.getItem('pgaals-comfort')) || {}; } catch {}
                 const motion = preferences.motion;
-                const theme = ['light', 'dark', 'system'].includes(preferences.theme) ? preferences.theme : 'system';
+                const theme = ['light', 'dark', 'system'].includes(preferences.theme) ? preferences.theme : 'light';
                 const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
                 document.documentElement.dataset.reducedMotion = String(motion === 'reduce' || matchMedia('(prefers-reduced-motion: reduce)').matches);
                 document.documentElement.dataset.theme = dark ? 'dark' : 'light';

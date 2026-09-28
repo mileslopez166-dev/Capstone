@@ -70,7 +70,8 @@ class SearchController extends Controller
         $quickLinks = collect([
             ['label' => 'Practice Missions', 'description' => 'Assign practice and review progress', 'href' => route('teacher.practice.index'), 'keywords' => ['practice', 'mission', 'review']],
             ['label' => 'Dashboard', 'description' => 'Teacher overview and recent activity', 'href' => route('teacher.dashboard'), 'keywords' => ['dashboard', 'home', 'overview']],
-            ['label' => 'Students', 'description' => 'Roster and add student form', 'href' => route('students.index'), 'keywords' => ['student', 'students', 'roster', 'add student', 'enroll']],
+            ['label' => 'Student List', 'description' => 'Student roster and assessment progress', 'href' => route('students.index'), 'keywords' => ['student', 'students', 'roster']],
+            ['label' => 'Add Student', 'description' => 'Create a student account', 'href' => route('students.create'), 'keywords' => ['add student', 'new student', 'enroll', 'register']],
             ['label' => 'Create Assessment', 'description' => 'Prepare literacy assessments and numeracy worksheets', 'href' => route('assessments.create'), 'keywords' => ['assessment', 'quiz', 'question', 'create', 'new']],
             ['label' => 'Created Assessments', 'description' => 'Review, publish, lock, and delete your assessments', 'href' => route('assessments.index'), 'keywords' => ['assessment', 'assessments', 'saved', 'publish', 'lock']],
             ['label' => 'Worksheet Reviews', 'description' => 'Student worksheets awaiting a score', 'href' => route('worksheets.reviews'), 'keywords' => ['worksheet', 'review', 'grade', 'numeracy']],

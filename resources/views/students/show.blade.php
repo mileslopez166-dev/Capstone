@@ -17,13 +17,13 @@
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="students" />
 
             <main class="flex-1 p-4 md:p-8 lg:ml-72 lg:p-12">
-                <section class="teacher-workspace-heading mb-12 grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
-                    <div class="lg:col-span-8">
-                        <a class="mb-4 flex items-center gap-2 font-bold text-primary" href="{{ route('dashboard') }}">
+                <section class="student-profile-heading">
+                    <div class="student-profile-identity">
+                        <a class="mb-4 flex items-center gap-2 font-bold text-primary" href="{{ route('students.index') }}">
                             <span class="material-symbols-outlined">arrow_back</span>
                             <span class="font-headline text-sm uppercase tracking-widest">Student Directory</span>
                         </a>
-                        <h1 class="mb-2 font-headline text-5xl font-extrabold tracking-tight text-on-surface md:text-6xl">{{ $student->name }}</h1>
+                        <h1 class="mb-2 font-headline font-extrabold text-on-surface">{{ $student->name }}</h1>
                         <div class="mt-4 flex flex-wrap items-center gap-4">
                             <span class="rounded-full bg-primary-container px-4 py-1.5 text-sm font-bold text-on-primary-container">Student Account</span>
                             <span class="rounded-full bg-surface-container-high px-4 py-1.5 text-sm font-bold text-on-surface-variant">{{ $studentMetrics['completed_count'] }} completed</span>
@@ -33,7 +33,7 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-4 lg:col-span-4">
+                    <div class="student-profile-details">
                         <x-student-pixel-avatar
                             :user="$student"
                             :gender="$student->gender"
@@ -44,7 +44,7 @@
                             class="w-full"
                         />
 
-                        <div class="w-full rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                        <div class="student-profile-progress">
                             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Student Progress</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="font-headline text-4xl font-black text-primary">{{ $studentMetrics['average_accuracy'] === null ? 'No Data' : $studentMetrics['average_accuracy'].'%' }}</span>
@@ -55,6 +55,11 @@
                 </section>
 
                 @if (session('status'))<p class="mb-6 rounded-lg bg-secondary-container/30 p-4" role="status">{{ session('status') }}</p>@endif
+                <section class="mb-8 border-y border-outline-variant/20 py-5" aria-labelledby="overall-ml-title">
+                    <h2 id="overall-ml-title" class="mb-2 font-headline text-xl font-bold text-on-surface">Overall ML Estimate</h2>
+                    <x-teacher-ml-level :student="$student" />
+                    <p class="mt-3 text-sm text-on-surface-variant">Teacher-only estimate from your assessments, using each assessment's latest scored attempt. Overall score is the average of those percentages. This is provisional teaching support, not an official grade or a validated overall diagnosis.</p>
+                </section>
                 <section class="assisted-picker" aria-labelledby="student-assessments-title">
                     <h2 id="student-assessments-title">Take an Assessment Together</h2>
                     @forelse ($assistedAssessments as $assignedAssessment)

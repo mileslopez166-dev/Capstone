@@ -50,7 +50,9 @@ class WorksheetResponseFormatTest extends TestCase
             }
             $this->actingAs($student)->postJson(route('worksheets.save', $assignment), $payload)->assertOk();
             $this->assertEquals($payload['pages'], $progress->fresh()->state['pages']);
-            $this->get(route('student.assessments.show', $assignment))->assertOk()->assertSee('data-item-response', false)->assertDontSee('data-book-add-answer', false);
+            $this->get(route('student.assessments.show', $assignment))->assertOk()
+                ->assertSee('data-item-response', false)->assertSee('worksheet-question-copy', false)
+                ->assertSee('worksheet-question-head', false)->assertDontSee('data-book-add-answer', false);
             $response = $this->postJson(route('worksheets.submit', $assignment), $payload)->assertOk();
             $attempt = WorksheetAttempt::where('progress_id', $progress->id)->firstOrFail();
             $this->assertEquals($payload['pages'], $attempt->pages);

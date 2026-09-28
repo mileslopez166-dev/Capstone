@@ -1,0 +1,17 @@
+.teacher-answer-key { margin: 20px 0; border: 1px solid #a8c6ba; border-radius: 8px; color: #193e36; background: #f8fcfa; overflow: hidden; }
+.teacher-answer-key summary { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; padding: 15px 18px; min-height: 48px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.teacher-answer-key summary::after { content: '+'; margin-left: auto; font-size: 20px; }
+.teacher-answer-key[open] summary::after { content: '-'; }
+.teacher-answer-key summary > span:last-of-type { font-size: 12px; font-weight: 500; }
+.teacher-answer-key summary:focus-visible { outline: 3px solid #12765b; outline-offset: -3px; }
+.teacher-answer-key ol { list-style: none; margin: 0; padding: 0 18px 8px; }
+.teacher-answer-key li { padding: 16px 0; border-top: 1px solid #cbddd5; overflow-wrap: anywhere; }
+.answer-key-question { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 8px; line-height: 1.6; }
+.answer-key-question > strong { flex: 1 1 220px; }
+.answer-key-question > span { font-size: 12px; padding: 3px 8px; background: #e3eee7; border-radius: 4px; }
+.teacher-answer-key p { margin: 7px 0 0; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.answer-key-context { padding: 12px 18px 18px; }
+.answer-key-context > span { display: inline-block; margin: 10px 14px 0 0; font-size: 13px; }
+html[data-theme='dark'] .teacher-answer-key { background: #102e29; color: #fff; border-color: #648c81; }
+html[data-theme='dark'] .teacher-answer-key li { border-color: #446a5e; }
+html[data-theme='dark'] .answer-key-question > span { background: #294c40; color: #fff; }

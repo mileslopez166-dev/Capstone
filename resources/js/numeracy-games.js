@@ -12,7 +12,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
     let entries = [];
     let items = [];
     let index = 0;
-    let mode = 'game';
+    let mode = 'worksheet';
     let signature = '';
     let checked = false;
     let summary = false;

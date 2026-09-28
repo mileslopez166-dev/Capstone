@@ -67,7 +67,8 @@
                 </div>
 
                 <div class="bg-surface-container-lowest rounded-DEFAULT overflow-hidden border shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                    <x-data-table-scroll label="Deleted users">
+                    <table class="w-full min-w-[800px] text-left border-collapse">
                         <thead>
                             <tr class="bg-surface-container-low text-on-surface-variant">
                                 <th class="px-6 py-4 font-semibold">User</th>
@@ -82,7 +83,7 @@
                                 <tr class="transition-colors hover:bg-surface-bright">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container/30 text-xs font-bold text-primary">{{ 
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container/30 text-xs font-bold text-primary">{{
                                                 \Illuminate\Support\Str::of($user->name)->explode(' ')->filter()->take(2)->map(fn($s)=>\Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($s,0,1)))->implode('') ?: 'U' }}</div>
                                             <div>
                                                 <p class="font-bold text-on-surface">{{ $user->name }}</p>
@@ -91,7 +92,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $user->role === 'admin' ? 'bg-primary-container/30 text-primary' : ($user->role === 'teacher' ? 'bg-secondary-container text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant') }}">{{ $user->role }}</span>
+                                        <span class="ui-table-badge inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $user->role === 'admin' ? 'bg-primary-container/30 text-primary' : ($user->role === 'teacher' ? 'bg-secondary-container text-secondary-dim' : 'bg-surface-container-high text-on-surface-variant') }}">{{ $user->role }}</span>
                                     </td>
                                     <td class="px-6 py-4">{{ $user->section ?: 'Unassigned' }}</td>
                                     <td class="px-6 py-4 text-on-surface-variant">{{ $user->deleted_at?->format('M d, Y h:i A') }}</td>
@@ -123,8 +124,9 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </x-data-table-scroll>
 
-                    <div class="border-t border-outline-variant/15 p-4 flex items-center justify-between">
+                    <div class="ui-table-footer border-t border-outline-variant/15 p-4">
                         <div class="text-sm text-on-surface-variant">Showing {{ $trashedUsers->firstItem() ?? 0 }} to {{ $trashedUsers->lastItem() ?? 0 }} of {{ $trashedUsers->total() }} users</div>
                         <div>
                             {{ $trashedUsers->links() }}

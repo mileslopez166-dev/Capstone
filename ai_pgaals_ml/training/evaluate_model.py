@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 ROOT = Path(__file__).resolve().parents[1]
 DATASET = ROOT / "processed" / "clean_dataset.csv"
 MODEL_PATH = ROOT / "models" / "reading_level_model.pkl"
-REPORT_PATH = ROOT / "processed" / "model_evaluation_report.md"
+REPORT_PATH = ROOT / "processed" / "full_dataset_diagnostic_report.md"
 IMPORTANCE_PATH = ROOT / "processed" / "feature_importance.csv"
 
 
@@ -38,7 +38,8 @@ def evaluate() -> dict:
     }).sort_values("importance", ascending=False).to_csv(IMPORTANCE_PATH, index=False)
 
     REPORT_PATH.write_text(
-        "# Model Evaluation Report\n\n"
+        "# Full Dataset Diagnostic Report\n\n"
+        "Includes training rows. This is NOT held-out test accuracy.\n\n"
         f"Model: {package.get('model_name', 'reading_level_model')}\n\n"
         f"Rows evaluated: {len(frame)}\n\n"
         f"Accuracy: {accuracy:.4f}\n\n"

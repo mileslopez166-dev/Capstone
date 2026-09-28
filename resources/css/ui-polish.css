@@ -1,4 +1,13 @@
-:root { --ui-accent: #0063a5; --ui-ink: #17324b; --ui-line: #c6dbe5; }
+:root { --ui-accent: #0063a5; --ui-ink: #17324b; --ui-line: #c6dbe5; --ui-panel-radius: 8px; }
+/* Keep existing panels consistent without rounding navigation, tables, or game scenery. */
+:is(.teacher-theme, .campus-theme) :is(.reading-progress-card, .worksheet-reader, .worksheet-tile, .teacher-focus, .teacher-metric, .tutor-workspace) { border-radius: var(--ui-panel-radius); }
+.teacher-theme :is(.teacher-page-heading, .teacher-empty) { border-radius: var(--ui-panel-radius); }
+.teacher-theme .teacher-results { border-radius: var(--ui-panel-radius); }
+.teacher-theme .teacher-result:first-child { border-radius: var(--ui-panel-radius) var(--ui-panel-radius) 0 0; }
+.teacher-theme .teacher-result:last-child { border-radius: 0 0 var(--ui-panel-radius) var(--ui-panel-radius); }
+.teacher-theme .teacher-result:only-child { border-radius: var(--ui-panel-radius); }
+.campus-theme :is(.campus-panel, .campus-stat, .campus-avatar-card, .activity-subject) { border-width: 1px; border-radius: var(--ui-panel-radius); box-shadow: 0 2px 6px #17324b12; }
+.campus-theme .campus-avatar-card { padding: 18px; }
 .teacher-theme { --ui-accent: #166655; --ui-ink: #243b35; --ui-line: #d0dfd9; }
 .admin-theme { --ui-accent: #285ca2; --ui-ink: #293442; --ui-line: #d6dfe9; }
 [x-cloak] { display: none !important; }
@@ -14,7 +23,7 @@
 .comfort-heading { font-size: 15px; padding-bottom: 8px; border-bottom: 1px solid #dce5eb; }
 .comfort-option { min-height: 56px; font-size: 14px; cursor: pointer; }
 .comfort-option input { width: 22px; height: 22px; color: var(--ui-accent); border-radius: 4px; }
-.ui-status { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: 0; vertical-align: middle; }
+.ui-status { display: inline-flex; flex-shrink: 0; align-items: center; gap: 5px; max-width: 100%; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: 0; vertical-align: middle; white-space: nowrap; overflow-wrap: normal; }
 .ui-status .material-symbols-outlined { font-size: 17px; flex-shrink: 0; }
 .ui-status-blue { color: #125488; background: #e2f1fe; }
 .ui-status-green { color: #176044; background: #e4f4ea; }

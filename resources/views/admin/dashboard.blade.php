@@ -103,7 +103,7 @@
                         </div>
                     </form>
 
-                    <div class="overflow-x-auto">
+                    <x-data-table-scroll label="User management">
                         <table class="w-full min-w-[900px] border-collapse text-left">
                             <thead>
                                 <tr class="bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant">
@@ -143,7 +143,7 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $roleClasses }}">{{ $managedUser->role }}</span>
+                                            <span class="ui-table-badge inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide {{ $roleClasses }}">{{ $managedUser->role }}</span>
                                         </td>
                                         <td class="px-6 py-4 font-medium text-on-surface">{{ $managedUser->section ?: 'Unassigned' }}</td>
                                         <td class="px-6 py-4">
@@ -197,7 +197,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
+                    </x-data-table-scroll>
 
                     <div class="border-t border-outline-variant/15 p-4">
                         <div class="flex flex-col gap-4 text-sm text-on-surface-variant lg:flex-row lg:items-center lg:justify-between">
