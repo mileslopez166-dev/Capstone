@@ -1,7 +1,7 @@
 .assessment-workspace {
     --assessment-stage-height: calc(100dvh - 196px);
     container-type: inline-size;
-    padding: 24px 24px 100px;
+    padding: 24px 24px calc(100px + env(safe-area-inset-bottom));
 }
 
 .student-assessment-page > .campus-companion-mobile { display: none; }
@@ -142,7 +142,7 @@
     line-height: 1.95;
 }
 .assessment-passage { max-width: 900px; max-height: 460px; min-height: 200px; margin-inline: auto; border-block: 1px solid #d8e9f4; background: #fff; }
-.assessment-workspace .story-paragraph { font-size: var(--assessment-story-size, 1.375rem); line-height: 1.85; overflow-wrap: anywhere; }
+.assessment-workspace .story-paragraph { font-size: var(--assessment-story-size, 1rem); line-height: 1.85; overflow-wrap: anywhere; }
 .assessment-legend { border-bottom: 1px solid #d8e9f4; }
 .assessment-workspace .assessment-legend > span { box-shadow: none; border: 0; background: none; }
 .assessment-mark-tools { background: #eff6fa; border-radius: 6px; }
@@ -164,8 +164,8 @@
     padding: 20px 20px 48px;
 }
 .assessment-workspace .ocean-game #question-node { max-height: 420px; padding: 16px; border: 1px solid #9dc8dd; border-bottom: 3px solid #4b95b9; }
-.assessment-workspace .ocean-game #question-node h2 { font-size: var(--assessment-questions-size, 1.5rem); line-height: 1.45; overflow-wrap: anywhere; }
-.assessment-workspace .ocean-game .hook-options > div { font-size: var(--assessment-answers-size, 1.125rem); line-height: 1.55; }
+.assessment-workspace .ocean-game #question-node h2 { font-size: var(--assessment-questions-size, 1.125rem); line-height: 1.45; overflow-wrap: anywhere; }
+.assessment-workspace .ocean-game .hook-options > div { font-size: var(--assessment-answers-size, 1rem); line-height: 1.55; }
 .assessment-workspace .ocean-game .hook-options > div > span:first-child { font-size: 16px; }
 .assessment-workspace .ocean-game .hook-options > div > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .assessment-workspace .ocean-game #mission-info h1 { font-size: 22px; }
@@ -173,9 +173,9 @@
 .assessment-workspace .frog-pond-game { min-height: max(580px, var(--assessment-stage-height)); }
 .assessment-workspace .frog-interface { min-height: max(580px, var(--assessment-stage-height)); padding: 20px 24px; }
 .assessment-workspace .frog-question-card { border-color: #a7d0d5; border-bottom-color: #328671; box-shadow: 0 3px 0 #acd1c5; }
-.assessment-workspace .frog-question-card h1 { max-height: none; overflow: visible; font-size: var(--assessment-questions-size, 1.5rem); line-height: 1.45; overflow-wrap: anywhere; }
+.assessment-workspace .frog-question-card h1 { max-height: none; overflow: visible; font-size: var(--assessment-questions-size, 1.125rem); line-height: 1.45; overflow-wrap: anywhere; }
 .assessment-workspace .frog-answer-zone { gap: 16px; }
-.assessment-workspace .frog-answer-copy [data-frog-answer-label] { min-width: 0; font-size: var(--assessment-answers-size, 1.125rem); line-height: 1.55; }
+.assessment-workspace .frog-answer-copy [data-frog-answer-label] { min-width: 0; font-size: var(--assessment-answers-size, 1rem); line-height: 1.55; }
 
 .assessment-results { padding: 28px; background: #fbfdfff7; border-block: 2px solid #8dcefa; outline: none; }
 .assessment-coin-reward { display: flex; align-items: center; gap: 8px; margin-block: 18px; color: #755914; font-size: 15px; line-height: 1.5; }
@@ -223,13 +223,16 @@
     .campus-theme .campus-student-topbar ~ .assessment-workspace { padding: 24px 24px 32px; }
 }
 @media (max-width: 767px) {
-    .assessment-workspace { padding: 18px 12px 100px; }
-    .assessment-heading { flex-wrap: wrap; gap: 10px; scroll-margin-top: 145px; }
+    .assessment-workspace { padding: 14px 12px calc(100px + env(safe-area-inset-bottom)); }
+    .assessment-heading { display: grid; grid-template-columns: 42px minmax(0, 1fr) 42px; align-items: start; gap: 10px; padding-bottom: 14px; scroll-margin-top: 145px; }
+    .assessment-heading-copy { grid-column: 2; }
+    .assessment-heading-copy > p { font-size: 10px; }
     .assessment-heading h1 { font-size: 19px; }
-    .assessment-attempt { margin-left: 52px; flex-basis: 100%; max-width: none; font-size: 11px; }
-    .assessment-word-helper { flex: 1 1 auto; }
+    .assessment-attempt { grid-column: 2 / -1; max-width: none; font-size: 11px; }
+    .assessment-text-settings { grid-column: 3; grid-row: 1; }
+    .assessment-word-helper { grid-column: 2 / -1; }
     .assessment-helper-toggle { width: 100%; min-width: 0; }
-    .assessment-helper-panel { position: fixed; inset: auto 12px 82px 12px; width: auto; max-height: min(70dvh, 560px); }
+    .assessment-helper-panel { position: fixed; inset: auto 12px calc(82px + env(safe-area-inset-bottom)) 12px; width: auto; max-height: min(70dvh, 560px); }
     .assessment-reader, .assessment-results { padding: 18px 14px; }
     .assessment-reader-heading { gap: 10px; margin-bottom: 18px; }
     .assessment-reader-heading h2 { font-size: 21px; }
@@ -238,19 +241,38 @@
 
 /* Use the available workspace width, including when a tablet shows the sidebar. */
 @container (max-width: 760px) {
-    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(340px, 1fr); height: auto; min-height: 0; padding: 16px 14px 44px; gap: 14px; }
+    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 332px; height: auto; min-height: 0; padding: 12px 12px 38px; gap: 10px; }
     .assessment-workspace .ocean-game #mission-info { grid-column: 1; grid-row: 1; }
-    .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; gap: 10px; }
-    .assessment-workspace .ocean-game #question-node { max-height: 330px; padding: 14px; }
+    .assessment-workspace .ocean-game #mission-info h1 { display: none; }
+    .assessment-workspace .ocean-game #mission-info p { display: none; }
+    .assessment-workspace .ocean-game .ocean-eyebrow { margin: 0; }
+    .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; gap: 8px; }
+    .assessment-workspace .ocean-game #hook-hud > div:first-child { flex-direction: row; gap: 8px; }
+    .assessment-workspace .ocean-game #hook-hud > div:first-child > div { padding: 8px; }
+    .assessment-workspace .ocean-game #question-node { max-height: 300px; padding: 12px; scrollbar-width: thin; scroll-padding-block: 12px; }
+    .assessment-workspace .ocean-game #question-node > div:first-child { margin-bottom: 6px; }
+    .assessment-workspace .ocean-game #question-node h2 { margin-bottom: 10px; }
     .assessment-workspace .ocean-game .hook-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .assessment-workspace .ocean-game .hook-options > div { padding: 8px; gap: 7px; }
-    .assessment-workspace .ocean-game #fish-container { grid-column: 1; grid-row: 3; margin-top: 24px; }
-    .assessment-workspace .ocean-game .ocean-catch-status { left: 14px; right: 14px; }
-    .assessment-workspace .frog-interface { padding: 16px 14px; gap: 14px; }
-    .assessment-workspace .frog-question-card { padding: 14px; }
-    .assessment-workspace .frog-answer-zone { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 480px; }
-    .assessment-workspace .frog-target-visual { width: 116px; height: 110px; }
-    .assessment-workspace .frog-hud { flex-wrap: wrap; }
+    .assessment-workspace .ocean-game .hook-options > div { margin: 0; min-height: 44px; padding: 8px; gap: 6px; }
+    .assessment-workspace .ocean-game .hook-options > div > span:first-child { flex-basis: 24px; width: 24px; height: 24px; font-size: 14px; }
+    .assessment-workspace .ocean-game #fish-container { grid-column: 1; grid-row: 3; margin-top: 36px; min-height: 0; }
+    .assessment-workspace .ocean-game .answer-fish { width: 124px; height: 68px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 44px; bottom: 0; width: 28px; height: 24px; }
+    .assessment-workspace .ocean-game .ocean-catch-status { left: 12px; right: 12px; bottom: 8px; font-size: 12px; line-height: 1.4; }
+    .assessment-workspace .frog-pond-game { height: auto; min-height: 0; }
+    .assessment-workspace .frog-interface { min-height: 0; padding: 12px; gap: 10px; grid-template-rows: auto auto auto 130px auto; }
+    .assessment-workspace .frog-question-card { padding: 12px; }
+    .assessment-workspace .frog-answer-zone { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; max-width: 480px; }
+    .assessment-workspace .frog-target-visual { width: 82px; height: 64px; }
+    .assessment-workspace .frog-answer-copy { min-height: 48px; padding: 8px; gap: 6px; align-items: flex-start; }
+    .assessment-workspace .frog-hud { flex-wrap: wrap; gap: 6px; }
+    .assessment-workspace .frog-mission-name { font-size: 14px; gap: 4px; }
+    .assessment-workspace .frog-mission-name > span { font-size: 18px; }
+    .assessment-workspace .frog-hud-stats { flex-wrap: wrap; gap: 6px; }
+    .assessment-workspace .frog-stage { min-height: 0; }
+    .assessment-workspace .frog-character-anchor { width: 124px; height: 108px; }
+    .assessment-workspace .frog-finish-line { width: 86px; height: 104px; right: 4px; }
+    .assessment-workspace .frog-race-status { font-size: 12px; }
     .assessment-result-metrics { gap: 10px; }
     .assessment-result-metric { padding: 14px; }
     .assessment-result-value strong { font-size: 28px; }
@@ -269,9 +291,28 @@
     .assessment-result-detail { grid-template-columns: minmax(0, 1fr); gap: 20px; }
     .assessment-result-actions > * { width: 100%; }
 }
-@container (max-width: 480px) {
-    .assessment-workspace .ocean-game .hook-options { grid-template-columns: minmax(0, 1fr); }
-    .assessment-workspace .frog-answer-copy { flex-wrap: wrap; align-content: flex-start; }
-    .assessment-workspace .frog-answer-copy [data-frog-answer-label] { flex-basis: 100%; order: 1; }
-    .assessment-workspace .frog-answer-verdict { margin-left: auto; }
+/* Short landscape screens keep the question beside the water. */
+@media (max-height: 540px) and (min-width: 620px) and (max-width: 1023px) {
+    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: auto 332px; height: auto; min-height: 0; gap: 10px 16px; padding: 12px 12px 38px; }
+    .assessment-workspace .ocean-game #mission-info { grid-column: 1 / -1; grid-row: 1; }
+    .assessment-workspace .ocean-game #mission-info h1, .assessment-workspace .ocean-game #mission-info p { display: none; }
+    .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; }
+    .assessment-workspace .ocean-game #question-node { max-height: 258px; padding: 12px; }
+    .assessment-workspace .ocean-game .hook-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .assessment-workspace .ocean-game .hook-options > div { margin: 0; padding: 8px; }
+    .assessment-workspace .ocean-game #fish-container { grid-column: 2; grid-row: 2; margin-top: 36px; min-height: 0; }
+    .assessment-workspace .ocean-game .answer-fish { width: 124px; height: 68px; }
+    .assessment-workspace .ocean-game .ocean-catch-status { left: 48%; }
+    .assessment-workspace .frog-pond-game { height: auto; min-height: 0; }
+    .assessment-workspace .frog-interface { min-height: 0; padding: 12px; gap: 10px; grid-template-rows: auto auto auto 130px auto; }
+    .assessment-workspace .frog-answer-zone { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
+    .assessment-workspace .frog-target-visual { width: 82px; height: 64px; }
+    .assessment-workspace .frog-stage { min-height: 0; }
+    .assessment-workspace .frog-character-anchor { width: 124px; height: 108px; }
+    .assessment-workspace .frog-finish-line { width: 86px; height: 104px; }
+}
+
+@media (max-width: 600px), (max-height: 540px) and (min-width: 620px) and (max-width: 1023px) {
+    .assessment-workspace .ocean-game .answer-fish { width: 100px; height: 60px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 40px; bottom: 0; width: 28px; height: 24px; }
 }

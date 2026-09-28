@@ -13,7 +13,9 @@ class WorksheetResponses
         foreach ($page['reading']['sections'] as $sectionIndex => $section) {
             foreach ($section['items'] ?? [] as $index => $item) {
                 $label = is_array($item) ? ($item['label'] ?? ($section['start'] ?? 1) + $index) : ($section['start'] ?? 1) + $index;
-                $items[$sectionIndex.'-'.$index] = ['label' => (string) $label, 'fields' => self::fields($number, $page['part'], $sectionIndex, $index)];
+                $fields = self::fields($number, $page['part'], $sectionIndex, $index);
+                $items[$sectionIndex.'-'.$index] = ['label' => (string) $label, 'fields' => $fields,
+                    'game' => WorksheetGames::forItem(is_array($item) ? $item['text'] : $item, $section['instruction'] ?? '', $fields)];
             }
         }
         return $items;

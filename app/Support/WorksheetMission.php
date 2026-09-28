@@ -11,8 +11,9 @@ class WorksheetMission
 {
     public static function forStudent(User $student): array
     {
+        $worksheets = NumeracyWorksheets::gameEnabled();
         $section = $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
-        $assignments = Assessment::with('teacher')->whereNotNull('worksheet_number')->where('status', 'published')
+        $assignments = Assessment::with('teacher')->whereIn('worksheet_number', array_column($worksheets, 'number'))->where('status', 'published')
             ->where(fn ($query) => $query->whereIn('target_section', ['all', $section])->orWhereNull('target_section'))
             ->latest()->orderByDesc('id')->get();
         $progress = AssessmentProgress::where('user_id', $student->id)->whereNull('submission_id')
@@ -21,7 +22,7 @@ class WorksheetMission
         $attempts = WorksheetAttempt::with('assessment')->where('user_id', $student->id)->latest()->orderByDesc('id')->get()
             ->groupBy(fn ($attempt) => $attempt->assessment->worksheet_number);
 
-        $steps = collect(NumeracyWorksheets::all())->map(function ($worksheet) use ($assignments, $progress, $attempts) {
+        $steps = collect($worksheets)->map(function ($worksheet) use ($assignments, $progress, $attempts) {
             $number = $worksheet['number'];
             $attempt = $attempts->get($number)?->first();
             $available = $assignments->where('worksheet_number', $number);

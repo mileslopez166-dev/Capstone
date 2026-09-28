@@ -82,6 +82,10 @@
             ->values();
         $questionCount = $gameQuestions->count();
         $firstQuestion = $gameQuestions->first();
+        // The random attempt key keeps one school design stable across resumes and devices.
+        $fishSpecies = ['pufferfish', 'shark', 'yellowfin', 'jellyfish'][
+            hexdec(substr(hash('sha256', $progress->attempt_key ?? $assessment->id.':'.$student->id), 0, 2)) % 4
+        ];
         $missionTitle = str($assessment->title)->upper()->limit(28, '');
         $assessmentTutorConfig = [
             'available' => (bool) config('tutor.enabled') && filled(config('tutor.key')) && ! $assisted,
@@ -244,7 +248,7 @@
             <audio id="multiple-choice-hook-sound" src="{{ asset('audio/multiple-choice-hook-reel.mp3') }}" preload="auto"></audio>
             <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
             <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
-            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game ocean-game' : '' }}" id="mission-canvas" aria-label="Assessment activity">
+            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ (! $isOralReading && ! $isFlashcards) ? 'hook-game ocean-game' : '' }}" id="mission-canvas" data-fish-species="{{ $fishSpecies }}" aria-label="Assessment activity">
                 @if (! $isOralReading && ! $isFlashcards)
                     <div id="fishing-sea-scene" aria-hidden="true"></div>
                     <div class="ocean-catch-status" id="ocean-catch-status" role="status" aria-live="polite"></div>
@@ -302,6 +306,7 @@
                 <template id="answer-fish-template">
                     <button type="button" class="answer-fish">
                         <svg class="fish-visual" viewBox="0 0 132 80" aria-hidden="true">
+                            <g class="fish-design-yellowfin">
                             <g class="fish-tail"><path d="M38 40 6 15Q1 40 6 65Z" fill="var(--fish-dark)" stroke="var(--fish-outline)" stroke-width="2"/><path d="m9 25 22 15L9 55M7 40h24" fill="none" stroke="var(--fish-light)" stroke-width="2"/></g>
                             <path d="M48 24Q57 1 79 12L88 27M48 56Q63 79 82 64L87 52" fill="var(--fish-dark)" stroke="var(--fish-outline)" stroke-width="2"/>
                             <path d="M27 40C35 8 102 5 120 39 103 75 39 73 27 40Z" fill="var(--fish-color)" stroke="var(--fish-outline)" stroke-width="2"/>
@@ -311,6 +316,38 @@
                             <path d="M93 31q-6 10 0 20" fill="none" stroke="var(--fish-outline)" stroke-width="1.5" opacity=".5"/>
                             <circle cx="103" cy="31" r="7" fill="white"/><circle cx="105" cy="32" r="3.6" fill="#153440"/><circle cx="106" cy="30" r="1.3" fill="white"/>
                             <path d="m115 42 5-3" stroke="var(--fish-outline)" stroke-width="2" stroke-linecap="round"/>
+                            </g>
+                            <g class="fish-design-pufferfish">
+                                <path class="fish-tail" d="m48 35-26-16q-7 16 0 32Z" fill="#dea035" stroke="#93743b" stroke-width="2"/>
+                                <path d="m52 17-4-10 12 5m9-3 5-8 5 9m13 4 10-5-1 12m-52 8-10 5 11 5m2 12-5 9 12-3m35-4 10 5-2-12" fill="#ffe2a0" stroke="#b69650" stroke-width="1.5"/>
+                                <ellipse cx="75" cy="35" rx="31" ry="27" fill="#e6be52" stroke="#93743b" stroke-width="2"/>
+                                <path d="M47 41q28 12 57-1c-3 30-51 30-57 1Z" fill="#fff0bc"/>
+                                <g fill="#93743b"><circle cx="58" cy="26" r="3"/><circle cx="69" cy="17" r="3"/><circle cx="78" cy="22" r="2.5"/><circle cx="53" cy="36" r="2.5"/><circle cx="65" cy="34" r="2.5"/></g>
+                                <path class="fish-fin" d="M65 36q-22-10-16 10 8 3 16-10Z" fill="#dea035" stroke="#93743b"/>
+                                <ellipse cx="91" cy="27" rx="8" ry="9" fill="#fffbea"/><ellipse cx="94" cy="28" rx="4" ry="5" fill="#153440"/><circle cx="95" cy="25" r="1.7" fill="white"/>
+                                <ellipse cx="107" cy="37" rx="6" ry="4" fill="#fff0bc"/>
+                                <path d="m108 37 4 1" stroke="#93743b" stroke-width="2" stroke-linecap="round"/>
+                            </g>
+                            <g class="fish-design-shark">
+                                <path class="fish-tail" d="M35 38 9 10l6 26-7 21 24-13Z" fill="#587e98" stroke="#365e78" stroke-width="2"/>
+                                <path d="M54 27 67 3 77 28" fill="#587e98" stroke="#365e78" stroke-width="2"/>
+                                <path d="M29 39c19-24 64-22 93-4q4 5-1 7C87 60 51 59 29 39Z" fill="#7199b1" stroke="#365e78" stroke-width="2"/>
+                                <path d="M37 43q35 4 84-3c-29 21-62 16-84 3Z" fill="#e6f0ed"/>
+                                <path class="fish-fin" d="m73 39-18 24 1-23" fill="#587e98" stroke="#365e78" stroke-width="1.5"/>
+                                <path d="m79 29-2 10m-4-11-2 10m-4-10-2 10" fill="none" stroke="#365e78" stroke-width="1.7" stroke-linecap="round"/>
+                                <circle cx="99" cy="31" r="5" fill="#e6f0ed"/><circle cx="100" cy="31" r="3" fill="#153440"/><circle cx="101" cy="30" r="1" fill="white"/>
+                                <path d="M97 42q11 5 19-3" fill="none" stroke="#365e78" stroke-width="1.7" stroke-linecap="round"/>
+                            </g>
+                            <g class="fish-design-jellyfish">
+                                <g class="jelly-tentacles" fill="none" stroke-linecap="round">
+                                    <path d="M51 33q-9 8 1 14t-4 16m20-30q10 8-1 16t5 15m14-31q-9 8 0 14t-5 16" stroke="#bc77bb" stroke-width="2.5"/>
+                                    <path d="M59 34q10 8 0 17m17-17q-10 9 0 18" stroke="#f2b5df" stroke-width="5"/>
+                                </g>
+                                <path d="M39 33C39 1 95 1 96 33q-5 7-10 0-6 8-12 0-7 8-13 0-6 8-12 0-5 6-10 0Z" fill="#e6b4df" fill-opacity=".88" stroke="#ad75b9" stroke-width="1.5"/>
+                                <path d="M46 23q4-12 17-12" fill="none" stroke="#fff1fd" stroke-width="3" stroke-linecap="round"/>
+                                <ellipse cx="59" cy="25" rx="2.5" ry="3.5" fill="#493b66"/><ellipse cx="78" cy="25" rx="2.5" ry="3.5" fill="#493b66"/>
+                                <path d="M65 28q4 4 8 0" fill="none" stroke="#79538a" stroke-width="1.5" stroke-linecap="round"/>
+                            </g>
                         </svg>
                         <span class="fish-letter"></span>
                     </button>
@@ -1480,19 +1517,15 @@
 
                     function spawnFishSchool() {
                         container.replaceChildren();
-                        const colors = [
-                            ['#54d8c7', '#169f99', '#b6f6d9', '#176273'],
-                            ['#ffa38d', '#ed706e', '#ffdbba', '#9e464a'],
-                            ['#f5d05e', '#dea035', '#fff0a3', '#8c681f'],
-                            ['#82c5f6', '#4b92d0', '#d5f2ff', '#34668e'],
-                        ];
+                        const colors = ['#71aeb7', '#ecc347', '#d7eee2', '#365e78'];
                         fishSchool = questions[currentQuestionIndex].options.map((option, index) => {
                             const element = fishTemplate.content.firstElementChild.cloneNode(true);
                             element.dataset.letter = option.l;
+                            element.dataset.fishSpecies = canvas.dataset.fishSpecies;
                             element.setAttribute('aria-label', `${option.l}: ${option.t}`);
                             element.querySelector('.fish-letter').textContent = option.l;
                             ['color', 'dark', 'light', 'outline'].forEach((name, colorIndex) => {
-                                element.style.setProperty(`--fish-${name}`, colors[index % colors.length][colorIndex]);
+                                element.style.setProperty(`--fish-${name}`, colors[colorIndex]);
                             });
                             container.appendChild(element);
                             return { element, x: Math.max(0, container.clientWidth - element.offsetWidth - 16) * ((index * .29 + .1) % 1) + 8, direction: index % 2 ? -1 : 1, speed: 32 + index * 4 };

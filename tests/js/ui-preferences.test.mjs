@@ -47,12 +47,12 @@ async function loadPreferences(t, stored = null, blocked = false) {
     return { ...module, styles, events, audio, classes, setSystemDark: next => { prefersDark = next; }, stored: () => JSON.parse(value) };
 }
 
-test('existing preferences keep the larger default reading sizes', async t => {
+test('preferences without saved sizes use the compact assessment defaults', async t => {
     const { preferences, styles, audio } = await loadPreferences(t, JSON.stringify({ sound: false, motion: 'reduce' }));
-    assert.deepEqual(preferences.readingSizes, { story: 22, questions: 24, answers: 18 });
-    assert.equal(styles.get('--assessment-story-size'), '1.375rem');
-    assert.equal(styles.get('--assessment-questions-size'), '1.5rem');
-    assert.equal(styles.get('--assessment-answers-size'), '1.125rem');
+    assert.deepEqual(preferences.readingSizes, { story: 16, questions: 18, answers: 16 });
+    assert.equal(styles.get('--assessment-story-size'), '1rem');
+    assert.equal(styles.get('--assessment-questions-size'), '1.125rem');
+    assert.equal(styles.get('--assessment-answers-size'), '1rem');
     assert.equal(audio.muted, true);
     assert.equal(preferences.reducedMotion, true);
 });
@@ -67,7 +67,7 @@ test('sliders save independently without losing sound or motion preferences', as
     preferences.set('sound', true);
     assert.equal(stored().readingSizes.answers, 28);
     preferences.resetReadingSizes();
-    assert.deepEqual(stored(), { sound: true, motion: 'reduce', theme: 'system', readingSizes: { story: 22, questions: 24, answers: 18 } });
+    assert.deepEqual(stored(), { sound: true, motion: 'reduce', theme: 'system', readingSizes: { story: 16, questions: 18, answers: 16 } });
 });
 
 test('dark mode toggles the html class and saves with other preferences', async t => {
@@ -92,15 +92,15 @@ test('saved sizes restore and invalid values cannot create broken CSS', async t 
     preferences.setReadingSize('questions', -2);
     preferences.setReadingSize('answers', 'url(bad)');
     preferences.setReadingSize('__proto__', 20);
-    assert.deepEqual(preferences.readingSizes, { story: 22, questions: 24, answers: 18 });
-    assert.equal(styles.get('--assessment-story-size'), '1.375rem');
+    assert.deepEqual(preferences.readingSizes, { story: 16, questions: 18, answers: 16 });
+    assert.equal(styles.get('--assessment-story-size'), '1rem');
 });
 
 test('malformed or partial saved preferences fall back per field', async t => {
     const { preferences, events } = await loadPreferences(t, '{bad json');
-    assert.deepEqual(preferences.readingSizes, { story: 22, questions: 24, answers: 18 });
+    assert.deepEqual(preferences.readingSizes, { story: 16, questions: 18, answers: 16 });
     events.get('storage')({ key: 'pgaals-comfort', newValue: JSON.stringify({ readingSizes: { story: 28, questions: 33, answers: null } }) });
-    assert.deepEqual(preferences.readingSizes, { story: 28, questions: 24, answers: 18 });
+    assert.deepEqual(preferences.readingSizes, { story: 28, questions: 18, answers: 16 });
 });
 
 test('other-tab updates and removing preferences update all reading sizes', async t => {
@@ -113,7 +113,7 @@ test('other-tab updates and removing preferences update all reading sizes', asyn
     assert.equal(preferences.sound, false);
     assert.equal(preferences.darkMode, true);
     events.get('storage')({ key: 'pgaals-comfort', newValue: null });
-    assert.deepEqual(preferences.readingSizes, { story: 22, questions: 24, answers: 18 });
+    assert.deepEqual(preferences.readingSizes, { story: 16, questions: 18, answers: 16 });
 });
 
 test('size controls still work when browser storage is blocked', async t => {
@@ -121,5 +121,5 @@ test('size controls still work when browser storage is blocked', async t => {
     assert.doesNotThrow(() => preferences.setReadingSize('answers', 28));
     assert.equal(styles.get('--assessment-answers-size'), '1.75rem');
     assert.doesNotThrow(() => preferences.resetReadingSizes());
-    assert.equal(preferences.readingSizes.answers, 18);
+    assert.equal(preferences.readingSizes.answers, 16);
 });

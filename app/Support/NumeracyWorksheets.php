@@ -23,6 +23,17 @@ class NumeracyWorksheets
         return collect(self::all())->firstWhere('number', $number) ?? abort(404);
     }
 
+    public static function gameEnabled(): array
+    {
+        return array_values(array_filter(self::all(), fn ($worksheet) => collect($worksheet['pages'])
+            ->contains(fn ($page) => collect($page['responses'])->contains(fn ($item) => ! empty($item['game'])))));
+    }
+
+    public static function gameEnabledNumbers(): array
+    {
+        return array_column(self::gameEnabled(), 'number');
+    }
+
     public static function pageConfig(array $worksheet): array
     {
         return array_map(fn ($page) => [

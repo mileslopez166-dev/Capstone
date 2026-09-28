@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\NumeracyWorksheets;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,6 +56,12 @@ class Assessment extends Model
     public function worksheetAttempts(): HasMany
     {
         return $this->hasMany(WorksheetAttempt::class);
+    }
+
+    public function scopeInActivityCatalog(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $query) => $query->where('subject', '!=', 'numeracy')
+            ->orWhereIn('worksheet_number', NumeracyWorksheets::gameEnabledNumbers()));
     }
 
     public static function retryLimitOptions(): array

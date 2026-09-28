@@ -31,7 +31,7 @@ class WorksheetController extends Controller
     {
         abort_unless($request->user()->isTeacher(), 403);
         return view('worksheets.index', [
-            'worksheets' => NumeracyWorksheets::all(),
+            'worksheets' => NumeracyWorksheets::gameEnabled(),
         ]);
     }
 
@@ -48,12 +48,14 @@ class WorksheetController extends Controller
     public function create(Request $request, int $number)
     {
         abort_unless($request->user()->isTeacher(), 403);
+        abort_unless(in_array($number, NumeracyWorksheets::gameEnabledNumbers(), true), 404);
         return view('worksheets.create', ['worksheet' => NumeracyWorksheets::find($number)]);
     }
 
     public function store(Request $request, int $number)
     {
         abort_unless($request->user()->isTeacher(), 403);
+        abort_unless(in_array($number, NumeracyWorksheets::gameEnabledNumbers(), true), 404);
         $worksheet = NumeracyWorksheets::find($number);
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],

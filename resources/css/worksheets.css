@@ -51,14 +51,14 @@
 .worksheet-item-response { min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 16px; padding: 8px 0; margin-top: 12px; }
 .worksheet-response-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: 14px; font-weight: 700; }
 .worksheet-field-wide, .worksheet-choice-field, .worksheet-item-drawing { grid-column: 1 / -1; min-width: 0; }
-.worksheet-item-response input[type=text], .worksheet-item-response textarea, .worksheet-item-response select { width: 100%; min-width: 0; border: 1px solid #8aa9b8; border-radius: 6px; padding: 10px 12px; color: #26394a; background: #fff; font-size: var(--assessment-answers-size, 1.125rem); line-height: var(--worksheet-line-height, 1.7); font-weight: 400; }
+.worksheet-item-response input[type=text], .worksheet-item-response textarea, .worksheet-item-response select { width: 100%; min-width: 0; border: 1px solid #8aa9b8; border-radius: 6px; padding: 10px 12px; color: #26394a; background: #fff; font-size: var(--assessment-answers-size, 1rem); line-height: var(--worksheet-line-height, 1.7); font-weight: 400; }
 .worksheet-item-response textarea { resize: vertical; }
 .worksheet-item-response select { appearance: auto; padding-right: 30px; }
 .worksheet-item-response :disabled { opacity: 1; cursor: default; color: #435b69; background-color: #f4f8fa; }
 .worksheet-item-response :focus-visible { outline: 3px solid #bc7b12; outline-offset: 2px; }
 .worksheet-choice-field legend { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
 .worksheet-response-options { display: flex; flex-wrap: wrap; gap: 10px; }
-.worksheet-response-options label { display: flex; align-items: center; gap: 10px; min-height: 48px; min-width: 66px; padding: 8px 12px; border: 1px solid #acc3cf; border-radius: 6px; font-size: var(--assessment-answers-size, 1.125rem); cursor: pointer; }
+.worksheet-response-options label { display: flex; align-items: center; gap: 10px; min-height: 48px; min-width: 66px; padding: 8px 12px; border: 1px solid #acc3cf; border-radius: 6px; font-size: var(--assessment-answers-size, 1rem); cursor: pointer; }
 .worksheet-response-options label:has(:checked) { border-color: #288173; background: #e7f5ed; color: #195f4c; }
 .worksheet-response-options input { width: 21px; height: 21px; flex-shrink: 0; accent-color: #247f73; }
 .worksheet-item-drawing-tools { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 10px; }
@@ -70,7 +70,7 @@
 .worksheet-legacy-answers summary { cursor: pointer; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
 .worksheet-extra-notes summary { cursor: pointer; padding: 12px 0; margin-bottom: 0; }
 .worksheet-extra-notes summary:focus-visible { outline: 3px solid #bc7b12; outline-offset: 3px; }
-.worksheet-response textarea, .worksheet-response input { width: 100%; min-width: 0; border: 1px solid #9fb6c4; border-radius: 6px; padding: 12px; font-size: var(--assessment-answers-size, 1.125rem); font-weight: 400; line-height: var(--worksheet-line-height, 1.7); background: #fff; resize: vertical; color: #26394a; }
+.worksheet-response textarea, .worksheet-response input { width: 100%; min-width: 0; border: 1px solid #9fb6c4; border-radius: 6px; padding: 12px; font-size: var(--assessment-answers-size, 1rem); font-weight: 400; line-height: var(--worksheet-line-height, 1.7); background: #fff; resize: vertical; color: #26394a; }
 .worksheet-response input { font-size: 16px; }
 .worksheet-response textarea:read-only { background: #f5fafb; }
 .worksheet-reader [hidden], .worksheet-reader[data-step=read] [data-book-answer-only], .worksheet-reader[data-step=answer] [data-book-start-answer] { display: none !important; }
@@ -115,7 +115,7 @@
 .worksheet-settings-panel > input:last-child { margin-bottom: 0; }
 .worksheet-settings summary:focus-visible { outline: 3px solid #bc7b12; outline-offset: 3px; }
 .worksheet-reading { max-height: 72dvh; overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid #aebfca; }
-.worksheet-text-page { padding: 24px; font-size: var(--assessment-story-size, 1.375rem); line-height: var(--worksheet-line-height, 1.7); color: #26394a; overflow-wrap: anywhere; }
+.worksheet-text-page { padding: 24px; font-size: var(--assessment-story-size, 1rem); line-height: var(--worksheet-line-height, 1.7); color: #26394a; overflow-wrap: anywhere; }
 .worksheet-reader:not([data-initialized]) .worksheet-text-page:not(:first-child) { display: none; }
 .worksheet-text-page h3 { font-size: 1.15em; font-weight: 800; line-height: 1.35; margin-bottom: 22px; }
 .worksheet-text-page h4 { font-size: 1em; font-weight: 800; margin-bottom: 14px; }
@@ -155,7 +155,7 @@
 .worksheet-approval-title { display: flex; align-items: center; gap: 8px; color: #856122; font-weight: 700; }
 .worksheet-table-dialog [role=status] { margin-block: 16px; font-size: 14px; }
 .worksheet-table-scroll { overflow: auto; max-height: 65dvh; border: 1px solid #c2d4dc; }
-.worksheet-table-scroll table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--assessment-answers-size, 1.125rem); font-variant-numeric: tabular-nums; text-align: center; }
+.worksheet-table-scroll table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--assessment-answers-size, 1rem); font-variant-numeric: tabular-nums; text-align: center; }
 .worksheet-table-scroll caption { padding: 12px; font-size: 16px; font-weight: 700; text-align: left; }
 .worksheet-table-scroll th, .worksheet-table-scroll td { padding: 10px; min-width: 44px; border-right: 1px solid #d5e0e6; border-bottom: 1px solid #d5e0e6; }
 .worksheet-table-scroll thead th { position: sticky; top: 0; z-index: 2; background: #d9ede6; color: #175d4b; }

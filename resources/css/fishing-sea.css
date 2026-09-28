@@ -60,6 +60,13 @@
 .hook-game.ocean-game #fish-container::after { display: none; }
 .ocean-game #egg-wrapper { display: none; }
 .ocean-game .answer-fish { width: 150px; height: 88px; }
+.fish-design-yellowfin, .fish-design-pufferfish, .fish-design-shark, .fish-design-jellyfish { display: none; }
+.answer-fish[data-fish-species="yellowfin"] .fish-design-yellowfin,
+.answer-fish[data-fish-species="pufferfish"] .fish-design-pufferfish,
+.answer-fish[data-fish-species="shark"] .fish-design-shark,
+.answer-fish[data-fish-species="jellyfish"] .fish-design-jellyfish { display: inline; }
+.jelly-tentacles { transform-origin: 68px 33px; animation: jelly-drift 2s ease-in-out infinite alternate; }
+@keyframes jelly-drift { from { transform: skewX(-7deg) scaleY(.96); } to { transform: skewX(7deg) scaleY(1.04); } }
 .ocean-game .fish-letter { inset: auto auto 1px 52px; width: 30px; height: 26px; padding: 0; border: 1px solid #ffffff90; border-radius: 6px; background: #ecfff5f2; color: #184b46; font-size: 15px; text-shadow: none; box-shadow: 0 3px 8px #053e5330; }
 .ocean-game .answer-fish[data-letter="B"] .fish-letter { background: #ffebddf2; color: #874834; }
 .ocean-game .answer-fish[data-letter="C"] .fish-letter { background: #fff2bef2; color: #785617; }
@@ -101,4 +108,6 @@
 
 @media (prefers-reduced-motion: reduce) {
     .fishing-boat-fallback { transform: translateY(calc(var(--boat-pull, 0) * 12px)); }
+    .jelly-tentacles { animation: none; }
 }
+html[data-reduced-motion="true"] .jelly-tentacles { animation: none; }

@@ -105,7 +105,7 @@ class SidebarNavigationTest extends TestCase
             WorksheetAttempt::create(['assessment_id' => $assessment->id, 'user_id' => $student->id, 'progress_id' => $progress->id, 'pages' => [], 'total' => 10]);
         }
         $library = $this->actingAs($teacher)->get(route('worksheets.index'));
-        $library->assertSeeText('Worksheet 35')->assertDontSee('id="assigned"', false)->assertDontSee('id="review"', false);
+        $library->assertSeeText('Worksheet 4')->assertDontSeeText('Worksheet 35')->assertDontSee('id="assigned"', false)->assertDontSee('id="review"', false);
         $this->assertNavigation($library, 'teacher', route('assessments.create'), 'assessments');
         $reviews = $this->get(route('worksheets.reviews'));
         $reviews->assertViewHas('reviews', fn ($rows) => $rows->count() === 1 && $rows->first()->assessment->created_by === $teacher->id)

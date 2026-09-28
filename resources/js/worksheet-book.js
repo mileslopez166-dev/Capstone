@@ -1,4 +1,5 @@
 import { normalizeResponses, hasResponses, initWorksheetResponses } from './worksheet-responses.js';
+import { initNumeracyGames } from './numeracy-games.js';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const viewKey = 'pgaals-worksheet-view';
@@ -72,6 +73,13 @@ export function initWorksheetBook(root) {
         } catch {}
     }
     const responses = initWorksheetResponses(root, () => state, () => !readonly && !submitting && !submitted && state.step === 'answer', changed);
+    const games = initNumeracyGames(root, config.pages, () => state,
+        () => !readonly && !submitting && !submitted && !conflict && state.step === 'answer',
+        (key, fields) => {
+            const page = state.pages[state.page];
+            page.responses[key] = { ...page.responses[key], ...fields };
+            changed();
+        });
     const snapshot = () => ({ ...state, revision, attempt_key: config.attemptKey });
     function backup() {
         try { localStorage.setItem(config.storageKey, JSON.stringify(snapshot())); return true; } catch { return false; }
@@ -158,6 +166,7 @@ export function initWorksheetBook(root) {
         }
         syncModels();
         responses.sync();
+        games.sync();
     }
     function setTool(value) {
         mode = value;
@@ -176,11 +185,13 @@ export function initWorksheetBook(root) {
         draw();
         syncModels();
         responses.sync();
+        games.sync();
         if (focus) {
             const page = root.querySelector(`[data-book-reading-page="${state.page}"]`);
             const target = state.step === 'answer' ? page.querySelector('[data-response-field], [data-model-cell], [data-temperature-input]') || page : page;
             target?.focus({ preventScroll: true });
             target?.scrollIntoView({ block: 'nearest' });
+            games.focus?.();
         }
     }
     function syncModels() {
@@ -256,10 +267,10 @@ export function initWorksheetBook(root) {
         find('zoom-range').value = settings.zoom;
         find('setting-spacing').textContent = settings.spacing.toFixed(1);
         find('spacing').value = settings.spacing;
-        const size = window.PgaalsPreferences?.readingSizes.answers ?? 18;
+        const size = window.PgaalsPreferences?.readingSizes.answers ?? 16;
         find('answer-size').value = size;
         find('setting-size').textContent = `${size}px`;
-        const readingSize = window.PgaalsPreferences?.readingSizes.story ?? 22;
+        const readingSize = window.PgaalsPreferences?.readingSizes.story ?? 16;
         find('reading-size').value = readingSize;
         find('setting-reading').textContent = `${readingSize}px`;
         find('font-label').textContent = `${readingSize}px`;
@@ -279,13 +290,13 @@ export function initWorksheetBook(root) {
     find('answer-size').addEventListener('input', event => window.PgaalsPreferences?.setReadingSize('answers', event.target.value));
     find('reading-size').addEventListener('input', event => window.PgaalsPreferences?.setReadingSize('story', event.target.value));
     root.querySelectorAll('[data-book-font]').forEach(button => button.addEventListener('click', () => {
-        const size = window.PgaalsPreferences?.readingSizes.story ?? 22;
+        const size = window.PgaalsPreferences?.readingSizes.story ?? 16;
         window.PgaalsPreferences?.setReadingSize('story', clamp(size + (button.dataset.bookFont === '+' ? 2 : -2), 16, 32));
     }));
     find('reset-settings').addEventListener('click', () => {
         settings = worksheetSettings();
-        window.PgaalsPreferences?.setReadingSize('answers', 18);
-        window.PgaalsPreferences?.setReadingSize('story', 22);
+        window.PgaalsPreferences?.setReadingSize('answers', 16);
+        window.PgaalsPreferences?.setReadingSize('story', 16);
         applySettings(true);
     });
     const closeSettings = () => { find('settings').open = false; find('settings').querySelector('summary').focus(); };

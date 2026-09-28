@@ -2,7 +2,7 @@ const key = 'pgaals-comfort';
 const systemMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
 const media = new Set();
-const readingDefaults = { story: 22, questions: 24, answers: 18 };
+const readingDefaults = { story: 16, questions: 18, answers: 16 };
 const readingLimits = { story: [16, 32], questions: [18, 34], answers: [16, 28] };
 const normalizeReadingSizes = value => Object.fromEntries(Object.entries(readingDefaults).map(([name, fallback]) => {
     const size = value?.[name];

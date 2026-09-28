@@ -26,7 +26,7 @@ class WorksheetMissionTest extends TestCase
             'score' => $reviewed ? 8 : null, 'reviewed_at' => $reviewed ? now() : null]);
     }
 
-    public function test_numeracy_builder_has_no_quiz_type_and_students_get_a_locked_35_step_mission(): void
+    public function test_numeracy_builder_has_no_quiz_type_and_students_get_a_locked_four_step_mission(): void
     {
         $teacher = User::factory()->teacher()->create();
         $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()->assertSee('Create Numeracy Assessment')
@@ -34,9 +34,9 @@ class WorksheetMissionTest extends TestCase
         $this->get(route('assessments.create'))->assertSee('data-numeracy-mission', false)->assertDontSee('value="numeracy"', false);
         $this->get(route('worksheets.mission'))->assertForbidden();
         $student = User::factory()->create(['section' => 'Section A']);
-        $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('0 / 35 submitted')->assertSee('Worksheet 35');
+        $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('0 / 4 submitted')->assertSee('Worksheet 4')->assertDontSee('Worksheet 5');
         $mission = WorksheetMission::forStudent($student);
-        $this->assertSame(35, $mission['steps']->where('state', 'locked')->count());
+        $this->assertSame(4, $mission['steps']->where('state', 'locked')->count());
         $this->assertNull($mission['next']);
         $this->get(route('student.activities', ['subject' => 'numeracy']))->assertSee(route('worksheets.mission'), false);
         $this->get(route('student.dashboard'))->assertSee('Your Numeracy Mission');
@@ -56,23 +56,24 @@ class WorksheetMissionTest extends TestCase
         $this->assertSame(1, $mission['reviewed']);
         $this->assertSame(3, $mission['next']['number']);
         $this->assertSame('ready', $mission['steps']->firstWhere('number', 2)['state']);
-        foreach ([4, 5] as $number) $this->assertSame('locked', $mission['steps']->firstWhere('number', $number)['state']);
+        $this->assertSame('locked', $mission['steps']->firstWhere('number', 4)['state']);
+        $this->assertNull($mission['steps']->firstWhere('number', 5));
         $one->update(['status' => 'draft']);
         $this->assertSame(1, WorksheetMission::forStudent($student)['finished']);
         $this->assertSame(0, WorksheetMission::forStudent(User::factory()->create())['finished']);
         $this->actingAs($student)->get(route('worksheets.review', $done))->assertSee('Continue Mission');
     }
 
-    public function test_submitting_all_35_finishes_the_mission_without_inventing_grades(): void
+    public function test_submitting_all_four_game_worksheets_finishes_the_mission_without_inventing_grades(): void
     {
         $teacher = User::factory()->teacher()->create(); $student = User::factory()->create(['section' => 'Section A']);
-        foreach (range(1, 35) as $number) $this->submit($this->worksheet($teacher, $number), $student);
+        foreach (range(1, 4) as $number) $this->submit($this->worksheet($teacher, $number), $student);
         $mission = WorksheetMission::forStudent($student);
         $this->assertTrue($mission['complete']);
-        $this->assertSame(35, $mission['finished']);
+        $this->assertSame(4, $mission['finished']);
         $this->assertSame(0, $mission['reviewed']);
         $this->assertNull($mission['next']);
         $this->assertDatabaseCount('assessment_submissions', 0);
-        $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('Mission Complete!')->assertSee('35 / 35 submitted');
+        $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('Mission Complete!')->assertSee('4 / 4 submitted');
     }
 }

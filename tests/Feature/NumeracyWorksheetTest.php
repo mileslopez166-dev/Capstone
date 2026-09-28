@@ -41,15 +41,16 @@ class NumeracyWorksheetTest extends TestCase
     public function test_teacher_can_preview_and_assign_one_worksheet_without_changing_source(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()->assertSee('Worksheet 35')->assertDontSee('Worksheet 36');
-        $this->get(route('worksheets.create', 25))->assertOk()->assertSee('Part 3');
+        $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()->assertSee('Worksheet 4')->assertDontSee('Worksheet 5')->assertDontSee('Worksheet 35');
+        $this->get(route('worksheets.create', 1))->assertOk()->assertSee('Part 2');
+        $this->get(route('worksheets.create', 25))->assertNotFound();
         $this->get(route('worksheets.create', 36))->assertNotFound();
-        $this->post(route('worksheets.store', 25), ['title' => 'Polygon workbook', 'target_section' => 'section_a',
+        $this->post(route('worksheets.store', 1), ['title' => 'Divisibility workbook', 'target_section' => 'section_a',
             'worksheet_total' => 18, 'retry_limit' => 'unlimited', 'status' => 'draft', 'created_by' => 999])
             ->assertSessionHasNoErrors()->assertRedirect();
         $assignment = Assessment::firstOrFail();
         $this->assertSame($teacher->id, $assignment->created_by);
-        $this->assertSame(25, $assignment->worksheet_number);
+        $this->assertSame(1, $assignment->worksheet_number);
         $this->assertTrue($assignment->hasUnlimitedRetries());
         $this->get(route('assessments.show', $assignment))->assertOk()->assertSee('18 scored items');
         $this->assertDatabaseCount(AssessmentSubmission::class, 0);

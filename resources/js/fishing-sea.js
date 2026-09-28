@@ -22,6 +22,7 @@ export function initFishingSea(host) {
     host.appendChild(renderer.domElement);
 
     const arena = root.querySelector('#fish-container');
+    const species = root.dataset.fishSpecies || 'yellowfin';
     const hookHead = root.querySelector('#hook-head');
     const hookCable = root.querySelector('#hook-cable');
     const hookAssembly = root.querySelector('#hook-assembly');
@@ -184,10 +185,10 @@ export function initFishingSea(host) {
     const gillMaterial = standard('#245260', { transparent: true, opacity: .65 });
     const palettes = ['#71bfa8', '#df987c', '#e0c065', '#75b4d6'];
     const fishMaterials = palettes.map((color) => ({
-        body: standard('#ffffff', { map: scaleTexture(color), metalness: .36, roughness: .36 }),
         fin: standard(color, { side: THREE.DoubleSide, transparent: true, opacity: .82, roughness: .44 }),
-        ray: standard(color, { roughness: .45 }),
     }));
+    const yellowfinBody = standard('#ffffff', { map: scaleTexture('#71aeb7'), metalness: .36, roughness: .36 });
+    const yellowfinFin = standard('#ecc347', { side: THREE.DoubleSide, roughness: .44 });
     const finGeometry = (points) => {
         const shape = new THREE.Shape();
         points.forEach(([x, y], index) => index ? shape.lineTo(x, y) : shape.moveTo(x, y));
@@ -198,6 +199,23 @@ export function initFishingSea(host) {
     const dorsalGeometry = finGeometry([[-.64, .18], [-.47, .43], [-.05, .66], [.07, .34], [.37, .27]]);
     const lowerGeometry = finGeometry([[-.6, -.17], [-.48, -.43], [-.12, -.32], [.06, -.28]]);
     const sideGeometry = finGeometry([[.18, .04], [-.21, -.26], [-.39, -.2], [-.25, -.04]]);
+    const sharkDorsal = finGeometry([[-.42, .2], [-.24, .79], [.2, .24]]);
+    const sharkTail = finGeometry([[0, 0], [-.42, .57], [-.32, .06], [-.37, -.35], [-.06, -.11]]);
+    const sharkFin = finGeometry([[.2, .02], [-.26, -.48], [-.43, -.36], [-.14, .04]]);
+    const pufferFin = finGeometry([[0, 0], [-.3, .18], [-.38, .03], [-.28, -.16]]);
+    const spineGeometry = keepGeometry(new THREE.ConeGeometry(1, 1, 6));
+    const pufferSkin = standard('#e6be52', { roughness: .55 });
+    const pufferBelly = standard('#fff0bc', { roughness: .6 });
+    const pufferSpots = standard('#93743b', { roughness: .7 });
+    const pufferSpines = standard('#ffe2a0', { roughness: .65 });
+    const sharkSkin = standard('#7199b1', { metalness: .12, roughness: .42 });
+    const sharkBelly = standard('#e6f0ed', { roughness: .55 });
+    const sharkFinMaterial = standard('#587e98', { side: THREE.DoubleSide, roughness: .45 });
+    const jellyBellGeometry = keepGeometry(new THREE.SphereGeometry(1, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2));
+    const jellyRimGeometry = keepGeometry(new THREE.TorusGeometry(.57, .035, 8, 32));
+    const jellyBellMaterial = standard('#e6b4df', { transparent: true, opacity: .78, roughness: .25, side: THREE.DoubleSide, depthWrite: false });
+    const jellyTentacleMaterial = standard('#bc77bb', { roughness: .5 });
+    const jellyInnerMaterial = standard('#f2c6e7', { roughness: .4 });
 
     function createFish(index) {
         const object = new THREE.Group();
@@ -205,28 +223,100 @@ export function initFishingSea(host) {
         object.add(body);
         scene.add(object);
         const material = fishMaterials[index % 4];
-        mesh(body, bodyGeometry, material.body);
-        mesh(body, dorsalGeometry, material.fin);
-        mesh(body, lowerGeometry, material.fin);
         const tail = new THREE.Group();
-        tail.position.x = -.95;
-        body.add(tail);
-        mesh(tail, tailGeometry, material.fin);
-        for (let ray = -3; ray <= 3; ray++) {
-            tube(tail, [[0, 0, .006], [-.2, ray * .06, .015], [-.39, ray * .113, .006]], .005, material.ray);
-        }
         const fins = [];
-        for (const side of [-1, 1]) {
-            const fin = mesh(body, sideGeometry, material.fin, [.05, -.045, side * .185]);
-            fin.rotation.y = side * .36;
-            fins.push(fin);
-            mesh(body, sphere, eyeWhite, [.64, .112, side * .12], [.08, .081, .039]);
-            mesh(body, sphere, pupilMaterial, [.656, .117, side * .151], [.046, .052, .018]);
-            mesh(body, sphere, glintMaterial, [.667, .14, side * .166], [.014, .016, .009]);
-            tube(body, [[.42, .22, side * .14], [.35, .12, side * .174], [.36, -.1, side * .178], [.47, -.21, side * .12]], .009, gillMaterial);
+        const tendrils = [];
+        body.add(tail);
+
+        if (species === 'pufferfish') {
+            mesh(body, sphere, pufferSkin, [0, 0, 0], [.65, .52, .42]);
+            mesh(body, sphere, pufferBelly, [0, -.19, .015], [.59, .34, .405]);
+            tail.position.x = -.6;
+            mesh(tail, tailGeometry, material.fin, [0, 0, 0], [.7, .7, .7]);
+            // Distribute small spines over the round body, with a clear face at the front.
+            for (let spike = 0; spike < 30; spike++) {
+                const y = 1 - 2 * (spike + .5) / 30;
+                const angle = spike * Math.PI * (3 - Math.sqrt(5));
+                const radius = Math.sqrt(1 - y * y);
+                const direction = new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+                if (direction.x > .55 || direction.y < -.55) continue;
+                const spine = mesh(body, spineGeometry, pufferSpines,
+                    [direction.x * .69, direction.y * .56, direction.z * .46], [.035, .12, .035]);
+                spine.quaternion.setFromUnitVectors(up, direction);
+            }
+            for (const side of [-1, 1]) {
+                const fin = mesh(body, pufferFin, material.fin, [-.12, -.06, side * .4]);
+                fins.push(fin);
+                mesh(body, sphere, eyeWhite, [.43, .18, side * .32], [.115, .125, .065]);
+                mesh(body, sphere, pupilMaterial, [.465, .18, side * .37], [.056, .071, .025]);
+                mesh(body, sphere, glintMaterial, [.48, .212, side * .39], [.019, .022, .01]);
+                [[-.38, .18], [-.23, .34], [-.03, .3], [.12, .4], [-.44, -.04]].forEach(([x, y]) => {
+                    const z = .425 * Math.sqrt(Math.max(0, 1 - (x / .65) ** 2 - (y / .52) ** 2));
+                    mesh(body, sphere, pufferSpots, [x, y, side * z], [.042, .046, .02]);
+                });
+            }
+            mesh(body, sphere, pufferBelly, [.65, -.015, 0], [.16, .09, .11]);
+            tube(body, [[.75, -.035, -.075], [.81, -.04, 0], [.75, -.035, .075]], .012, gillMaterial);
+        } else if (species === 'shark') {
+            mesh(body, bodyGeometry, sharkSkin, [0, 0, 0], [1.05, .9, 1]);
+            mesh(body, sphere, sharkBelly, [.05, -.145, .005], [.73, .18, .17]);
+            mesh(body, sharkDorsal, sharkFinMaterial);
+            mesh(body, lowerGeometry, sharkFinMaterial, [0, 0, 0], [.8, .8, .8]);
+            tail.position.x = -.98;
+            mesh(tail, sharkTail, sharkFinMaterial);
+            for (const side of [-1, 1]) {
+                fins.push(mesh(body, sharkFin, sharkFinMaterial, [.02, -.055, side * .16]));
+                mesh(body, sphere, eyeWhite, [.64, .09, side * .135], [.07, .07, .035]);
+                mesh(body, sphere, pupilMaterial, [.657, .095, side * .162], [.043, .047, .018]);
+                mesh(body, sphere, glintMaterial, [.67, .114, side * .177], [.013, .014, .008]);
+                for (let gill = 0; gill < 3; gill++) {
+                    const x = .29 - gill * .095;
+                    tube(body, [[x, .12, side * .19], [x - .035, -.015, side * .203], [x, -.15, side * .16]], .01, gillMaterial);
+                }
+                tube(body, [[.53, -.09, side * .145], [.7, -.14, side * .12], [.83, -.075, side * .07]], .011, gillMaterial);
+            }
+        } else if (species === 'jellyfish') {
+            mesh(body, jellyBellGeometry, jellyBellMaterial, [0, .02, 0], [.58, .44, .4]);
+            const rim = mesh(body, jellyRimGeometry, jellyInnerMaterial, [0, .02, 0], [1, .7, 1]);
+            rim.rotation.x = Math.PI / 2;
+            mesh(body, sphere, jellyInnerMaterial, [0, .12, 0], [.22, .13, .18]);
+            for (let index = 0; index < 7; index++) {
+                const x = (index - 3) * .14;
+                const tendril = new THREE.Group();
+                tendril.position.set(x, .015, index % 2 ? -.12 : .13);
+                body.add(tendril);
+                tube(tendril, [[0, 0, 0], [.06, -.16, 0], [-.045, -.34, .025], [.03, -.52 - (index % 3) * .035, 0]],
+                    index % 2 ? .018 : .027, index % 2 ? jellyTentacleMaterial : jellyInnerMaterial);
+                tendrils.push(tendril);
+            }
+            for (const side of [-1, 1]) {
+                for (const x of [-.18, .18]) {
+                    mesh(body, sphere, pupilMaterial, [x, .17, side * .36], [.036, .047, .018]);
+                    mesh(body, sphere, glintMaterial, [x + .009, .19, side * .374], [.01, .012, .007]);
+                }
+                tube(body, [[-.065, .08, side * .395], [0, .045, side * .404], [.065, .08, side * .395]], .01, jellyTentacleMaterial);
+            }
+        } else {
+            mesh(body, bodyGeometry, yellowfinBody);
+            mesh(body, dorsalGeometry, yellowfinFin);
+            mesh(body, lowerGeometry, yellowfinFin);
+            tail.position.x = -.95;
+            mesh(tail, tailGeometry, yellowfinFin);
+            for (let ray = -3; ray <= 3; ray++) {
+                tube(tail, [[0, 0, .006], [-.2, ray * .06, .015], [-.39, ray * .113, .006]], .005, yellowfinFin);
+            }
+            for (const side of [-1, 1]) {
+                const fin = mesh(body, sideGeometry, yellowfinFin, [.05, -.045, side * .185]);
+                fin.rotation.y = side * .36;
+                fins.push(fin);
+                mesh(body, sphere, eyeWhite, [.64, .112, side * .12], [.08, .081, .039]);
+                mesh(body, sphere, pupilMaterial, [.656, .117, side * .151], [.046, .052, .018]);
+                mesh(body, sphere, glintMaterial, [.667, .14, side * .166], [.014, .016, .009]);
+                tube(body, [[.42, .22, side * .14], [.35, .12, side * .174], [.36, -.1, side * .178], [.47, -.21, side * .12]], .009, gillMaterial);
+            }
+            tube(body, [[.84, -.036, -.05], [.89, -.047, 0], [.84, -.036, .05]], .009, gillMaterial);
         }
-        tube(body, [[.84, -.036, -.05], [.89, -.047, 0], [.84, -.036, .05]], .009, gillMaterial);
-        return { object, body, tail, fins, direction: 1, index, button: null, caught: false, splash: false };
+        return { object, body, tail, fins, tendrils, direction: 1, index, button: null, caught: false, splash: false };
     }
     const targets = Array.from({ length: 4 }, (_, index) => createFish(index));
 
@@ -417,7 +507,7 @@ export function initFishingSea(host) {
         });
 
         targets.forEach((target) => {
-            const { button, object, body, tail, fins, index } = target;
+            const { button, object, body, tail, fins, tendrils, index } = target;
             if (!button?.isConnected) { object.visible = false; return; }
             object.visible = true;
             const box = button.getBoundingClientRect();
@@ -428,10 +518,13 @@ export function initFishingSea(host) {
             if (caught) {
                 const hookBox = hookHead.getBoundingClientRect();
                 const diving = button.dataset.result === 'incorrect';
-                object.rotation.z = (diving ? -1 : 1) * Math.PI / 2 + (motion.matches ? 0 : Math.sin(time * 24) * .07);
+                const jellyfish = species === 'jellyfish';
+                object.rotation.z = (jellyfish ? 0 : (diving ? -1 : 1) * Math.PI / 2) + (motion.matches ? 0 : Math.sin(time * 24) * .07);
+                const attachX = jellyfish ? 0 : .87;
+                const attachY = jellyfish ? .46 : 0;
                 object.position.set(
-                    hookBox.left + 38 - rootBox.left - width / 2 - Math.cos(object.rotation.z) * object.scale.x * .87,
-                    height / 2 - (hookBox.top + 21 - rootBox.top) - Math.sin(object.rotation.z) * object.scale.x * .87, 85,
+                    hookBox.left + 38 - rootBox.left - width / 2 - (Math.cos(object.rotation.z) * attachX - Math.sin(object.rotation.z) * attachY) * object.scale.x,
+                    height / 2 - (hookBox.top + 21 - rootBox.top) - (Math.sin(object.rotation.z) * attachX + Math.cos(object.rotation.z) * attachY) * object.scale.x, 85,
                 );
                 body.rotation.y = .18;
                 if (!diving && !target.splash && object.position.y > waterY - 50) {
@@ -446,7 +539,8 @@ export function initFishingSea(host) {
             }
             tail.rotation.y = Math.sin(time * (caught ? 26 : 10) + index) * .45;
             fins.forEach((fin, side) => { fin.rotation.y = (side ? 1 : -1) * (.42 + Math.sin(time * 7 + index) * .23); });
-            body.scale.y = 1 + (motion.matches ? 0 : Math.sin(time * 3 + index) * .015);
+            tendrils.forEach((tendril, strand) => { tendril.rotation.z = motion.matches ? 0 : Math.sin(time * 3 + strand * .8 + index) * .16; });
+            body.scale.y = 1 + (motion.matches ? 0 : Math.sin(time * 3 + index) * (species === 'jellyfish' ? .055 : .015));
             target.caught = caught;
         });
 

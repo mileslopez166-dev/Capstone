@@ -122,6 +122,7 @@ $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSect
 
     return Assessment::query()
         ->with('teacher')
+        ->inActivityCatalog()
         ->where('status', 'published')
         ->whereDoesntHave('worksheetAttempts', fn ($query) => $query->where('user_id', $student->id)->whereNull('reviewed_at'))
         ->where(function ($query) use ($targetSection): void {
@@ -681,5 +682,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+if (app()->environment('local')) {
+    Route::get('/test-error/{code}', function (string $code) {
+        abort((int) $code);
+    })->whereIn('code', ['403', '404', '419', '429', '500', '503'])->name('test-error.show');
+}
 
 require __DIR__.'/auth.php';

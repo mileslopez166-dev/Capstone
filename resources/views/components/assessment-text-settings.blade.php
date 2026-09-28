@@ -9,16 +9,16 @@
             <button type="button" class="ui-icon-button" @click="close()" aria-label="Close text settings" title="Close text settings"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
         </div>
         <label class="assessment-size-option" for="assessment-story-size">
-            <span>Story</span><output for="assessment-story-size" x-text="readingSizes.story + 'px'">22px</output>
-            <input id="assessment-story-size" type="range" min="16" max="32" step="2" value="22" :value="readingSizes.story" :aria-valuetext="readingSizes.story + ' pixels'" @input="setReadingSize('story', $event.target.value)">
+            <span>Story</span><output for="assessment-story-size" x-text="readingSizes.story + 'px'">16px</output>
+            <input id="assessment-story-size" type="range" min="16" max="32" step="2" value="16" :value="readingSizes.story" :aria-valuetext="readingSizes.story + ' pixels'" @input="setReadingSize('story', $event.target.value)">
         </label>
         <label class="assessment-size-option" for="assessment-questions-size">
-            <span>Questions</span><output for="assessment-questions-size" x-text="readingSizes.questions + 'px'">24px</output>
-            <input id="assessment-questions-size" type="range" min="18" max="34" step="2" value="24" :value="readingSizes.questions" :aria-valuetext="readingSizes.questions + ' pixels'" @input="setReadingSize('questions', $event.target.value)">
+            <span>Questions</span><output for="assessment-questions-size" x-text="readingSizes.questions + 'px'">18px</output>
+            <input id="assessment-questions-size" type="range" min="18" max="34" step="2" value="18" :value="readingSizes.questions" :aria-valuetext="readingSizes.questions + ' pixels'" @input="setReadingSize('questions', $event.target.value)">
         </label>
         <label class="assessment-size-option" for="assessment-answers-size">
-            <span>Answers</span><output for="assessment-answers-size" x-text="readingSizes.answers + 'px'">18px</output>
-            <input id="assessment-answers-size" type="range" min="16" max="28" step="2" value="18" :value="readingSizes.answers" :aria-valuetext="readingSizes.answers + ' pixels'" @input="setReadingSize('answers', $event.target.value)">
+            <span>Answers</span><output for="assessment-answers-size" x-text="readingSizes.answers + 'px'">16px</output>
+            <input id="assessment-answers-size" type="range" min="16" max="28" step="2" value="16" :value="readingSizes.answers" :aria-valuetext="readingSizes.answers + ' pixels'" @input="setReadingSize('answers', $event.target.value)">
         </label>
     </section>
 </div>

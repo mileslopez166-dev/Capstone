@@ -12,6 +12,7 @@ import '../css/ui-polish.css';
 import '../css/phil-iri.css';
 import './phil-iri';
 import '../css/worksheets.css';
+import '../css/numeracy-games.css';
 import '../css/sidebar-navigation.css';
 import '../css/app-footer.css';
 import '../css/teacher-photo.css';

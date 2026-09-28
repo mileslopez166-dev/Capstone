@@ -101,19 +101,21 @@ class StudentActivitiesTest extends TestCase
 
         Assessment::query()->create([
             'created_by' => $teacher->id,
-            'title' => 'Fractions Drill',
+            'title' => 'Divisibility Drill',
             'subject' => 'numeracy',
+            'worksheet_number' => 1,
+            'worksheet_total' => 20,
             'instructions' => 'Solve the number problems carefully.',
             'status' => 'published',
         ]);
 
         $this->actingAs($student)->get(route('student.activities'))->assertOk()
-            ->assertDontSeeText('Reading Fluency Check')->assertDontSeeText('Fractions Drill');
+            ->assertDontSeeText('Reading Fluency Check')->assertDontSeeText('Divisibility Drill');
         $this->get(route('student.activities', ['subject' => 'literacy']))->assertOk()
             ->assertSeeText('Pending assessments')->assertSeeText('Reading Fluency Check')
-            ->assertDontSeeText('Fractions Drill')->assertDontSeeText('Your Numeracy Mission');
+            ->assertDontSeeText('Divisibility Drill')->assertDontSeeText('Your Numeracy Mission');
         $this->get(route('student.activities', ['subject' => 'numeracy']))->assertOk()
-            ->assertSeeText('Fractions Drill')->assertDontSeeText('Reading Fluency Check')
+            ->assertSeeText('Divisibility Drill')->assertDontSeeText('Reading Fluency Check')
             ->assertSeeText('Your Numeracy Mission')->assertSee(route('worksheets.mission'), false);
     }
 
@@ -171,6 +173,7 @@ class StudentActivitiesTest extends TestCase
             Assessment::create([
                 'created_by' => $teacher->id, 'title' => ucfirst($subject).' activity',
                 'subject' => $subject, 'status' => 'published',
+                'worksheet_number' => $subject === 'numeracy' ? 1 : null,
             ]);
         }
         $this->actingAs(User::factory()->create())->get(route('student.activities', ['subject' => 'literacy']))->assertOk()
@@ -187,6 +190,7 @@ class StudentActivitiesTest extends TestCase
             foreach (['Available', 'Locked', 'Other section', 'Exhausted'] as $state) {
                 $assessment = Assessment::create(['created_by' => $teacher->id, 'title' => $state.' '.$subject,
                     'subject' => $subject, 'status' => $state === 'Locked' ? 'draft' : 'published',
+                    'worksheet_number' => $subject === 'numeracy' ? 1 : null,
                     'target_section' => $state === 'Other section' ? 'section_b' : 'section_a', 'retry_limit' => 0]);
                 if ($state === 'Exhausted') {
                     AssessmentSubmission::create(['assessment_id' => $assessment->id, 'user_id' => $student->id,

@@ -18,7 +18,7 @@
         </div>
         <div class="worksheet-tools" role="group" aria-label="Worksheet text size">
             <button type="button" class="worksheet-icon" data-book-font="-" title="Smaller worksheet text" aria-label="Smaller worksheet text"><span class="material-symbols-outlined" aria-hidden="true">text_decrease</span></button>
-            <output data-book-font-label>22px</output>
+            <output data-book-font-label>16px</output>
             <button type="button" class="worksheet-icon" data-book-font="+" title="Larger worksheet text" aria-label="Larger worksheet text"><span class="material-symbols-outlined" aria-hidden="true">text_increase</span></button>
         </div>
         @unless ($readonly)<button type="button" class="worksheet-icon" data-book-table-open title="Multiplication table - teacher approval" aria-label="Multiplication table - teacher approval"><span class="material-symbols-outlined" aria-hidden="true">grid_on</span></button>@endunless
@@ -26,14 +26,15 @@
             <summary class="worksheet-icon" title="Reading settings" aria-label="Reading settings"><span class="material-symbols-outlined" aria-hidden="true">tune</span></summary>
             <div class="worksheet-settings-panel">
                 <div><strong>Reading settings</strong><button class="worksheet-icon" type="button" data-book-reset-settings title="Reset reading settings" aria-label="Reset reading settings"><span class="material-symbols-outlined" aria-hidden="true">restart_alt</span></button><button class="worksheet-icon" type="button" data-book-close-settings title="Close reading settings" aria-label="Close reading settings"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
-                <label for="worksheet-reading-size">Worksheet text <output data-book-setting-reading>22px</output></label><input id="worksheet-reading-size" data-book-reading-size type="range" min="16" max="32" step="2" value="22">
-                <label for="worksheet-answer-size">Answer text <output data-book-setting-size>18px</output></label><input id="worksheet-answer-size" data-book-answer-size type="range" min="16" max="28" step="2" value="18">
+                <label for="worksheet-reading-size">Worksheet text <output data-book-setting-reading>16px</output></label><input id="worksheet-reading-size" data-book-reading-size type="range" min="16" max="32" step="2" value="16">
+                <label for="worksheet-answer-size">Answer text <output data-book-setting-size>16px</output></label><input id="worksheet-answer-size" data-book-answer-size type="range" min="16" max="28" step="2" value="16">
                 <label for="worksheet-spacing">Line spacing <output data-book-setting-spacing>1.7</output></label><input id="worksheet-spacing" data-book-spacing type="range" min="1.4" max="2" step="0.1" value="1.7">
                 <label for="worksheet-zoom">Original page zoom <output data-book-setting-zoom>100%</output></label><input id="worksheet-zoom" data-book-zoom-range type="range" min="100" max="300" step="25" value="100">
             </div>
         </details>
     </div>
     <div class="worksheet-reader-progress"><p class="worksheet-save-state" data-book-status role="status" aria-live="polite">{{ $readonly ? 'Submitted work' : 'Ready when you are' }}</p><span data-book-completion></span><progress data-book-progress max="{{ count($worksheet['pages']) }}" value="0" aria-label="Parts answered"></progress></div>
+    @unless ($readonly)<x-numeracy-game />@endunless
     <div class="worksheet-workspace">
         <div class="worksheet-reference">
             <h3 class="worksheet-area-title"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Worksheet <span data-book-page-label>Part 1</span></h3>

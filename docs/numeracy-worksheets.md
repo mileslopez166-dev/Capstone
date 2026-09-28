@@ -1,7 +1,9 @@
 # Numeracy Worksheet Books
 
-The supplied ARAL Grade 6 PDF is available as 35 separately assignable worksheets
-(71 exercise pages). The apparent Worksheet 36 is a back cover with a hidden heading,
+The supplied ARAL Grade 6 PDF contains 35 worksheets (71 exercise pages). Only the
+game-connected Worksheets 1-4 are offered for new assignments and the student mission.
+The full source catalog is retained for existing attempts and teacher review.
+The apparent Worksheet 36 is a back cover with a hidden heading,
 not an exercise, and is excluded. Original page images, diagrams and source attribution
 are retained under `resources/worksheets/aral-g6`, served through authenticated routes.
 
@@ -51,12 +53,29 @@ not correctness or a claim that every item was answered. Teachers still grade om
 Reading settings include worksheet text (16-32px), answer text (16-28px), line spacing
 (1.4-2.0), and optional original-page zoom (100-300%). Worksheet and answer text share
 the existing story and answer size preferences; zoom and spacing use
-`pgaals-worksheet-view` device preferences. Reset restores worksheet/story text to 22px,
-answers to 18px, spacing to 1.7, and original zoom to 100%, without changing sound,
+`pgaals-worksheet-view` device preferences. Reset restores worksheet/story text to 16px,
+answers to 16px, spacing to 1.7, and original zoom to 100%, without changing sound,
 motion, or question text size. Settings are available during review too.
 Legacy rows are limited to 100 per part with a 40-character item label and 2,000-character answer.
 Empty rows or item labels alone do not count as answered parts. These are teacher-reviewed
 responses, not generated questions or automatic marking.
+
+## Divisibility Games
+
+In Worksheets 1-4, the Answer step offers a **Games / Worksheet** switch. Compatible
+questions use the original numbers and answer fields, not a separate question bank:
+
+- **Rocket Launch**: Yes/No divisibility (Worksheets 3 and 4); Worksheet 3 keeps its justification field.
+- **Number Puzzle**: missing digits (Worksheet 1, Part 2), including the smallest-digit requirement and no leading zero.
+- **Divisibility Archer**: select all applicable divisors (Worksheets 1, 2 and 4).
+
+Each selection autosaves through the existing worksheet endpoint, including device backup.
+Students can return to the normal worksheet, resume from unanswered items, and change
+answers until submission. Games offer hints, correctness feedback, touch/keyboard controls,
+text-size preferences, dark mode and reduced motion. The game tally counts current correct
+responses once, not repeated clicks. It is practice feedback only: written explanations and
+the final worksheet score are still teacher-reviewed. Submitted work stays read-only, and
+no game-specific score or answer key is accepted by the server.
 
 Fraction grids can be shaded in Answer mode. Shaded cells autosave and remain visible
 in teacher review. Grid identifiers and cell bounds are validated against the assigned
@@ -72,12 +91,17 @@ separate timestamp on `assessment_progress`, not a client-editable flag. The 1-1
 is only returned after approval, with no-store response headers. Approval survives
 resuming that attempt; every retake starts locked again. Use HTTPS outside local development.
 
-Students open **Your Numeracy Mission** from their dashboard or **Activities > Numeracy** to see all 35
+Students open **Your Numeracy Mission** from their dashboard or **Activities > Numeracy** to see the four game-connected
 worksheet steps. Unassigned worksheets stay locked. The next action resumes saved work
 first, then the lowest-numbered available worksheet. Mission completion counts distinct
 worksheet numbers submitted, not retakes or points. Students can continue while waiting
-for review, and completing all 35 submissions shows Mission Complete. Scores still require
+for review, and completing all four submissions shows Mission Complete. Scores still require
 teacher review. Teachers retain control of which worksheets are published to each section.
+
+`NumeracyWorksheets::gameEnabled()` derives the current catalog from game metadata.
+The creation endpoints reject worksheets outside this catalog. Available student queues,
+counts and assessment search use the same restriction. Older assignments, saved progress,
+submitted work and grading remain intact; they are not deleted or changed by this filter.
 
 There is no answer key in the supplied PDF. This implementation does not pretend to
 automatically grade drawings or free-text responses. Pending work earns no points and

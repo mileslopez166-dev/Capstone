@@ -1,6 +1,11 @@
 <x-app-layout>
     @php
         $student = Auth::user();
+        $worksheetGameNames = $subject === 'numeracy'
+            ? collect(\App\Support\NumeracyWorksheets::gameEnabled())->mapWithKeys(fn ($worksheet) => [
+                $worksheet['number'] => \App\Support\WorksheetGames::namesForWorksheet($worksheet),
+            ])
+            : collect();
     @endphp
 
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface selection:bg-primary-container/30">
@@ -82,6 +87,7 @@
                                         $targetLabel = str($assessment->target_section ?? 'all')->replace('_', ' ')->title();
                                         $quizLabel = str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title();
                                         $focusLabel = collect($assessment->focus_areas ?? [])->join(', ');
+                                        $gameNames = $worksheetGameNames->get($assessment->worksheet_number, []);
                                     @endphp
 
                                     <a class="group block overflow-hidden rounded-2xl border border-outline-variant/15 bg-white text-left shadow-[0_20px_55px_rgba(0,94,159,0.08)] transition-all hover:-translate-y-1 hover:border-primary-container hover:shadow-[0_24px_70px_rgba(0,94,159,0.14)]" href="{{ route('student.assessments.show', $assessment) }}">
@@ -139,6 +145,15 @@
                                                             <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Material</dt>
                                                             <dd class="mt-1 font-bold text-on-surface">{{ $assetPath ? strtoupper($assetExtension) : 'Activity Screen' }}</dd>
                                                         </div>
+                                                        @if ($gameNames)
+                                                            <div class="min-w-0 border-t border-outline-variant/15 pt-3 sm:col-span-3" data-assessment-games>
+                                                                <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ count($gameNames) === 1 ? 'Game' : 'Games' }}</dt>
+                                                                <dd class="mt-1 flex items-start gap-2 font-bold text-on-surface">
+                                                                    <span class="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">sports_esports</span>
+                                                                    <span class="min-w-0 break-words" data-assessment-game-names>{{ implode(', ', $gameNames) }}</span>
+                                                                </dd>
+                                                            </div>
+                                                        @endif
                                                     </dl>
                                                 </div>
 

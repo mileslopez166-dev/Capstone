@@ -32,6 +32,7 @@ class SearchController extends Controller
                 ->pluck('remaining_tries', 'assessment_id');
 
             $assessments = Assessment::query()
+                ->inActivityCatalog()
                 ->where('status', 'published')
                 ->where(function ($builder) use ($targetSection): void {
                     $builder->where('target_section', 'all')

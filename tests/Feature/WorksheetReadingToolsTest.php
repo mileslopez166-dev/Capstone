@@ -25,7 +25,8 @@ class WorksheetReadingToolsTest extends TestCase
         $this->actingAs($teacher);
         $parts = 0;
         foreach (NumeracyWorksheets::all() as $worksheet) {
-            $this->get(route('worksheets.create', $worksheet['number']))->assertOk()->assertSee('worksheet-text-page', false);
+            $assignment = $this->assignment($teacher, $worksheet['number']);
+            $this->get(route('assessments.show', $assignment))->assertOk()->assertSee('worksheet-text-page', false);
             foreach ($worksheet['pages'] as $page) {
                 $parts++;
                 $this->assertNotEmpty($page['reading']['title']);
