@@ -29,16 +29,17 @@
 }
 
 @layer base {
+    /* Clip sideways overflow without creating a scroll container for sticky headers. */
     html {
         min-width: 320px;
-        overflow-x: hidden;
+        overflow-x: clip;
         text-size-adjust: 100%;
     }
 
     body {
         @apply bg-background font-body text-on-surface antialiased;
         min-height: 100dvh;
-        overflow-x: hidden;
+        overflow-x: clip;
     }
 
     *, ::before, ::after {
