@@ -833,7 +833,7 @@
                         }
                         persistProgress(true);
                         stopGameMusic();
-                        fadeHookReelSound();
+                        stopHookReelSound();
                     }
 
                     function formatElapsedTime(totalSeconds) {
@@ -882,27 +882,40 @@
 
                     function playHookReelSound() {
                         if (!hookReelSound || !isFishing) return;
+                        stopHookReelSound();
+                        hookReelSound.volume = 0.75;
+                        hookReelSound.play().catch(stopHookReelSound);
+                    }
+
+                    function stopHookReelSound() {
                         clearInterval(hookReelFadeTimer);
+                        hookReelFadeTimer = null;
+                        if (!hookReelSound) return;
                         hookReelSound.pause();
                         hookReelSound.currentTime = 0;
                         hookReelSound.volume = 0.75;
-                        hookReelSound.play().catch(() => {});
                     }
 
                     function fadeHookReelSound() {
-                        if (!hookReelSound || hookReelSound.paused) return;
+                        if (!hookReelSound) return;
                         clearInterval(hookReelFadeTimer);
+                        hookReelFadeTimer = null;
+                        if (hookReelSound.paused) {
+                            stopHookReelSound();
+                            return;
+                        }
+                        const startedAt = performance.now();
+                        const startingVolume = hookReelSound.volume;
+                        const duration = 350;
                         hookReelFadeTimer = setInterval(() => {
-                            const nextVolume = Math.max(0, hookReelSound.volume - 0.08);
-                            hookReelSound.volume = nextVolume;
-
-                            if (nextVolume <= 0) {
-                                clearInterval(hookReelFadeTimer);
-                                hookReelSound.pause();
-                                hookReelSound.currentTime = 0;
-                                hookReelSound.volume = 0.75;
+                            if (document.hidden || hookReelSound.paused) {
+                                stopHookReelSound();
+                                return;
                             }
-                        }, 35);
+                            const progress = Math.min((performance.now() - startedAt) / duration, 1);
+                            hookReelSound.volume = startingVolume * (1 - progress);
+                            if (progress >= 1) stopHookReelSound();
+                        }, 30);
                     }
 
                     function playFrogWrongAnswerSound() {
@@ -1720,6 +1733,7 @@
                     markModeButtons.forEach(button => button.addEventListener('click', () => persistProgress()));
                     progressScrollers.forEach(scroller => scroller.addEventListener('scroll', () => persistProgress(), { passive: true }));
                     function handleReadingPageHide(event) {
+                        stopHookReelSound();
                         if (event.persisted) {
                             if (timerStatus === 'running') {
                                 updateReadingTimer();
@@ -1741,6 +1755,7 @@
                     });
                     document.addEventListener('visibilitychange', () => {
                         if (document.hidden) {
+                            stopHookReelSound();
                             if (timerStatus === 'running') {
                                 updateReadingTimer();
                                 persistProgress(true);
