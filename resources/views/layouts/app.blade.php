@@ -30,10 +30,12 @@
         $campusRole = auth()->user()?->role;
         $hasCampusTheme = $campusRole === 'student';
         $workspaceTheme = in_array($campusRole, ['teacher', 'admin'], true) ? 'staff-theme '.$campusRole.'-theme' : '';
+        $routeName = request()->route()?->getName();
+        $isAssessmentSession = $routeName === 'student.assessments.show' || $routeName === 'teacher.assessments.take';
     @endphp
     <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }}">
         {{ $slot }}
-        @if (in_array($campusRole, ['teacher', 'student'], true))
+        @if (in_array($campusRole, ['teacher', 'student'], true) && ! $isAssessmentSession)
             <x-app-footer />
         @endif
     </body>

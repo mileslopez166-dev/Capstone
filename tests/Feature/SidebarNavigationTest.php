@@ -134,7 +134,12 @@ class SidebarNavigationTest extends TestCase
             $this->assertNavigation($this->get(route($page, $params)), 'student', route($target, $targetParams), $group);
         }
         $assessment = $this->assessment(User::factory()->teacher()->create());
-        $this->assertNavigation($this->get(route('student.assessments.show', $assessment)), 'student', route('student.activities', ['subject' => 'literacy']), 'activities');
+        $assessmentResponse = $this->get(route('student.assessments.show', $assessment));
+        $assessmentResponse->assertOk()
+            ->assertSee('assessment-focus-mode', false)
+            ->assertDontSee('data-role-navigation="student"', false)
+            ->assertDontSee('campus-student-topbar', false)
+            ->assertDontSee('campus-bottom-nav', false);
     }
 
     public function test_new_teacher_pages_reject_students_admins_and_guests(): void

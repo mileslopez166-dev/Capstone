@@ -316,3 +316,52 @@
     .assessment-workspace .ocean-game .answer-fish { width: 100px; height: 60px; }
     .assessment-workspace .ocean-game .fish-letter { left: 40px; bottom: 0; width: 28px; height: 24px; }
 }
+/* A live student attempt is a focused workspace, without the dashboard shell. */
+.assessment-focus-mode {
+    min-height: 100dvh;
+}
+.assessment-focus-mode .assessment-workspace {
+    min-height: 100dvh;
+    margin-left: 0 !important;
+    padding: max(12px, env(safe-area-inset-top)) clamp(12px, 2.5vw, 28px) max(16px, env(safe-area-inset-bottom));
+}
+.assessment-focus-mode .assessment-heading {
+    max-width: 1500px;
+    margin-inline: auto;
+}
+.assessment-focus-mode .mission-canvas.app-game-screen:not(.assessment-reading) {
+    height: calc(100dvh - 96px);
+    min-height: 0;
+}
+.assessment-focus-mode .assessment-reading {
+    min-height: 0;
+}
+
+@media (max-width: 767px) {
+    .assessment-focus-mode .assessment-workspace {
+        padding: max(8px, env(safe-area-inset-top)) 8px max(12px, env(safe-area-inset-bottom));
+    }
+    .assessment-focus-mode .assessment-heading {
+        grid-template-columns: 38px minmax(0, 1fr) 38px;
+        gap: 8px;
+        padding-bottom: 10px;
+    }
+    .assessment-focus-mode .assessment-back {
+        flex-basis: 38px;
+        height: 38px;
+    }
+    .assessment-focus-mode .assessment-heading h1 {
+        font-size: 18px;
+    }
+    .assessment-focus-mode .assessment-heading-copy > p {
+        font-size: 9px;
+    }
+    .assessment-focus-mode .mission-canvas.app-game-screen:not(.assessment-reading) {
+        height: calc(100dvh - 82px);
+    }
+    .assessment-focus-mode .hook-game.ocean-game,
+    .assessment-focus-mode .frog-pond-game,
+    .assessment-focus-mode .treasure-game {
+        min-height: 0;
+    }
+}

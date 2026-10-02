@@ -171,7 +171,7 @@
         .result-pattern { background-image: radial-gradient(circle at 10px 10px, rgba(68, 165, 255, 0.45) 1px, transparent 1px), radial-gradient(circle at 30px 30px, rgba(145, 247, 142, 0.45) 1px, transparent 1px); background-size: 40px 40px; background-position: 0 0, 20px 20px; opacity: 0.2; }
     </style>
 
-    <div class="student-assessment-page min-h-screen font-body text-on-surface" x-data="{ mobileMenuOpen: false }">
+    <div class="student-assessment-page {{ $assisted ? '' : 'assessment-focus-mode' }} min-h-screen font-body text-on-surface" x-data="{ mobileMenuOpen: false }">
         @if ($assisted)
             @php
                 $teacherName = auth()->user()->name;
@@ -182,11 +182,10 @@
             </div>
             <button x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-label="Close menu"></button>
             <div class="lg:ml-72"><x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials"><x-slot:mobileTrigger><button class="lg:hidden" @click="mobileMenuOpen = true" aria-label="Open menu"><span class="material-symbols-outlined">menu</span></button></x-slot:mobileTrigger></x-teacher-topbar></div>
-        @else
-            <x-student-nav active="activities" />
+
         @endif
 
-        <main class="assessment-workspace lg:ml-72" aria-labelledby="assessment-title">
+        <main class="assessment-workspace {{ $assisted ? 'lg:ml-72' : '' }}" aria-labelledby="assessment-title">
             @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
             @if ($assisted)
                 <x-teacher-answer-key :questions="$manualQuestions->all()" :context="$progress->selection_context ?? []" />
@@ -211,12 +210,12 @@
                             <div class="assessment-helper-heading">
                                 <div>
                                     <strong>Ask Tutor</strong>
-                                    <p>For words or directions you do not understand.</p>
+                                    <p>For the story, questions, words, or directions you do not understand.</p>
                                 </div>
                                 <button type="button" @click="open = false" aria-label="Close assessment tutor"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
                             </div>
                             <div class="assessment-helper-messages" x-ref="messages" role="log" aria-live="polite">
-                                <p class="assessment-helper-empty" x-show="turns.length === 0">Ask about a word, sentence, or instruction. I can explain, but I will not answer the test for you.</p>
+                                <p class="assessment-helper-empty" x-show="turns.length === 0">Ask about the story, a question, a word, or an instruction. I can guide you, but I will not answer the test for you.</p>
                                 <template x-for="turn in turns" :key="turn.id">
                                     <article class="assessment-helper-turn">
                                         <p><strong>You:</strong> <span x-text="turn.question"></span></p>
@@ -228,7 +227,7 @@
                             <p class="assessment-helper-error" role="alert" x-show="error" x-text="error" x-cloak></p>
                             <form class="assessment-helper-form" @submit.prevent="send()" :aria-busy="busy">
                                 <label for="assessment-helper-question">Question</label>
-                                <textarea id="assessment-helper-question" x-ref="question" x-model="draft" :disabled="!available || busy" maxlength="1500" rows="2" placeholder="What word or direction is confusing?" required></textarea>
+                                <textarea id="assessment-helper-question" x-ref="question" x-model="draft" :disabled="!available || busy" maxlength="1500" rows="2" placeholder="What part of the story or question is confusing?" required></textarea>
                                 <div>
                                     <small x-text="draft.length + ' / 1500'"></small>
                                     <button type="submit" :disabled="!available || busy || !draft.trim()">
@@ -257,6 +256,7 @@
                 @if ($isFishing)
                     <div id="fishing-sea-scene" aria-hidden="true"></div>
                     <div class="ocean-catch-status" id="ocean-catch-status" role="status" aria-live="polite"></div>
+
                 @endif
                 <div id="hook-hud" class="pointer-events-none absolute left-3 right-3 top-3 z-30 flex max-w-sm flex-col gap-3 sm:left-5 sm:right-auto sm:top-5 sm:w-72 {{ ! $isFishing ? 'hidden' : '' }}">
                     <div class="flex flex-col gap-4">
@@ -537,6 +537,7 @@
                     const container = document.getElementById('fish-container');
                     const fishTemplate = document.getElementById('answer-fish-template');
                     const catchStatus = document.getElementById('ocean-catch-status');
+
                     const reducedMotion = () => window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const scoreEl = document.getElementById('score');
                     const progressEl = document.getElementById('progress-bar');
@@ -780,7 +781,8 @@
                         } else if (savedPhase) {
                             missionStarted = savedPhase !== 'reading';
                         }
-                        readingElapsedSeconds = Math.max(0, Number(state.reading_seconds || 0));
+                        const savedReadingSeconds = Number(state.reading_seconds || 0);
+                        readingElapsedSeconds = Number.isFinite(savedReadingSeconds) ? Math.max(0, savedReadingSeconds) : 0;
                         timerStatus = state.timer_status === 'running' ? 'paused' : (state.timer_status || 'idle');
                         storyReaderText?.querySelectorAll('.story-sentence').forEach((sentence, index) => setSentenceMark(sentence, Number(state.sentence_marks?.[index] || 0)));
                         storyReaderText?.querySelectorAll('.story-word').forEach((word, index) => setWordMark(word, Number(state.word_marks?.[index] || 0)));
@@ -812,8 +814,14 @@
                         }
                     }
 
+                    function resumeReadingTicker() {
+                        if (!isSilentReading || timerStatus !== 'running' || readingTimer || missionFinished) return;
+                        updateReadingTimer();
+                        readingTimer = window.setInterval(updateReadingTimer, 1000);
+                    }
+
                     function pauseAndSave() {
-                        if (readingTimer) {
+                        if (readingTimer || timerStatus === 'running') {
                             updateReadingTimer();
                             clearInterval(readingTimer);
                             readingTimer = null;
@@ -914,28 +922,33 @@
                     }
 
                     function updateReadingTimer() {
-                        if (!readingStartedAt || !readingTimerDisplay) return;
-                        readingElapsedSeconds = Math.floor((Date.now() - readingStartedAt) / 1000);
-                        readingTimerDisplay.innerText = formatElapsedTime(readingElapsedSeconds);
+                        if (readingStartedAt === null || !Number.isFinite(readingStartedAt) || !readingTimerDisplay) return;
+                        readingElapsedSeconds = Math.max(0, Math.floor((Date.now() - readingStartedAt) / 1000));
+                        readingTimerDisplay.textContent = formatElapsedTime(readingElapsedSeconds);
                     }
 
                     function startReadingTimer() {
-                        if (readingTimer || timerStatus === 'finished') return;
+                        if (timerStatus === 'finished') return;
+                        if (timerStatus === 'running') {
+                            resumeReadingTicker();
+                            return;
+                        }
+
                         readingStartedAt = Date.now() - readingElapsedSeconds * 1000;
                         timerStatus = 'running';
                         updateReadingTimer();
-                        readingTimer = setInterval(updateReadingTimer, 1000);
+                        resumeReadingTicker();
                         startTimerButton.disabled = true;
                         startTimerButton.classList.add('opacity-60');
                         endTimerButton.disabled = false;
                         endTimerButton.classList.remove('opacity-60');
-                        readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
+                        readingTimerStatus.textContent = 'Timer is running. Click End Timer when the reader is done.';
                         persistProgress();
                     }
 
                     function endReadingTimer() {
-                        if (!readingTimer && timerStatus !== 'paused') return;
-                        if (readingTimer) updateReadingTimer();
+                        if (timerStatus !== 'running' && timerStatus !== 'paused') return;
+                        updateReadingTimer();
                         clearInterval(readingTimer);
                         readingTimer = null;
                         timerStatus = 'finished';
@@ -1339,6 +1352,7 @@
                     }
 
                     function nextQuestion() {
+
                         currentQuestionIndex++;
                         questionNode.style.opacity = '0';
                         setTimeout(() => {
@@ -1348,6 +1362,7 @@
                             spawnFishSchool();
                         }, 300);
                     }
+
 
                     function renderHookQuestion() {
                         const question = questions[currentQuestionIndex];
@@ -1681,6 +1696,7 @@
 
                     startTimerButton?.addEventListener('click', startReadingTimer);
                     endTimerButton?.addEventListener('click', endReadingTimer);
+
                     frogAnswerButtons.forEach((button) => {
                         button.addEventListener('click', () => answerFlashcard(button.dataset.frogAnswer, button));
                     });
@@ -1703,9 +1719,40 @@
                     storyReaderText?.addEventListener('click', () => persistProgress());
                     markModeButtons.forEach(button => button.addEventListener('click', () => persistProgress()));
                     progressScrollers.forEach(scroller => scroller.addEventListener('scroll', () => persistProgress(), { passive: true }));
-                    window.addEventListener('pagehide', pauseAndSave);
+                    function handleReadingPageHide(event) {
+                        if (event.persisted) {
+                            if (timerStatus === 'running') {
+                                updateReadingTimer();
+                                persistProgress(true);
+                            }
+                            return;
+                        }
+
+                        pauseAndSave();
+                    }
+
+                    window.addEventListener('pagehide', handleReadingPageHide);
+                    window.addEventListener('pageshow', () => {
+                        if (timerStatus === 'running') {
+                            updateReadingTimer();
+                            resumeReadingTicker();
+                            readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
+                        }
+                    });
                     document.addEventListener('visibilitychange', () => {
-                        if (document.hidden) pauseAndSave();
+                        if (document.hidden) {
+                            if (timerStatus === 'running') {
+                                updateReadingTimer();
+                                persistProgress(true);
+                            }
+                            return;
+                        }
+
+                        if (timerStatus === 'running') {
+                            updateReadingTimer();
+                            resumeReadingTicker();
+                            readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
+                        }
                     });
                     window.addEventListener('online', () => {
                         if (missionFinished) submitAttempt(); else persistProgress();

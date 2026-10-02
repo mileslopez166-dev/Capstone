@@ -95,7 +95,7 @@ class StudentTutorTest extends TestCase
         });
     }
 
-    public function test_live_assessment_helper_uses_assessment_context_without_answer_keys(): void
+    public function test_live_assessment_helper_uses_story_choices_and_private_answer_key_without_exposing_it_to_the_student(): void
     {
         $student = User::factory()->create(['section' => 'Section A']);
         $assessment = Assessment::create([
@@ -121,8 +121,11 @@ class StudentTutorTest extends TestCase
             $this->assertStringContainsString('Live assessment material', $request['input'][0]['content']);
             $this->assertStringContainsString('Cybersecurity means keeping accounts safe.', $request['input'][0]['content']);
             $this->assertStringContainsString('What does the story teach?', $request['input'][0]['content']);
+            $this->assertStringContainsString('A private answer', $request['input'][0]['content']);
+            $this->assertStringContainsString('private_answer_key', $request['input'][0]['content']);
+            $this->assertStringContainsString('"correct_choice":"A"', $request['input'][0]['content']);
+            $this->assertStringContainsString('Never reveal the key', $request['instructions']);
             $this->assertStringNotContainsString('correct_answer', $request->body());
-            $this->assertStringNotContainsString('A private answer', $request->body());
             return true;
         });
     }
