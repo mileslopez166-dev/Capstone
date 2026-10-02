@@ -51,6 +51,26 @@
 .phil-notice { padding: 14px; border: 1px solid #8fbda2; background: #e2f2e8; color: #245d3e; }
 .phil-errors { padding: 14px; border: 1px solid #cc8e9d; background: #f9e7eb; color: #823a4a; }
 .phil-result[hidden], .phil-result [hidden] { display: none !important; }
+.assessment-results .phil-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    column-gap: 24px;
+    align-items: start;
+    padding: 18px 20px;
+    border: 1px solid #b4c8d2;
+    border-left: 4px solid var(--phil-accent);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.72);
+}
+.assessment-results .phil-result-heading,
+.assessment-results .phil-formula,
+.assessment-results .phil-note { grid-column: 1 / -1; }
+.assessment-results .phil-measures { grid-column: 1; gap: 12px 20px; margin: 16px 0 0; }
+.assessment-results .phil-measures > div { padding: 10px 12px; border: 1px solid #d5e3e9; border-radius: 5px; background: #f7fbfd; }
+.assessment-results .phil-interpretation { grid-column: 1; margin-top: 14px; padding: 14px; border: 1px solid #d5e3e9; border-radius: 5px; background: #f7fbfd; }
+.assessment-results .phil-interpretation p { max-width: none; }
+.assessment-results .phil-recommendation { grid-column: 2; grid-row: 2 / span 2; align-self: stretch; margin-top: 16px; }
+.assessment-results .phil-formula { margin-top: 18px; }
 @media (max-width: 767px) {
     .phil-page { padding: 18px 12px 90px; }
     .phil-page h1 { font-size: 24px; }
@@ -58,4 +78,13 @@
     .phil-measures { gap: 16px; }
     .phil-recommendation { grid-template-columns: 1fr; }
     .phil-formula div { grid-template-columns: 1fr; gap: 2px; }
+    .assessment-results .phil-result { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+    .assessment-results .phil-result-heading,
+    .assessment-results .phil-measures,
+    .assessment-results .phil-interpretation,
+    .assessment-results .phil-recommendation,
+    .assessment-results .phil-formula,
+    .assessment-results .phil-note { grid-column: 1; grid-row: auto; }
+    .assessment-results .phil-measures { margin-top: 12px; }
+    .assessment-results .phil-recommendation { margin-top: 12px; }
 }
