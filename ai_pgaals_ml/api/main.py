@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -10,7 +11,7 @@ from pydantic import BaseModel, Field
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "reading_level_model.pkl"
+MODEL_PATH = Path(os.getenv("ML_MODEL_PATH", ROOT / "models" / "reading_level_model.pkl"))
 
 app = FastAPI(title="AI-PGAALS ML API", version="1.0.0")
 _package = None

@@ -50,8 +50,8 @@ services:
       OPENAI_TUTOR_ENABLED: ${OPENAI_TUTOR_ENABLED:-false}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_TUTOR_MODEL: ${OPENAI_TUTOR_MODEL:-gpt-6-astra}
-      ML_PREDICTIONS_ENABLED: ${ML_PREDICTIONS_ENABLED:-false}
-      ML_PREDICTION_API_URL: ${ML_PREDICTION_API_URL:-}
+      ML_PREDICTIONS_ENABLED: "true"
+      ML_PREDICTION_API_URL: http://ml-api:8001
       ML_PREDICTION_TIMEOUT: ${ML_PREDICTION_TIMEOUT:-5}
       ML_READING_MODEL_NAME: ${ML_READING_MODEL_NAME:-reading_level_random_forest_v1}
       VITE_APP_NAME: ${VITE_APP_NAME:-AI-PGAALS}
@@ -65,6 +65,20 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      ml-api:
+        condition: service_started
+
+  ml-api:
+    build:
+      context: ./ai_pgaals_ml
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "8001"
+    environment:
+      ML_MODEL_PATH: /models/reading_level_model.pkl
+    volumes:
+      - ml_models:/models:ro
 
   database:
     image: mysql:8.0
@@ -96,3 +110,4 @@ services:
 volumes:
   app_storage:
   db_data:
+  ml_models:
