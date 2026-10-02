@@ -10,6 +10,7 @@ COPY requirements-api.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api ./api
+COPY models/reading_level_model.pkl /models/reading_level_model.pkl
 
 EXPOSE 8001
 
