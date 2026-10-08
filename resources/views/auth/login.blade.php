@@ -50,6 +50,14 @@
                     </button>
                 </form>
                 <p class="login-register">New here? <a href="{{ route('register') }}">Create an account</a></p>
+                <a class="login-app-download" href="{{ asset('downloads/AI-PGAALS-Android.apk') }}" download="AI-PGAALS-Android.apk">
+                    <span class="material-symbols-outlined" aria-hidden="true">android</span>
+                    <span class="login-app-download-copy">
+                        <strong>Download the Android app</strong>
+                        <small>Install AI-PGAALS on your Android device</small>
+                    </span>
+                    <span class="material-symbols-outlined login-app-download-action" aria-hidden="true">download</span>
+                </a>
             </section>
         </main>
         <footer class="login-footer">AI-PGAALS &middot; Literacy &amp; Numeracy</footer>

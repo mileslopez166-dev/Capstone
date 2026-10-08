@@ -53,6 +53,13 @@
 .login-submit:hover { background: #06588c; }
 .login-submit:disabled { opacity: .7; cursor: wait; }
 .login-register { margin-top: 26px; padding-top: 22px; border-top: 1px solid #e4ecf1; text-align: center; color: #526575; font-size: 12px; line-height: 1.8; }
+.login-app-download { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 12px 14px; border: 1px solid #acd1e5; border-radius: 7px; background: #f2f9fd; color: #124e75; text-decoration: none; transition: background .15s, border-color .15s; }
+.login-app-download:hover { border-color: #5da6ce; background: #e7f5fc; text-decoration: none !important; }
+.login-app-download > .material-symbols-outlined:first-child { flex: 0 0 auto; font-size: 23px; color: #0879bb; }
+.login-app-download-copy { display: grid; flex: 1; gap: 2px; }
+.login-app-download-copy strong { font-size: 13px; line-height: 1.4; }
+.login-app-download-copy small { color: #526d7e; font-size: 11px; line-height: 1.4; }
+.login-app-download-action { flex: 0 0 auto; font-size: 20px; }
 .login-footer { padding: 12px 20px; text-align: center; background: #ffffffed; color: #486878; font-size: 11px; }
 .login-page :is(a, button, input):focus-visible { outline: 3px solid #0879bb; outline-offset: 3px; }
 @media (max-width: 520px) {

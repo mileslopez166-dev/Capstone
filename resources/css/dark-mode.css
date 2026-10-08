@@ -114,6 +114,10 @@ html.dark .login-page .auth-input {
 }
 html.dark .login-password-toggle:hover { background: #17324d; color: #91d4ff; }
 html.dark .login-register { border-color: var(--dark-line); }
+html.dark .login-app-download { border-color: #355875; background: #10283c; color: #e6f4ff; }
+html.dark .login-app-download:hover { border-color: #65b8e8; background: #16364f; }
+html.dark .login-app-download > .material-symbols-outlined:first-child { color: #77c8ff; }
+html.dark .login-app-download-copy small { color: #b4c8d8; }
 
 html.dark .campus-theme {
     --campus-ink: #ffffff;
