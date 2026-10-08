@@ -241,7 +241,7 @@
 
 /* Use the available workspace width, including when a tablet shows the sidebar. */
 @container (max-width: 760px) {
-    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 280px; height: auto; min-height: 0; padding: 12px 12px 30px; gap: 10px; }
+    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 240px; height: auto; min-height: 0; padding: 10px 12px 24px; gap: 8px; }
     .assessment-workspace .ocean-game #mission-info { grid-column: 1; grid-row: 1; }
     .assessment-workspace .ocean-game #mission-info h1 { display: none; }
     .assessment-workspace .ocean-game #mission-info p { display: none; }
@@ -249,15 +249,15 @@
     .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; gap: 8px; }
     .assessment-workspace .ocean-game #hook-hud > div:first-child { flex-direction: row; gap: 8px; }
     .assessment-workspace .ocean-game #hook-hud > div:first-child > div { padding: 8px; }
-    .assessment-workspace .ocean-game #question-node { max-height: min(300px, 43dvh); padding: 10px; overflow-y: auto; scrollbar-width: thin; scroll-padding-block: 10px; }
+    .assessment-workspace .ocean-game #question-node { max-height: min(235px, 31dvh); padding: 9px; overflow-y: auto; scrollbar-width: thin; scrollbar-gutter: stable; scroll-padding-block: 9px; }
     .assessment-workspace .ocean-game #question-node > div:first-child { margin-bottom: 4px; }
     .assessment-workspace .ocean-game #question-node h2 { margin-bottom: 8px; line-height: 1.3; }
     .assessment-workspace .ocean-game .hook-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .assessment-workspace .ocean-game .hook-options > div { margin: 0; min-height: 44px; padding: 6px 8px; gap: 7px; line-height: 1.35; }
+    .assessment-workspace .ocean-game .hook-options > div { margin: 0; min-height: 44px; padding: 5px 7px; gap: 6px; line-height: 1.3; }
     .assessment-workspace .ocean-game .hook-options > div > span:first-child { flex-basis: 24px; width: 24px; height: 24px; font-size: 14px; }
-    .assessment-workspace .ocean-game #fish-container { grid-column: 1; grid-row: 3; margin-top: 28px; min-height: 0; }
-    .assessment-workspace .ocean-game .answer-fish { width: 88px; height: 54px; }
-    .assessment-workspace .ocean-game .fish-letter { left: 31px; bottom: 0; width: 25px; height: 22px; font-size: 13px; }
+    .assessment-workspace .ocean-game #fish-container { grid-column: 1; grid-row: 3; margin-top: 24px; min-height: 0; }
+    .assessment-workspace .ocean-game .answer-fish { width: 80px; height: 48px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 28px; bottom: 0; width: 24px; height: 21px; font-size: 12px; }
     .assessment-workspace .ocean-game .ocean-catch-status { left: 12px; right: 12px; bottom: 8px; font-size: 12px; line-height: 1.4; }
     .assessment-workspace .frog-pond-game { height: auto; min-height: 0; }
     .assessment-workspace .frog-interface { min-height: 0; padding: 12px; gap: 10px; grid-template-rows: auto auto auto 130px auto; }
@@ -299,23 +299,26 @@
 }
 @container (max-width: 359px) {
     .assessment-workspace .ocean-game .hook-options { grid-template-columns: minmax(0, 1fr); }
-    .assessment-workspace .hook-game.ocean-game { grid-template-rows: auto auto 250px; }
-    .assessment-workspace .ocean-game #fish-container { margin-top: 24px; }
-    .assessment-workspace .ocean-game .answer-fish { width: 82px; height: 50px; }
-    .assessment-workspace .ocean-game .fish-letter { left: 29px; }
+    .assessment-workspace .hook-game.ocean-game { grid-template-rows: auto auto 220px; }
+    .assessment-workspace .ocean-game #fish-container { margin-top: 20px; }
 }
-/* Short landscape screens keep the question beside the water. */
-@media (max-height: 540px) and (min-width: 620px) and (max-width: 1023px) {
-    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: auto 332px; height: auto; min-height: 0; gap: 10px 16px; padding: 12px 12px 38px; }
+/* Phone landscape keeps the question beside a full, unobstructed water area. */
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 480px) and (max-width: 1023px) {
+    .assessment-workspace .hook-game.ocean-game { grid-template-columns: minmax(230px, .9fr) minmax(0, 1.25fr); grid-template-rows: auto clamp(200px, calc(100dvh - 120px), 360px); height: auto; min-height: 0; gap: 6px 12px; padding: 8px 10px 22px; }
     .assessment-workspace .ocean-game #mission-info { grid-column: 1 / -1; grid-row: 1; }
     .assessment-workspace .ocean-game #mission-info h1, .assessment-workspace .ocean-game #mission-info p { display: none; }
-    .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; }
-    .assessment-workspace .ocean-game #question-node { max-height: 258px; padding: 12px; }
+    .assessment-workspace .ocean-game #hook-hud { grid-column: 1; grid-row: 2; min-height: 0; gap: 6px; overflow: hidden; }
+    .assessment-workspace .ocean-game #hook-hud > div:first-child { gap: 6px; }
+    .assessment-workspace .ocean-game #hook-hud > div:first-child > div { min-width: 0; padding: 6px; }
+    .assessment-workspace .ocean-game #question-node { max-height: clamp(128px, calc(100dvh - 205px), 250px); padding: 8px; }
+    .assessment-workspace .ocean-game #question-node > div:first-child { margin-bottom: 3px; }
+    .assessment-workspace .ocean-game #question-node h2 { margin-bottom: 6px; line-height: 1.25; }
     .assessment-workspace .ocean-game .hook-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .assessment-workspace .ocean-game .hook-options > div { margin: 0; padding: 8px; }
-    .assessment-workspace .ocean-game #fish-container { grid-column: 2; grid-row: 2; margin-top: 36px; min-height: 0; }
-    .assessment-workspace .ocean-game .answer-fish { width: 124px; height: 68px; }
-    .assessment-workspace .ocean-game .ocean-catch-status { left: 48%; }
+    .assessment-workspace .ocean-game .hook-options > div { margin: 0; min-height: 44px; padding: 5px 7px; gap: 6px; line-height: 1.25; }
+    .assessment-workspace .ocean-game #fish-container { grid-column: 2; grid-row: 2; margin-top: 20px; min-height: 0; }
+    .assessment-workspace .ocean-game .answer-fish { width: 76px; height: 46px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 27px; bottom: 0; width: 23px; height: 20px; font-size: 12px; }
+    .assessment-workspace .ocean-game .ocean-catch-status { left: 43%; right: 10px; bottom: 5px; }
     .assessment-workspace .frog-pond-game { height: auto; min-height: 0; }
     .assessment-workspace .frog-interface { min-height: 0; padding: 12px; gap: 10px; grid-template-rows: auto auto auto 130px auto; }
     .assessment-workspace .frog-answer-zone { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
@@ -325,9 +328,13 @@
     .assessment-workspace .frog-finish-line { width: 86px; height: 104px; }
 }
 
-@media (max-width: 600px), (max-height: 540px) and (min-width: 620px) and (max-width: 1023px) {
-    .assessment-workspace .ocean-game .answer-fish { width: 88px; height: 54px; }
-    .assessment-workspace .ocean-game .fish-letter { left: 31px; bottom: 0; width: 25px; height: 22px; }
+@media (max-width: 600px), (orientation: landscape) and (max-height: 600px) and (min-width: 480px) and (max-width: 1023px) {
+    .assessment-workspace .ocean-game .answer-fish { width: 80px; height: 48px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 28px; bottom: 0; width: 24px; height: 21px; }
+}
+@media (max-width: 359px) {
+    .assessment-workspace .ocean-game .answer-fish { width: 76px; height: 46px; }
+    .assessment-workspace .ocean-game .fish-letter { left: 27px; width: 23px; height: 20px; }
 }
 /* A live student attempt is a focused workspace, without the dashboard shell. */
 .assessment-focus-mode {
@@ -377,4 +384,19 @@
     .assessment-focus-mode .treasure-game {
         min-height: 0;
     }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1023px) {
+    .assessment-focus-mode .assessment-workspace {
+        padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    }
+    .assessment-focus-mode .assessment-heading { gap: 8px; padding-bottom: 6px; }
+    .assessment-focus-mode .assessment-back { flex-basis: 36px; height: 36px; }
+    .assessment-focus-mode .assessment-heading-copy > p,
+    .assessment-focus-mode .assessment-heading-copy .teacher-identity { display: none; }
+    .assessment-focus-mode .assessment-heading h1 { margin-top: 0; overflow: hidden; font-size: 16px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+    .assessment-focus-mode .assessment-helper-toggle { width: 38px; min-height: 36px; padding: 0; }
+    .assessment-focus-mode .assessment-helper-toggle > span:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .assessment-focus-mode .assessment-helper-panel { position: fixed; inset: 6px max(8px, env(safe-area-inset-right)) 6px auto; width: min(420px, calc(100vw - 16px)); max-height: calc(100dvh - 12px); }
+    .assessment-focus-mode .mission-canvas.app-game-screen:not(.assessment-reading) { height: calc(100dvh - 50px); }
 }
