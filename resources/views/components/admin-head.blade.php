@@ -1,4 +1,5 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-favicon />
 <script>
     (() => {
         let preferences = {};

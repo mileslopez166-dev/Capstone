@@ -118,6 +118,22 @@ html.dark .login-app-download { border-color: #355875; background: #10283c; colo
 html.dark .login-app-download:hover { border-color: #65b8e8; background: #16364f; }
 html.dark .login-app-download > .material-symbols-outlined:first-child { color: #77c8ff; }
 html.dark .login-app-download-copy small { color: #b4c8d8; }
+html.dark .login-install-overlay { background: rgba(0, 7, 14, .82); }
+html.dark .login-install-dialog { border-color: #355875; background: #0a1a2b; }
+html.dark .login-install-heading,
+html.dark .login-install-actions,
+html.dark .login-install-blocked { border-color: #294760; }
+html.dark .login-install-heading h2 { color: #f3f8fc; }
+html.dark .login-install-icon { background: #123b31; color: #8be0be; }
+html.dark .login-install-close { border-color: #35536c; color: #c0d3df; }
+html.dark .login-install-close:hover { background: #17324d; color: #fff; }
+html.dark .login-install-intro,
+html.dark .login-install-steps p { color: #c0d3df; }
+html.dark .login-install-warning { background: #0f3029; color: #d4f6e8; }
+html.dark .login-install-blocked { color: #ead9b7; }
+html.dark .login-install-actions { background: #0d1f31; }
+html.dark .login-install-actions button { border-color: #3b5b73; color: #d7e6f0; }
+html.dark .login-install-actions button:hover { background: #17324d; }
 
 html.dark .campus-theme {
     --campus-ink: #ffffff;
