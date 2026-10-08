@@ -22,7 +22,10 @@ class StudentAvatarTest extends TestCase
             ->assertSee('Save Avatar')
             ->assertViewHas('appearance', fn (array $look) => $look['character'] === 'lyra');
 
-        $this->get('/profile')->assertOk()->assertSee('student-girl.png')->assertSee('Customize Avatar');
+        $this->get('/profile')->assertOk()
+            ->assertSee('data-character="lyra"', false)
+            ->assertSee('data-outfit="hoodie"', false)
+            ->assertSee('Customize Avatar');
         $this->assertNull($student->fresh()->avatar_config);
     }
 

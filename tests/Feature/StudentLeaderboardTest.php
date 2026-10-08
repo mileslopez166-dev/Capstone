@@ -38,7 +38,7 @@ class StudentLeaderboardTest extends TestCase
             ->assertSeeText('All Sections Rankings')
             ->assertSeeText('Lyra Vale')
             ->assertSeeText('Miles Lopez')
-            ->assertSee('images/campus/student-girl.png', false)
+            ->assertSee('data-character="lyra"', false)
             ->assertSeeText('#2')
             ->assertSee('href="'.route('student.leaderboard').'"', false);
     }

@@ -25,7 +25,8 @@ class CampusThemeTest extends TestCase
 
         $this->actingAs($student)->get('/student/dashboard')
             ->assertOk()->assertSee('campus-theme campus-student', false)
-            ->assertSee('images/campus/student-girl.png', false)
+            ->assertSee('data-character="lyra"', false)
+            ->assertSee('data-outfit="hoodie"', false)
             ->assertSee('Level 1, 0 total XP', false);
 
         AssessmentSubmission::query()->create([
