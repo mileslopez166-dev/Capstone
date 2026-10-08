@@ -1,4 +1,5 @@
-.ui-data-table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
+.ui-data-table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable; }
+.ui-data-table-scroll:focus-visible { outline: 3px solid #1672d2; outline-offset: 3px; }
 .ui-data-table-scroll table { width: 100%; table-layout: auto; }
 .ui-data-table-scroll :is(th, td) { overflow-wrap: normal; word-break: normal; }
 .ui-data-table-scroll th { white-space: nowrap; }
@@ -15,4 +16,8 @@
 .ui-table-search :is(a, button) { flex-shrink: 0; white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 @media (max-width: 640px) {
     .ui-data-table-scroll :is(th, td) { padding-inline: 14px; }
+    .ui-data-table-scroll td:first-child:not([colspan]) { min-width: 12rem; }
+    .ui-table-footer { align-items: flex-start; }
+    .ui-table-footer > :first-child { flex: 1 1 100%; }
+    .ui-table-search :is(a, button) { min-width: 6.5rem; }
 }

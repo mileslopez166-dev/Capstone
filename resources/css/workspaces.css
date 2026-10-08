@@ -270,7 +270,7 @@
 .teacher-theme .campus-topbar { background: #e1ebe7f7; border-bottom: 2px solid #aec3b8; }
 .teacher-theme .campus-search { background: #f8fbfa; border-color: #9fb7ab; }
 .teacher-theme .teacher-page-heading { padding: 22px 24px; background: #dbeae3; border: 1px solid #a8c3b4; }
-.teacher-theme .teacher-page-heading h1 { color: #204b3b; overflow-wrap: anywhere; }
+.teacher-theme .teacher-page-heading h1 { color: #204b3b; overflow-wrap: break-word; }
 .teacher-theme .teacher-page-heading p, .teacher-theme .teacher-eyebrow { color: #486457; }
 .teacher-theme .teacher-primary-action { border: 1px solid #07533e; min-height: 44px; }
 .teacher-theme .teacher-metrics { gap: 14px; background: transparent; border: 0; }
@@ -292,7 +292,7 @@
 .teacher-theme .teacher-metric-label { color: #3e535b; font-weight: 600; min-height: 36px; }
 .teacher-theme .teacher-metric-label > span:first-child { min-width: 0; }
 .teacher-theme .teacher-metric-label .material-symbols-outlined { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: 6px; color: var(--metric-accent); background: var(--metric-icon); font-size: 20px; }
-.teacher-theme .teacher-metric strong { color: #253d45; overflow-wrap: anywhere; }
+.teacher-theme .teacher-metric strong { color: #253d45; overflow-wrap: break-word; }
 .teacher-theme .teacher-metric small { color: #53626a; line-height: 1.6; }
 .teacher-theme .teacher-overview-grid { gap: 26px; align-items: start; }
 .teacher-theme .teacher-section { min-width: 0; padding-top: 0; border-top: 0; }
@@ -305,7 +305,7 @@
 .teacher-theme .teacher-result:nth-child(even) { background: #e8f0f5; }
 .teacher-theme .teacher-result:hover { background: #dfeaf0; }
 .teacher-theme .teacher-result:last-child { border-bottom: 0; }
-.teacher-theme .teacher-result > div { min-width: 0; overflow-wrap: anywhere; }
+.teacher-theme .teacher-result > div { min-width: 0; overflow-wrap: break-word; }
 .teacher-theme .teacher-result > .material-symbols-outlined { background: #d4e8df; border: 1px solid #a1c3b1; color: #246249; }
 .teacher-theme .teacher-result > span:last-child { flex-shrink: 0; background: #e0efe7; border: 1px solid #a4c6b4; color: #20583f; }
 .teacher-theme .teacher-result p, .teacher-theme .teacher-roster small { color: #566a73; }
@@ -343,10 +343,18 @@
     .teacher-theme .teacher-metric-label .material-symbols-outlined { display: none; }
     .teacher-theme .teacher-metric strong { font-size: 22px; }
 }
+@media (max-width: 480px) {
+    .teacher-metrics, .admin-overview-metrics { grid-template-columns: minmax(0, 1fr); }
+    .teacher-metric, .admin-overview-metric { border-right: 0; border-bottom: 1px solid var(--workspace-line); }
+    .teacher-metric:last-child, .admin-overview-metric:last-child { border-bottom: 0; }
+    .teacher-theme .teacher-page-heading, .teacher-theme .teacher-workspace-heading, .teacher-theme .practice-heading { padding: 16px 14px; }
+    .student-profile-identity > div { align-items: flex-start; }
+    .student-profile-identity > div > span { max-width: 100%; }
+}
 
 .teacher-theme main { min-width: 0; }
 .teacher-theme main :is(.grid, .flex) > :where(div, section, aside, form) { min-width: 0; }
-.teacher-theme main :is(h1, h2, h3, p, strong) { overflow-wrap: anywhere; }
+.teacher-theme main :is(h1, h2, h3, p, strong) { overflow-wrap: break-word; word-break: normal; }
 .teacher-theme .teacher-workspace-heading, .teacher-theme .practice-heading {
     padding: 22px 24px;
     background: #dbeae3;
@@ -357,11 +365,11 @@
 .student-profile-heading { display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-areas: "identity avatar" "progress avatar"; grid-template-rows: auto 1fr; align-items: start; gap: 24px 32px; margin-bottom: 32px; }
 .student-profile-identity { grid-area: identity; padding-top: 8px; }
 .student-profile-identity h1 { font-size: 28px; line-height: 1.3; }
-.student-profile-identity > div > span:last-child { overflow-wrap: anywhere; }
+.student-profile-identity > div > span:last-child { overflow-wrap: break-word; }
 .student-profile-details { display: contents; }
 .student-profile-details > .campus-avatar-card { grid-area: avatar; border: 1px solid #a6becb; border-radius: 8px; box-shadow: none; padding: 16px; }
 .student-profile-details .campus-avatar-stage-full { height: 200px; }
-.student-profile-details .campus-avatar-card-footer { overflow-wrap: anywhere; }
+.student-profile-details .campus-avatar-card-footer { overflow-wrap: break-word; }
 .student-profile-progress { grid-area: progress; max-width: 480px; width: 100%; padding: 20px; border: 1px solid #a6becb; border-radius: 8px; background: #e4edf3; }
 @media (max-width: 767px) {
     .student-profile-heading { grid-template-columns: minmax(0, 1fr); grid-template-areas: "identity" "avatar" "progress"; gap: 20px; }
@@ -422,8 +430,8 @@
 .class-comparison-row:focus-visible { outline: 3px solid #1f7a5f; outline-offset: 3px; }
 .class-comparison-row > .material-symbols-outlined:first-child { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #9fc2ad; border-radius: 8px; background: #dcefe4; color: #246249; font-size: 21px; }
 .class-comparison-row > div { min-width: 0; }
-.class-comparison-row strong { display: block; overflow-wrap: anywhere; font-size: 14px; color: #183d32; }
-.class-comparison-row p { margin-top: 4px; color: #526973; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.class-comparison-row strong { display: block; overflow-wrap: break-word; font-size: 14px; color: #183d32; }
+.class-comparison-row p { margin-top: 4px; color: #526973; font-size: 12px; line-height: 1.5; overflow-wrap: break-word; }
 .class-comparison-row dl { display: flex; gap: 8px; margin: 0; }
 .class-comparison-row dl div { min-width: 72px; padding: 8px 10px; border: 1px solid #b6cec1; border-radius: 6px; background: #fff; text-align: center; }
 .class-comparison-row dt { color: #60756b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
@@ -466,4 +474,7 @@
     .class-comparison-row { grid-template-columns: auto minmax(0, 1fr) auto; }
     .class-comparison-row dl { grid-column: 1 / -1; flex-wrap: wrap; }
     .class-comparison-row dl div { flex: 1 1 8rem; }
+}
+@media (max-width: 480px) {
+    .teacher-theme .teacher-workspace-heading, .teacher-theme .practice-heading { padding: 16px 14px; }
 }

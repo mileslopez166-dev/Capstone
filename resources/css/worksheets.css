@@ -2,7 +2,7 @@
 .worksheet-page > * { max-width: 1240px; margin-left: auto; margin-right: auto; }
 .worksheet-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
 .worksheet-heading p { font-size: 12px; font-weight: 800; color: #267969; margin-bottom: 5px; }
-.worksheet-heading h1 { font-size: 28px; line-height: 1.25; font-weight: 800; overflow-wrap: anywhere; }
+.worksheet-heading h1 { font-size: 28px; line-height: 1.25; font-weight: 800; overflow-wrap: break-word; }
 .worksheet-page h2, .worksheet-pending-list h2 { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
 .worksheet-tabs, .worksheet-summary, .worksheet-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .worksheet-tabs { border-bottom: 1px solid #bdced3; margin-bottom: 22px; }
@@ -17,7 +17,7 @@
 .worksheet-tile h3 { font-size: 16px; font-weight: 800; }
 .worksheet-tile span { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
 .worksheet-row { display: flex; align-items: center; gap: 16px; padding: 17px 8px; border-bottom: 1px solid #c4d7dc; background: #ffffffbf; }
-.worksheet-row > :first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.worksheet-row > :first-child { flex: 1; min-width: 0; overflow-wrap: break-word; }
 .worksheet-row p { margin-top: 4px; font-size: 14px; color: #526976; }
 .worksheet-row > span { font-size: 14px; }
 .worksheet-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding: 24px 0; }
@@ -115,7 +115,7 @@
 .worksheet-settings-panel > input:last-child { margin-bottom: 0; }
 .worksheet-settings summary:focus-visible { outline: 3px solid #bc7b12; outline-offset: 3px; }
 .worksheet-reading { max-height: 72dvh; overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid #aebfca; }
-.worksheet-text-page { padding: 24px; font-size: var(--assessment-story-size, 1rem); line-height: var(--worksheet-line-height, 1.7); color: #26394a; overflow-wrap: anywhere; }
+.worksheet-text-page { padding: 24px; font-size: var(--assessment-story-size, 1rem); line-height: var(--worksheet-line-height, 1.7); color: #26394a; overflow-wrap: break-word; }
 .worksheet-reader:not([data-initialized]) .worksheet-text-page:not(:first-child) { display: none; }
 .worksheet-text-page h3 { font-size: 1.15em; font-weight: 800; line-height: 1.35; margin-bottom: 22px; }
 .worksheet-text-page h4 { font-size: 1em; font-weight: 800; margin-bottom: 14px; }

@@ -27,6 +27,7 @@ export const preferences = {
         Object.entries(this.readingSizes).forEach(([name, size]) => {
             document.documentElement.style.setProperty(`--assessment-${name}-size`, `${size / 16}rem`);
         });
+        document.documentElement.dataset.assessmentAnswers = this.readingSizes.answers >= 22 ? 'large' : 'default';
         document.querySelectorAll('audio, video').forEach(element => media.add(element));
         media.forEach(element => { element.muted = !this.sound; });
         window.dispatchEvent(new CustomEvent('pgaals:preferences', { detail: { sound: this.sound, reducedMotion: this.reducedMotion, theme: this.theme, darkMode: this.darkMode } }));

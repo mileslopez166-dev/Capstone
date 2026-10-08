@@ -13,7 +13,7 @@
 .numeracy-scene { position: relative; isolation: isolate; min-height: 230px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 24px 18px; gap: 18px; overflow: hidden; background: #eaf4ed; }
 .numeracy-rocket-world, .numeracy-archer-world { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 .numeracy-rocket-world, .numeracy-rocket, .numeracy-archer-world, .numeracy-bow, .numeracy-targets, .numeracy-puzzle-number { display: none; }
-.numeracy-mission-number { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: var(--assessment-story-size, 1rem); line-height: 1.4; max-width: 100%; overflow-wrap: anywhere; }
+.numeracy-mission-number { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: var(--assessment-story-size, 1rem); line-height: 1.4; max-width: 100%; overflow-wrap: break-word; }
 .numeracy-mission-number strong { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .numeracy-game[data-game=rocket] .numeracy-scene { background: #17283f; color: #f1f8ff; padding-right: 130px; }
 .numeracy-game[data-game=rocket] :is(.numeracy-rocket-world, .numeracy-rocket) { display: block; }
@@ -45,7 +45,7 @@
 .numeracy-choice[aria-pressed=true] { border-color: #207566; background: #d4eee2; color: #125344; }
 .numeracy-reason { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; font-size: 14px; font-weight: 700; }
 .numeracy-reason textarea { min-width: 0; width: 100%; resize: vertical; border: 1px solid var(--ng-line); border-radius: 6px; background: var(--ng-paper); color: var(--ng-ink); font-size: var(--assessment-answers-size, 1rem); }
-.numeracy-feedback { min-height: 2.8em; margin: 14px 0 8px; font-size: var(--assessment-story-size, 1rem); line-height: 1.5; overflow-wrap: anywhere; }
+.numeracy-feedback { min-height: 2.8em; margin: 14px 0 8px; font-size: var(--assessment-story-size, 1rem); line-height: 1.5; overflow-wrap: break-word; }
 .numeracy-game[data-result=correct] .numeracy-feedback { color: #196048; }
 .numeracy-game[data-result=incorrect] .numeracy-feedback { color: #a13443; }
 .numeracy-hint { margin: 12px 0; padding: 12px 14px; border-left: 3px solid #bb923a; background: var(--ng-soft); font-size: var(--assessment-story-size, 1rem); line-height: 1.5; }
@@ -80,6 +80,7 @@ html.dark .numeracy-mode-switch button[aria-pressed=true] { background: #267b70;
     .numeracy-game[data-game=puzzle] .numeracy-choices { gap: 5px; }
     .numeracy-choice { padding-inline: 3px; }
     .numeracy-game-actions .ui-button { flex: 1 0 100%; }
+    html[data-assessment-answers='large'] .numeracy-game:not([data-game='puzzle']) .numeracy-choices { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 360px) { .numeracy-game[data-game=puzzle] .numeracy-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .numeracy-exhaust { animation: none !important; } }

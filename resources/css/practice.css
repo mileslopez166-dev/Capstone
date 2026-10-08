@@ -3,10 +3,10 @@
 .practice-student .practice-summary { padding-inline: 18px; background: #ebf7f2; }
 .practice-content { max-width: 1120px; margin: 0 auto; min-width: 0; }
 .practice-content * { letter-spacing: 0; }
-.practice-content h1 { font-size: 28px; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+.practice-content h1 { font-size: 28px; font-weight: 800; line-height: 1.25; overflow-wrap: break-word; }
 .practice-content h2 { font-size: 20px; font-weight: 750; line-height: 1.4; }
 .practice-content h3 { font-size: 16px; font-weight: 750; line-height: 1.4; }
-.practice-content p, .practice-content small { overflow-wrap: anywhere; }
+.practice-content p, .practice-content small { overflow-wrap: break-word; }
 .practice-heading { margin-bottom: 24px; }
 .practice-back, .practice-link { display: inline-flex; align-items: center; gap: 6px; color: #087065; font-weight: 700; font-size: 14px; }
 .practice-back { margin-bottom: 12px; }
@@ -53,7 +53,7 @@
 .practice-selection { display: flex; align-items: flex-start; gap: 14px; padding: 20px 0; border-bottom: 1px solid #dae6e4; cursor: pointer; }
 .practice-selection input, .practice-check input, .practice-answer input { accent-color: #087461; color: #087461; flex-shrink: 0; width: 18px; height: 18px; margin-top: 3px; }
 .practice-selection > span { min-width: 0; }
-.practice-selection strong { display: block; overflow-wrap: anywhere; }
+.practice-selection strong { display: block; overflow-wrap: break-word; }
 .practice-selection small { display: block; margin-top: 6px; line-height: 1.6; color: #536f70; }
 .practice-mark { display: inline-block; font-size: 12px; font-weight: 650; padding: 3px 7px; border-radius: 3px; }
 .mark-1 { background: #fff1b9; color: #805400; }
@@ -62,7 +62,7 @@
 .practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .practice-grid > .practice-empty { grid-column: 1 / -1; }
 .practice-mission-card { background: #fff; border: 1px solid #b8d9d7; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.practice-mission-card h2 { overflow-wrap: anywhere; }
+.practice-mission-card h2 { overflow-wrap: break-word; }
 .practice-mission-card p { color: #526c70; font-size: 14px; }
 .practice-mission-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; margin-top: auto; padding-block: 10px; }
 .practice-note { white-space: pre-wrap; margin-block: 20px; line-height: 1.7; }
@@ -71,15 +71,15 @@
 .practice-story p { white-space: pre-wrap; line-height: 1.9; max-height: 420px; overflow-y: auto; padding: 0 20px 20px; }
 .practice-word { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #d8e4e2; padding: 20px 0; }
 .practice-word h3 { font-size: 22px; margin: 8px 0; }
-.practice-word > div, .practice-review-word > strong { min-width: 0; overflow-wrap: anywhere; }
+.practice-word > div, .practice-review-word > strong { min-width: 0; overflow-wrap: break-word; }
 .practice-word p { line-height: 1.7; }
 .practice-check { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; flex-shrink: 0; }
 .practice-question { min-width: 0; padding: 24px 0 0; margin-top: 28px; }
-.practice-question legend { font-size: 19px; font-weight: 750; line-height: 1.6; overflow-wrap: anywhere; }
+.practice-question legend { font-size: 19px; font-weight: 750; line-height: 1.6; overflow-wrap: break-word; }
 .practice-question legend > span { display: block; font-size: 13px; color: #506f71; }
 .practice-answer { display: flex; align-items: flex-start; gap: 14px; border: 1px solid #c6d8d7; background: #fff; border-radius: 5px; padding: 16px; margin-bottom: 10px; cursor: pointer; }
 .practice-answer:has(input:checked) { border-color: #0c806b; background: #e8f7f1; }
-.practice-answer span { overflow-wrap: anywhere; min-width: 0; }
+.practice-answer span { overflow-wrap: break-word; min-width: 0; }
 .practice-answer-feedback { display: flex; align-items: center; gap: 10px; font-size: 14px; padding: 12px; background: #fff3da; color: #784b00; }
 .practice-answer-feedback.is-correct { color: #086450; background: #e0f5e9; }
 .practice-complete { display: flex; gap: 20px; align-items: center; background: #e5f8ee; border-bottom: 3px solid #2caa7e; padding: 24px; margin-top: 20px; }
@@ -92,7 +92,7 @@
 .practice-review-word, .practice-rating { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-block: 16px; border-bottom: 1px solid #d6e4e1; }
 .practice-review-word > span { font-size: 14px; color: #526f6f; }
 .practice-rating select { max-width: 290px; }
-.practice-rating strong { overflow-wrap: anywhere; min-width: 0; }
+.practice-rating strong { overflow-wrap: break-word; min-width: 0; }
 .practice-attempt { border-bottom: 1px solid #d6e4e1; padding: 16px 0; }
 .practice-attempt summary { display: flex; gap: 12px; align-items: center; justify-content: space-between; cursor: pointer; font-size: 14px; }
 .practice-attempt p { padding-top: 16px; line-height: 1.7; }

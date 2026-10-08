@@ -58,7 +58,7 @@
 .frog-answer:nth-child(even) .frog-target-fallback { animation-delay: -.9s; }
 .frog-answer-copy { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 64px; flex: 1; padding: 12px; border: 1px solid #ffffff; border-bottom: 4px solid var(--target-color); border-radius: 8px; background: #ffffffed; box-shadow: 0 6px 12px #24494c12; text-align: left; transition: border-color .2s, box-shadow .2s, background .2s; }
 .frog-answer-letter { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; background: var(--target-pale); color: var(--target-deep); font-size: 14px; font-weight: 800; }
-.frog-answer-copy [data-frog-answer-label] { flex: 1; color: #304a48; font-size: 14px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.frog-answer-copy [data-frog-answer-label] { flex: 1; color: #304a48; font-size: 14px; font-weight: 600; line-height: 1.45; overflow-wrap: break-word; }
 .frog-answer:focus-visible { outline: 3px solid #226d63; outline-offset: 5px; }
 .frog-answer:hover:not(:disabled) .frog-answer-copy { border-color: var(--target-color); background: #fff; box-shadow: 0 8px 18px #24494c20; }
 .frog-answer-verdict { display: none; flex: 0 0 20px; font-size: 20px; }

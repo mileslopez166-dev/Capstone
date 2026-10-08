@@ -9,7 +9,7 @@
 .assisted-picker-controls select { flex: 1; width: 100%; min-width: 0; border: 1px solid #95afb3; border-radius: 6px; background-color: white; }
 .assisted-picker .ui-button { flex-shrink: 0; }
 .assisted-assignment { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding: 18px 20px; border: 1px solid #acc9bf; border-radius: 8px; background: #f4faf7; color: #183d32; }
-.assisted-assignment > div { min-width: 0; overflow-wrap: anywhere; }
+.assisted-assignment > div { min-width: 0; overflow-wrap: break-word; }
 .assisted-assignment strong { display: block; font-size: 16px; line-height: 1.5; }
 .assisted-assignment .ui-button { min-height: 44px; border-radius: 8px; }
 .assisted-assignment:focus-within { border-color: #187451; outline: 2px solid #187451; outline-offset: 2px; }
@@ -52,11 +52,14 @@
 
     p, h1, h2, h3, h4, h5, h6, a, span, dd, dt, label {
         overflow-wrap: break-word;
+        word-break: normal;
+        hyphens: none;
     }
 
-    button, [role="button"] {
+    button, [role="button"], [class*="badge"], [class*="status"] {
         overflow-wrap: normal;
         word-break: normal;
+        hyphens: none;
     }
 }
 
