@@ -147,7 +147,9 @@ class PhilIri
         $tokens = [];
         // Keep indexes aligned with the reader's paragraph, sentence, and word buttons.
         foreach (preg_split('/\R{2,}/u', trim($passage ?? '')) as $paragraph) {
-            if (trim($paragraph) === '') continue;
+            if (trim($paragraph) === '') {
+                continue;
+            }
             preg_match_all('/[^.!?]+[.!?]+|[^.!?]+$/u', $paragraph, $matches);
             foreach ($matches[0] ?: [$paragraph] as $sentence) {
                 foreach (preg_split('/\s+/u', trim($sentence), -1, PREG_SPLIT_NO_EMPTY) as $token) {
@@ -158,10 +160,14 @@ class PhilIri
         $words = array_filter($tokens, fn ($token) => preg_match('/[\p{L}\p{N}]/u', $token));
         $result = ['word_count' => count($words), 'marked_miscues' => null];
         $marks = $state['word_marks'] ?? null;
-        if (!$words || !is_array($marks) || array_keys($marks) !== array_keys($tokens)) return $result;
+        if (! $words || ! is_array($marks) || array_keys($marks) !== array_keys($tokens)) {
+            return $result;
+        }
         // Missing marks and old yellow notes must not become a perfect reading score.
         foreach ($marks as $mark) {
-            if (!in_array($mark, [0, 2, '0', '2'], true)) return $result;
+            if (! in_array($mark, [0, 2, '0', '2'], true)) {
+                return $result;
+            }
         }
         $result['marked_miscues'] = count(array_filter(array_keys($words), fn ($index) => (int) $marks[$index] === 2));
 
@@ -210,6 +216,7 @@ class PhilIri
             $result['label'] = $questions !== 20 ? '20-item GST required'
                 : ($result['correct_count'] >= 14 ? 'At or above screening cutoff' : 'Further assessment needed');
             $result['comprehension_interpretation'] = self::comprehensionInterpretation($result);
+
             return $result;
         }
 
@@ -275,7 +282,7 @@ class PhilIri
         }
 
         if ($type === 'oral_reading' && $wordCount > 0 && ($result['word_reading_percent'] ?? null) !== null) {
-            if (!empty($result['reviewed_at']) && ($result['miscues'] ?? null) !== null) {
+            if (! empty($result['reviewed_at']) && ($result['miscues'] ?? null) !== null) {
                 $miscues = (int) $result['miscues'];
                 $rows[] = [
                     'label' => 'Word reading',
@@ -319,15 +326,16 @@ class PhilIri
         if ($submission) {
             $pointQuestions = (int) $submission->question_count;
             $pointCorrect = (int) $submission->correct_count;
+            $pointsPerCorrectAnswer = (int) config('gamification.points_per_correct_answer');
 
             if ($pointQuestions > 0) {
                 $rows[] = [
                     'label' => 'Assessment points',
-                    'value' => $pointCorrect.' correct x 250 = '.number_format((int) $submission->points).' points',
+                    'value' => $pointCorrect.' correct x '.$pointsPerCorrectAnswer.' = '.number_format((int) $submission->points).' points',
                 ];
                 $rows[] = [
                     'label' => 'Possible points',
-                    'value' => $pointQuestions.' questions x 250 = '.number_format((int) $submission->possible_points).' points',
+                    'value' => $pointQuestions.' questions x '.$pointsPerCorrectAnswer.' = '.number_format((int) $submission->possible_points).' points',
                 ];
             } elseif ($type === 'oral_reading' && ($result['word_reading_percent'] ?? null) !== null) {
                 $rows[] = [

@@ -2,7 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Assessment, AssessmentProgress, AssessmentRetakeRequest, AssessmentSubmission, AppNotification, User, WorksheetAttempt};
+use App\Models\AppNotification;
+use App\Models\Assessment;
+use App\Models\AssessmentProgress;
+use App\Models\AssessmentRetakeRequest;
+use App\Models\AssessmentSubmission;
+use App\Models\User;
+use App\Models\WorksheetAttempt;
 use App\Support\NumeracyWorksheets;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -32,9 +38,11 @@ class NumeracyWorksheetTest extends TestCase
         $library = NumeracyWorksheets::all();
         $this->assertSame(range(1, 35), array_column($library, 'number'));
         $this->assertSame(71, collect($library)->sum(fn ($sheet) => count($sheet['pages'])));
-        foreach ($library as $sheet) foreach ($sheet['pages'] as $page) {
-            $this->assertFileExists(resource_path('worksheets/aral-g6/'.$page['image']));
-            $this->assertGreaterThan(1000, $page['width']);
+        foreach ($library as $sheet) {
+            foreach ($sheet['pages'] as $page) {
+                $this->assertFileExists(resource_path('worksheets/aral-g6/'.$page['image']));
+                $this->assertGreaterThan(1000, $page['width']);
+            }
         }
     }
 
@@ -81,7 +89,8 @@ class NumeracyWorksheetTest extends TestCase
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $payload = $this->payload($progress, 3);
         $this->actingAs($student)->postJson(route('worksheets.save', $assignment), $payload)->assertOk()->assertJsonPath('revision', 3);
-        $older = $this->payload($progress, 1); $older['pages'][0]['text'] = 'old';
+        $older = $this->payload($progress, 1);
+        $older['pages'][0]['text'] = 'old';
         $this->postJson(route('worksheets.save', $assignment), $older)->assertOk()->assertJsonPath('revision', 3);
         $this->assertSame($payload['pages'], $progress->fresh()->state['pages']);
         $this->get(route('student.assessments.show', $assignment))->assertOk()->assertSee('245 is divisible by 5');
@@ -97,7 +106,8 @@ class NumeracyWorksheetTest extends TestCase
         $payload = $this->payload($progress);
         $payload['pages'][1]['strokes'][0]['points'][0][0] = 2;
         $this->actingAs($student)->postJson(route('worksheets.save', $assignment), $payload)->assertUnprocessable();
-        $payload = $this->payload($progress); $payload['pages'][0]['text'] = '';
+        $payload = $this->payload($progress);
+        $payload['pages'][0]['text'] = '';
         $this->postJson(route('worksheets.submit', $assignment), $payload)->assertUnprocessable();
         $this->postJson(route('student.assessments.submit', $assignment), ['answers' => []])->assertUnprocessable();
         $this->assertDatabaseCount(AssessmentSubmission::class, 0);
@@ -153,7 +163,8 @@ class NumeracyWorksheetTest extends TestCase
 
     public function test_submission_waits_for_teacher_review_then_score_flows_into_activities_and_reports_once(): void
     {
-        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create();
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
         $assignment = $this->assignment($teacher);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $this->actingAs($student)->postJson(route('worksheets.submit', $assignment), $this->payload($progress))->assertOk();
@@ -174,7 +185,7 @@ class NumeracyWorksheetTest extends TestCase
         $this->post(route('worksheets.grade', $attempt), ['score' => 15, 'feedback' => 'Check items 3 and 7.'])->assertSessionHasNoErrors();
         $this->post(route('worksheets.grade', $attempt), ['score' => 20, 'feedback' => 'Duplicate'])->assertRedirect();
         $this->assertDatabaseCount(AssessmentSubmission::class, 1);
-        $this->assertDatabaseHas(AssessmentSubmission::class, ['correct_count' => 15, 'question_count' => 20, 'points' => 3750, 'possible_points' => 5000]);
+        $this->assertDatabaseHas(AssessmentSubmission::class, ['correct_count' => 15, 'question_count' => 20, 'points' => 750, 'possible_points' => 1000]);
         $this->get(route('reports.student', $student))->assertOk()->assertSee($assignment->title);
         $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Worksheet &amp; Teacher Feedback', false)->assertDontSee('Worksheets Awaiting Review');
         $this->get(route('worksheets.review', $attempt))->assertOk()->assertSee('Check items 3 and 7.');
@@ -184,7 +195,8 @@ class NumeracyWorksheetTest extends TestCase
 
     public function test_retry_token_is_consumed_once_at_submission_and_not_again_at_grading(): void
     {
-        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create();
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
         $assignment = $this->assignment($teacher);
         AssessmentSubmission::create(['assessment_id' => $assignment->id, 'user_id' => $student->id, 'attempt_number' => 1,
             'answers' => [], 'correct_count' => 10, 'question_count' => 20, 'points' => 2500, 'possible_points' => 5000, 'submitted_at' => now()]);

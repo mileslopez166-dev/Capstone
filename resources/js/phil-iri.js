@@ -58,8 +58,9 @@ document.addEventListener('assessment:graded', ({ detail }) => {
         }
 
         if (pointQuestions > 0) {
-            rows.push(['Assessment points', `${pointCorrect} correct x 250 = ${formatWhole(detail.points)} points`]);
-            rows.push(['Possible points', `${pointQuestions} questions x 250 = ${formatWhole(detail.possible_points)} points`]);
+            const pointsPerCorrectAnswer = Number(detail.possible_points) / pointQuestions;
+            rows.push(['Assessment points', `${pointCorrect} correct x ${formatWhole(pointsPerCorrectAnswer)} = ${formatWhole(detail.points)} points`]);
+            rows.push(['Possible points', `${pointQuestions} questions x ${formatWhole(pointsPerCorrectAnswer)} = ${formatWhole(detail.possible_points)} points`]);
         } else if (isOral && hasWordReading) {
             rows.push(['Assessment points', '0 question points; oral reading is scored through Phil-IRI.']);
         }

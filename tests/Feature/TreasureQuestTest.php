@@ -31,6 +31,7 @@ class TreasureQuestTest extends TestCase
         $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
         $student = User::factory()->create(['section' => 'Section A', 'avatar_config' => ['character' => 'lyra']]);
         $assessment = Assessment::create($this->payload($overrides) + ['created_by' => $teacher->id]);
+
         return [$teacher, $student, $assessment];
     }
 
@@ -53,11 +54,15 @@ class TreasureQuestTest extends TestCase
         $response->assertOk()->assertSee('id="treasure-scene"', false)->assertSee('id="story-gate"', false)
             ->assertSee('assessment-reading')->assertSee('campus-character-custom')
             ->assertDontSee('id="fishing-sea-scene"', false)->assertDontSee('id="frog-pond-scene"', false);
-        if (getenv('CAPTURE_TREASURE_FIXTURES')) file_put_contents(storage_path('app/treasure-student.html'), $response->getContent());
+        if (getenv('CAPTURE_TREASURE_FIXTURES')) {
+            file_put_contents(storage_path('app/treasure-student.html'), $response->getContent());
+        }
         $response = $this->actingAs($teacher)->get(route('teacher.assessments.take', [$assessment, $student]));
         $response->assertOk()->assertSee('id="treasure-scene"', false)->assertViewHas('student', fn ($value) => $value->is($student))
             ->assertSee(json_encode(route('teacher.assessments.submit', [$assessment, $student])), false);
-        if (getenv('CAPTURE_TREASURE_FIXTURES')) file_put_contents(storage_path('app/treasure-teacher.html'), $response->getContent());
+        if (getenv('CAPTURE_TREASURE_FIXTURES')) {
+            file_put_contents(storage_path('app/treasure-teacher.html'), $response->getContent());
+        }
         $this->actingAs(User::factory()->teacher()->create())->get(route('teacher.assessments.take', [$assessment, $student]))->assertNotFound();
     }
 
@@ -85,8 +90,8 @@ class TreasureQuestTest extends TestCase
             ->assertViewHas('progress', fn ($saved) => $saved->state == $state && $saved->attempt_key === $progress->attempt_key);
         $payload = ['answers' => ['A', 'C'], 'attempt_key' => $progress->attempt_key, 'points' => 99999, 'accuracy' => 100];
         $this->postJson(route('student.assessments.submit', $assessment), $payload)->assertOk()
-            ->assertJsonPath('points', 250)->assertJsonPath('correct_count', 1)->assertJsonPath('question_count', 2)->assertJsonPath('coins_earned', 10);
-        $this->postJson(route('student.assessments.submit', $assessment), $payload)->assertOk()->assertJsonPath('points', 250);
+            ->assertJsonPath('points', 50)->assertJsonPath('correct_count', 1)->assertJsonPath('question_count', 2)->assertJsonPath('coins_earned', 10);
+        $this->postJson(route('student.assessments.submit', $assessment), $payload)->assertOk()->assertJsonPath('points', 50);
         $this->assertDatabaseCount('assessment_submissions', 1);
     }
 }

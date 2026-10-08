@@ -125,7 +125,7 @@ class AssessmentProgressTest extends TestCase
             $payload = ['attempt_key' => $progress->attempt_key, 'answers' => ['A', 'B'], 'state' => $this->state(), 'revision' => 100];
             $this->postJson(route('student.assessments.submit', $assessment), $payload)->assertOk()->assertJsonPath('attempt_number', $attempt);
             $this->postJson(route('student.assessments.submit', $assessment), array_merge($payload, ['answers' => ['C', 'D']]))
-                ->assertOk()->assertJsonPath('attempt_number', $attempt)->assertJsonPath('points', 500);
+                ->assertOk()->assertJsonPath('attempt_number', $attempt)->assertJsonPath('points', 100);
             $this->postJson(route('student.assessments.progress', $assessment), $payload)->assertStatus(409);
             $this->assertSame($attempt < 3 ? 1 : 0, $token->fresh()->remaining_tries);
         }

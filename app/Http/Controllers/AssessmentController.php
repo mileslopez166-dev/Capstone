@@ -7,10 +7,10 @@ use App\Models\AssessmentProgress;
 use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
-use App\Support\AssessmentParticipant;
-use App\Support\AssessmentCoinRewards;
-use App\Support\AssessmentScores;
 use App\Support\AdaptiveQuestions;
+use App\Support\AssessmentCoinRewards;
+use App\Support\AssessmentParticipant;
+use App\Support\AssessmentScores;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\PhilIri;
@@ -47,7 +47,9 @@ class AssessmentController extends Controller
     public function create(Request $request): View|RedirectResponse
     {
         abort_unless($request->user()?->isTeacher(), 403);
-        if ($request->query('subject') === 'numeracy') return redirect()->route('worksheets.index');
+        if ($request->query('subject') === 'numeracy') {
+            return redirect()->route('worksheets.index');
+        }
 
         return view('assessments.create', [
             'storyTemplates' => json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true, 512, JSON_THROW_ON_ERROR),
@@ -57,7 +59,9 @@ class AssessmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         abort_unless($request->user()?->isTeacher(), 403);
-        if ($request->input('subject') === 'numeracy') return redirect()->route('worksheets.index');
+        if ($request->input('subject') === 'numeracy') {
+            return redirect()->route('worksheets.index');
+        }
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -109,9 +113,11 @@ class AssessmentController extends Controller
                 ->all();
 
         $selection = $validated['question_selection'] ?? 'fixed';
-        if ($validated['assessment_type'] === 'oral_reading') $selection = 'fixed';
+        if ($validated['assessment_type'] === 'oral_reading') {
+            $selection = 'fixed';
+        }
         if ($selection === 'automatic') {
-            if (!in_array($validated['assessment_type'], ['silent_reading', 'listening_comprehension'], true)) {
+            if (! in_array($validated['assessment_type'], ['silent_reading', 'listening_comprehension'], true)) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['question_selection' => 'Automatic question selection is available for silent reading and listening comprehension.']);
             }
             AdaptiveQuestions::validateBank($manualQuestions);
@@ -259,7 +265,9 @@ class AssessmentController extends Controller
         $assisted = $request->user()->isTeacher();
 
         $pendingWorksheet = $assessment->worksheetAttempts()->where('user_id', $student->id)->whereNull('reviewed_at')->first();
-        if ($pendingWorksheet) return redirect()->route('worksheets.review', $pendingWorksheet);
+        if ($pendingWorksheet) {
+            return redirect()->route('worksheets.review', $pendingWorksheet);
+        }
 
         return DB::transaction(function () use ($student, $assisted, $assessment) {
             $student = User::query()->lockForUpdate()->findOrFail($student->id);
@@ -399,15 +407,18 @@ class AssessmentController extends Controller
             $progress = AdaptiveQuestions::freeze($progress, $assessment, $student);
             $questions = $progress->question_snapshot ?? [];
             $this->validateAnswerIndexes($validated['answers'], $questions);
-            if (isset($validated['state']['answers'])) $this->validateAnswerIndexes($validated['state']['answers'], $questions);
+            if (isset($validated['state']['answers'])) {
+                $this->validateAnswerIndexes($validated['state']['answers'], $questions);
+            }
             $questionCount = count($questions);
             if (count($validated['answers']) !== $questionCount) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['answers' => 'Answer every question in this attempt before submitting.']);
             }
             $answers = collect($validated['answers'])->mapWithKeys(fn ($answer, $index) => [(int) $index => $answer]);
             $correctCount = collect($questions)->filter(fn ($question, $index) => ($question['correct_answer'] ?? null) === $answers->get($index))->count();
-            $points = $correctCount * 250;
-            $possiblePoints = $questionCount * 250;
+            $pointsPerCorrectAnswer = (int) config('gamification.points_per_correct_answer');
+            $points = $correctCount * $pointsPerCorrectAnswer;
+            $possiblePoints = $questionCount * $pointsPerCorrectAnswer;
 
             $state = $validated['state'] ?? $progress->state ?? [];
             $submission = AssessmentSubmission::query()->create([
@@ -435,6 +446,7 @@ class AssessmentController extends Controller
             $progress->recordAssistance($request->user());
 
             AssessmentCoinRewards::award($submission);
+
             return $submission;
         });
 

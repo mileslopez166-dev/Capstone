@@ -53,7 +53,9 @@ class LiteracyStoryLibraryTest extends TestCase
                 $this->assertNotEmpty($question['question']);
                 $this->assertSame(['A', 'B', 'C', 'D'], array_keys($question['answers']));
                 $this->assertArrayHasKey($question['correct_answer'], $question['answers']);
-                foreach ($question['answers'] as $answer) $this->assertNotEmpty($answer);
+                foreach ($question['answers'] as $answer) {
+                    $this->assertNotEmpty($answer);
+                }
                 $guide = $story['answer_guide'][$number];
                 $this->assertSame($number + 1, $guide['number']);
                 $this->assertSame($question['correct_answer'], $guide['correct_answer']);
@@ -73,7 +75,9 @@ class LiteracyStoryLibraryTest extends TestCase
         $response = $this->actingAs(User::factory()->teacher()->create())->get(route('assessments.create'));
         $response->assertOk()->assertSeeText('Default story')->assertSeeText('Use Story')->assertSeeText('Question difficulty')
             ->assertDontSeeText('The School Garden Project')->assertDontSeeText('The Lost Notebook');
-        foreach ($this->stories() as $story) $response->assertSeeText($story['story_title']);
+        foreach ($this->stories() as $story) {
+            $response->assertSeeText($story['story_title']);
+        }
         $this->assertDatabaseCount('assessments', 0);
     }
 
@@ -138,14 +142,14 @@ class LiteracyStoryLibraryTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create();
         foreach ($this->stories() as $story) {
-          foreach ($story['question_sets'] as $questions) {
-            $this->actingAs($teacher)->post(route('assessments.store'), $this->payload($story, ['manual_questions' => $questions, 'status' => 'published', 'assessment_type' => 'listening_comprehension']))->assertSessionHasNoErrors()->assertRedirect();
-            $assessment = Assessment::latest('id')->firstOrFail();
-            $this->assertEquals($questions, $assessment->manual_questions);
-            $this->actingAs(User::factory()->create())->postJson(route('student.assessments.submit', $assessment), [
-                'answers' => array_column($questions, 'correct_answer'),
-            ])->assertOk()->assertJsonPath('correct_count', 8)->assertJsonPath('points', 2000)->assertJsonPath('phil_iri.level', 'Independent');
-          }
+            foreach ($story['question_sets'] as $questions) {
+                $this->actingAs($teacher)->post(route('assessments.store'), $this->payload($story, ['manual_questions' => $questions, 'status' => 'published', 'assessment_type' => 'listening_comprehension']))->assertSessionHasNoErrors()->assertRedirect();
+                $assessment = Assessment::latest('id')->firstOrFail();
+                $this->assertEquals($questions, $assessment->manual_questions);
+                $this->actingAs(User::factory()->create())->postJson(route('student.assessments.submit', $assessment), [
+                    'answers' => array_column($questions, 'correct_answer'),
+                ])->assertOk()->assertJsonPath('correct_count', 8)->assertJsonPath('points', 400)->assertJsonPath('phil_iri.level', 'Independent');
+            }
         }
     }
 

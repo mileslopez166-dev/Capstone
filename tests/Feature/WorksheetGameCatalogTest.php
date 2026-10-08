@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Assessment, AssessmentProgress, User, WorksheetAttempt};
-use App\Support\{NumeracyWorksheets, WorksheetGames, WorksheetMission};
+use App\Models\Assessment;
+use App\Models\AssessmentProgress;
+use App\Models\User;
+use App\Models\WorksheetAttempt;
+use App\Support\NumeracyWorksheets;
+use App\Support\WorksheetGames;
+use App\Support\WorksheetMission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -52,7 +57,7 @@ class WorksheetGameCatalogTest extends TestCase
         }
         $this->assertSame([], WorksheetGames::namesForWorksheet(NumeracyWorksheets::find(5)));
         $response = $this->actingAs($student)->get(route('student.activities', ['subject' => 'numeracy']))->assertOk();
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         @$dom->loadHTML($response->getContent());
         $xpath = new \DOMXPath($dom);
         $this->assertCount(4, $xpath->query('//*[@data-assessment-games]'));
@@ -111,7 +116,7 @@ class WorksheetGameCatalogTest extends TestCase
         $this->post(route('worksheets.grade', $attempt), ['score' => 8, 'feedback' => 'Reviewed existing work.'])
             ->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame(8, $attempt->fresh()->score);
-        $this->assertDatabaseHas('assessment_submissions', ['assessment_id' => $assessment->id, 'points' => 2000]);
+        $this->assertDatabaseHas('assessment_submissions', ['assessment_id' => $assessment->id, 'points' => 400]);
         $this->actingAs($student)->get(route('student.activities', ['subject' => 'numeracy']))->assertOk()
             ->assertViewHas('completedSubmissions', fn ($items) => $items->count() === 1 && $items->first()->assessment_id === $assessment->id);
         $this->get(route('worksheets.review', $attempt))->assertOk()->assertSee('Reviewed existing work.');

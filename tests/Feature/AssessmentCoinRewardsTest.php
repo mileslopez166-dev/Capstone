@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Assessment, AssessmentProgress, PracticeCoinTransaction, User, WorksheetAttempt};
+use App\Models\Assessment;
+use App\Models\AssessmentProgress;
+use App\Models\PracticeCoinTransaction;
+use App\Models\User;
+use App\Models\WorksheetAttempt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -33,14 +37,14 @@ class AssessmentCoinRewardsTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create();
         $total = 0;
-        foreach ([[0,100,10], [75,100,10], [76,100,20], [90,100,20], [91,100,35], [100,100,35],
-            [3,4,10], [151,200,20], [180,199,20], [181,200,35]] as [$correct, $count, $coins]) {
+        foreach ([[0, 100, 10], [75, 100, 10], [76, 100, 20], [90, 100, 20], [91, 100, 35], [100, 100, 35],
+            [3, 4, 10], [151, 200, 20], [180, 199, 20], [181, 200, 35]] as [$correct, $count, $coins]) {
             $assessment = $this->assessment($teacher, $count);
             $progress = AssessmentProgress::forAttempt($assessment, $student, 1);
             $this->actingAs($student)->postJson(route('student.assessments.submit', $assessment),
                 $this->payload($assessment, $progress, $correct) + ['coins_earned' => 9999, 'accuracy' => 100, 'points' => 999999])
                 ->assertOk()->assertJsonPath('coins_earned', $coins)->assertJsonPath('coins_pending', false)
-                ->assertJsonPath('points', $correct * 250);
+                ->assertJsonPath('points', $correct * 50);
             $total += $coins;
             $this->assertSame($total, $student->practiceCoinBalance());
             $this->assertDatabaseHas('practice_coin_transactions', [

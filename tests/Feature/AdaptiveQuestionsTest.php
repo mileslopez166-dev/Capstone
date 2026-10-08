@@ -18,6 +18,7 @@ class AdaptiveQuestionsTest extends TestCase
     private function payload(array $overrides = []): array
     {
         $story = json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true)[0];
+
         return array_replace([
             'title' => $story['story_title'], 'subject' => 'literacy', 'quiz_type' => 'treasure_quest',
             'assessment_type' => 'silent_reading', 'delivery_method' => 'manual', 'target_section' => 'all',
@@ -35,6 +36,7 @@ class AdaptiveQuestionsTest extends TestCase
     private function open(User $student, Assessment $assessment): AssessmentProgress
     {
         $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk();
+
         return AssessmentProgress::where('assessment_id', $assessment->id)->where('user_id', $student->id)->latest('attempt_number')->firstOrFail();
     }
 
@@ -49,6 +51,7 @@ class AdaptiveQuestionsTest extends TestCase
         }
         $this->postJson(route('student.assessments.submit', $assessment), ['attempt_key' => $progress->attempt_key, 'answers' => $answers])
             ->assertOk()->assertJsonPath('question_count', 8);
+
         return AssessmentSubmission::latest('id')->firstOrFail();
     }
 
@@ -85,7 +88,9 @@ class AdaptiveQuestionsTest extends TestCase
             $response = $this->get(route('student.assessments.show', $assessment));
             $response->assertOk()->assertDontSee('Teacher answer key')->assertDontSee('rules-v1')->assertDontSee('evidence_assessments');
             foreach ($assessment->manual_questions as $index => $question) {
-                if (!in_array($index, array_column($progress->question_snapshot, 'bank_index'), true)) $response->assertDontSee(e($question['question']), false);
+                if (! in_array($index, array_column($progress->question_snapshot, 'bank_index'), true)) {
+                    $response->assertDontSee(e($question['question']), false);
+                }
             }
             $this->assertArrayNotHasKey('question_snapshot', $progress->toArray());
         }
@@ -121,7 +126,7 @@ class AdaptiveQuestionsTest extends TestCase
         $submission = $this->submit($assessment, $progress, fn ($level, $index) => $index !== 0);
         $this->assertSame($snapshot, $submission->questionsForReview());
         $this->assertSame(5, $submission->correct_count);
-        $this->assertSame(1250, $submission->points);
+        $this->assertSame(250, $submission->points);
         $this->assertCount(3, PracticeSuggestions::forSubmission($submission));
         $this->get(route('student.activities', ['subject' => 'literacy']))->assertOk()
             ->assertViewHas('completedSubmissions', fn ($rows) => $rows->first()->review_items->pluck('question')->all() === array_column($snapshot, 'question'));
@@ -139,12 +144,14 @@ class AdaptiveQuestionsTest extends TestCase
         $answers = array_column($progress->question_snapshot, 'correct_answer');
         $this->postJson(route('student.assessments.submit', $assessment), ['answers' => $answers])->assertUnprocessable();
         $this->postJson(route('student.assessments.submit', $assessment), ['attempt_key' => $progress->attempt_key, 'answers' => array_fill(0, 32, 'A')])->assertUnprocessable();
-        $bad = $answers; unset($bad[0]); $bad['00'] = 'A';
+        $bad = $answers;
+        unset($bad[0]);
+        $bad['00'] = 'A';
         $this->postJson(route('student.assessments.submit', $assessment), ['attempt_key' => $progress->attempt_key, 'answers' => $bad])->assertUnprocessable();
         $this->actingAs(User::factory()->create())->postJson(route('student.assessments.submit', $assessment), ['attempt_key' => $progress->attempt_key, 'answers' => $answers])->assertNotFound();
         $this->actingAs($student)->postJson(route('student.assessments.submit', $assessment), [
             'attempt_key' => $progress->attempt_key, 'answers' => $answers, 'question_snapshot' => [], 'selection_context' => ['plan' => 'support'], 'points' => 99999,
-        ])->assertOk()->assertJsonPath('points', 2000)->assertJsonMissingPath('selection_context');
+        ])->assertOk()->assertJsonPath('points', 400)->assertJsonMissingPath('selection_context');
         $this->postJson(route('student.assessments.submit', $assessment), ['attempt_key' => $progress->attempt_key, 'answers' => $answers])->assertOk();
         $this->assertDatabaseCount('assessment_submissions', 1);
         $this->assertSame($progress->question_snapshot, AssessmentSubmission::firstOrFail()->question_snapshot);
@@ -168,7 +175,9 @@ class AdaptiveQuestionsTest extends TestCase
         ])->assertOk()->assertJsonPath('correct_count', 8);
         $submission = AssessmentSubmission::firstOrFail();
         $this->assertSame($student->id, $submission->user_id);
-        if (getenv('CAPTURE_ADAPTIVE_FIXTURES')) file_put_contents(storage_path('app/adaptive-report.html'), $this->get(route('teacher.phil-iri.show', $submission))->getContent());
+        if (getenv('CAPTURE_ADAPTIVE_FIXTURES')) {
+            file_put_contents(storage_path('app/adaptive-report.html'), $this->get(route('teacher.phil-iri.show', $submission))->getContent());
+        }
     }
 
     public function test_placement_ignores_other_students_teachers_subjects_modes_and_duplicate_retakes(): void

@@ -22,7 +22,7 @@
         default => ['label' => 'Bronze', 'class' => 'student-mini-tier-bronze text-white ring-orange-100 shadow-[0_0_16px_rgba(251,146,60,0.48)]'],
     };
     $studentXp = max(0, (int) ($student?->assessmentSubmissions()->sum('points') ?? 0));
-    $xpPerLevel = 500;
+    $xpPerLevel = (int) config('gamification.xp_per_level');
     $studentLevel = intdiv($studentXp, $xpPerLevel) + 1;
     $levelXp = $studentXp % $xpPerLevel;
     $links = [

@@ -8,8 +8,8 @@ use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
 use App\Models\WorksheetAttempt;
-use App\Support\AssessmentParticipant;
 use App\Support\AssessmentCoinRewards;
+use App\Support\AssessmentParticipant;
 use App\Support\NotificationSender;
 use App\Support\NumeracyWorksheets;
 use Illuminate\Http\Request;
@@ -24,12 +24,14 @@ class WorksheetController extends Controller
     public function mission(Request $request)
     {
         abort_unless($request->user()->isStudent(), 403);
+
         return view('worksheets.mission', ['mission' => \App\Support\WorksheetMission::forStudent($request->user())]);
     }
 
     public function index(Request $request)
     {
         abort_unless($request->user()->isTeacher(), 403);
+
         return view('worksheets.index', [
             'worksheets' => NumeracyWorksheets::gameEnabled(),
         ]);
@@ -38,6 +40,7 @@ class WorksheetController extends Controller
     public function reviews(Request $request)
     {
         abort_unless($request->user()->isTeacher(), 403);
+
         return view('worksheets.reviews', [
             'reviews' => WorksheetAttempt::with(['assessment', 'student'])
                 ->whereHas('assessment', fn ($query) => $query->where('created_by', $request->user()->id))
@@ -49,6 +52,7 @@ class WorksheetController extends Controller
     {
         abort_unless($request->user()->isTeacher(), 403);
         abort_unless(in_array($number, NumeracyWorksheets::gameEnabledNumbers(), true), 404);
+
         return view('worksheets.create', ['worksheet' => NumeracyWorksheets::find($number)]);
     }
 
@@ -71,7 +75,10 @@ class WorksheetController extends Controller
             'focus_areas' => ['Problem Solving'], 'manual_questions' => [],
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
         ]));
-        if ($assessment->status === 'published') NotificationSender::notifyAssessmentPublished($assessment);
+        if ($assessment->status === 'published') {
+            NotificationSender::notifyAssessmentPublished($assessment);
+        }
+
         return redirect()->route('assessments.show', $assessment)->with('status', 'Worksheet assessment created.');
     }
 
@@ -96,6 +103,7 @@ class WorksheetController extends Controller
             abort_unless(is_string($request->query('figure')) && $allowed->containsStrict($request->query('figure')), 404);
             $filename = $request->query('figure');
         }
+
         return response()->file(resource_path('worksheets/aral-g6/'.$filename), ['Cache-Control' => 'private, max-age=3600']);
     }
 
@@ -143,7 +151,9 @@ class WorksheetController extends Controller
         abort_unless(array_keys($data['pages']) === range(0, $count - 1), 422, 'Invalid worksheet pages.');
         foreach ($data['pages'] as $pageIndex => &$page) {
             $page['text'] = $page['text'] ?? '';
-            if (isset($page['responses'])) $page['responses'] = \App\Support\WorksheetResponses::validate($page['responses'], $templates[$pageIndex]['responses']);
+            if (isset($page['responses'])) {
+                $page['responses'] = \App\Support\WorksheetResponses::validate($page['responses'], $templates[$pageIndex]['responses']);
+            }
             if (isset($page['answers'])) {
                 abort_unless(array_is_list($page['answers']), 422, 'Invalid worksheet answers.');
                 $page['answers'] = array_map(fn ($entry) => ['label' => $entry['label'] ?? '', 'answer' => $entry['answer'] ?? ''], $page['answers']);
@@ -151,14 +161,19 @@ class WorksheetController extends Controller
             $grids = NumeracyWorksheets::grids($templates[$pageIndex]);
             foreach ($page['shading'] ?? [] as $key => $cells) {
                 abort_unless(isset($grids[$key]) && array_is_list($cells) && count($cells) === count(array_unique($cells)), 422, 'Invalid fraction model.');
-                foreach ($cells as $cell) abort_unless($cell < $grids[$key], 422, 'Invalid fraction model cell.');
+                foreach ($cells as $cell) {
+                    abort_unless($cell < $grids[$key], 422, 'Invalid fraction model cell.');
+                }
             }
             abort_unless(array_is_list($page['strokes']), 422, 'Invalid drawing strokes.');
             foreach ($page['strokes'] as $stroke) {
                 abort_unless(array_is_list($stroke['points']), 422, 'Invalid drawing points.');
-                foreach ($stroke['points'] as $point) abort_unless(array_keys($point) === [0, 1], 422, 'Invalid drawing point.');
+                foreach ($stroke['points'] as $point) {
+                    abort_unless(array_keys($point) === [0, 1], 422, 'Invalid drawing point.');
+                }
             }
         }
+
         return $data;
     }
 
@@ -166,6 +181,7 @@ class WorksheetController extends Controller
     {
         $student = $this->authorizeStudent($request, $assessment, $student);
         $data = $this->validatedState($request, $assessment);
+
         return DB::transaction(function () use ($request, $student, $assessment, $data) {
             User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $progress = $this->progress($student, $assessment, $data['attempt_key']);
@@ -174,6 +190,7 @@ class WorksheetController extends Controller
                 $progress->update(['revision' => $data['revision'], 'state' => ['pages' => $data['pages'], 'page' => $data['page'], 'step' => $data['step'] ?? 'read', 'phase' => 'questions']]);
                 $progress->recordAssistance($request->user());
             }
+
             return response()->json(['revision' => $progress->revision]);
         });
     }
@@ -192,13 +209,17 @@ class WorksheetController extends Controller
             $student = User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $progress = $this->progress($student, $assessment, $data['attempt_key']);
             $existing = WorksheetAttempt::where('progress_id', $progress->id)->first();
-            if ($existing) return $existing;
+            if ($existing) {
+                return $existing;
+            }
             abort_unless($data['revision'] >= $progress->revision, 409, 'Newer answers were saved in another tab. Reload before submitting.');
             $count = $assessment->submissions()->where('user_id', $student->id)->count();
             abort_unless(! $progress->submission_id && $progress->attempt_number === $count + 1, 409);
             $templates = NumeracyWorksheets::find($assessment->worksheet_number)['pages'];
             foreach ($data['pages'] as $pageIndex => $page) {
-                if ($templates[$pageIndex]['reading']['reading_only'] ?? false) continue;
+                if ($templates[$pageIndex]['reading']['reading_only'] ?? false) {
+                    continue;
+                }
                 $hasAnswers = collect($page['answers'] ?? [])->contains(fn ($entry) => trim($entry['answer']) !== '');
                 $hasShading = collect($page['shading'] ?? [])->contains(fn ($cells) => count($cells) > 0);
                 $hasResponses = \App\Support\WorksheetResponses::hasAnswer($page['responses'] ?? []);
@@ -216,8 +237,10 @@ class WorksheetController extends Controller
             $progress->recordAssistance($request->user());
             NotificationSender::sendToUsers([$assessment->teacher], 'worksheet_submitted', 'Worksheet ready for review',
                 $student->name.' submitted '.$assessment->title, route('worksheets.review', $attempt));
+
             return $attempt;
         });
+
         return response()->json(['url' => route('worksheets.review', $attempt)]);
     }
 
@@ -226,6 +249,7 @@ class WorksheetController extends Controller
         $attempt->load(['assessment', 'student', 'progress.submission.coinReward', 'progress.administrator']);
         $teacher = $request->user()->isTeacher() && $attempt->assessment->created_by === $request->user()->id;
         abort_unless($teacher || ($request->user()->isStudent() && $attempt->user_id === $request->user()->id), 404);
+
         return view('worksheets.review', ['attempt' => $attempt, 'assessment' => $attempt->assessment,
             'worksheet' => NumeracyWorksheets::find($attempt->assessment->worksheet_number), 'teacher' => $teacher]);
     }
@@ -234,6 +258,7 @@ class WorksheetController extends Controller
     {
         $student = $this->authorizeStudent($request, $assessment, $student);
         $request->validate(['attempt_key' => ['required', 'uuid'], 'password' => ['sometimes', 'required', 'string', 'max:1024']]);
+
         return DB::transaction(function () use ($request, $student, $assessment) {
             User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $progress = $this->progress($student, $assessment, $request->input('attempt_key'));
@@ -250,6 +275,7 @@ class WorksheetController extends Controller
                 }
                 $progress->forceFill(['multiplication_table_unlocked_at' => now()])->save();
             }
+
             return response()->json(['table' => array_map(fn ($row) => array_map(fn ($column) => $row * $column, range(1, 12)), range(1, 12))])
                 ->header('Cache-Control', 'private, no-store');
         });
@@ -264,12 +290,16 @@ class WorksheetController extends Controller
         DB::transaction(function () use ($attempt, $data) {
             User::whereKey($attempt->user_id)->lockForUpdate()->firstOrFail();
             $attempt = WorksheetAttempt::whereKey($attempt->id)->lockForUpdate()->firstOrFail();
-            if ($attempt->reviewed_at) return;
+            if ($attempt->reviewed_at) {
+                return;
+            }
             $submission = AssessmentSubmission::create([
                 'assessment_id' => $attempt->assessment_id, 'user_id' => $attempt->user_id,
                 'attempt_number' => $attempt->progress->attempt_number, 'answers' => [],
                 'correct_count' => $data['score'], 'question_count' => $attempt->total,
-                'points' => $data['score'] * 250, 'possible_points' => $attempt->total * 250, 'submitted_at' => $attempt->created_at,
+                'points' => $data['score'] * (int) config('gamification.points_per_correct_answer'),
+                'possible_points' => $attempt->total * (int) config('gamification.points_per_correct_answer'),
+                'submitted_at' => $attempt->created_at,
             ]);
             $attempt->progress->update(['submission_id' => $submission->id]);
             $attempt->update(['score' => $data['score'], 'feedback' => $data['feedback'], 'reviewed_at' => now()]);
@@ -277,6 +307,7 @@ class WorksheetController extends Controller
             NotificationSender::sendToUsers([$attempt->student], 'worksheet_graded', 'Your worksheet has been checked',
                 $attempt->assessment->title, route('worksheets.review', $attempt));
         });
+
         return back()->with('status', 'Worksheet score saved.');
     }
 }

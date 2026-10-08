@@ -30,6 +30,7 @@ class PhilIriScoringTest extends TestCase
     private function submit(Assessment $assessment, User $student, int $correct, array $extra = [])
     {
         $count = count($assessment->manual_questions);
+
         return $this->actingAs($student)->postJson(route('student.assessments.submit', $assessment), array_merge([
             'answers' => array_merge(array_fill(0, $correct, 'A'), array_fill(0, $count - $correct, 'B')),
         ], $extra));
@@ -44,7 +45,7 @@ class PhilIriScoringTest extends TestCase
             ->assertJsonPath('phil_iri.assessment_type_label', 'Silent Reading Assessment')
             ->assertJsonPath('phil_iri.measure', 'Silent reading comprehension')
             ->assertJsonPath('phil_iri.practice_recommendation.label', 'Enrichment challenge')
-            ->assertJsonPath('points', 1000)->assertJsonPath('possible_points', 1250);
+            ->assertJsonPath('points', 200)->assertJsonPath('possible_points', 250);
         $submission = AssessmentSubmission::firstOrFail();
         $this->assertSame(PhilIri::VERSION, $submission->phil_iri['version']);
         $this->assertSame('Independent', $submission->phil_iri['comprehension_level']);
@@ -53,7 +54,7 @@ class PhilIriScoringTest extends TestCase
         $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Silent Reading Assessment')->assertSee('Independent')->assertSee('Comprehension interpretation')->assertSee($interpretation)
             ->assertSeeText('Enrichment challenge')->assertSeeText('Move into a harder reading task')->assertSeeText('Open enrichment practice')
             ->assertSeeText('Score and points formula')->assertSeeText('Reading comprehension')->assertSeeText('4 / 5 x 100 = 80%')
-            ->assertSeeText('4 correct x 250 = 1,000 points')->assertSeeText('5 questions x 250 = 1,250 points');
+            ->assertSeeText('4 correct x 50 = 200 points')->assertSeeText('5 questions x 50 = 250 points');
         $this->actingAs($student)->get(route('student.dashboard'))->assertOk()->assertSeeText('Next: Enrichment challenge');
         $this->actingAs($teacher)->get(route('reports.student', $student))->assertOk()->assertSee('Phil-IRI scoring')->assertSee('Independent')->assertSee($interpretation)->assertSeeText('Assign practice mission');
         $this->get(route('students.show', $student))->assertOk()->assertSee($interpretation);
@@ -76,7 +77,7 @@ class PhilIriScoringTest extends TestCase
             ->assertSeeText('Listening Comprehension Assessment')
             ->assertSeeText('Listening comprehension')
             ->assertSeeText('3 / 5 x 100 = 60%')
-            ->assertSeeText('3 correct x 250 = 750 points');
+            ->assertSeeText('3 correct x 50 = 150 points');
         $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
             ->assertSeeText('Listening Comprehension Assessment')
             ->assertSeeText('Listening comprehension')
@@ -88,7 +89,7 @@ class PhilIriScoringTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $assessment = $this->assessment($teacher, 'silent_reading', 5, 'numeracy');
         $student = User::factory()->create();
-        $this->submit($assessment, $student, 3)->assertOk()->assertJsonPath('phil_iri', null)->assertJsonPath('points', 750);
+        $this->submit($assessment, $student, 3)->assertOk()->assertJsonPath('phil_iri', null)->assertJsonPath('points', 150);
         $this->get(route('student.activities'))->assertOk()->assertDontSee('Phil-IRI-based result');
         $this->actingAs($teacher)->get(route('teacher.phil-iri.show', AssessmentSubmission::firstOrFail()))->assertNotFound();
     }
@@ -327,7 +328,7 @@ class PhilIriScoringTest extends TestCase
         $this->actingAs($teacher)->get(route('reports.student', $student))->assertOk()->assertSee($interpretation);
         $this->assertSame($interpretation, PhilIri::forSubmission($submission->fresh())['comprehension_interpretation']);
         $this->assertEquals($snapshot, $submission->fresh()->phil_iri);
-        $this->assertEquals(750, $submission->fresh()->points);
+        $this->assertEquals(150, $submission->fresh()->points);
     }
 
     public function test_teacher_revisions_refresh_the_comprehension_interpretation(): void

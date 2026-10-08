@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Assessment;
-use App\Models\AssessmentSubmission;
 use App\Models\AssessmentRetakeRequest;
+use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -56,8 +56,8 @@ class StudentAssessmentSubmissionTest extends TestCase
             ->assertJson([
                 'correct_count' => 1,
                 'question_count' => 2,
-                'points' => 250,
-                'possible_points' => 500,
+                'points' => 50,
+                'possible_points' => 100,
                 'accuracy' => 50.0,
             ]);
 
@@ -66,8 +66,8 @@ class StudentAssessmentSubmissionTest extends TestCase
             'user_id' => $student->id,
             'correct_count' => 1,
             'question_count' => 2,
-            'points' => 250,
-            'possible_points' => 500,
+            'points' => 50,
+            'possible_points' => 100,
         ]);
     }
 
@@ -165,6 +165,7 @@ class StudentAssessmentSubmissionTest extends TestCase
             'remaining_tries' => 1,
         ]);
     }
+
     public function test_student_is_redirected_to_dashboard_when_retake_token_is_needed(): void
     {
         $teacher = User::factory()->teacher()->create();
@@ -213,6 +214,7 @@ class StudentAssessmentSubmissionTest extends TestCase
             'remaining_tries' => 0,
         ]);
     }
+
     public function test_oral_reading_assessment_shows_pronunciation_legend(): void
     {
         $teacher = User::factory()->teacher()->create();

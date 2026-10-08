@@ -73,12 +73,12 @@ class TeacherAssistedAssessmentTest extends TestCase
         $this->get(route('teacher.assessments.take', [$assessment, $student]))->assertOk()
             ->assertViewHas('progress', fn ($saved) => $saved->state == $this->state() && $saved->attempt_key === $progress->attempt_key);
         $this->postJson(route('teacher.assessments.submit', [$assessment, $student]), $payload + ['answers' => ['A']])
-            ->assertOk()->assertJsonPath('points', 250);
+            ->assertOk()->assertJsonPath('points', 50);
         $this->postJson(route('teacher.assessments.submit', [$assessment, $student]), $payload + ['answers' => ['B']])
-            ->assertOk()->assertJsonPath('points', 250);
+            ->assertOk()->assertJsonPath('points', 50);
         $this->assertAuthenticatedAs($teacher);
         $this->assertDatabaseCount('assessment_submissions', 1);
-        $this->assertDatabaseHas('assessment_submissions', ['assessment_id' => $assessment->id, 'user_id' => $student->id, 'points' => 250]);
+        $this->assertDatabaseHas('assessment_submissions', ['assessment_id' => $assessment->id, 'user_id' => $student->id, 'points' => 50]);
         $this->assertDatabaseMissing('assessment_submissions', ['user_id' => $teacher->id]);
         $this->assertSame($teacher->id, $progress->fresh()->administered_by);
         $this->actingAs($student)->get(route('student.activities'))->assertOk()
@@ -217,7 +217,7 @@ class TeacherAssistedAssessmentTest extends TestCase
         $this->get(route('worksheets.review', $attempt))->assertOk()->assertSee('Teacher-assisted: '.$teacher->name);
         $this->postJson(route('teacher.assessments.worksheet.save', [$assessment, $student]), $data)->assertStatus(409);
         $this->post(route('worksheets.grade', $attempt), ['score' => 17, 'feedback' => 'Good working. Review divisibility by 9.'])->assertRedirect();
-        $this->assertDatabaseHas('assessment_submissions', ['user_id' => $student->id, 'assessment_id' => $assessment->id, 'points' => 4250]);
+        $this->assertDatabaseHas('assessment_submissions', ['user_id' => $student->id, 'assessment_id' => $assessment->id, 'points' => 850]);
         $this->assertAuthenticatedAs($teacher);
         $this->actingAs($student)->get(route('worksheets.review', $attempt))->assertOk()->assertSee('17 / 20');
         $this->actingAs(User::factory()->teacher()->create())->get(route('worksheets.review', $attempt))->assertNotFound();

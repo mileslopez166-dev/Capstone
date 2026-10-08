@@ -24,7 +24,7 @@ class MLPredictionServiceTest extends TestCase
             'ml.endpoint' => 'http://127.0.0.1:8001',
             'ml.model_name' => 'reading_level_random_forest_v1',
         ]);
-        Http::swap(new Factory());
+        Http::swap(new Factory);
         Http::preventStrayRequests();
     }
 
@@ -148,7 +148,7 @@ class MLPredictionServiceTest extends TestCase
             ['method' => 'held_out_test', 'accuracy' => null, 'test_rows' => 100],
             ['method' => 'held_out_test', 'accuracy' => 0.8, 'test_rows' => 0],
         ] as $evaluation) {
-            Http::swap(new Factory());
+            Http::swap(new Factory);
             Http::fake(['*' => Http::response(['prediction' => 'Independent', 'evaluation' => $evaluation])]);
             $this->assertNull(app(MLPredictionService::class)->predictForSubmission($submission)->model_evaluation);
         }
@@ -165,7 +165,7 @@ class MLPredictionServiceTest extends TestCase
         $this->actingAs($student)->get(route('student.assessments.show', $assessment))
             ->assertOk()->assertSee('data-ml-live', false);
         $this->postJson(route('student.assessments.submit', $assessment), ['answers' => ['A']])
-            ->assertOk()->assertJsonPath('accuracy', 100)->assertJsonPath('points', 250)
+            ->assertOk()->assertJsonPath('accuracy', 100)->assertJsonPath('points', 50)
             ->assertJsonPath('ml_prediction.confidence', 0.89)
             ->assertJsonPath('ml_prediction.evaluation.accuracy', 0.925);
     }
@@ -272,7 +272,7 @@ class MLPredictionServiceTest extends TestCase
         config(['ml.enabled' => true]);
         foreach ([Http::response([], 503), Http::response(['prediction' => 'Unknown'])] as $response) {
             \Illuminate\Support\Facades\Cache::flush();
-            Http::swap(new Factory());
+            Http::swap(new Factory);
             Http::fake(['*' => $response]);
             $this->getJson($url)->assertOk()->assertJsonPath('status', 'unavailable')
                 ->assertJsonPath('prediction', null)->assertJsonPath('overall_percentage', 100);
