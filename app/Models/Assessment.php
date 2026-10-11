@@ -15,6 +15,12 @@ class Assessment extends Model
 
     public const UNLIMITED_RETRY_LIMIT = 65535;
 
+    public const DEFAULT_QUESTION_TIME_LIMIT_SECONDS = 120;
+
+    public const MIN_QUESTION_TIME_LIMIT_SECONDS = 10;
+
+    public const MAX_QUESTION_TIME_LIMIT_SECONDS = 3600;
+
     protected $fillable = [
         'title',
         'subject',
@@ -31,6 +37,7 @@ class Assessment extends Model
         'story_description',
         'status',
         'retry_limit',
+        'question_time_limit_seconds',
         'created_by',
         'worksheet_number',
         'worksheet_total',
@@ -38,6 +45,7 @@ class Assessment extends Model
 
     protected $casts = [
         'retry_limit' => 'integer',
+        'question_time_limit_seconds' => 'integer',
         'worksheet_number' => 'integer',
         'worksheet_total' => 'integer',
         'focus_areas' => 'array',
@@ -102,5 +110,15 @@ class Assessment extends Model
         }
 
         return max(0, 1 + (int) $this->retry_limit - $completedAttempts);
+    }
+
+    public function questionTimeLimitParts(): array
+    {
+        $seconds = (int) ($this->question_time_limit_seconds ?: self::DEFAULT_QUESTION_TIME_LIMIT_SECONDS);
+
+        return [
+            'minutes' => intdiv($seconds, 60),
+            'seconds' => $seconds % 60,
+        ];
     }
 }

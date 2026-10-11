@@ -30,6 +30,7 @@
             : 'Unlock this assessment? Students will be able to answer it.';
         $retryLimitFormValue = old('retry_limit', $assessment->retryLimitFormValue());
         $totalIncludedAttempts = 1 + (int) $assessment->retry_limit;
+        $questionTimeParts = $assessment->questionTimeLimitParts();
     @endphp
 
     <div class="min-h-screen bg-surface lg:flex" x-data="{ mobileMenuOpen: false }">
@@ -114,6 +115,28 @@
                     @error('retry_limit')
                         <p class="w-full text-sm text-error">{{ $message }}</p>
                     @enderror
+                </form>
+
+                <form class="mb-8 flex flex-wrap items-end gap-4 border-b border-outline-variant/20 pb-6" method="POST" action="{{ route('assessments.timing', $assessment) }}">
+                    @csrf
+                    @method('PATCH')
+                    <fieldset>
+                        <legend class="mb-2 block text-sm font-bold">Time per question</legend>
+                        <div class="flex gap-3">
+                            <label class="text-xs font-semibold text-on-surface-variant" for="question_time_minutes">Minutes
+                                <input class="mt-1 block w-24 rounded-lg border-outline-variant/30 bg-white p-3 text-on-surface" id="question_time_minutes" name="question_time_minutes" type="number" min="0" max="60" inputmode="numeric" value="{{ old('question_time_minutes', $questionTimeParts['minutes']) }}" required>
+                            </label>
+                            <label class="text-xs font-semibold text-on-surface-variant" for="question_time_seconds">Seconds
+                                <input class="mt-1 block w-24 rounded-lg border-outline-variant/30 bg-white p-3 text-on-surface" id="question_time_seconds" name="question_time_seconds" type="number" min="0" max="59" inputmode="numeric" value="{{ old('question_time_seconds', $questionTimeParts['seconds']) }}" required>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-on-primary" type="submit">
+                        <span class="material-symbols-outlined text-lg">timer</span>Save Time Limit
+                    </button>
+                    <p class="py-3 text-sm text-on-surface-variant">The game advances automatically when this time expires.</p>
+                    @error('question_time_minutes')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
+                    @error('question_time_seconds')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
                 </form>
 
                 <section class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-lowest shadow-[0_24px_70px_rgba(0,94,159,0.08)]">

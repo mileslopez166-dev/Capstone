@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     expose:
       - "${APP_PORT:-80}"
-    environment:
+    environment: &app-environment
       APP_NAME: ${APP_NAME:-AI-PGAALS}
       APP_ENV: ${APP_ENV:-production}
       APP_PORT: ${APP_PORT:-80}
@@ -26,7 +26,7 @@ services:
       BROADCAST_DRIVER: ${BROADCAST_DRIVER:-log}
       CACHE_DRIVER: ${CACHE_DRIVER:-file}
       FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
       SESSION_DRIVER: ${SESSION_DRIVER:-database}
       SESSION_DOMAIN: ${SESSION_DOMAIN:-smartlearn6.site}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
@@ -54,12 +54,32 @@ services:
       ML_PREDICTION_API_URL: http://ml-api:8001
       ML_PREDICTION_TIMEOUT: ${ML_PREDICTION_TIMEOUT:-5}
       ML_READING_MODEL_NAME: ${ML_READING_MODEL_NAME:-reading_level_random_forest_v1}
+      ML_ADMIN_TOKEN: ${ML_ADMIN_TOKEN:-}
+      ML_TRAINING_TIMEOUT: ${ML_TRAINING_TIMEOUT:-900}
+      ML_MINIMUM_TRAINING_ROWS: ${ML_MINIMUM_TRAINING_ROWS:-30}
+      ML_HYBRID_ALPHA: ${ML_HYBRID_ALPHA:-0.7}
       VITE_APP_NAME: ${VITE_APP_NAME:-AI-PGAALS}
       VITE_PUSHER_APP_KEY: ${VITE_PUSHER_APP_KEY:-}
       VITE_PUSHER_HOST: ${VITE_PUSHER_HOST:-}
       VITE_PUSHER_PORT: ${VITE_PUSHER_PORT:-443}
       VITE_PUSHER_SCHEME: ${VITE_PUSHER_SCHEME:-https}
       VITE_PUSHER_APP_CLUSTER: ${VITE_PUSHER_APP_CLUSTER:-mt1}
+    volumes:
+      - app_storage:/var/www/html/storage
+    depends_on:
+      database:
+        condition: service_healthy
+      ml-api:
+        condition: service_started
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 21m
+    command: ["php", "artisan", "queue:work", "--queue=ai,default", "--sleep=3", "--tries=1", "--timeout=1200"]
+    environment: *app-environment
     volumes:
       - app_storage:/var/www/html/storage
     depends_on:
@@ -77,6 +97,10 @@ services:
       - "8001"
     environment:
       ML_MODEL_PATH: /models/reading_level_model.pkl
+      ML_MODEL_ROOT: /models
+      ML_ADMIN_TOKEN: ${ML_ADMIN_TOKEN:-}
+    volumes:
+      - ml_models:/models
 
   database:
     image: mysql:8.0
@@ -108,3 +132,4 @@ services:
 volumes:
   app_storage:
   db_data:
+  ml_models:

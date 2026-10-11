@@ -38,7 +38,8 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // Model evaluations may run for up to 1200 seconds.
+            'retry_after' => 1260,
             'after_commit' => false,
         ],
 

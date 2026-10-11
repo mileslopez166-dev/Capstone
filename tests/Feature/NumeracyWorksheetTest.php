@@ -54,12 +54,14 @@ class NumeracyWorksheetTest extends TestCase
         $this->get(route('worksheets.create', 25))->assertNotFound();
         $this->get(route('worksheets.create', 36))->assertNotFound();
         $this->post(route('worksheets.store', 1), ['title' => 'Divisibility workbook', 'target_section' => 'section_a',
-            'worksheet_total' => 18, 'retry_limit' => 'unlimited', 'status' => 'draft', 'created_by' => 999])
+            'worksheet_total' => 18, 'retry_limit' => 'unlimited', 'question_time_minutes' => 3,
+            'question_time_seconds' => 15, 'status' => 'draft', 'created_by' => 999])
             ->assertSessionHasNoErrors()->assertRedirect();
         $assignment = Assessment::firstOrFail();
         $this->assertSame($teacher->id, $assignment->created_by);
         $this->assertSame(1, $assignment->worksheet_number);
         $this->assertTrue($assignment->hasUnlimitedRetries());
+        $this->assertSame(195, $assignment->question_time_limit_seconds);
         $this->get(route('assessments.show', $assignment))->assertOk()->assertSee('18 scored items');
         $this->assertDatabaseCount(AssessmentSubmission::class, 0);
         $this->actingAs(User::factory()->create())->get(route('worksheets.index'))->assertForbidden();

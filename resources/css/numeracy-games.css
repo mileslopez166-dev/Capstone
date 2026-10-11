@@ -6,6 +6,12 @@
 .numeracy-game { --ng-line: #abc3ce; --ng-ink: #203f4b; --ng-paper: #fff; --ng-soft: #edf5f7; color: var(--ng-ink); border: 1px solid var(--ng-line); border-radius: 8px; background: var(--ng-paper); overflow: hidden; }
 .numeracy-game-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 20px 8px; }
 .numeracy-game-header h3 { font-size: 21px; font-weight: 800; margin: 0; }
+.numeracy-game-header-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.numeracy-game-timer { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 5px 9px; border: 1px solid #82bea5; border-radius: 5px; background: #e8f7ef; color: #155b44; font-variant-numeric: tabular-nums; }
+.numeracy-game-timer[hidden] { display: none; }
+.numeracy-game-timer .material-symbols-outlined { font-size: 18px; }
+.numeracy-game-timer[data-urgency=warning] { border-color: #d4a431; background: #fff4cd; color: #76520b; }
+.numeracy-game-timer[data-urgency=critical] { border-color: #d45b66; background: #ffebed; color: #97283a; }
 .numeracy-game-score { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
 .numeracy-game-score .material-symbols-outlined { color: #a8750b; }
 .numeracy-game-progress { display: flex; align-items: center; gap: 18px; padding: 4px 20px 16px; font-size: 13px; }
@@ -61,6 +67,9 @@
 .numeracy-game-summary p { margin-bottom: 20px; line-height: 1.6; }
 .numeracy-game[data-summary=true] :is(.numeracy-scene, .numeracy-game-body) { display: none; }
 html.dark .numeracy-game { --ng-line: #566a78; --ng-ink: #e5eff3; --ng-paper: #172931; --ng-soft: #263c47; }
+html.dark .numeracy-game-timer { border-color: #6fb697; background: #17372f; color: #e7fff4; }
+html.dark .numeracy-game-timer[data-urgency=warning] { border-color: #d5ad4c; background: #493d1f; color: #fff3c4; }
+html.dark .numeracy-game-timer[data-urgency=critical] { border-color: #e17b84; background: #4a242a; color: #ffe9eb; }
 html.dark .numeracy-game[data-result=correct] .numeracy-feedback { color: #8ddcb5; }
 html.dark .numeracy-game[data-result=incorrect] .numeracy-feedback { color: #ffa7ac; }
 html.dark .numeracy-mode-switch button { background: #172931; color: #e5eff3; }
@@ -68,6 +77,7 @@ html.dark .numeracy-mode-switch button[aria-pressed=true] { background: #267b70;
 @media (max-width: 480px) {
     .numeracy-game-header { padding: 14px 12px 8px; }
     .numeracy-game-header h3 { font-size: 19px; }
+    .numeracy-game-header-status { width: 100%; justify-content: space-between; }
     .numeracy-game-progress { padding-inline: 12px; gap: 10px; }
     .numeracy-game-body { padding: 14px 12px; }
     .numeracy-scene { min-height: 205px; padding: 18px 12px; }
@@ -85,3 +95,90 @@ html.dark .numeracy-mode-switch button[aria-pressed=true] { background: #267b70;
 @media (max-width: 360px) { .numeracy-game[data-game=puzzle] .numeracy-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .numeracy-exhaust { animation: none !important; } }
 html[data-reduced-motion=true] .numeracy-exhaust { animation: none !important; }
+
+/* The range keeps targets in normal flow so every divisor stays reachable. */
+.numeracy-game[data-game=archer] { border-color: #7ba699; }
+.numeracy-game[data-game=archer] .numeracy-game-header { border-top: 4px solid #367e72; }
+.numeracy-game[data-game=archer] .numeracy-scene {
+    min-height: 430px;
+    padding: 24px 24px 132px;
+    gap: 36px;
+    background: #b9e9f2;
+    justify-content: flex-start;
+}
+.numeracy-archer-world { object-fit: cover; object-position: center bottom; }
+.numeracy-game[data-game=archer] .numeracy-mission-number {
+    padding: 10px 30px 12px;
+    border: 2px solid #426e76;
+    border-bottom-width: 5px;
+    border-radius: 8px;
+    background: #f7fcf5;
+    color: #244b53;
+    box-shadow: 0 6px 0 #375f6714;
+    gap: 0;
+}
+.numeracy-game[data-game=archer] .numeracy-mission-number strong { font-size: 42px; line-height: 1.2; color: #173e4c; }
+.numeracy-game[data-game=archer] [data-ng-condition]:empty { display: none; }
+.numeracy-game[data-game=archer] .numeracy-targets { width: min(100%, 850px); gap: 44px 24px; padding: 8px 0 30px; }
+.numeracy-game[data-game=archer] .numeracy-target {
+    width: 104px; height: 104px; flex-basis: 104px;
+    border: 4px solid #344b58;
+    background: #f9fcfa;
+    box-shadow: inset 0 0 0 7px #f9fcfa, inset 0 0 0 17px #4a98c0, inset 0 0 0 21px #fff4e0, inset 0 0 0 30px #df6470, inset 0 0 0 50px #ffe3a0, 0 6px 0 #344b58, 0 10px 10px #23484030;
+    isolation: isolate;
+    transition: outline-color .15s, translate .15s;
+    outline: 3px solid transparent;
+    outline-offset: 5px;
+    overflow: visible;
+}
+.numeracy-game[data-game=archer] .numeracy-target::before {
+    content: ''; position: absolute; z-index: -1; top: calc(100% + 8px); left: 16%; width: 68%; height: 28px;
+    background: #755f48; clip-path: polygon(24% 0, 39% 0, 18% 100%, 0 100%, 24% 0, 76% 0, 100% 100%, 82% 100%, 61% 0);
+}
+.numeracy-game[data-game=archer] .numeracy-target > span:first-child {
+    display: grid; place-items: center; min-width: 34px; min-height: 34px; padding: 2px;
+    font-size: max(20px, var(--assessment-answers-size, 1rem)); line-height: 1; color: #223e4b;
+}
+.numeracy-game[data-game=archer] .numeracy-target[aria-pressed=true] { outline-color: #215c72; translate: 0 -4px; }
+.numeracy-game[data-game=archer] .numeracy-target[aria-pressed=true]::after {
+    content: '\2713'; display: grid; place-items: center; width: 25px; height: 25px; right: -8px; top: -8px; bottom: auto;
+    border: 2px solid #fff; border-radius: 50%; background: #215c72; color: #fff; font-size: 16px; transform: none;
+}
+.numeracy-game[data-game=archer] .numeracy-target[data-hit=correct] { outline-color: #166b44; }
+.numeracy-game[data-game=archer] .numeracy-target[data-hit=incorrect] { outline-color: #aa2944; }
+.numeracy-game[data-game=archer] .numeracy-target[data-hit=correct]::after { background: #166b44; }
+.numeracy-game[data-game=archer] .numeracy-target[data-hit=incorrect]::after { content: '\00d7'; background: #aa2944; }
+.numeracy-target-hit { display: none; position: absolute; width: 36px; height: 4px; right: 8px; bottom: 25px; transform: rotate(-40deg); background: #f8efd7; border: 1px solid #51433c; pointer-events: none; }
+.numeracy-target[data-hit] .numeracy-target-hit { display: block; }
+.numeracy-target-hit::after { content: ''; position: absolute; right: 0; top: -4px; width: 10px; height: 10px; background: #de6370; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
+.numeracy-game[data-game=archer] .numeracy-bow { bottom: 8px; left: calc(50% - 100px); width: 200px; height: 96px; overflow: visible; filter: drop-shadow(0 3px 1px #23484030); }
+.numeracy-game[data-game=archer] .numeracy-arrow { width: 44px; height: 4px; background: #f8efd7; transform-origin: right center; box-shadow: -12px 0 5px #ffffff88; }
+.numeracy-game[data-game=archer] .numeracy-game-body { border-top: 2px solid #7ba699; }
+.numeracy-game[data-game=archer] .numeracy-feedback:empty { min-height: 0; margin: 0 0 8px; }
+.numeracy-game[data-game=archer] .numeracy-feedback:not(:empty) { padding: 12px 16px; border-radius: 6px; background: var(--ng-soft); border-left: 4px solid currentColor; }
+.numeracy-game[data-game=archer] [data-ng-check] { background: #206e68; color: #fff; border-bottom: 3px solid #154b48; }
+.numeracy-game[data-game=archer] .numeracy-target:focus-visible { outline: 4px solid #153f61; outline-offset: 6px; }
+@media (hover: hover) {
+    .numeracy-game[data-game=archer] .numeracy-target:hover:not(:disabled) { translate: 0 -4px; }
+}
+@media (max-width: 600px) {
+    .numeracy-game[data-game=archer] .numeracy-scene { min-height: 360px; padding: 16px 14px 104px; gap: 22px; }
+    .numeracy-game[data-game=archer] .numeracy-mission-number { padding: 8px 18px; }
+    .numeracy-game[data-game=archer] .numeracy-mission-number strong { font-size: 34px; }
+    .numeracy-game[data-game=archer] .numeracy-targets { gap: 34px 16px; padding-bottom: 24px; }
+    .numeracy-game[data-game=archer] .numeracy-target {
+        width: 72px; height: 72px; flex-basis: 72px; border-width: 3px;
+        box-shadow: inset 0 0 0 4px #f9fcfa, inset 0 0 0 10px #4a98c0, inset 0 0 0 13px #fff4e0, inset 0 0 0 19px #df6470, inset 0 0 0 35px #ffe3a0, 0 4px 0 #344b58, 0 8px 8px #23484030;
+    }
+    .numeracy-game[data-game=archer] .numeracy-target::before { height: 22px; top: calc(100% + 5px); }
+    .numeracy-game[data-game=archer] .numeracy-bow { width: 160px; height: 77px; left: calc(50% - 80px); }
+    .numeracy-game[data-game=archer] .numeracy-game-actions { gap: 6px; }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+    .numeracy-game[data-game=archer] .numeracy-scene { min-height: 300px; padding-top: 12px; padding-bottom: 92px; gap: 18px; }
+    .numeracy-game[data-game=archer] .numeracy-mission-number { flex-direction: row; gap: 12px; padding: 6px 18px; }
+    .numeracy-game[data-game=archer] .numeracy-mission-number strong { font-size: 30px; }
+    .numeracy-game[data-game=archer] .numeracy-bow { width: 150px; height: 72px; left: calc(50% - 75px); }
+}
+@media (prefers-reduced-motion: reduce) { .numeracy-game[data-game=archer] .numeracy-target { transition: none; } }
+html[data-reduced-motion=true] .numeracy-game[data-game=archer] .numeracy-target { transition: none; }

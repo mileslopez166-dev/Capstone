@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\WorksheetAttempt;
 use App\Support\AssessmentCoinRewards;
 use App\Support\AssessmentParticipant;
+use App\Support\LearningRecommender;
+use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\NumeracyWorksheets;
 use Illuminate\Http\Request;
@@ -67,13 +69,22 @@ class WorksheetController extends Controller
             'instructions' => ['nullable', 'string', 'max:2000'],
             'worksheet_total' => ['required', 'integer', 'min:1', 'max:1000'],
             'retry_limit' => ['required', Rule::in(array_map('strval', array_keys(Assessment::retryLimitOptions())))],
+            'question_time_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:60'],
+            'question_time_seconds' => ['sometimes', 'required', 'integer', 'min:0', 'max:59'],
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
+        $questionTimeLimitSeconds = ((int) ($data['question_time_minutes'] ?? 2) * 60) + (int) ($data['question_time_seconds'] ?? 0);
+        if ($questionTimeLimitSeconds < Assessment::MIN_QUESTION_TIME_LIMIT_SECONDS || $questionTimeLimitSeconds > Assessment::MAX_QUESTION_TIME_LIMIT_SECONDS) {
+            throw ValidationException::withMessages([
+                'question_time_minutes' => 'Set a time between 10 seconds and 60 minutes per question.',
+            ]);
+        }
         $assessment = $request->user()->createdAssessments()->create(array_merge($data, [
             'subject' => 'numeracy', 'quiz_type' => 'worksheet', 'delivery_method' => 'manual',
             'assessment_type' => 'worksheet', 'worksheet_number' => $worksheet['number'],
             'focus_areas' => ['Problem Solving'], 'manual_questions' => [],
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
+            'question_time_limit_seconds' => $questionTimeLimitSeconds,
         ]));
         if ($assessment->status === 'published') {
             NotificationSender::notifyAssessmentPublished($assessment);
@@ -287,11 +298,11 @@ class WorksheetController extends Controller
         abort_unless($attempt->assessment->created_by === $request->user()->id, 404);
         $data = $request->validate(['score' => ['required', 'integer', 'min:0', 'max:'.$attempt->total],
             'feedback' => ['required', 'string', 'max:5000']]);
-        DB::transaction(function () use ($attempt, $data) {
+        $submission = DB::transaction(function () use ($attempt, $data): ?AssessmentSubmission {
             User::whereKey($attempt->user_id)->lockForUpdate()->firstOrFail();
             $attempt = WorksheetAttempt::whereKey($attempt->id)->lockForUpdate()->firstOrFail();
             if ($attempt->reviewed_at) {
-                return;
+                return null;
             }
             $submission = AssessmentSubmission::create([
                 'assessment_id' => $attempt->assessment_id, 'user_id' => $attempt->user_id,
@@ -306,7 +317,18 @@ class WorksheetController extends Controller
             AssessmentCoinRewards::award($submission);
             NotificationSender::sendToUsers([$attempt->student], 'worksheet_graded', 'Your worksheet has been checked',
                 $attempt->assessment->title, route('worksheets.review', $attempt));
+
+            return $submission;
         });
+
+        if ($submission) {
+            try {
+                app(MLPredictionService::class)->predictForSubmission($submission);
+                app(LearningRecommender::class)->recommend($submission->student, $submission);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
 
         return back()->with('status', 'Worksheet score saved.');
     }

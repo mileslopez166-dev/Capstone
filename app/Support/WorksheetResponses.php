@@ -92,8 +92,11 @@ class WorksheetResponses
         foreach ($responses as $key => $values) {
             abort_unless(isset($definitions[$key]) && is_array($values), 422, 'Invalid worksheet item.');
             $fields = collect($definitions[$key]['fields'])->keyBy('key');
-            abort_unless(!array_diff(array_keys($values), $fields->keys()->all()), 422, 'Invalid answer field.');
+            $allowed = $fields->keys()->all();
+            if ($definitions[$key]['game'] ?? null) $allowed[] = '__timed_out';
+            abort_unless(!array_diff(array_keys($values), $allowed), 422, 'Invalid answer field.');
             $rules = [];
+            if ($definitions[$key]['game'] ?? null) $rules['__timed_out'] = ['sometimes', 'boolean'];
             foreach ($fields as $name => $field) {
                 $type = $field['type'];
                 if ($type === 'drawing') {

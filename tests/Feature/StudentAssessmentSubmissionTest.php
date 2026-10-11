@@ -258,7 +258,7 @@ class StudentAssessmentSubmissionTest extends TestCase
         $this->assertSame(2, substr_count($response->getContent(), 'data-sync-scroll="oral-story">'));
     }
 
-    public function test_flashcards_assessment_uses_the_lily_pad_jumping_game(): void
+    public function test_flashcards_assessment_uses_the_river_log_crossing_game(): void
     {
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create();
@@ -290,9 +290,10 @@ class StudentAssessmentSubmissionTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('frog-flashcards-game')
-            ->assertSeeText('Lily Pad Race')
+            ->assertSeeText('River Log Crossing')
             ->assertSeeText('FINISH')
-            ->assertSeeText('To Finish')
+            ->assertSeeText('River progress')
+            ->assertSee('data-frog-log-index="0"', false)
             ->assertSee('id="frog-finish-pad"', false)
             ->assertSee('frog:finish-line')
             ->assertSee('frog-jump-sprite')

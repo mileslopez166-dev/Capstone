@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Http;
 
 class MLPredictionService
 {
-    private const LABELS = ['Independent', 'Instructional', 'Frustration'];
+    private const LABELS = [
+        'literacy' => ['Independent', 'Instructional', 'Frustration'],
+        'numeracy' => ['Beginning', 'Developing', 'Proficient', 'Advanced'],
+    ];
 
     public function predictForSubmission(AssessmentSubmission $submission): ?MLPrediction
     {
@@ -20,7 +23,9 @@ class MLPredictionService
             return null;
         }
         $features = $this->features($submission);
-        $result = $this->predictFeatures($features);
+        $result = $this->predictFeatures($features + [
+            'task' => $submission->assessment?->subject === 'numeracy' ? 'numeracy' : 'literacy',
+        ]);
         if (! $result) {
             return null;
         }
@@ -58,7 +63,8 @@ class MLPredictionService
 
         $data = $response->json();
         $prediction = (string) ($data['prediction'] ?? '');
-        if (! in_array($prediction, self::LABELS, true)) {
+        $task = (string) ($features['task'] ?? 'literacy');
+        if (! in_array($prediction, self::LABELS[$task] ?? [], true)) {
             return null;
         }
 
@@ -125,7 +131,7 @@ class MLPredictionService
         ]));
         $cached = Cache::get($key);
         if ($cached === null) {
-            $result = $this->predictFeatures($features);
+            $result = $this->predictFeatures($features + ['task' => 'literacy']);
             $cached = ['status' => $result ? 'ready' : 'unavailable', 'prediction' => $result];
             Cache::put($key, $cached, $result ? now()->addMinutes(10) : now()->addSeconds(30));
         }

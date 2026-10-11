@@ -1,14 +1,19 @@
 @props(['question', 'questionCount'])
 
+@php
+    $courseCount = max(1, (int) $questionCount);
+    $logWidth = max(42, min(76, (int) floor(560 / $courseCount)));
+@endphp
+
 <div id="frog-pond-scene" class="frog-pond-scene" aria-hidden="true"></div>
 <div class="frog-pond-fallback" aria-hidden="true"></div>
 
-<section class="frog-interface" id="frog-flashcards-game" aria-label="Lily pad finish line game">
+<section class="frog-interface" id="frog-flashcards-game" aria-label="River log crossing game">
     <header class="frog-hud">
-        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">sports_score</span>Lily Pad Race</div>
+        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">waves</span>River Log Crossing</div>
         <div class="frog-hud-stats">
             <span id="frog-level-text">Question 1/{{ $questionCount }}</span>
-            <span class="frog-score-chip"><span class="material-symbols-outlined" aria-hidden="true">stars</span><strong id="frog-score">0</strong><span>correct</span></span>
+            <span class="frog-score-chip"><span class="material-symbols-outlined" aria-hidden="true">forest</span><strong id="frog-score">0</strong><span>logs crossed</span></span>
         </div>
     </header>
 
@@ -18,25 +23,8 @@
     </div>
 
     <div id="frog-answer-zone" class="frog-answer-zone">
-        @foreach (['A', 'B', 'C', 'D'] as $index => $letter)
+        @foreach (['A', 'B', 'C', 'D'] as $letter)
             <button type="button" class="frog-answer" data-frog-answer="{{ $letter }}" aria-label="Answer {{ $letter }}">
-                <span class="frog-target-visual" aria-hidden="true">
-                    <svg class="frog-target-fallback" viewBox="0 0 160 144" fill="none">
-                        <ellipse cx="80" cy="119" rx="68" ry="25" fill="#226b71" opacity=".18"/>
-                        <path d="M80 112 131 95A65 27 0 1 0 141 121Z" transform="translate(0 5)" fill="#2f7945"/>
-                        <path d="M80 112 131 95A65 27 0 1 0 141 121Z" fill="#73bd59" stroke="#3a8d48" stroke-width="2"/>
-                        <path d="m80 112-55-8m55 8-33-23m33 23 9-25m-9 25-49 13m49-13-8 25m8-25 42 19" stroke="#b3d77b" stroke-width="1.5" stroke-linecap="round"/>
-                        <g fill="var(--target-color)" stroke="var(--target-deep)" stroke-width="1">
-                            <ellipse cx="44" cy="96" rx="7" ry="5"/>
-                            <ellipse cx="36" cy="102" rx="7" ry="5"/>
-                            <ellipse cx="52" cy="102" rx="7" ry="5"/>
-                            <ellipse cx="40" cy="109" rx="7" ry="5"/>
-                            <ellipse cx="48" cy="109" rx="7" ry="5"/>
-                        </g>
-                        <circle cx="44" cy="103" r="5" fill="#fff3ba"/>
-                    </svg>
-                    <span class="frog-pad-ripple"></span>
-                </span>
                 <span class="frog-answer-copy">
                     <span class="frog-answer-letter" data-frog-answer-circle>{{ $letter }}</span>
                     <span data-frog-answer-label>Answer {{ $letter }}</span>
@@ -47,22 +35,36 @@
     </div>
 
     <div class="frog-stage" aria-hidden="true">
-        <div class="frog-course-trail"></div>
+        <div class="frog-river-current"></div>
+        <div class="frog-start-bank">
+            <span>START</span>
+            <i class="frog-start-log"></i>
+        </div>
+        <div class="frog-course-logs">
+            @for ($index = 0; $index < $courseCount; $index++)
+                @php
+                    $x = 15 + (($index + 1) / ($courseCount + 1)) * 69;
+                    $y = 14 + (($index % 3) * 20);
+                @endphp
+                <span
+                    class="frog-safe-log"
+                    data-frog-log-index="{{ $index }}"
+                    style="--log-x: {{ number_format($x, 2, '.', '') }}%; --log-y: {{ $y }}%; --log-width: {{ $logWidth }}px;"
+                ><i></i></span>
+            @endfor
+        </div>
+        <span class="frog-water-target" id="frog-water-target"></span>
+        <span class="frog-water-splash" id="frog-water-splash"></span>
+
         <div class="frog-finish-line" id="frog-finish-line">
             <span class="frog-finish-banner">FINISH</span>
             <span class="frog-finish-checks"></span>
-            <div class="frog-finish-pad" id="frog-finish-pad">
-                <svg class="frog-finish-fallback" viewBox="0 0 160 50" fill="none">
-                    <ellipse cx="80" cy="28" rx="76" ry="20" fill="#387e4f"/>
-                    <path d="m80 24 65-13C117-4 8 4 4 23c-5 25 130 33 150 9Z" fill="#81bf58" stroke="#508d49" stroke-width="2"/>
-                    <path d="m80 24-61-7m61 7-37 13m37-13 5-18m-5 18 55 10" stroke="#d0e493" stroke-width="2"/>
-                </svg>
-            </div>
+            <div class="frog-finish-pad" id="frog-finish-pad"><i></i></div>
         </div>
+
         <div id="frog-character" class="frog-character-anchor">
             <svg class="frog-character-fallback" viewBox="0 0 260 230" fill="none">
-                <ellipse cx="130" cy="206" rx="114" ry="19" fill="#23886a" opacity=".25"/>
-                <path d="M21 191C19 153 234 156 239 190c1 39-172 43-218 1Z" fill="#459d57" stroke="#237950" stroke-width="4"/>
+                <ellipse cx="130" cy="206" rx="114" ry="19" fill="#174f55" opacity=".24"/>
                 <g class="frog-character-body">
                 <ellipse cx="72" cy="167" rx="35" ry="29" fill="#55af49"/><ellipse cx="188" cy="167" rx="35" ry="29" fill="#55af49"/>
                 <ellipse cx="130" cy="143" rx="66" ry="60" fill="#81ce58" stroke="#469743" stroke-width="4"/>
@@ -83,11 +85,11 @@
 
     <div class="frog-course-footer">
         <div class="frog-mission-progress">
-            <span>To Finish</span>
-            <div id="frog-progress-track" class="frog-progress-track" role="progressbar" aria-label="Correct answers toward the finish line" aria-valuemin="0" aria-valuemax="{{ $questionCount }}" aria-valuenow="0"><div id="frog-progress-bar"></div></div>
+            <span>River progress</span>
+            <div id="frog-progress-track" class="frog-progress-track" role="progressbar" aria-label="Safe logs reached" aria-valuemin="0" aria-valuemax="{{ $questionCount }}" aria-valuenow="0"><div id="frog-progress-bar"></div></div>
             <span id="frog-progress-count">0 / {{ $questionCount }}</span>
         </div>
-        <p class="frog-race-status" id="frog-race-status" role="status" aria-live="polite"></p>
+        <p class="frog-race-status" id="frog-race-status" role="status" aria-live="polite">Answer correctly to reach the next safe log.</p>
     </div>
 </section>
 <svg id="frog-jump-sprite" class="frog-jump-sprite" viewBox="0 0 260 230" fill="none" aria-hidden="true"></svg>

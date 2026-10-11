@@ -21,7 +21,7 @@
                 <p><strong>Correct answer: {{ $correct }}</strong> &ndash; {{ $question['answers'][$correct] ?? '' }}</p>
                 @if ($answers !== null)
                     @php $chosen = $answers[$index] ?? ''; @endphp
-                    <p>Student answer: <strong>{{ $chosen ?: 'Unanswered' }}</strong> {{ $question['answers'][$chosen] ?? '' }} ({{ $chosen === $correct ? 'Correct' : 'Incorrect' }})</p>
+                    <p>Student answer: <strong>{{ $chosen === 'TIMEOUT' ? 'Timed out' : ($chosen ?: 'Unanswered') }}</strong> {{ $question['answers'][$chosen] ?? '' }} ({{ $chosen === $correct ? 'Correct' : 'Incorrect' }})</p>
                 @endif
             </li>
         @endforeach

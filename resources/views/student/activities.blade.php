@@ -34,6 +34,31 @@
                 @if ($subject !== 'literacy')
                 <x-worksheet-pending />
                 @endif
+                @if ($subject && $recommendations->isNotEmpty())
+                <section class="campus-panel rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" aria-labelledby="recommended-activities-heading">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-widest text-secondary-dim">Personalized practice</p>
+                            <h2 id="recommended-activities-heading" class="mt-1 font-headline text-2xl font-extrabold text-on-surface">Recommended next</h2>
+                        </div>
+                        <p class="text-sm text-on-surface-variant">Based on your latest completed activity.</p>
+                    </div>
+                    <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($recommendations as $recommendation)
+                            @php $recommendedAssessment = $recommendation->assessment; @endphp
+                            <a class="group rounded-lg border border-outline-variant/20 bg-surface p-4 transition hover:border-primary/40 hover:bg-primary-container/10" href="{{ route('student.assessments.show', $recommendedAssessment) }}">
+                                <div class="flex items-start justify-between gap-3">
+                                    <span class="material-symbols-outlined text-primary" aria-hidden="true">{{ $recommendedAssessment->subject === 'numeracy' ? 'calculate' : 'auto_stories' }}</span>
+                                    <span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-on-surface-variant">{{ ucfirst($recommendedAssessment->subject) }}</span>
+                                </div>
+                                <h3 class="mt-3 font-headline text-lg font-extrabold leading-snug text-on-surface">{{ $recommendedAssessment->title }}</h3>
+                                <p class="mt-2 line-clamp-2 text-sm text-on-surface-variant">{{ collect($recommendation->reasons ?? [])->take(2)->join(' / ') }}</p>
+                                <span class="mt-4 inline-flex items-center gap-1 text-sm font-black text-primary">Open activity <span class="material-symbols-outlined text-base transition-transform group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+                @endif
                 @if ($subject)
                 <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                     <div class="campus-panel rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">

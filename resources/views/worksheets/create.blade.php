@@ -6,6 +6,10 @@
             <label>Section<select name="target_section">@foreach (['all' => 'All sections', 'section_a' => 'Section A', 'section_b' => 'Section B', 'section_c' => 'Section C'] as $value => $label)<option value="{{ $value }}" @selected(old('target_section', strtolower(str_replace(' ', '_', auth()->user()->section ?? 'all'))) === $value)>{{ $label }}</option>@endforeach</select></label>
             <label>Total scored items<input name="worksheet_total" type="number" min="1" max="1000" value="{{ old('worksheet_total') }}" required></label>
             <label>Retries after first attempt<select name="retry_limit">@foreach (\App\Models\Assessment::retryLimitOptions() as $value => $label)<option value="{{ $value }}" @selected((string) old('retry_limit', '0') === (string) $value)>{{ $label }}</option>@endforeach</select></label>
+            <label>Minutes per question<input name="question_time_minutes" type="number" min="0" max="60" inputmode="numeric" value="{{ old('question_time_minutes', 2) }}" required></label>
+            <label>Extra seconds<input name="question_time_seconds" type="number" min="0" max="59" inputmode="numeric" value="{{ old('question_time_seconds', 0) }}" required></label>
+            @error('question_time_minutes')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
+            @error('question_time_seconds')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
             <label class="worksheet-wide">Teacher instructions<textarea name="instructions" maxlength="2000" rows="3">{{ old('instructions') }}</textarea></label>
         </div>
         <div class="worksheet-preview">

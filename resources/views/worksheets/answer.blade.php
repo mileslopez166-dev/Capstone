@@ -1,4 +1,4 @@
-<x-worksheet-layout :teacher="$assisted" :title="$assessment->title" :back="$assisted ? route('assessments.show', $assessment) : route('worksheets.mission')">
+<x-worksheet-layout :teacher="$assisted" :focus="! $assisted" :title="$assessment->title" :back="$assisted ? route('assessments.show', $assessment) : route('worksheets.mission')">
     <x-teacher-identity :teacher="$assessment->teacher" />
     @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
     @if ($assessment->instructions)<p class="worksheet-instructions">{{ $assessment->instructions }}</p>@endif
@@ -9,7 +9,8 @@
             'saveUrl' => $assisted ? route('teacher.assessments.worksheet.save', [$assessment, $student]) : route('worksheets.save', $assessment),
             'submitUrl' => $assisted ? route('teacher.assessments.worksheet.submit', [$assessment, $student]) : route('worksheets.submit', $assessment),
             'tableUrl' => $assisted ? route('teacher.assessments.worksheet.table', [$assessment, $student]) : route('worksheets.table', $assessment),
-            'tableAllowed' => (bool) $progress->multiplication_table_unlocked_at];
+            'tableAllowed' => (bool) $progress->multiplication_table_unlocked_at,
+            'questionTimeLimitSeconds' => (int) $assessment->question_time_limit_seconds];
     @endphp
     <x-worksheet-reader :worksheet="$worksheet" :config="$config" />
 </x-worksheet-layout>

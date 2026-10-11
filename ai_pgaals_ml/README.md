@@ -68,6 +68,15 @@ it evaluates all rows (including training data), so it must not overwrite or be
 presented as the held-out test result.
 Trained `.pkl` model files are kept local and ignored by Git. Run the training command again on another device after adding the local datasets.
 
+The administrator comparison workflow does not use the legacy merged baseline as
+proof of production performance. It exports real, anonymized AI-PGAALS
+submissions and compares Decision Tree, Random Forest, and SVM with
+learner-grouped validation. Start it from **Administration > AI Model
+Evaluation** while the Laravel queue worker and FastAPI service are running.
+
+Literacy uses valid saved Phil-IRI levels. Numeracy correctly reports
+`Insufficient Data` until approved ARAL proficiency targets are available.
+
 ## 5. Run API
 
 ```bash
@@ -79,4 +88,9 @@ Laravel integration is disabled by default. Enable it in `.env` only after the m
 ```env
 ML_PREDICTIONS_ENABLED=true
 ML_PREDICTION_API_URL=http://127.0.0.1:8001
+ML_ADMIN_TOKEN=use-the-same-long-random-value-in-laravel-and-fastapi
 ```
+
+The internal administration endpoints are disabled when `ML_ADMIN_TOKEN` is
+empty. See `docs/ai-algorithm-comparison.md` for the complete evaluation,
+activation, rollback, and manuscript procedure.

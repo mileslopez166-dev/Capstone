@@ -36,6 +36,7 @@ export function gradeGameAnswer(game, answer) {
 }
 
 export function gameAnswerExists(game, values = {}) {
+    if (values.__timed_out === true) return true;
     return Object.hasOwn(values, game.field) && gradeGameAnswer(game, values[game.field]) !== null
         && (!game.reason || typeof values.reason === 'string' && values.reason.trim().length > 0);
 }

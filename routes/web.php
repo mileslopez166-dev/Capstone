@@ -1,25 +1,26 @@
 <?php
 
+use App\Http\Controllers\Admin\AiModelEvaluationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\TokenRequestController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\WorksheetController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AvatarController;
+use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
+use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Http\Controllers\Student\TutorController;
 use App\Http\Controllers\Teacher\AiAssistantController;
-use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
-use App\Http\Controllers\Teacher\PracticeController as TeacherPracticeController;
-use App\Http\Controllers\Teacher\PhilIriController;
 use App\Http\Controllers\Teacher\InterventionPlanController;
+use App\Http\Controllers\Teacher\PhilIriController;
+use App\Http\Controllers\Teacher\PracticeController as TeacherPracticeController;
 use App\Http\Controllers\Teacher\ProfilePhotoController;
-use App\Http\Controllers\Student\SearchController as StudentSearchController;
 use App\Http\Controllers\Teacher\SearchController as TeacherSearchController;
 use App\Http\Controllers\Teacher\StudentController;
+use App\Http\Controllers\WorksheetController;
 use App\Models\Assessment;
 use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
@@ -202,6 +203,15 @@ Route::get('/admin/search', SearchController::class)
     ->middleware(['auth', 'verified'])
     ->name('admin.search');
 
+Route::prefix('/admin/ai-models')->middleware(['auth', 'verified'])->name('admin.ai-models.')->group(function () {
+    Route::get('/', [AiModelEvaluationController::class, 'index'])->name('index');
+    Route::post('/classification/evaluate', [AiModelEvaluationController::class, 'evaluateClassification'])->name('classification.evaluate');
+    Route::post('/classification/{version}/activate', [AiModelEvaluationController::class, 'activateClassification'])->name('classification.activate');
+    Route::post('/recommendations/evaluate', [AiModelEvaluationController::class, 'evaluateRecommendations'])->name('recommendations.evaluate');
+    Route::post('/recommendations/activate', [AiModelEvaluationController::class, 'activateRecommendation'])->name('recommendations.activate');
+    Route::post('/rollback', [AiModelEvaluationController::class, 'rollback'])->name('rollback');
+});
+
 Route::get('/admin/token-requests', [TokenRequestController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('admin.token-requests.index');
@@ -366,11 +376,21 @@ Route::get('/student/activities', function () use ($visibleAssessmentsForStudent
         })
         ->values();
 
+    $recommendations = \App\Models\LearningRecommendation::query()
+        ->with('assessment.teacher')
+        ->where('student_id', $student->id)->where('status', 'active')
+        ->orderByDesc('score')->get()
+        ->filter(fn ($recommendation) => $recommendation->assessment
+            && $visibleAssessments->contains('id', $recommendation->assessment_id)
+            && ($subject === null || $recommendation->assessment->subject === $subject))
+        ->take(5)->values();
+
     return view('student.activities', [
         'subject' => $subject,
         'subjectCounts' => $pendingAssessments->countBy('subject'),
         'pendingAssessments' => \App\Support\StudentTaskQueue::assessments($subject ? $pendingAssessments->where('subject', $subject)->values() : collect(), $student),
         'completedSubmissions' => $subject ? $completedSubmissions->filter(fn ($submission) => $submission->assessment?->subject === $subject)->values() : $completedSubmissions,
+        'recommendations' => $recommendations,
     ]);
 })->middleware(['auth', 'verified'])->name('student.activities');
 
@@ -681,6 +701,8 @@ Route::patch('/teacher/assessments/{assessment}/availability', [AssessmentContro
     ->name('assessments.availability');
 Route::patch('/teacher/assessments/{assessment}/retries', [AssessmentController::class, 'updateRetries'])
     ->middleware(['auth', 'verified'])->name('assessments.retries');
+Route::patch('/teacher/assessments/{assessment}/timing', [AssessmentController::class, 'updateTiming'])
+    ->middleware(['auth', 'verified'])->name('assessments.timing');
 
 Route::get('/teacher/assessments/{assessment}', [AssessmentController::class, 'show'])
     ->middleware(['auth', 'verified'])

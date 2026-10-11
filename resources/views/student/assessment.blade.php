@@ -241,6 +241,12 @@
                         </section>
                     </div>
                 @endunless
+                @if ($questionCount > 0 && ! $isOralReading)
+                    <div class="assessment-question-timer" id="assessment-question-timer" hidden role="timer" aria-live="off" aria-label="Time remaining for this question">
+                        <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+                        <span><small>Question time</small><strong id="assessment-question-time">{{ sprintf('%02d:%02d', intdiv((int) ($assessment->question_time_limit_seconds ?: \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS), 60), (int) ($assessment->question_time_limit_seconds ?: \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS) % 60) }}</strong></span>
+                    </div>
+                @endif
                 <div class="assessment-attempt">
                     <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
@@ -568,6 +574,8 @@
                     const endTimerButton = document.getElementById('end-timer-button');
                     const readingTimerDisplay = document.getElementById('reading-timer-display');
                     const readingTimerStatus = document.getElementById('reading-timer-status');
+                    const questionTimerBadge = document.getElementById('assessment-question-timer');
+                    const questionTimerDisplay = document.getElementById('assessment-question-time');
                     const resultReadingTimeRow = document.getElementById('result-reading-time-row');
                     const resultReadingTime = document.getElementById('result-reading-time');
                     const gameMusic = document.getElementById('assessment-game-music');
@@ -617,6 +625,11 @@
                     let readingTimer = null;
                     let readingStartedAt = null;
                     let readingElapsedSeconds = 0;
+                    const questionTimeLimitSeconds = @json((int) ($assessment->question_time_limit_seconds ?: \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS));
+                    let questionTimer = null;
+                    let questionDeadline = null;
+                    let questionTimerIndex = null;
+                    let questionTimeoutPending = false;
                     let oralMarkMode = 'word';
                     let gameMusicFadeFrame = null;
                     let hookReelFadeTimer = null;
@@ -628,6 +641,98 @@
                     let saveTimeout = null;
                     let frogRoundEnding = false;
                     let treasureRoundEnding = false;
+
+                    function stopQuestionTimer(clearDeadline = true) {
+                        clearInterval(questionTimer);
+                        questionTimer = null;
+                        if (clearDeadline) {
+                            questionDeadline = null;
+                            questionTimerIndex = null;
+                        }
+                        if (questionTimerBadge) {
+                            questionTimerBadge.hidden = true;
+                            delete questionTimerBadge.dataset.urgency;
+                        }
+                    }
+
+                    function updateQuestionTimer() {
+                        if (!questionTimerBadge || !questionTimerDisplay || questionDeadline === null || missionFinished) return;
+                        const remaining = Math.max(0, Math.ceil((questionDeadline - Date.now()) / 1000));
+                        questionTimerDisplay.textContent = formatElapsedTime(remaining);
+                        questionTimerBadge.dataset.urgency = remaining <= 10 ? 'critical' : (remaining <= 30 ? 'warning' : 'normal');
+                        questionTimerBadge.setAttribute('aria-label', `${remaining} seconds remaining for this question`);
+                        if (remaining === 30 || remaining === 10) {
+                            questionTimerBadge.setAttribute('aria-live', 'polite');
+                            setTimeout(() => questionTimerBadge?.setAttribute('aria-live', 'off'), 1000);
+                        }
+                        if (remaining <= 0) timeoutCurrentQuestion();
+                    }
+
+                    function startQuestionTimer(reset = true) {
+                        if (!questionTimerBadge || !questionTimerDisplay || isOralReading || missionFinished || !missionStarted || !questions[currentQuestionIndex]) return;
+                        clearInterval(questionTimer);
+                        const canResume = !reset && questionTimerIndex === currentQuestionIndex && Number.isFinite(questionDeadline);
+                        if (!canResume) {
+                            questionTimerIndex = currentQuestionIndex;
+                            questionDeadline = Date.now() + questionTimeLimitSeconds * 1000;
+                        }
+                        questionTimeoutPending = false;
+                        questionTimerBadge.hidden = false;
+                        updateQuestionTimer();
+                        if (questionDeadline > Date.now()) questionTimer = setInterval(updateQuestionTimer, 250);
+                    }
+
+                    function timeoutCurrentQuestion() {
+                        if (questionTimeoutPending || missionFinished || isProcessingCapture || !questions[currentQuestionIndex]) return;
+                        questionTimeoutPending = true;
+                        stopQuestionTimer();
+                        capturedAnswers[currentQuestionIndex] = 'TIMEOUT';
+                        isProcessingCapture = true;
+                        persistProgress(true);
+
+                        if (isFlashcards) {
+                            caughtCount++;
+                            frogAnswerButtons.forEach(button => button.disabled = true);
+                            if (frogQuestionCard) frogQuestionCard.dataset.result = 'incorrect';
+                            const safeIndex = Math.max(-1, totalScore - 1);
+                            const jumpDuration = reducedMotion() ? 450 : 2200;
+                            document.getElementById('frog-feedback').textContent = "Time's up. The frog returned to the last safe log.";
+                            updateFrogProgress(false);
+                            animateFrogJump(null, false, jumpDuration, safeIndex, safeIndex);
+                            setTimeout(() => {
+                                if (caughtCount >= targetsNeeded) return endFrogRound();
+                                currentQuestionIndex++;
+                                isProcessingCapture = false;
+                                renderFlashcardQuestion();
+                            }, jumpDuration + 80);
+                            return;
+                        }
+
+                        if (isTreasureQuest) {
+                            caughtCount++;
+                            treasureButtons.forEach(button => button.disabled = true);
+                            treasureGame.dataset.outcome = 'incorrect';
+                            document.getElementById('treasure-feedback').textContent = "Time's up. Following the trail to the next question.";
+                            updateTreasureProgress();
+                            setTimeout(() => {
+                                if (caughtCount >= targetsNeeded) return endTreasureRound();
+                                currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                                isProcessingCapture = false;
+                                renderTreasureQuestion(true);
+                            }, reducedMotion() ? 250 : 900);
+                            return;
+                        }
+
+                        cancelAnimationFrame(hookFrame);
+                        hookFrame = null;
+                        stopHookReelSound();
+                        isHooking = false;
+                        hookCable.style.height = '0px';
+                        fishSchool.forEach(fish => fish.element.disabled = true);
+                        if (catchStatus) catchStatus.textContent = "Time's up. Sailing to the next question.";
+                        updateProgress();
+                        if (caughtCount < targetsNeeded) setTimeout(nextQuestion, reducedMotion() ? 250 : 900);
+                    }
 
                     function updateTreasureProgress() {
                         if (!treasureGame) return;
@@ -659,6 +764,7 @@
                             delete label.dataset.result;
                         });
                         updateTreasureProgress();
+                        if (missionStarted) startQuestionTimer(false);
                         if (focus) heading.focus({ preventScroll: true });
                     }
 
@@ -667,6 +773,7 @@
                         const question = questions[currentQuestionIndex];
                         if (!question || capturedAnswers[currentQuestionIndex] || !question.options.some(option => option.l === letter)) return;
                         isProcessingCapture = true;
+                        stopQuestionTimer();
                         playGameMusic();
                         capturedAnswers[currentQuestionIndex] = letter;
                         caughtCount++;
@@ -717,6 +824,8 @@
                             phase: missionFinished || allAnswered ? 'finished' : (missionStarted && !isOralReading ? 'questions' : 'reading'),
                             reading_seconds: readingElapsedSeconds,
                             timer_status: timerStatus,
+                            question_deadline_ms: questionDeadline,
+                            question_timer_index: questionTimerIndex,
                             word_marks: Array.from(storyReaderText?.querySelectorAll('.story-word') || [], word => Number(word.dataset.mark || 0)),
                             sentence_marks: Array.from(storyReaderText?.querySelectorAll('.story-sentence') || [], sentence => Number(sentence.dataset.sentenceMark || 0)),
                             mark_mode: oralMarkMode,
@@ -765,7 +874,7 @@
                         const state = snapshot.state || {};
                         progressRevision = Number(snapshot.revision || 0);
                         Object.entries(state.answers || {}).forEach(([index, answer]) => {
-                            if (questions[index]?.options.some(option => option.l === answer)) capturedAnswers[index] = answer;
+                            if (answer === 'TIMEOUT' || questions[index]?.options.some(option => option.l === answer)) capturedAnswers[index] = answer;
                         });
                         caughtCount = Object.keys(capturedAnswers).length;
                         currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
@@ -784,6 +893,10 @@
                         const savedReadingSeconds = Number(state.reading_seconds || 0);
                         readingElapsedSeconds = Number.isFinite(savedReadingSeconds) ? Math.max(0, savedReadingSeconds) : 0;
                         timerStatus = state.timer_status === 'running' ? 'paused' : (state.timer_status || 'idle');
+                        const savedQuestionDeadline = Number(state.question_deadline_ms);
+                        const savedQuestionIndex = Number(state.question_timer_index);
+                        questionDeadline = Number.isFinite(savedQuestionDeadline) && savedQuestionDeadline > 0 ? savedQuestionDeadline : null;
+                        questionTimerIndex = Number.isInteger(savedQuestionIndex) && savedQuestionIndex >= 0 ? savedQuestionIndex : null;
                         storyReaderText?.querySelectorAll('.story-sentence').forEach((sentence, index) => setSentenceMark(sentence, Number(state.sentence_marks?.[index] || 0)));
                         storyReaderText?.querySelectorAll('.story-word').forEach((word, index) => setWordMark(word, Number(state.word_marks?.[index] || 0)));
                         storyReaderText?.querySelectorAll('.story-sentence').forEach(syncSentenceMark);
@@ -834,6 +947,8 @@
                         persistProgress(true);
                         stopGameMusic();
                         stopHookReelSound();
+                        clearInterval(questionTimer);
+                        questionTimer = null;
                     }
 
                     function formatElapsedTime(totalSeconds) {
@@ -1120,6 +1235,8 @@
                         delete canvas.dataset.frogOutcome;
                         delete canvas.dataset.frogJumpStart;
                         delete canvas.dataset.frogJumpDuration;
+                        delete canvas.dataset.frogJumpFrom;
+                        delete canvas.dataset.frogJumpTo;
                         delete frogQuestionCard.dataset.result;
                         document.getElementById('frog-feedback').textContent = '';
                         frogAnswerButtons.forEach((button) => {
@@ -1134,6 +1251,7 @@
                             button.querySelector('.frog-answer-verdict').textContent = '';
                         });
                         canvas.dispatchEvent(new CustomEvent('frog:question'));
+                        if (missionStarted) startQuestionTimer(false);
                     }
 
                     function updateFrogProgress(correct) {
@@ -1141,6 +1259,7 @@
                         canvas.dataset.frogCorrect = String(totalScore);
                         canvas.dataset.frogAnswered = String(caughtCount);
                         canvas.dataset.frogTotal = String(targetsNeeded);
+                        canvas.dataset.frogSafeIndex = String(Math.max(-1, totalScore - 1));
                         if (frogScore) frogScore.innerText = String(totalScore);
                         if (frogProgressBar) frogProgressBar.style.width = `${Math.min(progress, 100)}%`;
                         if (frogQuestionCard && typeof correct === 'boolean') frogQuestionCard.dataset.result = correct ? 'correct' : 'incorrect';
@@ -1159,7 +1278,7 @@
                         updateFrogProgress();
                         const status = document.getElementById('frog-race-status');
                         if (targetsNeeded === 0 || totalScore !== targetsNeeded || caughtCount !== targetsNeeded) {
-                            status.textContent = `Round complete: ${totalScore} / ${targetsNeeded} correct.`;
+                            status.textContent = `Crossing complete: ${totalScore} of ${targetsNeeded} safe logs reached.`;
                             setTimeout(victory, 700);
                             return;
                         }
@@ -1170,7 +1289,7 @@
                         canvas.dataset.frogFinishStart = String(startedAt);
                         canvas.dataset.frogFinishDuration = String(duration);
                         frogLevelText.textContent = 'Perfect run';
-                        status.textContent = 'Heading for the finish line!';
+                        status.textContent = 'Crossing to the finish bank!';
                         canvas.dispatchEvent(new CustomEvent('frog:finish-line', { detail: {
                             startedAt, duration, correct: totalScore, answered: caughtCount, total: targetsNeeded,
                         } }));
@@ -1178,12 +1297,17 @@
                         setTimeout(victory, duration + 700);
                     }
 
-                    function animateFrogJump(button, correct, duration) {
+                    function animateFrogJump(button, correct, duration, fromSafeIndex, toSafeIndex) {
                         canvas.dataset.frogOutcome = correct ? 'correct' : 'incorrect';
                         const startedAt = performance.now();
                         canvas.dataset.frogJumpStart = String(startedAt);
                         canvas.dataset.frogJumpDuration = String(duration);
-                        canvas.dispatchEvent(new CustomEvent('frog:jump', { detail: { letter: button.dataset.frogAnswer, correct, duration, startedAt } }));
+                        canvas.dataset.frogJumpFrom = String(fromSafeIndex);
+                        canvas.dataset.frogJumpTo = String(toSafeIndex);
+                        canvas.dispatchEvent(new CustomEvent('frog:jump', { detail: {
+                            letter: button?.dataset.frogAnswer || null,
+                            correct, duration, startedAt, fromSafeIndex, toSafeIndex,
+                        } }));
                     }
 
                     function answerFlashcard(letter, button) {
@@ -1192,11 +1316,13 @@
                         if (!question.options.some((option) => option.l === letter)) return;
                         playGameMusic();
                         isProcessingCapture = true;
+                        stopQuestionTimer();
                         frogAnswerButtons.forEach((item) => item.disabled = true);
                         const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
                         persistProgress(true);
                         caughtCount++;
+                        const safeIndexBefore = Math.max(-1, totalScore - 1);
                         if (correct) {
                             totalScore++;
                             playFrogCorrectAnswerSound();
@@ -1206,11 +1332,12 @@
                         button.dataset.result = correct ? 'correct' : 'incorrect';
                         button.querySelector('.frog-answer-verdict').textContent = correct ? 'check_circle' : 'cancel';
                         document.getElementById('frog-feedback').textContent = correct
-                            ? 'Correct! A safe landing on the lily pad.'
-                            : 'The frog and lily pad sank together. On to the next question.';
-                        const jumpDuration = reducedMotion() ? 650 : (correct ? 1600 : 2600);
-                        animateFrogJump(button, correct, jumpDuration);
+                            ? 'Correct! The frog reached the next safe log.'
+                            : 'Splash! The frog returned to the last safe log.';
+                        const safeIndexAfter = Math.max(-1, totalScore - 1);
+                        const jumpDuration = reducedMotion() ? 450 : (correct ? 1400 : 2200);
                         updateFrogProgress(correct);
+                        animateFrogJump(button, correct, jumpDuration, safeIndexBefore, safeIndexAfter);
 
                         setTimeout(() => {
                             if (caughtCount >= targetsNeeded) {
@@ -1264,6 +1391,7 @@
 
                     function catchFish(element) {
                         fadeHookReelSound();
+                        stopQuestionTimer();
                         const correct = questions[currentQuestionIndex].correct === element.dataset.letter;
                         canvas.dataset.catchResult = correct ? 'correct' : 'incorrect';
                         questionNode.dataset.catchResult = canvas.dataset.catchResult;
@@ -1384,6 +1512,7 @@
                         delete questionNode.dataset.catchResult;
                         if (catchStatus) catchStatus.textContent = '';
                         questionNode.innerHTML = `<div class="mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary">terminal</span><h3 class="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary-dim">Question Node ${escapeHtml(question.node)}</h3></div><h2 class="font-headline mb-4 text-lg font-extrabold leading-tight text-on-surface">${escapeHtml(question.text)}</h2><div class="hook-options space-y-2">${question.options.map((option) => `<div class="group flex cursor-default items-center gap-3 rounded-xl border border-white bg-white/50 p-2.5 transition-colors hover:bg-white"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 font-bold text-primary">${escapeHtml(option.l)}</span><span class="font-medium text-on-surface-variant">${escapeHtml(option.t)}</span></div>`).join('')}</div>`;
+                        if (missionStarted) startQuestionTimer(false);
                     }
 
                     function updateProgress() {
@@ -1617,6 +1746,7 @@
                     }
 
                     function victory() {
+                        stopQuestionTimer();
                         canvas.dataset.assessmentFinished = 'true';
                         missionFinished = true;
                         missionStarted = false;
@@ -1752,6 +1882,7 @@
                             resumeReadingTicker();
                             readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
                         }
+                        if (missionStarted && !missionFinished && !isOralReading) startQuestionTimer(false);
                     });
                     document.addEventListener('visibilitychange', () => {
                         if (document.hidden) {
@@ -1768,6 +1899,7 @@
                             resumeReadingTicker();
                             readingTimerStatus.innerText = 'Timer is running. Click End Timer when the reader is done.';
                         }
+                        if (missionStarted && !missionFinished && !isOralReading) startQuestionTimer(false);
                     });
                     window.addEventListener('online', () => {
                         if (missionFinished) submitAttempt(); else persistProgress();

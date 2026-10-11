@@ -1,3 +1,4 @@
+@props(['questionTimeLimitSeconds' => \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS])
 <div class="numeracy-mode" data-numeracy-mode hidden>
     <div class="numeracy-mode-switch" role="group" aria-label="Answer mode">
         <button type="button" data-numeracy-view="worksheet" aria-pressed="true"><span class="material-symbols-outlined" aria-hidden="true">table_rows</span>Worksheet</button>
@@ -6,10 +7,13 @@
     <label class="sr-only" for="numeracy-game-select">Choose game</label>
     <select id="numeracy-game-select" data-numeracy-select aria-label="Choose game"></select>
 </div>
-<section class="numeracy-game" data-numeracy-game hidden aria-label="Numeracy game">
+<section class="numeracy-game" data-numeracy-game data-question-time-limit-seconds="{{ (int) $questionTimeLimitSeconds }}" hidden aria-label="Numeracy game">
     <header class="numeracy-game-header">
         <h3 data-ng-title></h3>
-        <span class="numeracy-game-score"><span class="material-symbols-outlined" aria-hidden="true">stars</span><strong data-ng-score>0</strong></span>
+        <div class="numeracy-game-header-status">
+            <span class="numeracy-game-timer" data-ng-timer role="timer" aria-live="off" aria-label="Time remaining for this question"><span class="material-symbols-outlined" aria-hidden="true">timer</span><strong data-ng-time>{{ sprintf('%02d:%02d', intdiv((int) $questionTimeLimitSeconds, 60), (int) $questionTimeLimitSeconds % 60) }}</strong></span>
+            <span class="numeracy-game-score"><span class="material-symbols-outlined" aria-hidden="true">stars</span><strong data-ng-score>0</strong></span>
+        </div>
     </header>
     <div class="numeracy-game-progress"><span data-ng-counter></span><progress data-ng-progress value="0" max="1" aria-label="Game questions answered"></progress></div>
     <div class="numeracy-scene" data-ng-scene>
@@ -24,9 +28,18 @@
         </div>
         <div class="numeracy-mission-number"><span data-ng-prompt></span><strong data-ng-number></strong><span data-ng-condition></span></div>
         <div class="numeracy-puzzle-number" data-ng-slots></div>
-        <svg class="numeracy-archer-world" viewBox="0 0 800 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 120q120-80 260 0t270 0 270 0v120H0Z" fill="#b1d698"/><path d="M0 168q120-60 280 0t250 0 270 0v72H0Z" fill="#6ba377"/><path d="M0 220q180-40 400 0t400 0v20H0Z" fill="#3f775e"/><path d="M26 124v-76m-16 39 16-31 20 31m-29-16 9-33 18 34m691 57V27m-27 56 27-48 32 49m-43-15 11-47 23 47" fill="#4f9d7c" stroke="#40745d" stroke-width="8" stroke-linejoin="round"/><path d="M80 161h640m-600-14v41m68-41v41m68-41v41m68-41v41m68-41v41m68-41v41m68-41v41m68-41v41m68-41v41" stroke="#a68760" stroke-width="9"/></svg>
+        <img class="numeracy-archer-world" src="{{ asset('images/games/archery-range.svg') }}" alt="" aria-hidden="true" width="1200" height="640">
         <div class="numeracy-targets" data-ng-targets role="group" aria-label="Divisor targets"></div>
-        <svg class="numeracy-bow" viewBox="0 0 120 45" aria-hidden="true"><path d="M10 37q50-66 100 0" fill="none" stroke="#845431" stroke-width="6"/><path d="m10 37 50-8 50 8" fill="none" stroke="#faf4d7" stroke-width="2"/><path d="M60 43V4m-6 9 6-9 6 9" fill="none" stroke="#294951" stroke-width="3"/></svg>
+        <svg class="numeracy-bow" data-ng-bow viewBox="0 0 200 96" aria-hidden="true">
+            <ellipse cx="100" cy="87" rx="78" ry="6" fill="#254d4933"/>
+            <path d="M15 63Q48 3 100 26q52-23 85 37" fill="none" stroke="#503e38" stroke-width="11" stroke-linecap="round"/>
+            <path d="M15 60Q48 0 100 23q52-23 85 37" fill="none" stroke="#dcad65" stroke-width="6" stroke-linecap="round"/>
+            <path class="numeracy-bow-string" d="m15 62 85 15 85-15" fill="none" stroke="#fff9e5" stroke-width="2"/>
+            <path d="M90 23h20" stroke="#385967" stroke-width="12" stroke-linecap="round"/>
+            <path d="M100 80V7" stroke="#f8eed7" stroke-width="3"/>
+            <path d="m100 1-6 14 6-3 6 3Z" fill="#354d60"/>
+            <path d="m100 73-8 8v-14l8-7 8 7v14Z" fill="#df616a"/>
+        </svg>
     </div>
     <div class="numeracy-game-body">
         <div class="numeracy-choices" data-ng-choices role="group" aria-label="Answer choices"></div>

@@ -66,6 +66,7 @@ RUN apt-get update \
         gd \
         mbstring \
         opcache \
+        pcntl \
         pdo_mysql \
         zip \
     && a2enmod headers rewrite \

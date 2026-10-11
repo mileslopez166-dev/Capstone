@@ -261,6 +261,41 @@ class TeacherAssessmentMakerTest extends TestCase
         $this->assertSame(Assessment::UNLIMITED_RETRY_LIMIT, $assessment->fresh()->retry_limit);
     }
 
+    public function test_teacher_can_set_and_update_time_per_question(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $this->actingAs($teacher)->post(route('assessments.store'), $this->assessmentPayload([
+            'question_time_minutes' => 1,
+            'question_time_seconds' => 35,
+        ]))->assertSessionHasNoErrors();
+
+        $assessment = Assessment::query()->firstOrFail();
+        $this->assertSame(95, $assessment->question_time_limit_seconds);
+        $this->get(route('assessments.show', $assessment))
+            ->assertOk()
+            ->assertSee('value="1"', false)
+            ->assertSee('value="35"', false);
+
+        $this->patch(route('assessments.timing', $assessment), [
+            'question_time_minutes' => 0,
+            'question_time_seconds' => 45,
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(45, $assessment->fresh()->question_time_limit_seconds);
+
+        foreach ([[0, 9], [60, 1]] as [$minutes, $seconds]) {
+            $this->patch(route('assessments.timing', $assessment), [
+                'question_time_minutes' => $minutes,
+                'question_time_seconds' => $seconds,
+            ])->assertSessionHasErrors('question_time_minutes');
+        }
+
+        $this->actingAs(User::factory()->teacher()->create())
+            ->patch(route('assessments.timing', $assessment), [
+                'question_time_minutes' => 2,
+                'question_time_seconds' => 0,
+            ])->assertNotFound();
+    }
+
     private function assessmentPayload(array $overrides = []): array
     {
         return array_replace_recursive([

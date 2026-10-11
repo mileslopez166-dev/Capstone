@@ -11,6 +11,7 @@ use App\Support\AdaptiveQuestions;
 use App\Support\AssessmentCoinRewards;
 use App\Support\AssessmentParticipant;
 use App\Support\AssessmentScores;
+use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\PhilIri;
@@ -93,7 +94,11 @@ class AssessmentController extends Controller
             'story_description' => ['nullable', 'string', 'max:10000'],
             'status' => ['required', 'in:draft,published'],
             'retry_limit' => $this->retryLimitRules(false),
+            'question_time_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:60'],
+            'question_time_seconds' => ['sometimes', 'required', 'integer', 'min:0', 'max:59'],
         ]);
+
+        $questionTimeLimitSeconds = $this->questionTimeLimitSeconds($validated);
 
         $manualQuestions = ($validated['assessment_type'] ?? null) === 'oral_reading'
             ? []
@@ -139,6 +144,7 @@ class AssessmentController extends Controller
             'story_description' => $validated['story_description'] ?? null,
             'status' => $validated['status'],
             'retry_limit' => Assessment::normalizeRetryLimit($validated['retry_limit'] ?? 0),
+            'question_time_limit_seconds' => $questionTimeLimitSeconds,
         ]);
 
         if ($assessment->status === 'published') {
@@ -220,6 +226,22 @@ class AssessmentController extends Controller
         return back()->with('status', 'Assessment retry limit updated.');
     }
 
+    public function updateTiming(Request $request, Assessment $assessment): RedirectResponse
+    {
+        abort_unless($request->user()?->isTeacher(), 403);
+        abort_unless($assessment->created_by === $request->user()->id, 404);
+        $validated = $request->validate([
+            'question_time_minutes' => ['required', 'integer', 'min:0', 'max:60'],
+            'question_time_seconds' => ['required', 'integer', 'min:0', 'max:59'],
+        ]);
+
+        $assessment->update([
+            'question_time_limit_seconds' => $this->questionTimeLimitSeconds($validated),
+        ]);
+
+        return back()->with('status', 'Question time limit updated.');
+    }
+
     private function retryLimitRules(bool $required = true): array
     {
         return array_merge($required ? ['required'] : ['sometimes', 'required'], [
@@ -241,6 +263,19 @@ class AssessmentController extends Controller
                 }
             },
         ]);
+    }
+
+    private function questionTimeLimitSeconds(array $validated): int
+    {
+        $seconds = ((int) ($validated['question_time_minutes'] ?? 2) * 60) + (int) ($validated['question_time_seconds'] ?? 0);
+
+        if ($seconds < Assessment::MIN_QUESTION_TIME_LIMIT_SECONDS || $seconds > Assessment::MAX_QUESTION_TIME_LIMIT_SECONDS) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'question_time_minutes' => 'Set a time between 10 seconds and 60 minutes per question.',
+            ]);
+        }
+
+        return $seconds;
     }
 
     public function destroy(Request $request, Assessment $assessment): RedirectResponse
@@ -311,12 +346,14 @@ class AssessmentController extends Controller
     private function progressRules(): array
     {
         return [
-            'state' => ['sometimes', 'array:answers,phase,reading_seconds,timer_status,word_marks,sentence_marks,mark_mode,scroll_ratio'],
+            'state' => ['sometimes', 'array:answers,phase,reading_seconds,timer_status,question_deadline_ms,question_timer_index,word_marks,sentence_marks,mark_mode,scroll_ratio'],
             'state.answers' => ['present_with:state', 'array'],
-            'state.answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
+            'state.answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D', 'TIMEOUT'])],
             'state.phase' => ['required_with:state', Rule::in(['reading', 'questions', 'finished'])],
             'state.reading_seconds' => ['required_with:state', 'integer', 'min:0', 'max:604800'],
             'state.timer_status' => ['required_with:state', Rule::in(['idle', 'running', 'paused', 'finished'])],
+            'state.question_deadline_ms' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:9007199254740991'],
+            'state.question_timer_index' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:999'],
             'state.word_marks' => ['sometimes', 'array', 'max:10000'],
             'state.word_marks.*' => ['integer', 'between:0,2'],
             'state.sentence_marks' => ['sometimes', 'array', 'max:10000'],
@@ -371,7 +408,7 @@ class AssessmentController extends Controller
         $validated = $request->validate(array_merge($this->progressRules(), [
             'attempt_key' => [$request->user()->isTeacher() || $assessment->question_selection === 'automatic' ? 'required' : 'sometimes', 'required', 'uuid'],
             'answers' => ['present', 'array', 'max:1000'],
-            'answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
+            'answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D', 'TIMEOUT'])],
         ]));
         $studentId = $student->id;
         $submission = DB::transaction(function () use ($request, $assessment, $validated, $studentId) {
@@ -453,6 +490,11 @@ class AssessmentController extends Controller
         if ($submission->wasRecentlyCreated) {
             NotificationSender::notifyAssessmentCompleted($submission->load(['assessment.teacher', 'student']));
             app(MLPredictionService::class)->predictForSubmission($submission);
+            try {
+                app(LearningRecommender::class)->recommend($submission->student, $submission);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
         }
 
         $submission->loadMissing('mlPrediction');

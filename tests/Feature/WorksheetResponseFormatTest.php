@@ -97,6 +97,23 @@ class WorksheetResponseFormatTest extends TestCase
         }
     }
 
+    public function test_game_timeout_marker_is_saved_only_for_game_items(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['section' => 'Section A']);
+        $assignment = $this->assignment($teacher, 1);
+        $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+        $payload = $this->payload($progress, NumeracyWorksheets::find(1));
+        $payload['pages'][0]['responses']['1-0'] = ['__timed_out' => true];
+
+        $this->actingAs($student)->postJson(route('worksheets.save', $assignment), $payload)->assertOk();
+        $this->assertTrue($progress->fresh()->state['pages'][0]['responses']['1-0']['__timed_out']);
+
+        $payload['revision'] = 2;
+        $payload['pages'][0]['responses']['0-0'] = ['__timed_out' => true];
+        $this->postJson(route('worksheets.save', $assignment), $payload)->assertUnprocessable();
+    }
+
     public function test_empty_controls_do_not_count_but_zero_no_and_saved_legacy_answers_are_retained(): void
     {
         $teacher = User::factory()->teacher()->create();

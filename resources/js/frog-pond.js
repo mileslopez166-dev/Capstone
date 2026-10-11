@@ -1,482 +1,329 @@
 import * as THREE from 'three';
-import { frogJumpFrame, frogFinishFrame, isPerfectFrogRun } from './frog-jump';
+import { frogRiverJumpFrame, frogFinishFrame, isPerfectFrogRun } from './frog-jump';
 
 export function initFrogPond(host) {
     const root = host.closest('.frog-pond-game');
-    if (!root || host.dataset.initialized) return;
+    const stage = root?.querySelector('.frog-stage');
+    if (!stage || host.dataset.initialized) return;
     host.dataset.initialized = 'true';
     root.dataset.pondState = 'fallback';
-
     let renderer;
     try {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('webgl2', { antialias: true, alpha: false, powerPreference: 'low-power' });
-        if (!context) return;
-        renderer = new THREE.WebGLRenderer({ canvas, context, antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' });
     } catch {
         return;
     }
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    // The camera owns its viewport; question and answer height never clips the river.
+    stage.prepend(host);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
-
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#d9eff5');
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 3000);
-    camera.position.z = 1000;
-    scene.add(new THREE.HemisphereLight('#fff9e7', '#67aeba', 2));
-    const sunlight = new THREE.DirectionalLight('#fff3dc', 3);
-    sunlight.position.set(-350, 550, 800);
-    scene.add(sunlight);
-    const fill = new THREE.DirectionalLight('#c1edff', 1.1);
-    fill.position.set(500, 80, 400);
-    scene.add(fill);
+    scene.background = new THREE.Color('#8dd6df');
+    scene.fog = new THREE.Fog('#8dd6df', 30, 65);
+    const camera = new THREE.OrthographicCamera(-9, 9, 7, -7, .1, 100);
+    scene.add(new THREE.HemisphereLight('#e8fcff', '#557766', 2.4));
+    const sun = new THREE.DirectionalLight('#fff5d6', 3);
+    sun.position.set(-8, 18, 8);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14 });
+    sun.shadow.bias = -.001;
+    scene.add(sun, sun.target);
 
-    const geometries = new Set();
+    const cube = new THREE.BoxGeometry(1, 1, 1);
+    const ring = new THREE.RingGeometry(.75, 1, 32);
     const materials = new Map();
-    const geometry = (value) => { geometries.add(value); return value; };
-    const sphere = geometry(new THREE.SphereGeometry(1, 24, 16));
-    const cylinder = geometry(new THREE.CylinderGeometry(1, 1, 1, 10));
-    const plane = geometry(new THREE.PlaneGeometry(1, 1));
-    const circle = geometry(new THREE.CircleGeometry(1, 48));
-    const ring = geometry(new THREE.TorusGeometry(1, .012, 6, 64));
-    const up = new THREE.Vector3(0, 1, 0);
-    const material = (color, options = {}) => {
-        const key = color + JSON.stringify(options);
-        if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, roughness: .4, ...options }));
-        return materials.get(key);
-    };
-    const mesh = (parent, shape, color, position, scale, options = {}) => {
-        const object = new THREE.Mesh(shape, material(color, options));
-        object.position.set(...position);
-        object.scale.set(...scale);
-        parent.add(object);
-        return object;
-    };
-    const ellipsoid = (parent, color, position, scale, options) => mesh(parent, sphere, color, position, scale, options);
-    const segment = (parent, from, to, radius, color) => {
-        const a = new THREE.Vector3(...from);
-        const b = new THREE.Vector3(...to);
-        const object = mesh(parent, cylinder, color, a.clone().add(b).multiplyScalar(.5).toArray(), [radius, a.distanceTo(b), radius]);
-        object.quaternion.setFromUnitVectors(up, b.sub(a).normalize());
-        return object;
-    };
-    const curve = (parent, points, radius, color) => {
-        const path = new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)));
-        const object = new THREE.Mesh(geometry(new THREE.TubeGeometry(path, 24, radius, 6, false)), material(color));
-        parent.add(object);
-        return object;
-    };
+    function material(color) {
+        if (!materials.has(color)) materials.set(color, new THREE.MeshStandardMaterial({ color, roughness: .88 }));
+        return materials.get(color);
+    }
+    function block(parent, color, x, y, z, sx, sy, sz) {
+        const mesh = new THREE.Mesh(cube, material(color));
+        mesh.position.set(x, y, z);
+        mesh.scale.set(sx, sy, sz);
+        mesh.castShadow = mesh.receiveShadow = true;
+        parent.add(mesh);
+        return mesh;
+    }
+    const total = Math.max(1, root.querySelectorAll('.frog-safe-log').length);
+    const spacing = 2.65;
+    const endZ = -(total + 1) * spacing;
+    const length = (total + 5) * spacing;
+    block(scene, '#2c9bbb', 0, -.48, endZ / 2, 80, .65, length + 60);
+    block(scene, '#278bab', 0, -.14, endZ / 2, 12, .12, length);
+    for (const side of [-1, 1]) {
+        block(scene, '#647855', side * 8, -.48, endZ / 2, 4.2, .9, length);
+        block(scene, '#8fc766', side * 8, .06, endZ / 2, 4.2, .22, length);
+    }
+    for (const z of [1.5, endZ - 1.5]) {
+        block(scene, '#71864e', 0, -.18, z, 12, .65, 3);
+        block(scene, '#abd776', 0, .2, z, 12, .18, 3);
+        for (let i = 0; i < 12; i++) {
+            block(scene, i % 2 ? '#c0e590' : '#91c45f', -5.5 + i, .3, z + (i % 3 - 1) * .6, .7, .03, .45);
+        }
+    }
+    const foam = [];
+    for (let row = 0; row < total + 3; row++) {
+        const z = -row * spacing;
+        block(scene, row % 2 ? '#359fbd' : '#3aa9c4', 0, -.06, z, 11.8, .035, spacing - .12).castShadow = false;
+        for (let i = 0; i < 5; i++) {
+            const piece = block(scene, '#91dce3', -5 + i * 2.3, -.015, z + (i % 3 - 1) * .55, .3 + (i % 2) * .5, .025, .07);
+            piece.castShadow = false;
+            foam.push({ piece, row, x: piece.position.x });
+        }
+        for (const side of [-1, 1]) {
+            const x = side * (6.7 + (row % 2) * .8);
+            block(scene, '#876349', x, .7, z, .28, 1.3, .3);
+            block(scene, row % 2 ? '#3c8b58' : '#579b56', x, 1.65, z, 1.4, 1.4, 1.25);
+            block(scene, '#71b563', x - .15, 2.3, z, .95, .65, .85);
+            block(scene, '#edf0d8', side * 5.9, .22, z + .8, .45, .38, .55);
+        }
+    }
+    const logs = [];
+    for (let index = 0; index < total; index++) {
+        const group = new THREE.Group();
+        scene.add(group);
+        block(group, '#805337', 0, 0, 0, 3.1, .48, .95);
+        block(group, '#b18550', 0, .25, 0, 3, .08, .82);
+        for (const x of [-1.57, 1.57]) {
+            block(group, '#d4ab71', x, 0, 0, .09, .46, .91);
+            block(group, '#956239', x * 1.035, 0, 0, .015, .2, .43);
+        }
+        for (const x of [-.85, .15, .8]) block(group, '#725137', x, .3, .02, .045, .035, .7);
+        block(group, '#96b660', -.7, .31, -.15, .6, .07, .24);
+        logs.push(group);
+    }
+    const finishArch = new THREE.Group();
+    scene.add(finishArch);
+    finishArch.position.z = endZ;
+    for (const x of [-1.8, 1.8]) block(finishArch, '#fff3d5', x, 1.3, 0, .18, 2.3, .18);
+    for (let i = 0; i < 10; i++) for (let j = 0; j < 2; j++) {
+        block(finishArch, (i + j) % 2 ? '#334e52' : '#fff9dd', -1.62 + i * .36, 2.2 + j * .26, 0, .36, .26, .13);
+    }
 
     const frog = new THREE.Group();
-    const character = new THREE.Group();
-    frog.add(character);
+    frog.rotation.y = Math.PI;
+    const body = new THREE.Group();
+    frog.add(body);
     scene.add(frog);
-    ellipsoid(character, '#69b940', [0, -.25, 0], [1.04, .92, .72]);
-    ellipsoid(character, '#e4ed9a', [0, -.3, .64], [.65, .61, .14], { roughness: .6 });
-    const head = ellipsoid(character, '#83cc50', [0, .52, .15], [1.16, .72, .75]);
+    block(body, '#6cc44e', 0, .42, 0, .86, .62, .8);
+    block(body, '#9bdf68', 0, .75, .16, 1, .42, .7);
+    block(body, '#daf2a0', 0, .38, .42, .57, .38, .045);
     const eyes = [];
-    const pupils = [];
     for (const side of [-1, 1]) {
-        ellipsoid(character, '#5ba73e', [side * .99, -.63, -.05], [.51, .42, .55]);
-        ellipsoid(character, '#78c343', [side * .63, -.66, .64], [.19, .48, .22]);
-        ellipsoid(character, '#8fd151', [side * .67, -1.03, .75], [.3, .13, .28]);
-        for (let toe = 0; toe < 3; toe++) {
-            ellipsoid(character, '#8fd151', [side * .67 + (toe - 1) * .17, -1.08 - Math.abs(toe - 1) * .03, .95], [.09, .08, .18]);
-        }
-        ellipsoid(character, '#83cc50', [side * .65, 1.08, .25], [.46, .49, .43]);
-        const eye = new THREE.Group();
-        eye.position.set(side * .65, 1.1, .55);
-        character.add(eye);
-        ellipsoid(eye, '#fffdeb', [0, 0, .12], [.32, .36, .18], { roughness: .15 });
-        const pupil = ellipsoid(eye, '#192f2c', [-side * .035, -.015, .283], [.14, .205, .08], { roughness: .09 });
-        ellipsoid(pupil, '#ffffff', [.32, .38, .75], [.25, .2, .2]);
+        block(body, '#88d655', side * .32, 1.04, .2, .3, .32, .3);
+        const eye = block(body, '#fffdf2', side * .32, 1.08, .36, .22, .22, .065);
+        block(eye, '#203e36', .1 * side, 0, .7, .45, .65, .1);
         eyes.push(eye);
-        pupils.push(pupil);
-        ellipsoid(character, '#edb578', [side * .8, .39, .71], [.18, .09, .06]);
-        ellipsoid(character, '#528c40', [side * .18, .54, .885], [.035, .025, .018]);
+        block(body, '#488f42', side * .47, .19, -.15, .4, .25, .55);
+        block(body, '#9ad863', side * .39, .08, .3, .34, .14, .48);
+        block(body, '#efa187', side * .4, .66, .52, .14, .075, .025);
     }
-    const smile = curve(character, [[-.51, .24, .806], [-.25, .13, .88], [0, .1, .91], [.25, .13, .88], [.51, .24, .806]], .027, '#376c35');
-    const mouth = ellipsoid(character, '#472c40', [0, .22, .91], [.31, .18, .035]);
-    mouth.visible = false;
+    block(body, '#34573a', 0, .65, .525, .29, .04, .025);
 
-    const lily = new THREE.Group();
-    scene.add(lily);
-    const leafShape = new THREE.Shape();
-    leafShape.moveTo(0, 0);
-    for (let step = 0; step <= 64; step++) {
-        const angle = .28 + step / 64 * (Math.PI * 2 - .56);
-        leafShape.lineTo(Math.cos(angle), Math.sin(angle));
-    }
-    leafShape.closePath();
-    const leafGeometry = geometry(new THREE.ExtrudeGeometry(leafShape, { depth: .04, bevelEnabled: true, bevelThickness: .035, bevelSize: .025, bevelSegments: 2, steps: 1 }));
-    const lilyLeaf = mesh(lily, leafGeometry, '#54a854', [0, 0, 0], [1, 1, 1]);
-    lilyLeaf.rotation.z = -.36;
-    for (let vein = 0; vein < 8; vein++) {
-        const angle = .5 + vein * .7;
-        segment(lily, [0, 0, .09], [Math.cos(angle) * .88, Math.sin(angle) * .88, .09], .008, '#85bf64');
-    }
-    const frogShadow = mesh(scene, circle, '#1e776f', [0, 0, -10], [1, 1, 1], { transparent: true, opacity: .18, depthWrite: false });
-
-    const water = mesh(scene, plane, '#63c1ce', [0, 0, -150], [1, 1, 1], { roughness: .25, metalness: .12 });
-    const sinkMask = new THREE.Mesh(plane, water.material);
-    sinkMask.visible = false;
-    scene.add(sinkMask);
-    const farBank = ellipsoid(scene, '#a6d3a0', [0, 0, -170], [1, 1, 1]);
-    const ripples = Array.from({ length: 5 }, (_, index) => mesh(scene, ring, '#ddfff2', [0, 0, -80], [1, 1, 1], { transparent: true, opacity: .26, depthWrite: false }));
-    const plants = [];
-    for (const side of [-1, 1]) {
-        const bank = new THREE.Group();
-        scene.add(bank);
-        ellipsoid(bank, '#3e985c', [0, -.2, 0], [1.2, .52, .5]);
-        ellipsoid(bank, '#74b765', [side * .45, .08, -.1], [.8, .45, .4]);
-        for (let index = 0; index < 5; index++) {
-            const x = (index - 2) * .3;
-            const height = 1.1 + (index % 3) * .28;
-            const stem = segment(bank, [x, -.08, .1], [x + side * .12, height, .03], .028, '#4e8750');
-            const leaf = ellipsoid(bank, index % 2 ? '#86bd5e' : '#4d9f59', [x + .17 * side, height * .43, .16], [.11, .65, .08]);
-            leaf.rotation.z = side * -.4;
-            if (index % 2 === 0) ellipsoid(bank, '#866346', [x + side * .12, height, .03], [.07, .22, .08]);
-            stem.rotation.z = side * .04;
-        }
-        ellipsoid(bank, '#b9c6b4', [-side * .7, -.1, .55], [.3, .18, .25], { roughness: 1 });
-        plants.push({ object: bank, side });
-    }
-    const flowers = [];
-    for (let index = 0; index < 3; index++) {
-        const flower = new THREE.Group();
-        scene.add(flower);
-        ellipsoid(flower, '#52a96b', [0, -.15, -.1], [1.1, .22, .1]);
-        for (let petal = 0; petal < 7; petal++) {
-            const angle = petal / 7 * Math.PI * 2;
-            const object = ellipsoid(flower, index === 1 ? '#fff4d8' : '#efa6bc', [Math.cos(angle) * .35, Math.sin(angle) * .18, .12], [.38, .17, .12]);
-            object.rotation.z = angle;
-        }
-        ellipsoid(flower, '#f4ca65', [0, 0, .25], [.22, .12, .1]);
-        flowers.push(flower);
-    }
-
-    const targets = [...root.querySelectorAll('[data-frog-answer]')].map((button, index) => {
-        const object = new THREE.Group();
-        scene.add(object);
-        const leaf = mesh(object, leafGeometry, ['#63b950', '#82b752', '#49aa77', '#69ae56'][index], [0, 0, 0], [1, 1, 1]);
-        leaf.rotation.z = -.36;
-        for (let vein = 0; vein < 8; vein++) {
-            const angle = .5 + vein * .7;
-            segment(object, [0, 0, .09], [Math.cos(angle) * .88, Math.sin(angle) * .88, .09], .009, '#b1d778');
-        }
-        const color = ['#ed8b7d', '#efc056', '#78b6e5', '#b7a0df'][index];
-        for (let petal = 0; petal < 5; petal++) {
-            const angle = petal * Math.PI * 2 / 5;
-            ellipsoid(object, color, [-.48 + Math.cos(angle) * .13, .23 + Math.sin(angle) * .16, .18], [.16, .16, .08]);
-        }
-        ellipsoid(object, '#fff1a1', [-.48, .23, .28], [.1, .12, .09]);
-        const shadow = mesh(scene, circle, '#286e6c', [0, 0, 0], [1, 1, 1], { transparent: true, opacity: .18, depthWrite: false });
-        const ripple = mesh(scene, ring, '#effff7', [0, 0, 0], [1, 1, 1], { transparent: true, opacity: .6, depthWrite: false });
-        ripple.visible = false;
-        const target = { button, object, shadow, ripple, base: new THREE.Vector3(), width: 1, height: 1, landingScale: 1, hover: false, index };
-        button.addEventListener('pointerenter', () => { target.hover = true; });
-        button.addEventListener('pointerleave', () => { target.hover = false; });
-        button.addEventListener('focus', () => { target.hover = true; });
-        button.addEventListener('blur', () => { target.hover = false; });
-        return target;
-    });
-    const splash = new THREE.Group();
+    const targetMaterial = new THREE.MeshBasicMaterial({ color: '#ffed91', side: THREE.DoubleSide, transparent: true, opacity: .9, depthWrite: false });
+    const target = new THREE.Mesh(ring, targetMaterial);
+    target.rotation.x = -Math.PI / 2;
+    target.scale.setScalar(.85);
+    scene.add(target);
+    const splashMaterial = new THREE.MeshBasicMaterial({ color: '#d8fcff', transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    const splash = new THREE.Mesh(ring, splashMaterial);
+    splash.rotation.x = -Math.PI / 2;
     scene.add(splash);
-    const drops = Array.from({ length: 8 }, () => ellipsoid(splash, '#c2f5f4', [0, 0, 0], [3, 6, 3], { roughness: .15 }));
-    splash.visible = false;
-    const finishGate = new THREE.Group();
-    scene.add(finishGate);
-    const boxGeometry = geometry(new THREE.BoxGeometry(1, 1, 1));
-    const finishPosts = [-1, 1].map(side => ({ side, object: mesh(finishGate, boxGeometry, '#fff4d7', [0, 0, 0], [1, 1, 1]) }));
-    const finishChecks = Array.from({ length: 16 }, (_, index) => mesh(finishGate, plane, (index + Math.floor(index / 8)) % 2 ? '#fffbe9' : '#254d49', [0, 0, 0], [1, 1, 1]));
-    const finishPad = new THREE.Group();
-    scene.add(finishPad);
-    mesh(finishPad, leafGeometry, '#81b959', [0, 0, 0], [1, 1, 1]).rotation.z = -.36;
-    for (let vein = 0; vein < 8; vein++) {
-        const angle = .5 + vein * .7;
-        segment(finishPad, [0, 0, .09], [Math.cos(angle) * .88, Math.sin(angle) * .88, .09], .009, '#d0e493');
-    }
-    const motionQuery = { get matches() { return window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches; } };
-    const gaze = new THREE.Vector2();
-    const homePosition = new THREE.Vector3();
-    const landingPosition = new THREE.Vector3();
-    const finishPosition = new THREE.Vector3();
-    let dimensions = { width: 0, height: 0 };
-    let frogScale = 1;
-    let jumpAnimation = null;
-    let finishAnimation = null;
-    let finishScale = 1;
-    let finished = root.dataset.assessmentFinished === 'true';
+    const drops = Array.from({ length: 16 }, () => block(scene, '#d9fbff', 0, 0, 0, .12, .2, .12));
+    const confetti = Array.from({ length: 20 }, (_, i) => block(scene, ['#ffe483', '#e8919c', '#f8faf0', '#65c596'][i % 4], 0, 0, 0, .12, .09, .09));
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let hover = false;
+    let petAt = -Infinity;
+    let animation = null;
+    let safeIndex = Number(root.dataset.frogSafeIndex ?? -1);
     let disposed = false;
-    let contextLost = false;
-    let previousFrame = 0;
-
-    function layout() {
-        if (disposed) return;
-        const box = root.getBoundingClientRect();
-        const width = root.clientWidth;
-        const height = root.clientHeight;
-        if (!width || !height) return;
-        dimensions = { width, height };
-        camera.left = -width / 2;
-        camera.right = width / 2;
-        camera.top = height / 2;
-        camera.bottom = -height / 2;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height, false);
-
-        const anchor = root.querySelector('#frog-character').getBoundingClientRect();
-        frogScale = Math.min(anchor.width / 3.6, anchor.height / 3.45);
-        homePosition.set(anchor.left + anchor.width / 2 - box.left - width / 2, height / 2 - (anchor.top + anchor.height * .46 - box.top), 45);
-        frog.position.copy(homePosition);
-        frog.scale.setScalar(frogScale);
-        lily.position.set(frog.position.x, frog.position.y - frogScale * 1.16, 15);
-        lily.scale.set(frogScale * 1.9, frogScale * .48, frogScale * .5);
-        frogShadow.position.set(lily.position.x + 7, lily.position.y - 8, -5);
-        frogShadow.scale.set(frogScale * 1.92, frogScale * .52, 1);
-
-        const gateBox = root.querySelector('#frog-finish-line').getBoundingClientRect();
-        finishGate.position.set(gateBox.left + gateBox.width / 2 - box.left - width / 2, height / 2 - (gateBox.bottom - box.top), 30);
-        finishPosts.forEach(({ side, object }) => {
-            object.position.set(side * (gateBox.width / 2 - 2), (gateBox.height - 16) / 2, 0);
-            object.scale.set(4, gateBox.height - 16, 8);
+    let lost = false;
+    let finished = root.dataset.assessmentFinished === 'true';
+    let lastTime = 0;
+    let aspect = 1;
+    const focus = new THREE.Vector3();
+    const reducedMotion = () => window.PgaalsPreferences?.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function animateLogs(time, reduced) {
+        logs.forEach((log, index) => {
+            log.position.set(Math.sin(index * 1.7) * 1.1 + (reduced ? 0 : Math.sin(time * .65 + index) * .35), .3 + (reduced ? 0 : Math.sin(time * 1.5 + index) * .045), -(index + 1) * spacing);
+            log.rotation.z = reduced ? 0 : Math.sin(time + index) * .018;
         });
-        finishChecks.forEach((object, index) => {
-            object.position.set(-gateBox.width / 2 + (index % 8 + .5) * gateBox.width / 8, gateBox.height - 30 - Math.floor(index / 8) * 10, 8);
-            object.scale.set(gateBox.width / 8, 10, 1);
-        });
-        const finishBox = root.querySelector('#frog-finish-pad').getBoundingClientRect();
-        finishPad.position.set(finishBox.left + finishBox.width / 2 - box.left - width / 2, height / 2 - (finishBox.top + finishBox.height / 2 - box.top), 25);
-        finishPad.scale.set(finishBox.width * .49, finishBox.height * .48, 15);
-        finishScale = Math.min(frogScale, finishBox.width / 3.6);
-        finishPosition.copy(finishPad.position).add(new THREE.Vector3(0, finishScale * 1.16, 95));
-
-        const answerZone = root.querySelector('.frog-answer-zone').getBoundingClientRect();
-        const waterTop = answerZone.top - box.top - 14;
-        const waterHeight = height - waterTop;
-        water.position.y = -waterTop / 2;
-        water.scale.set(width, waterHeight, 1);
-        farBank.position.set(0, height / 2 - waterTop - 8, -170);
-        farBank.scale.set(width * .75, 65, 20);
-        plants.forEach(({ object, side }) => {
-            const size = width > 700 ? 95 : 56;
-            object.scale.setScalar(size);
-            object.position.set(side * (width / 2 - size * .2), -height / 2 + size * .28, -20);
-        });
-        flowers.forEach((flower, index) => {
-            const size = width > 700 ? 24 : 14;
-            flower.scale.setScalar(size);
-            flower.position.set((index === 0 ? -.32 : index === 1 ? .34 : .23) * width, -height / 2 + (index === 2 ? 105 : 50), -15);
-        });
-        targets.forEach((target) => {
-            const rect = target.button.querySelector('.frog-target-visual').getBoundingClientRect();
-            target.base.set(rect.left + rect.width / 2 - box.left - width / 2, height / 2 - (rect.top + rect.height * .80 - box.top), 25);
-            target.width = rect.width * .46;
-            target.height = rect.height * .17;
-            target.landingScale = Math.min(frogScale, rect.width / 4, rect.height / 3.6);
-        });
-        render(performance.now(), true);
     }
-
-    function render(now, force = false) {
-        if (disposed || contextLost) return;
-        if (!force && now - previousFrame < 1000 / 30) return;
-        previousFrame = now;
+    function checkpoint(index) {
+        if (index >= total) return new THREE.Vector3(0, .31, endZ - .35);
+        if (index < 0) return new THREE.Vector3(0, .31, .8);
+        return logs[index].position.clone().add(new THREE.Vector3(0, .3, 0));
+    }
+    function draw(now) {
+        if (disposed || lost) return;
+        const reduced = reducedMotion();
         const time = now / 1000;
-        const reduced = motionQuery.matches;
-        const breathing = reduced ? 0 : Math.sin(time * 2) * .018;
-        character.scale.set(1, 1 + breathing, 1);
-        head.rotation.z = reduced ? 0 : Math.sin(time * .9) * .012;
-        const blinkPhase = time % 5.2;
-        const blink = !reduced && blinkPhase > 4.95 ? Math.max(.08, Math.abs(blinkPhase - 5.075) / .125) : 1;
-        eyes.forEach((eye) => { eye.scale.y = blink; });
-        pupils.forEach((pupil, index) => {
-            pupil.position.x = (index === 0 ? .035 : -.035) + gaze.x * .028;
-            pupil.position.y = -.015 + gaze.y * .025;
-        });
-        frog.position.copy(homePosition);
-        frog.scale.setScalar(frogScale);
-        character.position.set(0, 0, 0);
-        character.rotation.z = 0;
-        mouth.visible = false;
-        smile.visible = true;
+        const delta = Math.min(.05, Math.max(0, (now - lastTime) / 1000));
+        lastTime = now;
+        animateLogs(time, reduced);
+        const resting = checkpoint(safeIndex);
+        frog.position.copy(resting);
+        body.scale.set(1, reduced ? 1 : 1 + Math.sin(time * 3) * .025, 1);
+        body.rotation.set(0, 0, 0);
+        frog.visible = true;
         splash.visible = false;
-        sinkMask.visible = false;
-        character.visible = true;
-        frogShadow.position.set(lily.position.x + 7, lily.position.y - 8, -5);
-        frogShadow.scale.set(frogScale * 1.92, frogScale * .52, 1);
-        targets.forEach((target) => {
-            const bob = reduced ? 0 : Math.sin(time * 1.8 + target.index * 1.6) * 1.5;
-            const hover = target.hover && !target.button.disabled ? 1.035 : 1;
-            target.object.position.copy(target.base);
-            target.object.position.y += bob;
-            target.object.rotation.z = reduced ? 0 : Math.sin(time * .9 + target.index) * .018;
-            target.object.scale.set(target.width * hover, target.height * hover, target.width * .3);
-            target.object.visible = target.shadow.visible = !target.button.hidden;
-            target.shadow.position.copy(target.base).add(new THREE.Vector3(4, -5, -12));
-            target.shadow.scale.set(target.width * 1.04, target.height * 1.1, 1);
-            target.ripple.visible = false;
-        });
-        ripples.forEach((ripple, index) => {
-            const wave = reduced ? .5 : (time * .14 + index * .23) % 1;
-            const radius = frogScale * (1.95 + index * .28 + wave * .3);
-            ripple.scale.set(radius, radius * .22, 1);
-            ripple.position.set(lily.position.x, lily.position.y - 6 - index * 4, -65);
-        });
-
-        if (jumpAnimation) {
-            const { target, duration, start, correct } = jumpAnimation;
-            const progress = Math.max(0, Math.min((now - start) / duration, 1));
-            const pose = frogJumpFrame(progress, correct, reduced);
-            landingPosition.copy(target.base).add(new THREE.Vector3(0, target.landingScale * 1.16, 95));
-            const arc = Math.min(90, homePosition.distanceTo(landingPosition) * .18 + 25);
-            frog.position.copy(homePosition).lerp(landingPosition, pose.travel);
-            const depth = pose.dip + pose.sink * target.height * 6.2;
-            frog.position.y += pose.lift * arc - depth;
-            frog.position.z = 120;
-            const size = THREE.MathUtils.lerp(frogScale, target.landingScale, pose.travel);
-            frog.scale.setScalar(size);
-            character.scale.set(1 / pose.squash, pose.squash + pose.lift * .08, 1);
-            character.rotation.z = pose.wobble;
-            target.object.position.copy(target.base);
-            target.object.position.y -= depth;
-            target.object.rotation.z = pose.wobble;
-            target.object.scale.set(target.width, target.height, target.width * .3);
-            if (pose.sink > 0) {
-                sinkMask.visible = !reduced;
-                sinkMask.position.set(target.base.x, target.base.y - target.height * 3.1, 240);
-                sinkMask.scale.set(target.width * 2.3, target.height * 6.2, 1);
-                if (reduced || pose.sink >= .999) character.visible = target.object.visible = false;
-                target.shadow.visible = false;
-            }
-            frogShadow.position.set(frog.position.x + 4, THREE.MathUtils.lerp(lily.position.y, target.base.y, pose.travel) - 6, 10);
-            frogShadow.scale.set(size * 1.65, size * .35, 1);
-            if (pose.ripple >= 0) {
-                target.ripple.visible = true;
-                target.ripple.position.copy(target.base).add(new THREE.Vector3(0, -3, -8));
-                target.ripple.scale.set(target.width * (1.1 + pose.ripple * .7), target.height * (1.2 + pose.ripple * .7), 1);
-                target.ripple.material.opacity = (1 - pose.ripple) * .65;
-                if (!correct && !reduced) {
-                    splash.visible = true;
-                    splash.position.copy(target.base).add(new THREE.Vector3(0, 0, 100));
-                    drops.forEach((drop, index) => {
-                        const angle = index * Math.PI * 2 / drops.length;
-                        const spread = .4 + pose.ripple;
-                        drop.position.set(Math.cos(angle) * target.width * spread, Math.sin(angle) * target.height + Math.sin(pose.ripple * Math.PI) * 28, 0);
-                        const size = Math.max(.05, 1 - pose.ripple);
-                        drop.scale.set(3 * size, 6 * size, 3 * size);
-                    });
-                }
-            }
-            mouth.visible = !correct && pose.phase === 'landed';
-            smile.visible = !mouth.visible;
+        drops.forEach(drop => { drop.visible = false; });
+        confetti.forEach(piece => { piece.visible = false; });
+        const blink = !reduced && time % 4.3 > 4.15 ? .15 : 1;
+        eyes.forEach(eye => { eye.scale.y = .22 * blink; });
+        if (!animation && !reduced) {
+            body.rotation.y = hover ? -.16 : Math.sin(time * .8) * .035;
+            frog.position.y += Math.max(0, Math.sin(Math.min(1, (now - petAt) / 500) * Math.PI)) * .35;
         }
-        if (finishAnimation) {
-            const pose = frogFinishFrame((now - finishAnimation.start) / finishAnimation.duration, reduced);
-            frog.position.copy(homePosition).lerp(finishPosition, pose.travel);
-            frog.position.y += pose.lift * 28;
-            frog.position.z = 120;
-            const size = THREE.MathUtils.lerp(frogScale, finishScale, pose.travel);
-            frog.scale.setScalar(size);
-            character.scale.set(1 / pose.squash, pose.squash, 1);
-            frogShadow.position.set(frog.position.x, THREE.MathUtils.lerp(lily.position.y, finishPad.position.y, pose.travel) - 5, 10);
-            frogShadow.scale.set(size * 1.65, size * .35, 1);
+        if (animation) {
+            const p = THREE.MathUtils.clamp((now - animation.start) / animation.duration, 0, 1);
+            const pose = animation.finish ? frogFinishFrame(p, reduced) : frogRiverJumpFrame(p, animation.correct, reduced);
+            const from = checkpoint(animation.from);
+            const destination = animation.correct || animation.finish ? checkpoint(animation.to) : checkpoint(animation.from + 1).lerp(from, .48).setY(.08);
+            frog.position.copy(from).lerp(destination, pose.travel);
+            frog.position.y += pose.lift * 1.65 - pose.sink * 1.2;
+            body.scale.set(1 / pose.squash, pose.squash + pose.lift * .1, 1 / pose.squash);
+            body.rotation.x = reduced ? 0 : -pose.lift * .18;
+            frog.visible = pose.sink < .88;
+            if (pose.splash > .01) {
+                splash.visible = true;
+                splash.position.set(destination.x, .04, destination.z);
+                splash.scale.setScalar(.6 + pose.splash * 1.2);
+                splashMaterial.opacity = pose.splash * .8;
+                drops.forEach((drop, i) => {
+                    drop.visible = true;
+                    const angle = i / drops.length * Math.PI * 2;
+                    drop.position.set(destination.x + Math.cos(angle) * pose.splash * 1.1, .1 + Math.sin(pose.splash * Math.PI / 2) * (.4 + i % 3 * .15), destination.z + Math.sin(angle) * pose.splash);
+                    drop.rotation.z = angle;
+                });
+            }
+            if (animation.correct && p > .78 && !reduced) {
+                const burst = (p - .78) / .22;
+                confetti.forEach((piece, i) => {
+                    piece.visible = true;
+                    const angle = i * 2.4;
+                    piece.position.set(destination.x + Math.cos(angle) * burst * 1.5, destination.y + .5 + Math.sin(burst * Math.PI) * (1 + i % 3 * .2), destination.z + Math.sin(angle) * burst);
+                    piece.rotation.set(burst * 4, angle, burst * 3);
+                    piece.scale.setScalar(.09 * (1 - burst));
+                });
+            }
+            if (p >= 1) {
+                safeIndex = animation.correct || animation.finish ? animation.to : animation.from;
+                if (animation.finish) root.dataset.frogFinishCrossed = 'true';
+                animation = null;
+                frog.visible = true;
+                frog.position.copy(checkpoint(safeIndex));
+            }
         }
+        target.visible = safeIndex < total && !animation;
+        target.position.copy(checkpoint(Math.min(total, safeIndex + 1)));
+        target.position.y += .025;
+        targetMaterial.opacity = reduced ? .8 : .65 + Math.sin(time * 3) * .2;
+        foam.forEach(({ piece, row, x }) => {
+            piece.position.x = reduced ? x : ((x + 6 + time * (row % 2 ? .45 : -.45)) % 12 + 12) % 12 - 6;
+        });
+        const desired = new THREE.Vector3(frog.position.x * .25, 0, frog.position.z - 1.5);
+        focus.lerp(desired, reduced ? 1 : 1 - Math.exp(-delta * 5));
+        camera.position.copy(focus).add(new THREE.Vector3(8, 13, 14));
+        camera.lookAt(focus);
+        sun.position.set(focus.x - 8, 18, focus.z + 8);
+        sun.target.position.copy(focus);
         renderer.render(scene, camera);
     }
-
-    function onJump(event) {
-        finishAnimation = null;
-        const target = targets.find((item) => item.button.dataset.frogAnswer === event.detail.letter);
-        if (!target) return;
-        jumpAnimation = {
-            target, start: event.detail.startedAt ?? performance.now(),
-            correct: event.detail.correct !== false,
-            duration: event.detail.duration || 1500,
-        };
-        render(performance.now(), true);
-    }
-    function onQuestion() {
-        jumpAnimation = null;
-        finishAnimation = null;
-        character.position.set(0, 0, 0);
-        character.rotation.set(0, 0, 0);
-        character.scale.setScalar(1);
-        character.visible = true;
-        mouth.visible = false;
-        smile.visible = true;
-        layout();
-    }
-    function onFinishLine({ detail }) {
-        if (!isPerfectFrogRun(detail.correct, detail.answered, detail.total)) return;
-        jumpAnimation = null;
-        finishAnimation = { start: detail.startedAt, duration: detail.duration };
-        render(performance.now(), true);
-    }
-    function onPointer(event) {
-        const rect = root.getBoundingClientRect();
-        gaze.set(THREE.MathUtils.clamp((event.clientX - rect.left) / dimensions.width * 2 - 1, -1, 1), THREE.MathUtils.clamp(1 - (event.clientY - rect.top) / dimensions.height * 2, -1, 1));
-    }
-    function updateVisibility() {
-        renderer.setAnimationLoop(!document.hidden && !finished && !contextLost && !disposed ? render : null);
-    }
-    const observer = new ResizeObserver(layout);
-    observer.observe(root);
-    observer.observe(root.querySelector('.frog-interface'));
-    root.addEventListener('frog:jump', onJump);
-    root.addEventListener('frog:finish-line', onFinishLine);
-    root.addEventListener('frog:question', onQuestion);
-    root.addEventListener('pointermove', onPointer);
-    root.addEventListener('frog:finished', () => { finished = true; updateVisibility(); });
-    document.addEventListener('visibilitychange', updateVisibility);
-    renderer.domElement.addEventListener('webglcontextlost', (event) => {
-        event.preventDefault();
-        contextLost = true;
-        root.classList.remove('pond-3d-ready');
-        root.dataset.pondState = 'fallback';
-        updateVisibility();
-    });
-    renderer.domElement.addEventListener('webglcontextrestored', () => {
-        contextLost = false;
-        layout();
+    function layout() {
+        if (disposed || lost) return;
+        const rect = stage.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) return;
+        aspect = rect.width / rect.height;
+        const halfHeight = Math.max(5.8, 6.8 / aspect);
+        camera.left = -halfHeight * aspect;
+        camera.right = halfHeight * aspect;
+        camera.top = halfHeight;
+        camera.bottom = -halfHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(rect.width, rect.height, false);
+        draw(performance.now());
         root.classList.add('pond-3d-ready');
         root.dataset.pondState = 'ready';
-        updateVisibility();
-    });
-    window.addEventListener('pagehide', (event) => {
+    }
+    function onJump({ detail }) {
+        const from = Number(detail.fromSafeIndex ?? safeIndex);
+        const correct = detail.correct !== false;
+        const to = Number(detail.toSafeIndex ?? from + (correct ? 1 : 0));
+        animation = { from, to, correct, start: detail.startedAt ?? performance.now(), duration: detail.duration || 1400 };
+        safeIndex = from;
+        draw(performance.now());
+    }
+    function onQuestion() {
+        animation = null;
+        safeIndex = Number(root.dataset.frogSafeIndex ?? -1);
+        draw(performance.now());
+    }
+    function onFinish({ detail }) {
+        if (!isPerfectFrogRun(detail.correct, detail.answered, detail.total)) return;
+        animation = { from: total - 1, to: total, correct: true, finish: true, start: detail.startedAt ?? performance.now(), duration: detail.duration || 1800 };
+    }
+    function visibility() {
+        renderer.setAnimationLoop(!disposed && !lost && !finished && !document.hidden ? draw : null);
+    }
+    function onFinished() { finished = true; visibility(); }
+    function pointerMove(event) {
+        const rect = host.getBoundingClientRect();
+        pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2);
+        raycaster.setFromCamera(pointer, camera);
+        hover = raycaster.intersectObject(frog, true).length > 0;
+        host.style.cursor = hover ? 'pointer' : '';
+    }
+    function pointerLeave() { hover = false; }
+    function pointerDown(event) { pointerMove(event); if (hover && !animation) petAt = performance.now(); }
+    function contextLost(event) {
+        event.preventDefault();
+        lost = true;
+        root.classList.remove('pond-3d-ready');
+        root.dataset.pondState = 'fallback';
+        visibility();
+    }
+    function contextRestored() { lost = false; layout(); visibility(); }
+    const observer = new ResizeObserver(layout);
+    observer.observe(stage);
+    const listeners = [
+        [root, 'frog:jump', onJump], [root, 'frog:question', onQuestion],
+        [root, 'frog:finish-line', onFinish], [root, 'frog:finished', onFinished],
+        [host, 'pointermove', pointerMove], [host, 'pointerleave', pointerLeave], [host, 'pointerdown', pointerDown],
+        [document, 'visibilitychange', visibility], [window, 'pageshow', visibility],
+        [renderer.domElement, 'webglcontextlost', contextLost], [renderer.domElement, 'webglcontextrestored', contextRestored],
+    ];
+    listeners.forEach(([element, name, handler]) => element.addEventListener(name, handler));
+    function pagehide(event) {
         renderer.setAnimationLoop(null);
         if (event.persisted) return;
         disposed = true;
         observer.disconnect();
-        document.removeEventListener('visibilitychange', updateVisibility);
-        root.removeEventListener('frog:jump', onJump);
-        root.removeEventListener('frog:finish-line', onFinishLine);
-        root.removeEventListener('frog:question', onQuestion);
-        root.removeEventListener('pointermove', onPointer);
-        geometries.forEach((item) => item.dispose());
-        materials.forEach((item) => item.dispose());
+        listeners.forEach(([element, name, handler]) => element.removeEventListener(name, handler));
+        window.removeEventListener('pagehide', pagehide);
+        cube.dispose();
+        ring.dispose();
+        materials.forEach(item => item.dispose());
+        targetMaterial.dispose();
+        splashMaterial.dispose();
         renderer.dispose();
-    });
-    window.addEventListener('pageshow', (event) => { if (event.persisted) updateVisibility(); });
-
-    layout();
-    const pendingJump = root.querySelector('[data-frog-answer][data-result]');
-    if (!finished && root.dataset.frogFinishing === 'true') {
-        onFinishLine({ detail: { correct: Number(root.dataset.frogCorrect), answered: Number(root.dataset.frogAnswered), total: Number(root.dataset.frogTotal),
-            startedAt: Number(root.dataset.frogFinishStart), duration: Number(root.dataset.frogFinishDuration) } });
-    } else if (!finished && pendingJump && root.dataset.frogOutcome) {
-        onJump({ detail: {
-            letter: pendingJump.dataset.frogAnswer,
-            correct: root.dataset.frogOutcome === 'correct',
-            duration: Number(root.dataset.frogJumpDuration),
-            startedAt: Number(root.dataset.frogJumpStart),
-        } });
     }
-    root.classList.add('pond-3d-ready');
-    root.dataset.pondState = 'ready';
-    updateVisibility();
+    window.addEventListener('pagehide', pagehide);
+    animateLogs(performance.now() / 1000, reducedMotion());
+    focus.copy(checkpoint(safeIndex)).setY(0);
+    layout();
+    // The lazy renderer may arrive after a student has already chosen an answer.
+    if (root.dataset.frogFinishing === 'true' && !finished) {
+        onFinish({ detail: { correct: Number(root.dataset.frogCorrect), answered: Number(root.dataset.frogAnswered), total,
+            startedAt: Number(root.dataset.frogFinishStart), duration: Number(root.dataset.frogFinishDuration) } });
+    } else if (root.dataset.frogOutcome && !finished) {
+        onJump({ detail: { correct: root.dataset.frogOutcome === 'correct', fromSafeIndex: Number(root.dataset.frogJumpFrom),
+            toSafeIndex: Number(root.dataset.frogJumpTo), startedAt: Number(root.dataset.frogJumpStart), duration: Number(root.dataset.frogJumpDuration) } });
+    }
+    visibility();
 }

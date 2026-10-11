@@ -9,6 +9,7 @@ export function normalizeResponses(value, definitions = {}) {
         const input = value?.[key];
         if (!input || typeof input !== 'object' || Array.isArray(input)) continue;
         const fields = {};
+        if (typeof input.__timed_out === 'boolean' && definition.game) fields.__timed_out = input.__timed_out;
         for (const field of definition.fields) {
             const answer = input[field.key];
             if (field.type === 'checkbox') {

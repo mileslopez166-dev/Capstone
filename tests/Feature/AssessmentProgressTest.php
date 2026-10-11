@@ -167,6 +167,32 @@ class AssessmentProgressTest extends TestCase
         $this->assertSame([], $progress->fresh()->state);
     }
 
+    public function test_timed_out_questions_are_saved_and_scored_as_incorrect(): void
+    {
+        $student = User::factory()->create();
+        $assessment = $this->assessment();
+        $this->actingAs($student)->get(route('student.assessments.show', $assessment));
+        $progress = AssessmentProgress::query()->firstOrFail();
+        $state = $this->state([
+            'answers' => [0 => 'TIMEOUT'],
+            'question_deadline_ms' => now()->valueOf(),
+            'question_timer_index' => 0,
+        ]);
+
+        $this->postJson(route('student.assessments.progress', $assessment), [
+            'attempt_key' => $progress->attempt_key, 'revision' => 10, 'state' => $state,
+        ])->assertOk();
+
+        $this->postJson(route('student.assessments.submit', $assessment), [
+            'attempt_key' => $progress->attempt_key,
+            'answers' => ['TIMEOUT', 'B'],
+            'state' => array_merge($state, ['answers' => ['TIMEOUT', 'B'], 'phase' => 'finished']),
+            'revision' => 11,
+        ])->assertOk()->assertJsonPath('correct_count', 1);
+
+        $this->assertSame(['TIMEOUT', 'B'], array_values($progress->fresh()->submission->answers));
+    }
+
     public function test_oral_reading_can_resume_marks_and_finish_without_questions(): void
     {
         $assessment = $this->assessment(['assessment_type' => 'oral_reading', 'manual_questions' => []]);

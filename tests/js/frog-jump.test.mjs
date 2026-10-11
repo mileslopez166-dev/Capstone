@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { frogJumpFrame, frogFinishFrame, isPerfectFrogRun } from '../../resources/js/frog-jump.js';
+import { frogJumpFrame, frogRiverJumpFrame, frogFinishFrame, isPerfectFrogRun } from '../../resources/js/frog-jump.js';
 
 test('frog crouches, jumps, lands on the selected pad, and returns home', () => {
     assert.equal(frogJumpFrame(0).travel, 0);
@@ -42,6 +42,33 @@ test('only a non-empty perfect completed run can cross the finish line', () => {
     for (const counts of [[7, 8, 8], [0, 8, 8], [7, 7, 8], [0, 0, 0], [8, 7, 8], [9, 8, 8]]) {
         assert.equal(isPerfectFrogRun(...counts), false);
     }
+});
+
+test('a correct river answer ends on the next safe log', () => {
+    assert.equal(frogRiverJumpFrame(0, true).travel, 0);
+    assert(frogRiverJumpFrame(.45, true).lift > .8);
+    assert.equal(frogRiverJumpFrame(1, true).travel, 1);
+    assert.equal(frogRiverJumpFrame(1, true).sink, 0);
+    assert.equal(frogRiverJumpFrame(1, true).phase, 'safe-log');
+});
+
+test('a wrong river answer splashes and returns to the previous safe log', () => {
+    assert.equal(frogRiverJumpFrame(0, false).travel, 0);
+    assert(frogRiverJumpFrame(.45, false).travel > .8);
+    assert(frogRiverJumpFrame(.52, false).sink > .8);
+    assert(frogRiverJumpFrame(.52, false).splash > 0);
+    assert.equal(frogRiverJumpFrame(1, false).travel, 0);
+    assert.equal(frogRiverJumpFrame(1, false).sink, 0);
+    assert.equal(frogRiverJumpFrame(1, false).phase, 'safe-return');
+});
+
+test('reduced motion keeps river outcomes at their final safe positions', () => {
+    assert.deepEqual(frogRiverJumpFrame(.2, true, true), {
+        travel: 1, lift: 0, squash: 1, sink: 0, splash: 0, phase: 'safe-log',
+    });
+    assert.deepEqual(frogRiverJumpFrame(.8, false, true), {
+        travel: 0, lift: 0, squash: 1, sink: 0, splash: 0, phase: 'safe-return',
+    });
 });
 
 test('the finish hop crosses the line and stays on the finish pad', () => {

@@ -15,6 +15,7 @@
                 ['key' => 'overview', 'id' => 'admin-overview-nav', 'label' => 'Overview', 'icon' => 'space_dashboard', 'url' => route('admin.dashboard')],
                 ['key' => 'users', 'id' => 'admin-users-nav', 'label' => 'User Management', 'icon' => 'group', 'url' => route('admin.dashboard').'#user-management'],
                 ['key' => 'tokens', 'id' => 'admin-tokens-nav', 'label' => 'Token Requests', 'icon' => 'confirmation_number', 'url' => route('admin.token-requests.index')],
+                ['key' => 'ai-models', 'id' => 'admin-ai-models-nav', 'label' => 'AI Model Evaluation', 'icon' => 'model_training', 'url' => route('admin.ai-models.index')],
                 ['key' => 'trash', 'id' => 'admin-trash-nav', 'label' => 'Trash', 'icon' => 'delete', 'url' => route('admin.users.trash')],
             ] as $link)
                 <a id="{{ $link['id'] }}" class="{{ $active === $link['key'] ? 'bg-surface-container-high' : '' }}" href="{{ $link['url'] }}" @click="navOpen = false" @if ($active === $link['key']) aria-current="page" @endif>

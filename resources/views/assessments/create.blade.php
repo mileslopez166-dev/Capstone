@@ -20,8 +20,8 @@
                     @endif
 
                     <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        <div class="space-y-6 lg:col-span-2">
-                            <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                        <div class="contents lg:col-span-2 lg:block lg:space-y-6">
+                            <div class="order-1 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8 lg:order-none">
                                 <h2 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
                                     <span class="material-symbols-outlined text-primary">category</span>
                                     1. Assessment Foundation
@@ -96,7 +96,7 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+                            <div class="order-3 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8 lg:order-none">
                                 <h2 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
                                     <span class="material-symbols-outlined text-primary">edit_note</span>
                                     2. Story & Questions
@@ -277,8 +277,8 @@
                             </div>
                         </div>
 
-                        <aside class="space-y-6">
-                            <div class="relative overflow-hidden rounded-lg border border-outline-variant/10 bg-surface-container-low p-6">
+                        <aside class="contents lg:block lg:space-y-6">
+                            <div class="order-2 relative overflow-hidden rounded-lg border border-outline-variant/10 bg-surface-container-low p-6 lg:order-none">
                                 <div class="absolute right-0 top-0 p-4 opacity-10">
                                     <span class="material-symbols-outlined text-7xl text-primary" id="bg-icon">menu_book</span>
                                 </div>
@@ -310,6 +310,21 @@
                                         @enderror
                                     </div>
 
+                                    <fieldset>
+                                        <legend class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Time per question</legend>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <label class="text-sm font-semibold text-on-surface-variant" for="question_time_minutes">Minutes
+                                                <input class="mt-1 w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" id="question_time_minutes" name="question_time_minutes" type="number" min="0" max="60" inputmode="numeric" value="{{ old('question_time_minutes', 2) }}" required>
+                                            </label>
+                                            <label class="text-sm font-semibold text-on-surface-variant" for="question_time_seconds">Seconds
+                                                <input class="mt-1 w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" id="question_time_seconds" name="question_time_seconds" type="number" min="0" max="59" inputmode="numeric" value="{{ old('question_time_seconds', 0) }}" required>
+                                            </label>
+                                        </div>
+                                        <p class="mt-2 text-xs text-on-surface-variant">Students move to the next question when time runs out. Choose 10 seconds to 60 minutes.</p>
+                                        @error('question_time_minutes')<p class="mt-2 text-sm text-error">{{ $message }}</p>@enderror
+                                        @error('question_time_seconds')<p class="mt-2 text-sm text-error">{{ $message }}</p>@enderror
+                                    </fieldset>
+
                                     <hr class="border-outline-variant/20">
 
                                     <div class="space-y-3" id="literacy-options">
@@ -338,7 +353,7 @@
                                 </div>
                             </div>
 
-                            <div class="overflow-hidden rounded-lg shadow-lg">
+                            <div class="order-4 overflow-hidden rounded-lg shadow-lg lg:order-none">
                                 <div class="relative h-48 bg-gradient-to-br from-primary to-primary-container">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                                     <div class="absolute inset-x-0 bottom-0 p-6">

@@ -1,4 +1,4 @@
-@props(['teacher' => false, 'title', 'back' => null])
+@props(['teacher' => false, 'title', 'back' => null, 'focus' => false])
 <x-app-layout>
     <div x-data="{ mobileMenuOpen: false }">
         @if ($teacher)
@@ -11,10 +11,10 @@
             </div>
             <button x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-label="Close menu"></button>
             <div class="lg:ml-72"><x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials"><x-slot:mobileTrigger><button class="lg:hidden" @click="mobileMenuOpen = true" aria-label="Open menu"><span class="material-symbols-outlined">menu</span></button></x-slot:mobileTrigger></x-teacher-topbar></div>
-        @else
+        @elseif (! $focus)
             <x-student-nav active="activities" />
         @endif
-        <main class="worksheet-page lg:ml-72">
+        <main class="worksheet-page {{ $focus ? 'worksheet-focus-mode' : 'lg:ml-72' }}">
             <header class="worksheet-heading">
                 @if ($back)<a href="{{ $back }}" class="worksheet-icon" title="Back to assessments" aria-label="Back to assessments"><span class="material-symbols-outlined">arrow_back</span></a>@endif
                 <div><p>NUMERACY / GRADE 6</p><h1>{{ $title }}</h1></div>
