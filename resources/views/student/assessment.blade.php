@@ -88,6 +88,12 @@
         $fishSpecies = ['pufferfish', 'shark', 'yellowfin', 'jellyfish'][
             hexdec(substr(hash('sha256', $progress->attempt_key ?? $assessment->id.':'.$student->id), 0, 2)) % 4
         ];
+        $readingThemes = [
+            ['key' => 'meadow'],
+            ['key' => 'space'],
+        ];
+        $readingThemeSeed = $progress->attempt_key ?? $assessment->id.':'.$student->id.':'.$storyTitle;
+        $readingTheme = $readingThemes[hexdec(substr(hash('sha256', $readingThemeSeed), 2, 2)) % count($readingThemes)];
         $missionTitle = str($assessment->title)->upper()->limit(28, '');
         $assessmentTutorConfig = [
             'available' => (bool) config('tutor.enabled') && filled(config('tutor.key')) && ! $assisted,
@@ -167,12 +173,19 @@
 
         @endif
 
-        <main class="assessment-workspace {{ $assisted ? 'lg:ml-72' : '' }}" aria-labelledby="assessment-title">
+        <main class="assessment-workspace {{ $assisted ? 'lg:ml-72' : '' }} {{ $isSilentReading && $hasReadingStage ? 'assessment-storybook' : '' }}" @if ($isSilentReading) data-reading-theme="{{ $readingTheme['key'] }}" @endif aria-labelledby="assessment-title">
             @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
             @if ($assisted)
                 <x-teacher-answer-key :questions="$manualQuestions->all()" :context="$progress->selection_context ?? []" />
             @endif
             <header class="assessment-heading">
+                @if ($isSilentReading && $hasReadingStage)
+                    <div class="reading-header-banner"><x-reading-art name="banner" /></div>
+                    <div class="reading-header-scenery" aria-hidden="true">
+                        <x-reading-art name="read-sign" />
+                        <x-reading-art name="island" />
+                    </div>
+                @endif
                 <a class="assessment-back" href="{{ $assessmentBackUrl }}" aria-label="{{ $assessmentBackLabel }}" title="{{ $assessmentBackLabel }}">
                     <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                 </a>
@@ -185,7 +198,7 @@
                 @unless ($assisted)
                     <div class="assessment-word-helper" x-data="assessmentWordHelp(@js($assessmentTutorConfig))" @keydown.escape.window="open = false">
                         <button class="assessment-helper-toggle" type="button" @click="toggle()" :aria-expanded="open.toString()" aria-controls="assessment-word-helper-panel">
-                            <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ $isSilentReading && $hasReadingStage ? 'question_mark' : 'support_agent' }}</span>
                             <span>Ask for help</span>
                         </button>
                         <section id="assessment-word-helper-panel" class="assessment-helper-panel" x-show="open" x-transition x-cloak aria-label="Assessment tutor">
@@ -232,6 +245,13 @@
                 <div class="assessment-attempt">
                     <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
+                    @if ($isSilentReading)
+                        <div class="assessment-theme-switch" role="group" aria-label="Assessment theme">
+                            @foreach (['meadow' => ['park', 'Woodland theme'], 'space' => ['rocket_launch', 'Space theme']] as $theme => [$icon, $label])
+                                <button type="button" data-reading-theme-choice="{{ $theme }}" aria-label="{{ $label }}" title="{{ $label }}" aria-pressed="{{ $readingTheme['key'] === $theme ? 'true' : 'false' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></button>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </header>
 
@@ -354,10 +374,18 @@
                 @endif
                 @if ($hasReadingStage)
                     <div id="story-gate" class="assessment-story-gate">
-                        <section class="assessment-reader {{ $isOralReading ? 'assessment-reader-oral' : '' }}" aria-labelledby="story-title">
+                        <section class="assessment-reader {{ $isOralReading ? 'assessment-reader-oral' : '' }} {{ $isSilentReading ? 'assessment-reader-silent' : '' }}" aria-labelledby="story-title">
+                            @if ($isSilentReading)
+                                <div class="reading-paper">
+                                    <x-reading-art name="books" class="reading-paper-books" />
+                            @endif
                             <div class="assessment-reader-heading">
                                 <div class="assessment-reader-icon">
-                                    <span class="material-symbols-outlined">auto_stories</span>
+                                    @if ($isSilentReading)
+                                        <x-reading-art name="book" />
+                                    @else
+                                        <span class="material-symbols-outlined">auto_stories</span>
+                                    @endif
                                 </div>
                                 <div>
                                     <p class="assessment-eyebrow">{{ $isOralReading ? 'Reading Studio' : 'Read First' }}</p>
@@ -409,33 +437,48 @@
                             @endif
 
                             @if ($isSilentReading)
-                                <div class="assessment-timer mt-5 p-4">
-                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                        <div>
-                                            <p class="font-label text-[10px] font-black uppercase tracking-[0.22em] text-primary-dim">Silent Reading Timer</p>
-                                            <p class="mt-1 font-display text-3xl font-black text-on-surface" id="reading-timer-display">00:00</p>
-                                        </div>
-                                        <div class="flex flex-wrap gap-3">
-                                            <button class="inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-3 text-sm font-black uppercase tracking-widest text-on-secondary transition-colors hover:bg-secondary-dim" id="start-timer-button" type="button">
-                                                <span class="material-symbols-outlined text-lg">timer</span>
-                                                Start Timer
-                                            </button>
-                                            <button class="inline-flex items-center gap-2 rounded-lg bg-error px-5 py-3 text-sm font-black uppercase tracking-widest text-on-error opacity-60 transition-colors" id="end-timer-button" type="button" disabled>
-                                                <span class="material-symbols-outlined text-lg">timer_off</span>
-                                                End Timer
-                                            </button>
+                                    <x-reading-art name="steps-sign" class="reading-paper-sign" />
+                                </div>
+                                <div class="assessment-timer reading-timer">
+                                    <div class="reading-timer-face">
+                                        <x-reading-art name="clock" />
+                                        <div class="reading-timer-value">
+                                            <p>Silent Reading Timer</p>
+                                            <p id="reading-timer-display" role="timer" aria-live="off">00:00</p>
                                         </div>
                                     </div>
-                                    <p class="mt-3 text-sm font-medium text-on-surface-variant" id="reading-timer-status">Start the timer when the reader begins. End it when reading is done.</p>
+                                    <div class="reading-timer-buttons">
+                                        <button class="reading-action-button reading-action-start" id="start-timer-button" type="button">
+                                            <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+                                            <span id="start-timer-label">Start Timer</span>
+                                        </button>
+                                        <button class="reading-action-button reading-action-end opacity-60" id="end-timer-button" type="button" disabled>
+                                            <span class="material-symbols-outlined" aria-hidden="true">stop</span>
+                                            <span>End Timer</span>
+                                        </button>
+                                    </div>
+                                    <p id="reading-timer-status" role="status">Start the timer when the reader begins. End it when reading is done.</p>
                                 </div>
                             @endif
 
                             <div class="assessment-reader-actions mt-6 flex justify-end">
                                 <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 transition-colors hover:bg-primary-dim disabled:cursor-not-allowed disabled:opacity-50" id="start-questions-button" type="button" @if ($isSilentReading) disabled @endif>
-                                    {{ $isOralReading ? 'Finish Assessment' : 'Start Questions' }}
-                                    <span class="material-symbols-outlined text-lg">{{ $isOralReading ? 'check_circle' : 'arrow_forward' }}</span>
+                                    @if ($isSilentReading)
+                                        <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                                        <span>Start Questions</span>
+                                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                                    @else
+                                        {{ $isOralReading ? 'Finish Assessment' : 'Start Questions' }}
+                                        <span class="material-symbols-outlined text-lg">{{ $isOralReading ? 'check_circle' : 'arrow_forward' }}</span>
+                                    @endif
                                 </button>
                             </div>
+                            @if ($isSilentReading)
+                                <div class="reading-ground-decor" aria-hidden="true">
+                                    <x-reading-art name="reader" />
+                                    <x-reading-art name="books-sign" />
+                                </div>
+                            @endif
                         </section>
                     </div>
                 @endif
@@ -536,6 +579,22 @@
             <script>
                 (() => {
                     const canvas = document.getElementById('mission-canvas');
+                    const workspace = canvas.closest('.assessment-workspace');
+                    const themeButtons = Array.from(workspace.querySelectorAll('[data-reading-theme-choice]'));
+                    const themeStorageKey = 'assessment-theme:' + @js($progress->attempt_key ?? $assessment->id.':'.$student->id);
+                    function applyReadingTheme(theme) {
+                        if (!['meadow', 'space'].includes(theme)) return;
+                        workspace.dataset.readingTheme = theme;
+                        themeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.readingThemeChoice === theme)));
+                    }
+                    if (themeButtons.length) {
+                        try { applyReadingTheme(localStorage.getItem(themeStorageKey)); } catch {}
+                        themeButtons.forEach(button => button.addEventListener('click', () => {
+                            const theme = button.dataset.readingThemeChoice;
+                            applyReadingTheme(theme);
+                            try { localStorage.setItem(themeStorageKey, theme); } catch {}
+                        }));
+                    }
                     const hookAssembly = document.getElementById('hook-assembly');
                     const hookCable = document.getElementById('hook-cable');
                     const hookHead = document.getElementById('hook-head');
@@ -565,6 +624,7 @@
                     const progressScrollers = syncedStoryScrollers.length ? syncedStoryScrollers : (storyReaderText ? [storyReaderText.parentElement] : []);
                     const startQuestionsButton = document.getElementById('start-questions-button');
                     const startTimerButton = document.getElementById('start-timer-button');
+                    const startTimerLabel = document.getElementById('start-timer-label');
                     const endTimerButton = document.getElementById('end-timer-button');
                     const readingTimerDisplay = document.getElementById('reading-timer-display');
                     const readingTimerStatus = document.getElementById('reading-timer-status');
@@ -793,8 +853,19 @@
                         rallyGame.dispatchEvent(new CustomEvent('rally:answer', { detail: { correct } }));
                         document.getElementById('rally-feedback').textContent = correct
                             ? 'Correct! Boost activated!'
-                            : `A little skid! You can catch up. ${rallyHint(question)}`;
+                            : `A little skid! Moving to the next question. ${rallyHint(question)}`;
                         persistProgress(true);
+                        if (!correct) {
+                            rallyNext.hidden = true;
+                            setTimeout(() => {
+                                if (missionFinished || rallyRoundEnding) return;
+                                if (caughtCount >= targetsNeeded) { endRallyRound(); return; }
+                                currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                                isProcessingCapture = false;
+                                renderRallyQuestion(true);
+                            }, reducedMotion() ? 500 : 1700);
+                            return;
+                        }
                         rallyNext.hidden = false;
                         rallyNext.disabled = true;
                         document.getElementById('rally-next-label').textContent = caughtCount >= targetsNeeded ? 'Finish race' : 'Next question';
@@ -923,7 +994,7 @@
                         if (isSilentReading && startTimerButton) {
                             startTimerButton.disabled = timerStatus === 'finished';
                             startTimerButton.classList.toggle('opacity-60', timerStatus === 'finished');
-                            if (timerStatus === 'paused') startTimerButton.lastChild.textContent = ' Resume Timer';
+                            startTimerLabel.textContent = timerStatus === 'paused' ? 'Resume Timer' : timerStatus === 'finished' ? 'Finished' : 'Start Timer';
                             endTimerButton.disabled = timerStatus !== 'paused';
                             endTimerButton.classList.toggle('opacity-60', timerStatus !== 'paused');
                             startQuestionsButton.disabled = timerStatus !== 'finished';
@@ -953,7 +1024,7 @@
                             timerStatus = 'paused';
                             startTimerButton.disabled = false;
                             startTimerButton.classList.remove('opacity-60');
-                            startTimerButton.lastChild.textContent = ' Resume Timer';
+                            startTimerLabel.textContent = 'Resume Timer';
                             readingTimerStatus.textContent = `Timer paused at ${formatElapsedTime(readingElapsedSeconds)}.`;
                         }
                         persistProgress(true);
@@ -1079,6 +1150,7 @@
                         updateReadingTimer();
                         resumeReadingTicker();
                         startTimerButton.disabled = true;
+                        startTimerLabel.textContent = 'Running';
                         startTimerButton.classList.add('opacity-60');
                         endTimerButton.disabled = false;
                         endTimerButton.classList.remove('opacity-60');
@@ -1093,6 +1165,7 @@
                         readingTimer = null;
                         timerStatus = 'finished';
                         startTimerButton.disabled = true;
+                        startTimerLabel.textContent = 'Finished';
                         startTimerButton.classList.add('opacity-60');
                         endTimerButton.disabled = true;
                         endTimerButton.classList.add('opacity-60');

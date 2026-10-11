@@ -4,43 +4,7 @@
         <div class="absolute bottom-40 right-40 -z-10 h-48 w-48 rounded-full bg-secondary/5 blur-3xl"></div>
         <div class="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_left,rgba(68,165,255,0.15),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(145,247,142,0.15),transparent_30%),radial-gradient(circle_at_top_right,rgba(255,235,59,0.10),transparent_28%)]"></div>
 
-        <main class="glass-panel grid w-full max-w-[1100px] overflow-hidden rounded-xl border border-white/40 shadow-2xl lg:grid-cols-2">
-            <section class="relative hidden overflow-hidden bg-primary p-12 lg:flex lg:flex-col lg:justify-between">
-                <div class="absolute right-[-10%] top-[-10%] h-64 w-64 rounded-full bg-primary-container/20 blur-3xl"></div>
-                <div class="absolute bottom-[-5%] left-[-5%] h-48 w-48 rounded-full bg-secondary-container/20 blur-3xl"></div>
-                <div class="absolute -bottom-12 -right-12 h-64 w-64 rotate-12 rounded-full border border-white/10 bg-white/5"></div>
-
-                <div class="relative z-10">
-                    <div class="mb-12 flex items-center gap-2">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
-                            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
-                        </div>
-                        <span class="font-headline text-2xl font-black tracking-tighter text-white">AI-PGAALS</span>
-                    </div>
-
-                    <h1 class="mb-6 font-headline text-5xl font-bold leading-tight text-white">
-                        Start your <br>
-                        <span class="text-tertiary-fixed">journey</span> into <br>
-                        the future.
-                    </h1>
-                    <p class="max-w-md text-lg leading-relaxed text-white/80">
-                        Join students and educators in an adaptive ecosystem designed to evolve with your potential.
-                    </p>
-                </div>
-
-                <div class="relative z-10">
-                    <div class="mb-4 flex -space-x-4">
-                        <img class="h-12 w-12 rounded-full border-2 border-primary object-cover" alt="Student portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3s7a-MJUCu00-xt0Qq2MtnK9eePuKeG-ViI0Lmfp45ga1Y1l3Mdm4-od0gUOn0GVaWzWadPdsLnw-ckNAFXniEtJvAb86PDvPtysMDlU9OTYd684fDRVwnkpqlp37CYSzE3CdKfKipZUtcKB3V9WmBE-cFWNx-iyBomodjUbu9oEk74iY7BWqDmRf02yC2KBDN51MBvXVf6iMueWfzWkZ_JDkxAtRxgNk1FxXE0SFtlo3aw55m1roTc4R3wCo_lE9uxd_0gqvz2a2">
-                        <img class="h-12 w-12 rounded-full border-2 border-primary object-cover" alt="Teacher portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeS-Dq_YgrAvC9CKZNeLJCMgAmZp_rDOG6BYX9OQS-1K3kzE-lOhzbku1Rn_kT3pRDrdrauewsU77hYMtJ8AhBfV3eRwtE2u8-9tOW_LRGHo1sMGmoRH38BWTgnBFZ4zbVntlg9wmnyOgDCbRiSU15AIVkQZ31FRBX4HNjPSEXlZWa2_2BJDBZDmps5w7q8sOWxoIVjG_hebH5bElMPv-2J6cbV1YbfGmrPxxC5Pe1ifvU600V180qYW9wFHCivIgEAAxNp6GCj0tR">
-                        <img class="h-12 w-12 rounded-full border-2 border-primary object-cover" alt="Learner portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLdPsSxTVqkU2v9igmMLvLjBhxtsbT2vqiHALRdfLEUNp76cP71eUHpVsUENeDX449ovArIMvb3RU_vDcHkITSIcqRmvXNaky0m9ko181S50NIXAQrf0SEk5aU2cZEKYLlU8mJsdorqz_r7XBLrH0vvgiFDrMNV6h4B1eg3ElTqIooorsFoIGrgrhkHGKekRVUE3tuSmlO2719jjJ2JY7qlDsD4Qi-AzEr7vs1h5n0nDsXcjIUvihfT3BWOWN19MZaNbk5sdaWJrKu">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary bg-primary-container text-xs font-bold text-on-primary-container">
-                            +2k
-                        </div>
-                    </div>
-                    <p class="text-sm font-medium text-white/60">Join a growing community of learners</p>
-                </div>
-            </section>
-
+        <main class="glass-panel w-full max-w-[620px] overflow-hidden rounded-xl border border-white/40 shadow-2xl">
             <section class="flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16" x-data="{ role: '{{ old('role', 'student') }}', showPassword: false, showConfirmPassword: false }">
                 <div class="mb-8 sm:mb-10">
                     <h2 class="mb-2 font-headline text-3xl font-bold text-on-surface">Create Account</h2>

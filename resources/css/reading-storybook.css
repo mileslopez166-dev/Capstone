@@ -1,0 +1,178 @@
+@font-face {
+    font-family: 'Pixelify Sans';
+    src: url('../../public/fonts/pixelify-sans.ttf') format('truetype');
+    font-weight: 400 700;
+    font-display: swap;
+}
+
+.reading-art { display: block; position: relative; width: 100%; overflow: hidden; pointer-events: none; }
+.reading-art-variant { display: block; position: relative; width: 100%; overflow: hidden; }
+.reading-art-variant[data-art-world='space'] { display: none; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-variant[data-art-world='meadow'] { display: none; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-variant[data-art-world='space'] { display: block; }
+.reading-art img { position: absolute; height: auto; max-width: none; user-select: none; image-rendering: pixelated; }
+.reading-header-banner, .reading-header-scenery { display: none; }
+.assessment-theme-switch { display: flex; gap: 4px; margin-left: 8px; }
+.assessment-theme-switch button { display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid #2875a5; border-radius: 4px; color: #15466b; background: #f6fcff; touch-action: manipulation; }
+.assessment-theme-switch button[aria-pressed='true'] { background: #ffd750; color: #152450; border-color: #9b6c18; box-shadow: inset 0 -3px #e0a42c; }
+.assessment-theme-switch button:focus-visible { outline: 3px solid #efb822; outline-offset: 3px; }
+
+/* The illustrated header belongs to the reading phase, not the question game. */
+.assessment-storybook:has(#mission-canvas.assessment-reading:not([hidden])) {
+    padding: 24px 24px 44px;
+    background: #35bbf3 url('../../public/images/reading/sky-ground.png') center / 100% 100% no-repeat;
+    min-height: 100dvh;
+}
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading {
+    position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px 52px;
+    gap: 10px 12px; max-width: 940px; margin-inline: auto; padding: 0 8px 14px;
+}
+.assessment-storybook:has(.assessment-reading:not([hidden])) .reading-header-banner {
+    display: block; grid-column: 2; grid-row: 1; width: min(100%, 480px); justify-self: center;
+}
+.reading-art-banner { clip-path: polygon(4% 22%, 0 22%, 0 74%, 4% 74%, 4% 91%, 96% 91%, 96% 74%, 99% 74%, 99% 21%, 95% 21%, 95% 2%, 86% 2%, 86% 17%, 13% 17%, 13% 2%, 4% 2%); }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-back { grid-column: 1; grid-row: 1; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-text-settings { grid-column: 3; grid-row: 1; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-word-helper { grid-column: 4; grid-row: 1; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) {
+    width: 48px; height: 48px; min-height: 48px; padding: 0; border: 3px solid #112858; border-radius: 3px;
+    background: #f3ffff; color: #102554; box-shadow: inset -3px -4px #b1d6e5, 3px 4px #12294a;
+}
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-helper-toggle { background: #fff6d6; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-helper-toggle > span:last-child {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading-copy { grid-column: 1 / -1; grid-row: 2; text-align: center; padding-inline: 90px; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading-copy > p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading h1 {
+    margin: 0 0 12px; font: 700 44px/1.08 'Pixelify Sans', sans-serif; color: white;
+    -webkit-text-stroke: 1px #102558; paint-order: stroke fill; text-shadow: 3px 0 #102558, -3px 0 #102558, 0 -3px #102558, 0 5px #102558, 4px 5px #102558;
+}
+.assessment-storybook:has(.assessment-reading:not([hidden])) .teacher-identity { justify-content: center; color: #fff; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .teacher-identity :is(strong, small, p) { color: white; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-attempt { grid-column: 1 / -1; grid-row: 3; justify-self: center; font-size: 10px; color: #123b62; }
+.assessment-storybook:has(.assessment-reading:not([hidden])) .reading-header-scenery { display: flex; position: absolute; bottom: 0; left: 0; right: 0; align-items: end; justify-content: space-between; pointer-events: none; }
+.reading-header-scenery .reading-art { width: 96px; }
+.reading-art-read-sign { clip-path: polygon(9% 12%, 85% 4%, 89% 34%, 100% 30%, 100% 81%, 88% 85%, 94% 98%, 5% 100%, 0 71%, 0 32%, 11% 31%); }
+.reading-art-island { clip-path: polygon(26% 7%, 64% 2%, 79% 7%, 79% 19%, 91% 20%, 89% 35%, 100% 38%, 100% 70%, 89% 70%, 89% 85%, 71% 87%, 61% 100%, 45% 94%, 35% 79%, 14% 73%, 14% 57%, 0 51%, 0 37%, 31% 32%, 22% 24%); }
+
+.assessment-storybook #mission-canvas.assessment-reading { max-width: 940px; margin-inline: auto; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+/* An actual border reserves space without placing artwork over game controls. */
+.assessment-workspace #mission-canvas:is(.hook-game, .frog-pond-game, .rally-game):not(.assessment-reading) {
+    border: solid transparent;
+    border-width: 24px 18px 28px;
+    border-image: var(--assessment-frame, url('../../public/images/reading/parchment-frame.png')) 120 100 160 / 24px 18px 28px / 0 stretch;
+    border-radius: 0;
+    background-clip: padding-box;
+}
+.assessment-storybook .assessment-reader-silent { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.reading-paper {
+    position: relative; padding: 0 12px 66px;
+    border-style: solid; border-width: 52px 52px 86px;
+    border-image: var(--assessment-frame, url('../../public/images/reading/parchment-frame.png')) 180 180 300 fill / 52px 52px 86px / 0 stretch;
+    background: #fff2cf; background-clip: padding-box;
+}
+.assessment-reader-silent .assessment-reader-heading { position: relative; gap: 16px; margin: 0 90px 16px 0; padding: 0; border: 0; background: transparent; }
+.assessment-reader-silent .assessment-reader-heading > div:last-child { min-width: 0; }
+.assessment-reader-silent .assessment-reader-icon { width: 78px; flex: 0 0 78px; height: auto; border: 0; padding: 0; background: transparent; box-shadow: none; }
+.assessment-reader-silent .assessment-reader-heading h2 { color: #0b1c40; font: 700 34px/1.1 'Pixelify Sans', sans-serif; overflow-wrap: anywhere; }
+.assessment-reader-silent .assessment-eyebrow { font: 700 20px/1.2 'Pixelify Sans', sans-serif; color: #59361e; margin-bottom: 7px; }
+.reading-art-book, .reading-art-books, .reading-art-clock { mix-blend-mode: multiply; }
+.reading-art-book { clip-path: polygon(7% 17%, 44% 3%, 52% 9%, 87% 0, 100% 73%, 65% 89%, 59% 96%, 20% 100%, 0 28%); }
+.reading-art-books { clip-path: polygon(32% 0, 95% 13%, 92% 31%, 100% 39%, 95% 55%, 100% 68%, 85% 80%, 90% 91%, 52% 100%, 14% 84%, 14% 75%, 0 64%, 10% 46%, 14% 18%); }
+.reading-art-clock { clip-path: polygon(18% 0, 37% 7%, 48% 4%, 76% 0, 96% 18%, 83% 35%, 100% 70%, 87% 91%, 74% 100%, 53% 96%, 26% 100%, 7% 82%, 9% 44%, 0 29%, 6% 10%); }
+.reading-paper > .reading-paper-books { position: absolute; right: -8px; top: -10px; width: 88px; }
+.reading-paper > .reading-paper-sign { position: absolute; right: -48px; bottom: -77px; width: 100px; }
+.reading-art-steps-sign { clip-path: polygon(16% 13%, 52% 7%, 51% 1%, 97% 0, 100% 56%, 83% 59%, 91% 91%, 75% 100%, 70% 68%, 9% 75%, 0 27%, 17% 25%); }
+.assessment-reader-silent .assessment-passage { min-height: 0; max-height: none; max-width: none; margin: 0 0 0 64px; padding: 0; border: 0; background: transparent; color: #17295b; overflow: visible; }
+.assessment-reader-silent .story-paragraph { color: #17295b; line-height: 1.7; }
+.assessment-reader-silent .reading-timer {
+    display: grid; grid-template-columns: minmax(0, 1fr) 34%; gap: 4px 20px; align-items: center;
+    margin: 12px 7px 0; padding: 22px; border: 4px solid #237577; border-radius: 2px;
+    background: #e0f6ee; box-shadow: inset 0 0 0 5px #f3ffef, 4px 4px #0c4d65;
+}
+.reading-timer-face { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.reading-timer-face > .reading-art { width: 78px; flex: 0 0 78px; }
+.reading-timer-value { min-width: 0; }
+.reading-timer-value > p:first-child { color: #102348; font: 700 20px/1.1 'Pixelify Sans', sans-serif; text-transform: uppercase; }
+.assessment-reader-silent .reading-timer #reading-timer-display { font: 700 64px/1.05 'Pixelify Sans', sans-serif; font-variant-numeric: tabular-nums; color: #091c43; }
+.reading-timer-buttons { display: grid; gap: 8px; grid-column: 2; grid-row: 1 / 3; }
+.reading-action-button, .assessment-reader-silent #start-questions-button {
+    --reading-button-color: #168430;
+    --reading-button-edge: #0b5323;
+    position: relative; display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 64px; padding: 12px 16px; border: 3px solid var(--reading-button-edge); border-radius: 4px;
+    background: var(--reading-button-color); color: #fff; font: 700 25px/1.15 'Pixelify Sans', sans-serif;
+    text-transform: uppercase; text-shadow: 1px 2px #0004;
+    box-shadow: inset 3px 3px #ffffff50, inset -3px -3px #0003, 0 4px var(--reading-button-edge);
+    cursor: pointer; touch-action: manipulation; pointer-events: auto;
+}
+.reading-action-end { --reading-button-color: #cd4246; --reading-button-edge: #8a262e; }
+.reading-action-button > span, .assessment-reader-silent #start-questions-button > span { pointer-events: none; }
+.reading-action-button .material-symbols-outlined, .assessment-reader-silent #start-questions-button .material-symbols-outlined { flex-shrink: 0; font-size: 28px; }
+.reading-action-button:disabled { cursor: not-allowed; opacity: .6; }
+.reading-action-button:not(:disabled):hover, .assessment-reader-silent #start-questions-button:not(:disabled):hover { filter: brightness(1.12); }
+.reading-action-button:not(:disabled):active, .assessment-reader-silent #start-questions-button:not(:disabled):active { transform: translateY(2px); }
+.reading-action-button:focus-visible, .assessment-reader-silent #start-questions-button:focus-visible { outline: 3px solid #142957; outline-offset: 5px; }
+.reading-timer #reading-timer-status { grid-column: 1; font-size: 14px; color: #213d63; line-height: 1.35; padding-left: 92px; }
+.assessment-reader-silent .assessment-reader-actions { display: flex; justify-content: center; border: 0; padding: 0; margin: 22px 0 0; }
+.assessment-reader-silent #start-questions-button { --reading-button-color: #2074d4; --reading-button-edge: #123f86; width: min(74%, 640px); min-height: 86px; font-size: 32px; }
+.reading-ground-decor { position: relative; height: 80px; display: flex; justify-content: space-between; align-items: flex-end; margin-top: -48px; pointer-events: none; }
+.reading-ground-decor .reading-art-reader { width: 102px; }
+.reading-ground-decor .reading-art-books-sign { width: 105px; }
+.reading-art-reader { clip-path: polygon(37% 3%, 72% 3%, 72% 10%, 88% 15%, 91% 42%, 100% 47%, 100% 71%, 84% 93%, 30% 98%, 24% 90%, 3% 85%, 0 55%, 17% 51%, 19% 20%, 36% 16%); }
+.reading-art-books-sign { clip-path: polygon(14% 0, 96% 6%, 100% 67%, 84% 68%, 75% 100%, 62% 100%, 61% 70%, 0 68%, 0 11%, 13% 11%); }
+html.dark .assessment-reader-silent :is(.assessment-reader-heading, .assessment-passage) { background: transparent; color: #17295b; border: 0; }
+html.dark .assessment-reader-silent .reading-timer { background: #e0f6ee; border-color: #237577; }
+html.dark .assessment-reader-silent #start-questions-button { background: var(--reading-button-color); color: #fff; }
+html.dark .assessment-reader-silent .assessment-eyebrow { color: #59361e; }
+
+@media (max-width: 640px) {
+    .assessment-workspace #mission-canvas:is(.hook-game, .frog-pond-game, .rally-game):not(.assessment-reading) {
+        border-width: 14px 10px 18px;
+        border-image-width: 14px 10px 18px;
+    }
+    .assessment-storybook:has(#mission-canvas.assessment-reading:not([hidden])) { padding: 12px 8px 28px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading { grid-template-columns: 44px minmax(0, 1fr) 44px 44px; gap: 12px 6px; padding: 0 6px 8px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) { width: 40px; height: 44px; min-height: 44px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .reading-header-banner { grid-column: 2; grid-row: 1; width: 100%; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) :is(.assessment-back, .assessment-text-settings, .assessment-word-helper) { grid-row: 1; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading-copy { grid-row: 2; padding: 0 24px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-heading h1 { font-size: 29px; margin-bottom: 12px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-attempt { grid-row: 3; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .assessment-text-panel { right: -50px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .reading-header-scenery { bottom: 5px; }
+    .reading-header-scenery .reading-art { width: 49px; }
+    .assessment-storybook:has(.assessment-reading:not([hidden])) .teacher-identity { padding-inline: 16px; }
+    .reading-paper { padding: 5px 3px 36px; border-width: 32px 22px 52px; border-image-width: 32px 22px 52px; }
+    .assessment-reader-silent .assessment-reader-heading { gap: 7px; margin: 0 31px 10px 0; }
+    .assessment-reader-silent .assessment-reader-icon { width: 42px; flex-basis: 42px; }
+    .assessment-reader-silent .assessment-reader-heading h2 { font-size: 23px; }
+    .assessment-reader-silent .assessment-eyebrow { font-size: 13px; margin-bottom: 3px; }
+    .reading-paper > .reading-paper-books { right: -10px; top: -6px; width: 40px; }
+    .reading-paper > .reading-paper-sign { width: 63px; right: -22px; bottom: -52px; }
+    .assessment-reader-silent .assessment-passage { margin-left: 12px; }
+    .assessment-reader-silent .story-paragraph { line-height: 1.55; }
+    .assessment-reader-silent .reading-timer { margin: 8px 4px 0; padding: 12px 9px; gap: 4px 8px; grid-template-columns: minmax(0, 1fr) 36%; border-width: 3px; }
+    .reading-timer-face { gap: 7px; }
+    .reading-timer-face > .reading-art { width: 38px; flex-basis: 38px; }
+    .reading-timer-value > p:first-child { font-size: 12px; }
+    .assessment-reader-silent .reading-timer #reading-timer-display { font-size: 36px; }
+    .reading-timer #reading-timer-status { font-size: 11px; padding-left: 0; }
+    .reading-timer-buttons { gap: 3px; }
+    .reading-action-button { min-height: 48px; padding: 6px; gap: 4px; font-size: 14px; }
+    .reading-action-button .material-symbols-outlined { font-size: 18px; }
+    .assessment-reader-silent .assessment-reader-actions { margin-top: 14px; }
+    .assessment-reader-silent #start-questions-button { width: 78%; min-height: 60px; font-size: 20px; padding: 10px; gap: 6px; }
+    .assessment-reader-silent #start-questions-button .material-symbols-outlined { font-size: 22px; }
+    .reading-ground-decor { height: 64px; margin-top: -12px; }
+    .reading-ground-decor .reading-art-reader { width: 60px; }
+    .reading-ground-decor .reading-art-books-sign { width: 63px; }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .assessment-workspace #mission-canvas:is(.hook-game, .frog-pond-game, .rally-game):not(.assessment-reading) {
+        border-width: 10px 10px 12px;
+        border-image-width: 10px 10px 12px;
+    }
+}

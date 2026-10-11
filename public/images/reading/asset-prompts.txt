@@ -1,0 +1,21 @@
+Silent Reading Reference Artwork
+
+Mode: Built-in image_gen, reference editing. No CLI fallback.
+Space reference: user-supplied Pixel Galaxy Reading Adventure.png, copied unchanged
+to space-reference.png. Both themes use native HTML buttons and dynamic story text.
+
+space-background.png
+Edit target: the provided pixel galaxy reading screen. Extract ONLY its background into a production portrait game backdrop. Precisely match the original dark indigo pixel star field, sparse yellow and cyan twinkling pixel stars, purple planet near upper center, partial blue/green Earth at upper right, and lavender cratered moon terrain across the bottom 8 percent. Remove ALL text, labels, people, buttons, panels, frames, books, rockets, signboards and UI. Fill removed areas with the same continuous crisp pixel star field. The middle must be calm and low detail for overlaying readable HTML. No gradients or blur. Fully opaque portrait bitmap with no text or UI, 941x1672 composition like reference.
+
+space-frame.png
+Edit target: supplied pixel galaxy reading screen. Extract ONLY the large white reading panel's electric blue/cyan pixel border into one reusable square 1024x1024 production UI frame. Reproduce the stepped angular pixel corners, dark navy outer outline, blue metallic edge and luminous cyan highlights, exact reference style. Uniform narrow edge roughly 55px thick. Blank solid opaque near-white icy center; absolutely NO text, no lettering, no rocket, no book, no stars or objects inside center, no title ribbon. Outside corners transparent, inside frame opaque white. Frame occupies full canvas except 8px transparent margin. No shadows outside, no additional panels, no sky. Border must work as CSS nine-slice border image. Clean pixel art, crisp straight edges, no blur.
+
+Reference: user-supplied reading-screen mockup, copied unchanged to reference-art.png.
+The Blade reading-art component displays viewports from that source for the banner,
+books, clock, signs and reader. Story text and action buttons remain live HTML.
+
+parchment-frame.png
+Use case: precise-object-edit. Input image is the edit target. Extract ONLY the large square-ish parchment reading panel from the middle of this reference. Recreate its exact pixel-art wooden rim, grassy green top and bottom edges, white daisy at bottom-left and tiny gold stars on side edges. Output a single square 1024x1024 frame asset, front-facing, tightly framed to the full canvas with 8px transparent outer margin. Remove ALL text and books and signboards from the panel, leaving a completely blank pale warm parchment center where HTML story text will go. The parchment center must remain opaque pale yellow; only OUTSIDE the frame is transparent. Keep all wooden edges, pixel steps, lush grass edges and style like a copy of the reference. Keep border thickness near 55px, ensure all center area from x100 to924 and y100 to924 is clean blank parchment. No screen, buttons, clocks, labels, phone, sky or additional artwork. This is one production UI frame texture for a web reading app, not a full mockup.
+
+sky-ground.png
+Use case: precise-object-edit. Input image is edit target. Create just the BACKGROUND layer of this exact pixel game reading screen. Remove ALL UI, all text, all parchment and panels and buttons and icons and status bars and teacher and books and signs and child. Inpaint those removed areas with the same bright saturated turquoise blue sky and a few crisp white pixel clouds. Preserve the original style and colors like a copy-paste background. At the very bottom 8% of image keep an unbroken grassy bright green voxel ground platform with brown soil and tiny flowers; rest of image is open blue sky with sparse pixel clouds near edges. No trees, school buildings, interface, frames, letters, numbers, people, objects or logos. Vertical portrait image, fully opaque, production background asset.

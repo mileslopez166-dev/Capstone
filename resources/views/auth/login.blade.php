@@ -1,8 +1,24 @@
 <x-guest-layout>
     <div class="login-page">
+        <div class="login-playground" aria-hidden="true">
+            <canvas class="login-playground-canvas"></canvas>
+        </div>
+        <div class="login-live-scene" aria-hidden="true">
+            <span class="login-bird login-bird-one"></span>
+            <span class="login-bird login-bird-two"></span>
+            <span class="login-bird login-bird-three"></span>
+        </div>
+        <div class="login-landmark-layer" aria-hidden="true">
+            <img class="login-campus-marker" src="{{ asset('images/campus/bcs-stone-landmark.png') }}" alt="">
+        </div>
         <header class="login-header">
             <a class="login-brand" href="{{ route('login') }}"><x-application-logo /><span>AI-PGAALS</span></a>
-            <span>Grade 6 Learning Community</span>
+            <div class="login-header-actions">
+                <span>Grade 6 Learning Community</span>
+                <button type="button" class="login-motion-toggle" aria-label="Pause background animation" title="Pause background animation" aria-pressed="false" data-no-click-sound>
+                    <span class="material-symbols-outlined" aria-hidden="true">pause</span>
+                </button>
+            </div>
         </header>
 
         <main class="login-main">

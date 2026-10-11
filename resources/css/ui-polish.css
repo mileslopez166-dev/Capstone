@@ -12,6 +12,9 @@
 .admin-theme { --ui-accent: #285ca2; --ui-ink: #293442; --ui-line: #d6dfe9; }
 [x-cloak] { display: none !important; }
 :where(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 3px; }
+.student-assessment-details > summary::-webkit-details-marker { display: none; }
+.student-assessment-details[open] > summary { border-bottom: 1px solid #d9e5ed; }
+.student-assessment-details[open] > summary .student-assessment-chevron { transform: rotate(180deg); }
 .ui-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border: 1px solid transparent; border-radius: 6px; background: var(--ui-accent); color: white; font-size: 14px; font-weight: 700; text-align: center; }
 .ui-button:hover { filter: brightness(.93); }
 .ui-button-secondary { background: white; color: var(--ui-accent); border-color: var(--ui-line); }
@@ -168,16 +171,40 @@
 [data-reduced-motion="true"]::view-transition-group(*), [data-reduced-motion="true"]::view-transition-old(*), [data-reduced-motion="true"]::view-transition-new(*) { animation: none !important; }
 @media (max-width: 1100px) { .home-columns { grid-template-columns: 1fr; gap: 20px; } .home-stats > * { gap: 8px; padding: 16px 10px; } }
 @media (max-width: 1023px) {
-    .campus-companion-mobile { position: relative; padding-right: 48px; }
-    .companion-size-toggle { position: absolute; right: 0; top: 6px; display: grid; place-items: center; height: 44px; width: 44px; color: #134e7c; background: #f3fbff; border: 1px solid #81bce8; border-radius: 6px; }
-    .campus-companion-mobile.is-compact { height: 64px; min-height: 64px; margin-block: 8px 0; gap: 8px; }
-    .campus-companion-mobile.is-compact .campus-companion-character { height: 58px; }
-    .campus-companion-mobile.is-compact .campus-speech { height: 58px; flex: 1; padding: 8px; }
-    .campus-companion-mobile.is-compact:not(.has-chat-open) .campus-quick-tutor { display: none; }
-    .campus-companion-mobile.has-chat-open .campus-quick-tutor { display: grid; }
-    .campus-companion-mobile.is-compact .campus-speech-copy { font-size: 12px; line-height: 1.4; padding-right: 0; }
-    .campus-companion-mobile.is-compact .campus-speech-pause { display: none; }
-    .campus-companion-mobile.is-compact .campus-speech::after { bottom: 17px; }
+    .campus-companion-mobile {
+        position: fixed;
+        right: 0;
+        bottom: calc(76px + env(safe-area-inset-bottom));
+        z-index: 60;
+        display: flex;
+        align-items: flex-end;
+        width: 112px;
+        height: 132px;
+        min-height: 132px;
+        margin: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+    .campus-companion-mobile:not(.has-chat-open) {
+        overflow: hidden;
+    }
+    .campus-companion-mobile:not(.has-chat-open) .campus-speech,
+    .campus-companion-mobile:not(.has-chat-open) .companion-size-toggle { display: none; }
+    .campus-companion-mobile:not(.has-chat-open) .campus-companion-character {
+        position: absolute;
+        right: -40px;
+        bottom: -27px;
+        left: auto;
+        display: block;
+        width: 104px;
+        height: 156px;
+        max-width: none;
+        transform: rotate(-8deg);
+        transform-origin: 100% 100%;
+        filter: drop-shadow(-2px 3px 2px #123f6a45);
+        pointer-events: auto;
+    }
+    .campus-companion-mobile.has-chat-open > :is(.campus-speech, .campus-companion-character, .companion-size-toggle) { display: none; }
     .student-home { padding: 20px 20px 120px; }
     .campus-topbar .comfort-panel { position: fixed; right: 12px; top: 76px; }
     .admin-topbar .comfort-panel { position: fixed; top: 136px; right: 12px; }

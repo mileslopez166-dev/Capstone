@@ -121,7 +121,26 @@
                                         $gameNames = $worksheetGameNames->get($assessment->worksheet_number, []);
                                     @endphp
 
-                                    <a class="group block overflow-hidden rounded-2xl border border-outline-variant/15 bg-white text-left shadow-[0_20px_55px_rgba(0,94,159,0.08)] transition-all hover:-translate-y-1 hover:border-primary-container hover:shadow-[0_24px_70px_rgba(0,94,159,0.14)]" href="{{ route('student.assessments.show', $assessment) }}">
+                                    <details class="student-assessment-details group overflow-hidden rounded-2xl border border-outline-variant/15 bg-white text-left shadow-[0_20px_55px_rgba(0,94,159,0.08)] transition-colors open:border-primary-container">
+                                        <summary class="flex cursor-pointer list-none items-start justify-between gap-4 p-5 sm:items-center sm:p-6">
+                                            <div class="min-w-0">
+                                                <div class="mb-3 flex flex-wrap gap-2">
+                                                    <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
+                                                        {{ $assessment->subject }}
+                                                    </span>
+                                                    @if ($assessment->assessment_type !== 'oral_reading')
+                                                        <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                                                            {{ $quizLabel }}
+                                                        </span>
+                                                    @endif
+                                                    <x-status-badge :status="$assessment->student_state" />
+                                                </div>
+                                                <h4 class="font-headline text-xl font-extrabold leading-tight text-on-surface sm:text-2xl">{{ $assessment->title }}</h4>
+                                                <x-assessment-type-label :assessment="$assessment" />
+                                            </div>
+                                            <span class="student-assessment-chevron material-symbols-outlined mt-1 shrink-0 rounded-full bg-surface-container-low p-2 text-primary transition-transform sm:mt-0" aria-hidden="true">expand_more</span>
+                                        </summary>
+
                                         <div class="grid gap-0 lg:grid-cols-[18rem_1fr]">
                                             <div class="relative min-h-56 overflow-hidden bg-gradient-to-br from-primary to-primary-container lg:min-h-full">
                                                 @if ($isImageAsset)
@@ -144,20 +163,6 @@
 
                                             <div class="flex flex-col justify-between p-6 lg:p-8">
                                                 <div>
-                                                    <div class="mb-4 flex flex-wrap gap-2">
-                                                        <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $assessment->subject === 'literacy' ? 'bg-primary-container/20 text-primary' : 'bg-secondary-container/30 text-secondary-dim' }}">
-                                                            {{ $assessment->subject }}
-                                                        </span>
-                                                        @if ($assessment->assessment_type !== 'oral_reading')
-                                                            <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                                                                {{ $quizLabel }}
-                                                            </span>
-                                                        @endif
-                                                        <x-status-badge :status="$assessment->student_state" />
-                                                    </div>
-
-                                                    <h4 class="font-headline text-2xl font-extrabold leading-tight text-on-surface">{{ $assessment->title }}</h4>
-                                                    <x-assessment-type-label :assessment="$assessment" />
                                                     <x-teacher-identity :teacher="$assessment->teacher" />
                                                     <p class="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
                                                         {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
@@ -192,14 +197,14 @@
                                                     <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
                                                         Prepared {{ $assessment->created_at?->format('M d, Y') }}
                                                     </span>
-                                                    <span class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition-colors group-hover:bg-primary-dim">
+                                                    <a class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition-colors hover:bg-primary-dim" href="{{ route('student.assessments.show', $assessment) }}">
                                                         {{ $assessment->student_action }}
                                                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
-                                                    </span>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
-                                    </a>
+                                    </details>
                                 @endforeach
                             </div>
                         </div>
@@ -225,6 +230,7 @@
                                 @php
                                     $assessment = $submission->assessment;
                                     $requestStatus = $submission->latest_retake_request?->status;
+                                    $philResult = $assessment?->subject === 'literacy' ? \App\Support\PhilIri::forSubmission($submission) : null;
                                 @endphp
                                 <div id="result-{{ $submission->id }}" class="rounded-2xl border border-outline-variant/15 bg-white p-5 shadow-[0_20px_55px_rgba(0,94,159,0.06)]">
                                     <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -262,66 +268,85 @@
                                         </div>
                                     </div>
 
-                                    <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
-                                    <x-assessment-coin-reward :submission="$submission" />
-                                    <x-ml-prediction-result :prediction="$submission->mlPrediction" />
-                                    <a class="ui-button ui-button-secondary mt-4" href="{{ route('student.tutor.index', ['submission' => $submission->id]) }}"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>Ask Tutor about this assessment</a>
-                                    @if ($submission->worksheetAttempt)
-                                        <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
-                                    @else
-                                    <details class="group mt-5 rounded-2xl border border-outline-variant/15 bg-surface-container-low p-5">
-                                        <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                            <div>
-                                                <h5 class="font-headline text-lg font-extrabold text-on-surface">Assessment Review</h5>
-                                                <p class="mt-1 text-sm text-on-surface-variant">Open this only if you want to check the questions from your latest attempt.</p>
+                                    <details class="student-output-details group mt-5 overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-low">
+                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
+                                            <div class="min-w-0">
+                                                <h5 class="font-headline text-lg font-extrabold text-on-surface">View detailed results</h5>
+                                                <p class="mt-1 text-sm text-on-surface-variant">Open interpretation, ML prediction, tutor support, and answer review.</p>
                                             </div>
-                                            <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'bg-secondary-container/40 text-secondary-dim' : 'bg-error/10 text-error' }}">
-                                                <span class="material-symbols-outlined text-sm">{{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'verified' : 'rate_review' }}</span>
-                                                {{ ($submission->wrong_review_items ?? collect())->count() }} Wrong
-                                                <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                                            <span class="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary">
+                                                @if ($philResult && !empty($philResult['label']))
+                                                    {{ $philResult['label'] }}
+                                                @else
+                                                    Open
+                                                @endif
+                                                <span class="material-symbols-outlined text-base transition-transform group-open:rotate-180">expand_more</span>
                                             </span>
                                         </summary>
 
-                                        <div class="mt-4 border-t border-outline-variant/10 pt-4">
-                                            @if (($submission->review_items ?? collect())->isEmpty())
-                                                <div class="rounded-xl bg-white p-4 text-sm text-on-surface-variant">
-                                                    This assessment has no multiple-choice answers to review.
-                                                </div>
-                                            @elseif (($submission->wrong_review_items ?? collect())->isEmpty())
-                                                <div class="rounded-xl bg-white p-4 text-sm font-bold text-secondary-dim">
-                                                    Nice work. All checked answers were correct in this attempt.
-                                                </div>
+                                        <div class="student-output-details-body border-t border-outline-variant/10 px-5 pb-5">
+                                            <x-phil-iri-result :result="$philResult" :submission="$submission" />
+                                            <x-assessment-coin-reward :submission="$submission" />
+                                            <x-ml-prediction-result :prediction="$submission->mlPrediction" />
+                                            <a class="ui-button ui-button-secondary mt-4" href="{{ route('student.tutor.index', ['submission' => $submission->id]) }}"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>Ask Tutor about this assessment</a>
+                                            @if ($submission->worksheetAttempt)
+                                                <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
                                             @else
-                                                <div class="space-y-3">
-                                                    @foreach ($submission->wrong_review_items as $reviewItem)
-                                                        <div class="rounded-xl bg-white p-4 shadow-sm">
-                                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                                                <div class="min-w-0">
-                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Question {{ $reviewItem['number'] }}</p>
-                                                                    <p class="mt-1 font-bold text-on-surface">{{ $reviewItem['question'] }}</p>
-                                                                </div>
-                                                                <span class="inline-flex w-fit shrink-0 rounded-full bg-error/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-error">Needs Review</span>
-                                                            </div>
-                                                            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                                                                <div class="rounded-lg border border-error/20 bg-error/5 p-3">
-                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-error">Your Answer</p>
-                                                                    <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['selected_letter'] ?: '-' }}. {{ $reviewItem['selected_text'] }}</p>
-                                                                </div>
-                                                                <div class="rounded-lg border border-secondary/20 bg-secondary-container/20 p-3">
-                                                                    <p class="text-[10px] font-black uppercase tracking-widest text-secondary-dim">Correct Answer</p>
-                                                                    <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['correct_letter'] ?: '-' }}. {{ $reviewItem['correct_text'] }}</p>
-                                                                </div>
-                                                            </div>
-                                                            @if ($reviewItem['correct_letter'] && $submission->scorePercentage() !== null)
-                                                                <x-answer-feedback :submission="$submission" :index="$reviewItem['number'] - 1" />
-                                                            @endif
+                                            <details class="group mt-5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-5">
+                                                <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                    <div>
+                                                        <h5 class="font-headline text-lg font-extrabold text-on-surface">Assessment Review</h5>
+                                                        <p class="mt-1 text-sm text-on-surface-variant">Open this only if you want to check the questions from your latest attempt.</p>
+                                                    </div>
+                                                    <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'bg-secondary-container/40 text-secondary-dim' : 'bg-error/10 text-error' }}">
+                                                        <span class="material-symbols-outlined text-sm">{{ ($submission->wrong_review_items ?? collect())->isEmpty() && ($submission->review_items ?? collect())->isNotEmpty() ? 'verified' : 'rate_review' }}</span>
+                                                        {{ ($submission->wrong_review_items ?? collect())->count() }} Wrong
+                                                        <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                                                    </span>
+                                                </summary>
+
+                                                <div class="mt-4 border-t border-outline-variant/10 pt-4">
+                                                    @if (($submission->review_items ?? collect())->isEmpty())
+                                                        <div class="rounded-xl bg-white p-4 text-sm text-on-surface-variant">
+                                                            This assessment has no multiple-choice answers to review.
                                                         </div>
-                                                    @endforeach
+                                                    @elseif (($submission->wrong_review_items ?? collect())->isEmpty())
+                                                        <div class="rounded-xl bg-white p-4 text-sm font-bold text-secondary-dim">
+                                                            Nice work. All checked answers were correct in this attempt.
+                                                        </div>
+                                                    @else
+                                                        <div class="space-y-3">
+                                                            @foreach ($submission->wrong_review_items as $reviewItem)
+                                                                <div class="rounded-xl bg-white p-4 shadow-sm">
+                                                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                                                        <div class="min-w-0">
+                                                                            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Question {{ $reviewItem['number'] }}</p>
+                                                                            <p class="mt-1 font-bold text-on-surface">{{ $reviewItem['question'] }}</p>
+                                                                        </div>
+                                                                        <span class="inline-flex w-fit shrink-0 rounded-full bg-error/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-error">Needs Review</span>
+                                                                    </div>
+                                                                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                                                        <div class="rounded-lg border border-error/20 bg-error/5 p-3">
+                                                                            <p class="text-[10px] font-black uppercase tracking-widest text-error">Your Answer</p>
+                                                                            <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['selected_letter'] ?: '-' }}. {{ $reviewItem['selected_text'] }}</p>
+                                                                        </div>
+                                                                        <div class="rounded-lg border border-secondary/20 bg-secondary-container/20 p-3">
+                                                                            <p class="text-[10px] font-black uppercase tracking-widest text-secondary-dim">Correct Answer</p>
+                                                                            <p class="mt-1 text-sm font-bold text-on-surface">{{ $reviewItem['correct_letter'] ?: '-' }}. {{ $reviewItem['correct_text'] }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    @if ($reviewItem['correct_letter'] && $submission->scorePercentage() !== null)
+                                                                        <x-answer-feedback :submission="$submission" :index="$reviewItem['number'] - 1" />
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
                                                 </div>
+                                            </details>
                                             @endif
                                         </div>
                                     </details>
-                                    @endif
 
                                     <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                         @if ($assessment && ($assessment->hasUnlimitedRetries() || $submission->remaining_retake_tries > 0))

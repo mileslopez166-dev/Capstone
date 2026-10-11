@@ -1,0 +1,73 @@
+.assessment-workspace[data-reading-theme='space'],
+.assessment-workspace[data-reading-theme='space']:has(#mission-canvas.assessment-reading:not([hidden])) {
+    --assessment-frame: url('../../public/images/reading/space-frame.png');
+    background: #091954 url('../../public/images/reading/space-background.png') center bottom / cover no-repeat;
+    min-height: 100dvh;
+}
+.assessment-workspace[data-reading-theme='space'] .assessment-heading { color: #fff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-heading-copy > p { color: #63e7ff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-heading h1 { color: #fff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-heading .teacher-identity :is(strong, small) { color: #e9faff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-heading .assessment-attempt { color: #b4eafa; max-width: none; }
+.assessment-workspace[data-reading-theme='space'] .assessment-attempt > .material-symbols-outlined { color: #63edc9; }
+.assessment-workspace[data-reading-theme='space'] .reading-art { mix-blend-mode: normal; clip-path: none; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-banner { mix-blend-mode: screen; }
+.assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-heading { row-gap: 18px; padding-top: 8px; }
+.assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-heading-copy { padding-inline: 155px; }
+.assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .teacher-identity {
+    display: flex; width: fit-content; max-width: 100%; margin-inline: auto; padding: 12px 18px;
+    background: #142e68; border: 2px solid #2786c3; border-radius: 4px;
+}
+.assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) { border-color: #25c1f3; box-shadow: inset -3px -4px #b1d6e5, 3px 4px #0758a0; }
+.assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-helper-toggle { background: #ffe88b; color: #794200; box-shadow: inset -3px -4px #efbe3a, 3px 4px #a06916; border-color: #eebc35; }
+.assessment-workspace[data-reading-theme='space'] .reading-header-scenery .reading-art-read-sign { width: 155px; clip-path: polygon(0 72%, 8% 67%, 11% 51%, 19% 44%, 21% 22%, 31% 3%, 48% 0, 62% 11%, 70% 24%, 70% 53%, 84% 72%, 100% 87%, 100% 100%, 0 100%); }
+.assessment-workspace[data-reading-theme='space'] .reading-header-scenery .reading-art-island { width: 80px; clip-path: polygon(40% 2%, 73% 0, 96% 16%, 100% 46%, 73% 78%, 30% 98%, 0 87%, 4% 48%, 25% 34%); }
+.assessment-workspace[data-reading-theme='space'] .reading-paper { border-image-slice: 120 fill; border-width: 34px; border-image-width: 34px; padding: 10px 18px 40px; background-color: #f6fcff; }
+.assessment-workspace[data-reading-theme='space'] .reading-paper .assessment-reader-heading { margin-right: 94px; }
+.assessment-workspace[data-reading-theme='space'] .reading-paper .assessment-eyebrow { color: #2865a7; }
+.assessment-workspace[data-reading-theme='space'] .reading-paper .assessment-reader-heading h2 { color: #0d2050; }
+.assessment-workspace[data-reading-theme='space'] .reading-paper > .reading-paper-books { right: 4px; top: 0; width: 90px; clip-path: polygon(35% 0, 97% 0, 97% 29%, 71% 76%, 40% 98%, 0 99%, 8% 56%, 16% 26%); }
+.assessment-workspace[data-reading-theme='space'] .assessment-reader-silent .assessment-passage {
+    margin: 0; padding: 18px 22px; background: #ffffffc9; border: 1px solid #c3e9ff; color: #202d61;
+}
+.assessment-workspace[data-reading-theme='space'] .reading-paper > .reading-paper-sign { width: min(72%, 478px); right: 14%; bottom: -24px; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-steps-sign { clip-path: polygon(5% 0, 94% 0, 100% 58%, 95% 100%, 4% 100%, 0 58%); }
+.assessment-workspace[data-reading-theme='space'] .assessment-reader-silent .reading-timer {
+    background: #142d63; border: 12px solid transparent;
+    border-image: var(--assessment-frame) 120 / 12px / 0 stretch;
+    box-shadow: none; padding: 16px;
+}
+.assessment-workspace[data-reading-theme='space'] .reading-timer-value > p:first-child { color: #60e5ff; }
+.assessment-workspace[data-reading-theme='space'] .reading-timer #reading-timer-display { color: #75eaff; background: #0a1d46; border: 2px solid #2993d3; margin-top: 8px; padding: 2px 12px; }
+.assessment-workspace[data-reading-theme='space'] .reading-timer #reading-timer-status { color: #e5f7ff; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-clock { clip-path: polygon(11% 0, 78% 0, 100% 17%, 100% 70%, 76% 100%, 21% 100%, 0 70%, 0 16%); }
+.assessment-workspace[data-reading-theme='space'] .assessment-reader-silent #start-questions-button {
+    --reading-button-color: #ffd344; --reading-button-edge: #946916;
+    color: #10264a; text-shadow: none; outline: 4px solid #7954d6; outline-offset: 4px;
+}
+.assessment-workspace[data-reading-theme='space'] .reading-ground-decor { margin-top: 0; height: 108px; }
+.assessment-workspace[data-reading-theme='space'] .reading-ground-decor .reading-art-reader { width: 76px; }
+.assessment-workspace[data-reading-theme='space'] .reading-ground-decor .reading-art-books-sign { width: 72px; }
+.assessment-workspace[data-reading-theme='space'] .reading-art-reader { clip-path: polygon(28% 0, 38% 0, 39% 6%, 93% 4%, 100% 25%, 83% 30%, 93% 46%, 86% 52%, 90% 70%, 51% 75%, 64% 98%, 43% 100%, 31% 78%, 0 80%, 0 55%, 7% 50%, 0 32%, 6% 28%, 0 11%, 26% 9%); }
+.assessment-workspace[data-reading-theme='space'] .reading-art-books-sign { clip-path: polygon(20% 0, 26% 0, 27% 7%, 87% 8%, 100% 19%, 100% 56%, 85% 59%, 27% 54%, 21% 96%, 0 100%, 0 92%, 13% 54%, 16% 6%); }
+.assessment-workspace[data-reading-theme='space'] #mission-canvas:is(.hook-game, .frog-pond-game, .rally-game):not(.assessment-reading) { border-image-slice: 120; }
+
+@media (max-width: 640px) {
+    .assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-heading-copy { padding-inline: 36px; }
+    .assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-heading h1 { font-size: 26px; }
+    .assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .teacher-identity { padding: 8px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-header-scenery .reading-art-read-sign { width: 68px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-header-scenery .reading-art-island { width: 45px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-paper { border-width: 18px; border-image-width: 18px; padding: 10px 8px 24px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-paper .assessment-reader-heading { margin-right: 36px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-paper > .reading-paper-books { width: 43px; right: -2px; top: 3px; }
+    .assessment-workspace[data-reading-theme='space'] .assessment-reader-silent .assessment-passage { padding: 12px 10px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-paper > .reading-paper-sign { bottom: -14px; width: 88%; right: 6%; }
+    .assessment-workspace[data-reading-theme='space'] .assessment-reader-silent .reading-timer { padding: 8px; border-width: 8px; border-image-width: 8px; grid-template-columns: minmax(0, 1fr) 38%; gap: 5px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-timer-face { align-items: flex-start; }
+    .assessment-workspace[data-reading-theme='space'] .reading-timer-face > .reading-art { width: 20px; flex-basis: 20px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-timer #reading-timer-display { font-size: 30px; padding: 2px 4px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-ground-decor { height: 86px; margin-top: 14px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-ground-decor .reading-art-reader { width: 52px; }
+    .assessment-workspace[data-reading-theme='space'] .reading-ground-decor .reading-art-books-sign { width: 49px; }
+}

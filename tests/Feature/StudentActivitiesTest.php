@@ -161,9 +161,11 @@ class StudentActivitiesTest extends TestCase
             }
             $this->assertCount(1, $xpath->query('//div[@id="result-'.$records[$type].'"]//p[@data-assessment-type="'.$type.'"]'));
         }
-        $oralCard = $xpath->query('//a[.//p[@data-assessment-type="oral_reading"]]')->item(0);
+        $oralCard = $xpath->query('//details[contains(concat(" ", normalize-space(@class), " "), " student-assessment-details ")][.//p[@data-assessment-type="oral_reading"]]')->item(0);
         $this->assertNotNull($oralCard);
         $this->assertStringNotContainsString('Multiple Choice', $oralCard->textContent);
+        $this->assertCount(1, $xpath->query('.//summary', $oralCard));
+        $this->assertCount(1, $xpath->query('.//a[contains(@href, "/student/assessments/")]', $oralCard));
     }
 
     public function test_numeracy_is_not_labelled_as_reading_and_default_literacy_uses_silent_reading(): void

@@ -41,12 +41,16 @@ class AssessmentProgressTest extends TestCase
     {
         $student = User::factory()->create();
         $assessment = $this->assessment();
-        $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk();
+        $firstResponse = $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()
+            ->assertSee('data-reading-theme=', false);
+        preg_match('/data-reading-theme="([^"]+)"/', $firstResponse->getContent(), $themeMatch);
+        $this->assertContains($themeMatch[1] ?? null, ['meadow', 'space']);
         $progress = AssessmentProgress::query()->firstOrFail();
         $this->postJson(route('student.assessments.progress', $assessment), [
             'attempt_key' => $progress->attempt_key, 'revision' => 100, 'state' => $this->state(),
         ])->assertOk()->assertJsonPath('revision', 100);
         $this->get(route('student.assessments.show', $assessment))->assertOk()
+            ->assertSee('data-reading-theme="'.$themeMatch[1].'"', false)
             ->assertViewHas('progress', fn ($resumed) => $resumed->attempt_key === $progress->attempt_key && $resumed->state == $this->state());
         $this->assertDatabaseCount('assessment_progress', 1);
         $this->assertDatabaseCount('assessment_submissions', 0);
@@ -65,6 +69,30 @@ class AssessmentProgressTest extends TestCase
             'attempt_key' => $progress->attempt_key, 'revision' => 100, 'state' => $this->state(['answers' => [], 'phase' => 'reading']),
         ])->assertOk()->assertJsonPath('revision', 200);
         $this->assertEquals($this->state(), $progress->fresh()->state);
+    }
+
+    public function test_silent_storybook_preserves_controls_without_changing_oral_reading(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $silent = $this->assessment();
+        $this->get(route('student.assessments.show', $silent))->assertOk()
+            ->assertSee('reading-paper', false)
+            ->assertSee('images/reading/reference-art.png', false)
+            ->assertSee('id="start-timer-button"', false)
+            ->assertSee('id="start-timer-label"', false)
+            ->assertDontSee('reading-art-timer-start', false)
+            ->assertDontSee('reading-art-questions', false)
+            ->assertSee('id="end-timer-button"', false)
+            ->assertSee('id="start-questions-button"', false)
+            ->assertSee('We read. We learn.')
+            ->assertSee('A new day');
+
+        $oral = $this->assessment(['assessment_type' => 'oral_reading']);
+        $this->get(route('student.assessments.show', $oral))->assertOk()
+            ->assertDontSee('class="reading-paper"', false)
+            ->assertDontSee('images/reading/reference-art.png', false)
+            ->assertSee('assessment-reading-panes', false)
+            ->assertSee('Finish Assessment');
     }
 
     public function test_students_get_configured_retries_then_require_a_token(): void
