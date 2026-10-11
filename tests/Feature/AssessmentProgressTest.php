@@ -44,7 +44,7 @@ class AssessmentProgressTest extends TestCase
         $firstResponse = $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()
             ->assertSee('data-reading-theme=', false);
         preg_match('/data-reading-theme="([^"]+)"/', $firstResponse->getContent(), $themeMatch);
-        $this->assertContains($themeMatch[1] ?? null, ['meadow', 'space']);
+        $this->assertContains($themeMatch[1] ?? null, ['meadow', 'space', 'crystal']);
         $progress = AssessmentProgress::query()->firstOrFail();
         $this->postJson(route('student.assessments.progress', $assessment), [
             'attempt_key' => $progress->attempt_key, 'revision' => 100, 'state' => $this->state(),

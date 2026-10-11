@@ -1,0 +1,81 @@
+.assessment-workspace[data-reading-theme='crystal'],
+.assessment-workspace[data-reading-theme='crystal']:has(#mission-canvas.assessment-reading:not([hidden])) {
+    --assessment-frame: url('../../public/images/reading/crystal-frame.png');
+    background: #337be0 url('../../public/images/reading/crystal-background.png') center bottom / cover no-repeat;
+    min-height: 100dvh;
+}
+
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading,
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading h1,
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading .teacher-identity :is(strong, small, p) { color: #fff; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading-copy > p { color: #dffcff; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading h1 {
+    -webkit-text-stroke-color: #172b68;
+    text-shadow: 3px 0 #172b68, -3px 0 #172b68, 0 -3px #172b68, 0 5px #172b68, 4px 5px #172b68;
+}
+.assessment-workspace[data-reading-theme='crystal'] .assessment-heading .assessment-attempt { color: #effcff; max-width: none; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-attempt > .material-symbols-outlined { color: #75f3ff; }
+
+/* The fantasy artwork is decorative; controls retain the established assessment layout. */
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner {
+    display: grid; place-items: center; min-height: 72px; width: min(100%, 480px);
+    border: 4px solid #604024; border-radius: 4px;
+    background: linear-gradient(#8b5a30, #704321);
+    box-shadow: inset 0 0 0 3px #bc8550, 0 5px #39294f;
+}
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner > .reading-art { display: none; }
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner::before {
+    content: 'SILENT READING'; color: #fff8e8; font: 700 32px/1 'Pixelify Sans', sans-serif;
+    text-shadow: 2px 2px #3d2a36;
+}
+.assessment-workspace[data-reading-theme='crystal'] .reading-header-scenery,
+.assessment-workspace[data-reading-theme='crystal'] .reading-ground-decor,
+.assessment-workspace[data-reading-theme='crystal'] .reading-paper > :is(.reading-paper-books, .reading-paper-sign) { display: none; }
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .teacher-identity {
+    width: fit-content; max-width: 100%; margin-inline: auto; padding: 10px 16px;
+    background: #fff9e8e8; border: 2px solid #d5ad65; border-radius: 4px;
+}
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .teacher-identity :is(strong, small, p) { color: #172957; }
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) {
+    border-color: #28b8ef; box-shadow: inset -3px -4px #aee8ff, 3px 4px #22549c;
+}
+.assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .assessment-helper-toggle {
+    background: #fff5bf; color: #704313; border-color: #dda94b; box-shadow: inset -3px -4px #ebca66, 3px 4px #986527;
+}
+
+.assessment-workspace[data-reading-theme='crystal'] .reading-paper {
+    border-image-slice: 100 fill; border-width: 34px; border-image-width: 34px;
+    padding: 10px 18px 30px; background-color: #fffaf0;
+}
+.assessment-workspace[data-reading-theme='crystal'] .reading-paper .assessment-reader-heading { margin-right: 0; }
+.assessment-workspace[data-reading-theme='crystal'] .reading-paper .assessment-eyebrow { color: #375b91; }
+.assessment-workspace[data-reading-theme='crystal'] .reading-paper .assessment-reader-heading h2 { color: #10234f; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent .assessment-passage {
+    margin: 0; padding: 18px 22px; color: #1b2c5b; background: #fffef9d9; border: 1px solid #edd9aa;
+}
+.assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent .reading-timer {
+    background: #e9fff5ec; border: 12px solid transparent;
+    border-image: var(--assessment-frame) 100 / 12px / 0 stretch;
+    box-shadow: none; padding: 16px;
+}
+.assessment-workspace[data-reading-theme='crystal'] .reading-timer-value > p:first-child { color: #183768; }
+.assessment-workspace[data-reading-theme='crystal'] .reading-timer #reading-timer-display { color: #10234f; }
+.assessment-workspace[data-reading-theme='crystal'] .reading-timer #reading-timer-status { color: #294570; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent #start-questions-button {
+    --reading-button-color: #2589ed; --reading-button-edge: #1453a6;
+}
+.assessment-workspace[data-reading-theme='crystal'] #mission-canvas:is(.hook-game, .frog-pond-game, .rally-game):not(.assessment-reading) { border-image-slice: 100; }
+
+html.dark .assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent :is(.assessment-reader-heading, .assessment-passage) { color: #1b2c5b; }
+html.dark .assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent .reading-timer { background: #e9fff5ec; }
+
+@media (max-width: 640px) {
+    .assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner { min-height: 46px; border-width: 3px; }
+    .assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner::before { font-size: 20px; }
+    .assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .teacher-identity { padding: 7px 9px; }
+    .assessment-workspace[data-reading-theme='crystal'] .reading-paper { border-width: 18px; border-image-width: 18px; padding: 9px 8px 18px; }
+    .assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent .assessment-passage { padding: 12px 10px; }
+    .assessment-workspace[data-reading-theme='crystal'] .assessment-reader-silent .reading-timer {
+        padding: 8px; border-width: 8px; border-image-width: 8px;
+    }
+}

@@ -77,7 +77,9 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    stop_grace_period: 21m
+    # Do not let a long ML job hold the entire Dokploy rollout for 21 minutes.
+    # Interrupted database jobs become available for retry after retry_after.
+    stop_grace_period: 30s
     command: ["php", "artisan", "queue:work", "--queue=ai,default", "--sleep=3", "--tries=1", "--timeout=1200"]
     environment: *app-environment
     volumes:

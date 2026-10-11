@@ -30,6 +30,7 @@ import '../css/answer-key.css';
 import '../css/answer-feedback.css';
 import '../css/reading-storybook.css';
 import '../css/reading-space.css';
+import '../css/reading-crystal.css';
 import './worksheet-book';
 import { initFrogJump } from './frog-jump';
 import comfortControls, { preferences } from './ui-preferences';

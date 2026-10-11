@@ -91,6 +91,7 @@
         $readingThemes = [
             ['key' => 'meadow'],
             ['key' => 'space'],
+            ['key' => 'crystal'],
         ];
         $readingThemeSeed = $progress->attempt_key ?? $assessment->id.':'.$student->id.':'.$storyTitle;
         $readingTheme = $readingThemes[hexdec(substr(hash('sha256', $readingThemeSeed), 2, 2)) % count($readingThemes)];
@@ -247,7 +248,7 @@
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
                     @if ($isSilentReading)
                         <div class="assessment-theme-switch" role="group" aria-label="Assessment theme">
-                            @foreach (['meadow' => ['park', 'Woodland theme'], 'space' => ['rocket_launch', 'Space theme']] as $theme => [$icon, $label])
+                            @foreach (['meadow' => ['park', 'Woodland theme'], 'space' => ['rocket_launch', 'Space theme'], 'crystal' => ['diamond', 'Crystal sky theme']] as $theme => [$icon, $label])
                                 <button type="button" data-reading-theme-choice="{{ $theme }}" aria-label="{{ $label }}" title="{{ $label }}" aria-pressed="{{ $readingTheme['key'] === $theme ? 'true' : 'false' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></button>
                             @endforeach
                         </div>
@@ -583,7 +584,7 @@
                     const themeButtons = Array.from(workspace.querySelectorAll('[data-reading-theme-choice]'));
                     const themeStorageKey = 'assessment-theme:' + @js($progress->attempt_key ?? $assessment->id.':'.$student->id);
                     function applyReadingTheme(theme) {
-                        if (!['meadow', 'space'].includes(theme)) return;
+                        if (!['meadow', 'space', 'crystal'].includes(theme)) return;
                         workspace.dataset.readingTheme = theme;
                         themeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.readingThemeChoice === theme)));
                     }

@@ -4,6 +4,23 @@ Mode: Built-in image_gen, reference editing. No CLI fallback.
 Space reference: user-supplied Pixel Galaxy Reading Adventure.png, copied unchanged
 to space-reference.png. Both themes use native HTML buttons and dynamic story text.
 
+Crystal reference: user-supplied Pixel Fantasy Silent Reading App.png, copied unchanged
+to crystal-reference.png. The crystal theme keeps the application's established live
+HTML layout and uses the reference only for visual styling.
+
+crystal-background.png
+Use case: precise-object-edit. Extract and reconstruct only the fantasy crystal-world
+environment as a clean portrait background: blue/lavender pixel sky, clouds, stars,
+floating grassy islands, cyan crystals, castle, waterfalls and bottom stone bridge.
+Remove every UI panel, control, label, sign with text and all readable text. Keep the
+central area calm for live HTML, fully opaque, and suitable for responsive cover crops.
+
+crystal-frame.png
+Use case: precise-object-edit. Recreate only the warm ivory parchment frame as a square
+CSS nine-slice asset with stepped cream corners, thin gold edging and tiny cyan crystal
+corner accents. Keep the center blank and opaque; outside corners transparent. Remove
+all text, icons, buttons, characters, scenery and other UI.
+
 space-background.png
 Edit target: the provided pixel galaxy reading screen. Extract ONLY its background into a production portrait game backdrop. Precisely match the original dark indigo pixel star field, sparse yellow and cyan twinkling pixel stars, purple planet near upper center, partial blue/green Earth at upper right, and lavender cratered moon terrain across the bottom 8 percent. Remove ALL text, labels, people, buttons, panels, frames, books, rockets, signboards and UI. Fill removed areas with the same continuous crisp pixel star field. The middle must be calm and low detail for overlaying readable HTML. No gradients or blur. Fully opaque portrait bitmap with no text or UI, 941x1672 composition like reference.
 
