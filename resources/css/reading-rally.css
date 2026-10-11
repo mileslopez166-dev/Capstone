@@ -1,0 +1,94 @@
+.assessment-workspace .rally-game, .assessment-focus-mode .mission-canvas.rally-game.app-game-screen:not(.assessment-reading) { height: auto; min-height: 0; overflow: visible; background: #f8fbfc; color: #25434d; cursor: default; }
+.reading-rally { --rally-paper: #fff; --rally-ink: #25434d; --rally-border: #c5dade; color: var(--rally-ink); background: #f8fbfc; }
+.rally-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--rally-border); }
+.rally-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 20px; font-weight: 800; }
+.rally-heading h2 .material-symbols-outlined { color: #d74953; }
+.rally-correct-count { font-size: 14px; }
+.rally-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.rally-adventure { min-width: 0; }
+.rally-stage { position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: #9cdce0; isolation: isolate; }
+#rally-scene, #rally-scene canvas, .rally-fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+#rally-scene { z-index: 1; pointer-events: none; }
+#rally-scene canvas { display: block; }
+.reading-rally[data-renderer='3d'] .rally-fallback { visibility: hidden; }
+.rally-fallback { background: #8db775; overflow: hidden; }
+.rally-fallback-road { position: absolute; left: 14%; right: 14%; top: -10%; bottom: -10%; border-inline: 7px dashed #faf6e9; background: repeating-linear-gradient(0deg, transparent 0 25px, #d6e1dc 25px 50px) 25% 0 / 3px 100%, repeating-linear-gradient(0deg, transparent 0 25px, #d6e1dc 25px 50px) 50% 0 / 3px 100%, repeating-linear-gradient(0deg, transparent 0 25px, #d6e1dc 25px 50px) 75% 0 / 3px 100%, #52636b; background-repeat: no-repeat; }
+.rally-fallback-car { position: absolute; width: 15%; height: 24%; object-fit: contain; transition: top 1s ease; }
+.rally-car-player { left: 40%; top: 62%; }
+.rally-car-teal { left: 14%; top: var(--rival-0, 45%); filter: hue-rotate(165deg); }
+.rally-car-gold { left: 65%; top: var(--rival-1, 30%); filter: hue-rotate(55deg); }
+.rally-car-violet { left: 83%; top: var(--rival-2, 15%); filter: hue-rotate(265deg); }
+.rally-hud { position: absolute; z-index: 2; inset: 12px 12px auto; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; color: #fff; }
+.rally-hud > div { background: #173b40ee; border-radius: 6px; padding: 8px 12px; box-shadow: 0 2px 0 #ffffff30; }
+.rally-hud span { display: block; font-size: 10px; font-weight: 800; }
+.rally-hud strong { font-size: 25px; line-height: 1.3; }
+.rally-hud small { font-size: 12px; }
+.rally-hud .rally-driver { background: #f8fcff; width: 52px; height: 62px; padding: 2px 4px; color: #9f3041; text-align: center; overflow: hidden; }
+.rally-driver .campus-character { width: 100%; height: 43px; }
+.rally-driver .campus-character svg, .rally-driver .campus-character img { width: 100%; height: 100%; object-fit: contain; }
+.rally-banner { position: absolute; z-index: 3; left: 50%; bottom: 15px; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; max-width: calc(100% - 24px); padding: 8px 14px; background: #173b40eb; border: 1px solid #eaf6f1; border-radius: 6px; color: #fff; text-align: center; pointer-events: none; }
+.rally-banner strong { font-size: 14px; }
+.reading-rally[data-outcome='correct'] .rally-banner { background: #176c54; }
+.reading-rally[data-outcome='incorrect'] .rally-banner { background: #974333; }
+.rally-finish-flag { position: absolute; z-index: 2; inset: auto 0 0; height: 12px; background: repeating-conic-gradient(#fff 0 25%, #213740 0 50%) 0 / 24px 24px; opacity: 0; }
+.reading-rally[data-finished='true'] .rally-finish-flag { opacity: 1; }
+.rally-race-status { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 14px 18px; font-size: 13px; }
+#rally-mission-status { margin: 0; font-weight: 700; }
+#rally-progress-text { font-size: 12px; }
+#rally-progress { grid-column: 1 / -1; appearance: none; width: 100%; height: 8px; border: 0; border-radius: 4px; overflow: hidden; background: #d7e5e6; }
+#rally-progress::-webkit-progress-bar { background: #d7e5e6; }
+#rally-progress::-webkit-progress-value { background: #d74953; }
+#rally-progress::-moz-progress-bar { background: #d74953; }
+.rally-question { min-width: 0; padding: 20px; border-left: 1px solid var(--rally-border); }
+#rally-question-number { font-size: 12px; font-weight: 800; margin: 0 0 8px; }
+.rally-question h3 { font-size: var(--assessment-questions-size, 18px); line-height: 1.5; font-weight: 800; overflow-wrap: anywhere; margin: 0 0 12px; }
+.rally-passage { margin-bottom: 12px; }
+.rally-passage summary { cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.rally-passage summary::after { content: '+'; margin-left: auto; }
+.rally-passage[open] summary::after { content: '-'; }
+.rally-passage > div { max-height: 220px; overflow-y: auto; white-space: pre-line; line-height: 1.7; padding: 12px; background: var(--rally-paper); border-left: 3px solid #278978; font-size: var(--assessment-story-size, 16px); overflow-wrap: anywhere; }
+.rally-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.rally-answers button { display: flex; align-items: flex-start; gap: 8px; min-width: 0; min-height: 56px; padding: 12px; border: 1px solid var(--rally-border); border-radius: 8px; text-align: left; color: var(--rally-ink); background: var(--rally-paper); touch-action: manipulation; }
+.rally-answer-letter { display: grid; place-items: center; flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; background: #fce3d9; color: #923f36; font-weight: 800; }
+[data-rally-answer-label] { flex: 1; min-width: 0; font-size: var(--assessment-answers-size, 16px); line-height: 1.5; overflow-wrap: anywhere; }
+.rally-verdict { width: 20px; flex: 0 0 20px; font-size: 20px; }
+.rally-verdict:empty { display: none; }
+.rally-answers button:hover:not(:disabled) { border-color: #bc3e4d; box-shadow: 0 2px #bc3e4d; }
+.rally-answers button[data-result='correct'] { background: #e7f6ee; border-color: #328260; }
+.rally-answers button[data-result='incorrect'] { background: #fff0e9; border-color: #b66744; }
+.rally-round-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding-top: 14px; }
+#rally-feedback { flex: 1 1 200px; min-height: 24px; font-size: 14px; line-height: 1.5; }
+#rally-next { display: inline-flex; gap: 8px; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; background: #b53145; color: #fff; border-radius: 6px; font-size: 14px; font-weight: 800; }
+#rally-next:disabled { opacity: .6; }
+#rally-next[hidden], .rally-answers button[hidden] { display: none; }
+.rally-answers button:focus-visible, #rally-next:focus-visible, .rally-passage summary:focus-visible { outline: 3px solid #2186b8; outline-offset: 3px; }
+html[data-theme='dark'] .assessment-workspace .rally-game { background: #162e33; }
+html[data-theme='dark'] .reading-rally { --rally-paper: #234047; --rally-ink: #fff; --rally-border: #608188; background: #162e33; }
+html[data-theme='dark'] .rally-heading h2, html[data-theme='dark'] .rally-question h3, html[data-theme='dark'] .rally-passage summary { color: #fff; }
+html[data-theme='dark'] .rally-answers button[data-result='correct'] { background: #225542; }
+html[data-theme='dark'] .rally-answers button[data-result='incorrect'] { background: #674537; }
+@container (max-width: 850px) {
+    .rally-layout { grid-template-columns: minmax(0, 1fr); }
+    .rally-stage { aspect-ratio: 16 / 9; max-height: 340px; }
+    .rally-question { border-left: 0; border-top: 1px solid var(--rally-border); padding: 16px; }
+}
+@container (max-width: 460px) {
+    .rally-heading { padding: 10px 12px; }
+    .rally-heading h2 { font-size: 18px; }
+    .rally-correct-count { font-size: 12px; }
+    .rally-stage { aspect-ratio: 4 / 3; }
+    .rally-answers { grid-template-columns: minmax(0, 1fr); }
+    .rally-question, .rally-race-status { padding: 12px; }
+    .rally-hud { inset: 8px 8px auto; }
+    .rally-hud > div { padding: 5px 8px; }
+    .rally-hud strong { font-size: 20px; }
+    .rally-banner { padding: 6px 10px; bottom: 10px; }
+}
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 640px) {
+    .rally-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+    .rally-stage { aspect-ratio: 4 / 3; max-height: 300px; }
+    .rally-question { border-top: 0; border-left: 1px solid var(--rally-border); padding: 12px; }
+    .rally-answers { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .rally-fallback-car { transition: none; } }
+html[data-reduced-motion='true'] .rally-fallback-car { transition: none; }

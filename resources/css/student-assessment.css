@@ -397,7 +397,7 @@ html.dark .assessment-question-timer[data-urgency='critical'] { border-color: #e
     }
     .assessment-focus-mode .hook-game.ocean-game,
     .assessment-focus-mode .frog-pond-game,
-    .assessment-focus-mode .treasure-game {
+    .assessment-focus-mode .rally-game {
         min-height: 0;
     }
 }

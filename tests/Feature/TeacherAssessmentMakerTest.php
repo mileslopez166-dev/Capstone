@@ -22,7 +22,7 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertDontSee('assessment-list-item', false);
         $response->assertSeeText('Import Story and Questions from TXT');
         $response->assertSee('question-text-file');
-        $response->assertSeeText('Frog Flashcards');
+        $response->assertSeeText('Frog Adventure');
     }
 
     public function test_multiple_choice_upload_sample_includes_story_format(): void

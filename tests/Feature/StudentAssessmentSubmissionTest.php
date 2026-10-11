@@ -290,7 +290,7 @@ class StudentAssessmentSubmissionTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('frog-flashcards-game')
-            ->assertSeeText('River Log Crossing')
+            ->assertSeeText('Frog Adventure')
             ->assertSeeText('FINISH')
             ->assertSeeText('River progress')
             ->assertSee('data-frog-log-index="0"', false)

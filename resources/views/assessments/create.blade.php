@@ -56,12 +56,11 @@
 
                                 <div class="mt-8">
                                     <label class="mb-4 block text-sm font-bold text-on-surface-variant">Choose Quiz Type</label>
-                                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                         @foreach ([
-                                            ['value' => 'multiple_choice', 'icon' => 'checklist', 'label' => 'Multiple Choice'],
-                                            ['value' => 'data_egg', 'icon' => 'egg_alt', 'label' => 'Interactive Egg'],
-                                            ['value' => 'flashcards', 'icon' => 'pest_control', 'label' => 'Frog Flashcards'],
-                                            ['value' => 'treasure_quest', 'icon' => 'explore', 'label' => 'Treasure Quest'],
+                                            ['value' => 'multiple_choice', 'icon' => 'phishing', 'label' => 'Fishing Game'],
+                                            ['value' => 'flashcards', 'icon' => 'sports_esports', 'label' => 'Frog Adventure'],
+                                            ['value' => 'reading_rally', 'icon' => 'sports_motorsports', 'label' => 'Reading Rally'],
                                         ] as $quizType)
                                             <label class="group relative cursor-pointer">
                                                 <input class="peer sr-only" name="quiz_type" type="radio" value="{{ $quizType['value'] }}" {{ old('quiz_type', 'multiple_choice') === $quizType['value'] ? 'checked' : '' }}>

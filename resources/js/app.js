@@ -23,7 +23,8 @@ import '../css/teacher-photo.css';
 import '../css/student-tutor.css';
 import '../css/teacher-ai-assistant.css';
 import '../css/dark-mode.css';
-import '../css/treasure-quest.css';
+import '../css/reading-rally.css';
+import { initReadingRally } from './reading-rally';
 import '../css/answer-key.css';
 import '../css/answer-feedback.css';
 import './worksheet-book';
@@ -75,13 +76,7 @@ if (fishingSea) {
 }
 
 const buttonClickSound = new Audio('/audio/button-click.mp3');
-const treasureScene = document.getElementById('treasure-scene');
-if (treasureScene) {
-    import('./treasure-quest').then(({ initTreasureQuest }) => initTreasureQuest(treasureScene)).catch(() => {
-        treasureScene.closest('.treasure-quest').dataset.sceneState = 'fallback';
-        treasureScene.replaceChildren();
-    });
-}
+initReadingRally(document.querySelector('.reading-rally'));
 
 buttonClickSound.preload = 'auto';
 buttonClickSound.volume = 0.45;

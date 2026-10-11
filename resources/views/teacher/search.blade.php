@@ -87,7 +87,7 @@
                                     <a class="flex items-center justify-between gap-4 rounded-xl bg-surface-container-low p-4 transition-colors hover:bg-primary-container/15" href="{{ route('assessments.show', $assessment) }}">
                                         <span>
                                             <span class="block font-bold text-on-surface">{{ $assessment->title }}</span>
-                                            <span class="block text-sm text-on-surface-variant">{{ ucfirst($assessment->subject) }} | {{ str($assessment->quiz_type)->replace('_', ' ')->title() }} | {{ ucfirst($assessment->status) }}</span>
+                                            <span class="block text-sm text-on-surface-variant">{{ ucfirst($assessment->subject) }} | {{ match ($assessment->quiz_type ?? 'multiple_choice') { 'multiple_choice', 'data_egg' => 'Fishing Game', 'flashcards' => 'Frog Adventure', 'reading_rally', 'word_rescue', 'treasure_quest' => 'Reading Rally', default => str($assessment->quiz_type)->replace('_', ' ')->title() } }} | {{ ucfirst($assessment->status) }}</span>
                                         </span>
                                         <span class="material-symbols-outlined text-primary">assignment</span>
                                     </a>

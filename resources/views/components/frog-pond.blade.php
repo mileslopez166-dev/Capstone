@@ -8,9 +8,9 @@
 <div id="frog-pond-scene" class="frog-pond-scene" aria-hidden="true"></div>
 <div class="frog-pond-fallback" aria-hidden="true"></div>
 
-<section class="frog-interface" id="frog-flashcards-game" aria-label="River log crossing game">
+<section class="frog-interface" id="frog-flashcards-game" aria-label="Frog Adventure river crossing game">
     <header class="frog-hud">
-        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">waves</span>River Log Crossing</div>
+        <div class="frog-mission-name"><span class="material-symbols-outlined" aria-hidden="true">waves</span>Frog Adventure</div>
         <div class="frog-hud-stats">
             <span id="frog-level-text">Question 1/{{ $questionCount }}</span>
             <span class="frog-score-chip"><span class="material-symbols-outlined" aria-hidden="true">forest</span><strong id="frog-score">0</strong><span>logs crossed</span></span>

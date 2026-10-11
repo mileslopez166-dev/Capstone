@@ -8,14 +8,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class TreasureQuestTest extends TestCase
+class ReadingRallyTest extends TestCase
 {
     use RefreshDatabase;
 
     private function payload(array $overrides = []): array
     {
         return array_replace([
-            'title' => 'The Island Library', 'subject' => 'literacy', 'quiz_type' => 'treasure_quest',
+            'title' => 'The Island Library', 'subject' => 'literacy', 'quiz_type' => 'reading_rally',
             'delivery_method' => 'manual', 'assessment_type' => 'silent_reading',
             'target_section' => 'all', 'status' => 'published', 'focus_areas' => ['Comprehension Depth'],
             'story_title' => 'The Island Library', 'story_description' => 'Mia brought books to the island. Everyone worked together to build a library.',
@@ -35,44 +35,44 @@ class TreasureQuestTest extends TestCase
         return [$teacher, $student, $assessment];
     }
 
-    public function test_teacher_can_publish_treasure_quest_and_students_see_its_name(): void
+    public function test_teacher_can_publish_reading_rally_and_students_see_its_name(): void
     {
         $this->actingAs(User::factory()->teacher()->create())->get(route('assessments.create'))
-            ->assertOk()->assertSee('value="treasure_quest"', false)->assertSeeText('Treasure Quest');
+            ->assertOk()->assertSee('value="reading_rally"', false)->assertSeeText('Reading Rally');
         $this->post(route('assessments.store'), $this->payload())->assertSessionHasNoErrors()->assertRedirect();
         $assessment = Assessment::firstOrFail();
-        $this->assertSame('treasure_quest', $assessment->quiz_type);
+        $this->assertSame('reading_rally', $assessment->quiz_type);
         $this->assertSame('instructional', $assessment->manual_questions[0]['difficulty']);
         $this->actingAs(User::factory()->create())->get(route('student.activities', ['subject' => 'literacy']))
-            ->assertOk()->assertSeeText('Treasure Quest');
+            ->assertOk()->assertSeeText('Reading Rally');
     }
 
     public function test_student_and_teacher_assisted_views_share_game_and_correct_endpoints(): void
     {
         [$teacher, $student, $assessment] = $this->fixture();
         $response = $this->actingAs($student)->get(route('student.assessments.show', $assessment));
-        $response->assertOk()->assertSee('id="treasure-scene"', false)->assertSee('id="story-gate"', false)
+        $response->assertOk()->assertSee('id="rally-scene"', false)->assertSee('id="story-gate"', false)
             ->assertSee('assessment-reading')->assertSee('campus-character-custom')
             ->assertDontSee('id="fishing-sea-scene"', false)->assertDontSee('id="frog-pond-scene"', false);
-        if (getenv('CAPTURE_TREASURE_FIXTURES')) {
-            file_put_contents(storage_path('app/treasure-student.html'), $response->getContent());
+        if (getenv('CAPTURE_RALLY_FIXTURES')) {
+            file_put_contents(storage_path('app/rally-student.html'), $response->getContent());
         }
         $response = $this->actingAs($teacher)->get(route('teacher.assessments.take', [$assessment, $student]));
-        $response->assertOk()->assertSee('id="treasure-scene"', false)->assertViewHas('student', fn ($value) => $value->is($student))
+        $response->assertOk()->assertSee('id="rally-scene"', false)->assertViewHas('student', fn ($value) => $value->is($student))
             ->assertSee(json_encode(route('teacher.assessments.submit', [$assessment, $student])), false);
-        if (getenv('CAPTURE_TREASURE_FIXTURES')) {
-            file_put_contents(storage_path('app/treasure-teacher.html'), $response->getContent());
+        if (getenv('CAPTURE_RALLY_FIXTURES')) {
+            file_put_contents(storage_path('app/rally-teacher.html'), $response->getContent());
         }
         $this->actingAs(User::factory()->teacher()->create())->get(route('teacher.assessments.take', [$assessment, $student]))->assertNotFound();
     }
 
-    public function test_oral_reading_remains_reading_only_and_listening_can_use_treasure_quest(): void
+    public function test_oral_reading_remains_reading_only_and_listening_can_use_reading_rally(): void
     {
         [, $student, $assessment] = $this->fixture(['assessment_type' => 'oral_reading', 'manual_questions' => []]);
         $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()
-            ->assertSee('id="story-gate"', false)->assertDontSee('id="treasure-scene"', false);
+            ->assertSee('id="story-gate"', false)->assertDontSee('id="rally-scene"', false);
         [, $student, $assessment] = $this->fixture(['assessment_type' => 'listening_comprehension']);
-        $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()->assertSee('id="treasure-scene"', false)
+        $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()->assertSee('id="rally-scene"', false)
             ->assertDontSee('id="story-gate"', false);
     }
 
@@ -93,5 +93,40 @@ class TreasureQuestTest extends TestCase
             ->assertJsonPath('points', 50)->assertJsonPath('correct_count', 1)->assertJsonPath('question_count', 2)->assertJsonPath('coins_earned', 10);
         $this->postJson(route('student.assessments.submit', $assessment), $payload)->assertOk()->assertJsonPath('points', 50);
         $this->assertDatabaseCount('assessment_submissions', 1);
+    }
+
+    public function test_legacy_game_opens_reading_rally_but_cannot_be_selected_for_new_assessments(): void
+    {
+        foreach (['treasure_quest', 'word_rescue'] as $legacy) {
+            [$teacher, $student, $assessment] = $this->fixture(['quiz_type' => $legacy]);
+            $this->actingAs($student)->get(route('student.assessments.show', $assessment))
+                ->assertOk()->assertSeeText('Reading Rally')->assertSee('rally-car.svg')->assertDontSee('treasure-scene');
+            $this->actingAs($teacher)->post(route('assessments.store'), $this->payload(['quiz_type' => $legacy]))
+                ->assertSessionHasErrors('quiz_type');
+        }
+    }
+
+    public function test_legacy_pending_retry_remains_readable_and_first_choice_is_scored(): void
+    {
+        [, $student, $assessment] = $this->fixture(['quiz_type' => 'word_rescue']);
+        $this->actingAs($student)->get(route('student.assessments.show', $assessment));
+        $progress = AssessmentProgress::firstOrFail();
+        $state = ['answers' => [], 'phase' => 'questions', 'reading_seconds' => 12, 'timer_status' => 'finished',
+            'question_deadline_ms' => 1900000000000, 'question_timer_index' => 0, 'rescue_attempts' => [['B']]];
+        $this->postJson(route('student.assessments.progress', $assessment), [
+            'attempt_key' => $progress->attempt_key, 'revision' => 1, 'state' => $state,
+        ])->assertOk();
+        $this->get(route('student.assessments.show', $assessment))->assertOk()
+            ->assertViewHas('progress', fn ($saved) => $saved->state['rescue_attempts'] === [['B']]);
+        $this->postJson(route('student.assessments.progress', $assessment), [
+            'attempt_key' => $progress->attempt_key, 'revision' => 2,
+            'state' => array_replace($state, ['rescue_attempts' => [99 => ['A']]]),
+        ])->assertStatus(422);
+        $state['answers'] = ['B', 'B'];
+        $state['rescue_attempts'] = [['B', 'A'], ['B']];
+        $state['phase'] = 'finished';
+        $this->postJson(route('student.assessments.submit', $assessment), [
+            'attempt_key' => $progress->attempt_key, 'answers' => $state['answers'], 'state' => $state, 'revision' => 3,
+        ])->assertOk()->assertJsonPath('correct_count', 1)->assertJsonPath('points', 50);
     }
 }

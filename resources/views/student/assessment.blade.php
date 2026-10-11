@@ -25,8 +25,8 @@
         $isSilentReading = $assessmentType === 'silent_reading';
         $isListeningComprehension = $assessmentType === 'listening_comprehension';
         $isFlashcards = ($assessment->quiz_type ?? 'multiple_choice') === 'flashcards';
-        $isTreasureQuest = ($assessment->quiz_type ?? 'multiple_choice') === 'treasure_quest';
-        $isFishing = ! $isOralReading && ! $isFlashcards && ! $isTreasureQuest;
+        $isReadingRally = in_array($assessment->quiz_type, ['reading_rally', 'word_rescue', 'treasure_quest'], true);
+        $isFishing = ! $isOralReading && ! $isFlashcards && ! $isReadingRally;
         $storyDescription = $assessment->story_description;
         $hasReadingStage = ($storyTitle || $storyDescription) && ! $isListeningComprehension;
         $storyText = $storyDescription ?: $assessment->instructions;
@@ -128,33 +128,15 @@
             .hook-game .hook-options > div { margin: 0; padding: 6px; gap: 7px; font-size: 13px; }
             .hook-game .hook-options > div > span:first-child { flex-shrink: 0; }
             .hook-game #fish-container { grid-column: 1; grid-row: 3; }
-            .hook-game #egg-wrapper { transform: translateX(-50%) scale(.55); transform-origin: center bottom; bottom: 4px; }
         }
         @media (prefers-reduced-motion: reduce) {
             .fish-tail, .fish-fin { animation: none; }
         }
-        .particle { position: absolute; pointer-events: none; z-index: 100; }
         .glass-hud { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
         .liquid-track { box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .liquid-fill { box-shadow: 0 0 15px rgba(145, 247, 142, 0.6), inset 0 2px 4px rgba(255,255,255,0.4); transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .hook-cable { width: 2px; background: #728c99; height: 0; flex: none; }
-        .pulse-bag { animation: bag-pulse 2s infinite ease-in-out; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease; }
-        @keyframes bag-pulse { 0%, 100% { transform: scale(var(--base-scale, 1)) translateY(0); } 50% { transform: scale(calc(var(--base-scale, 1) * 1.05)) translateY(-5px); } }
         .mission-canvas { cursor: crosshair; }
-        .data-egg-container { width: 118px; height: 148px; position: relative; perspective: 1000px; }
-        .data-egg { width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, #ffffff 0%, #eef1f4 50%, #d9dde1 100%); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; box-shadow: 0 20px 40px rgba(0, 94, 159, 0.15), inset -10px -10px 30px rgba(0, 0, 0, 0.05), inset 10px 10px 30px rgba(255, 255, 255, 0.8); position: relative; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.5); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; }
-        .egg-glow { position: absolute; inset: -28px; background: radial-gradient(circle, rgba(68, 165, 255, 0.3) 0%, transparent 70%); pointer-events: none; opacity: 0.6; animation: glow-pulse 3s infinite ease-in-out; z-index: 5; }
-        @keyframes glow-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
-        .crack { position: absolute; background: #005e9f; width: 2px; height: 0; opacity: 0; transition: height 0.5s ease-out, opacity 0.5s ease; transform-origin: top; filter: blur(0.5px); z-index: 20; }
-        .crack-visible { opacity: 0.4; height: 30px; }
-        .shell-piece { position: absolute; background: radial-gradient(circle at 30% 30%, #ffffff 0%, #eef1f4 50%, #d9dde1 100%); width: 58px; height: 72px; border: 2px solid rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 30; opacity: 0; }
-        .hatch-core { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; opacity: 0; transform: scale(0); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hatch-active .hatch-core { opacity: 1; transform: scale(1); animation: core-pop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        @keyframes core-pop { 0% { transform: scale(0); opacity: 0; } 30% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        .hatch-active .data-egg { opacity: 0; pointer-events: none; }
-        .hatch-light { position: absolute; inset: -110px; background: radial-gradient(circle, #ffffff 0%, #44a5ff 30%, transparent 70%); opacity: 0; pointer-events: none; z-index: 15; }
-        @keyframes explode-out { 0% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.5); opacity: 0; } }
-        .shell-exploded { animation: explode-out 1.2s forwards cubic-bezier(0.165, 0.84, 0.44, 1); }
         #story-reader-text { user-select: none; -webkit-user-select: none; }
         .story-paragraph { margin: 0 0 1rem; text-align: left; }
         .story-paragraph:last-child { margin-bottom: 0; }
@@ -258,7 +240,7 @@
             <audio id="multiple-choice-hook-sound" src="{{ asset('audio/multiple-choice-hook-reel.mp3') }}" preload="auto"></audio>
             <audio id="frog-wrong-answer-sound" src="{{ asset('audio/frog-wrong-answer.mp3') }}" preload="auto"></audio>
             <audio id="frog-correct-answer-sound" src="{{ asset('audio/frog-correct-answer.mp3') }}" preload="auto"></audio>
-            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ $isFishing ? 'hook-game ocean-game' : '' }} {{ ($isTreasureQuest && ! $isOralReading) ? 'treasure-game' : '' }}" id="mission-canvas" data-fish-species="{{ $fishSpecies }}" aria-label="Assessment activity">
+            <section class="mission-canvas relative app-game-screen w-full overflow-hidden {{ $hasReadingStage ? 'assessment-reading' : '' }} {{ ($isFlashcards && ! $isOralReading) ? 'frog-pond-game' : '' }} {{ $isFishing ? 'hook-game ocean-game' : '' }} {{ ($isReadingRally && ! $isOralReading) ? 'rally-game' : '' }}" id="mission-canvas" data-fish-species="{{ $fishSpecies }}" aria-label="Assessment activity">
                 @if ($isFishing)
                     <div id="fishing-sea-scene" aria-hidden="true"></div>
                     <div class="ocean-catch-status" id="ocean-catch-status" role="status" aria-live="polite"></div>
@@ -364,22 +346,11 @@
                     </button>
                 </template>
 
-                <div class="absolute bottom-3 left-1/2 z-40 -translate-x-1/2 {{ ! $isFishing ? 'hidden' : '' }}" id="egg-wrapper">
-                    <div class="egg-glow"></div><div class="hatch-light" id="hatch-flash"></div>
-                    <div class="data-egg-container pulse-bag" id="power-core" style="--base-scale: 1;">
-                        <div class="data-egg" id="shell-main">
-                            <div class="crack left-1/4 top-1/3 rotate-[15deg]" id="crack-1"></div><div class="crack right-1/4 top-1/4 -rotate-[25deg]" id="crack-2"></div><div class="crack left-1/2 bottom-1/4 rotate-[180deg]" id="crack-3"></div><div class="crack left-[20%] bottom-[40%] rotate-[45deg]" id="crack-4"></div><div class="crack right-[15%] bottom-[30%] rotate-[-60deg]" id="crack-5"></div>
-                            <div class="relative z-10 flex flex-col items-center pt-14 text-primary"><span class="material-symbols-outlined mb-1 text-4xl opacity-80" id="bag-icon" style="font-variation-settings: 'FILL' 1;">dataset</span><span class="font-label text-[9px] font-bold uppercase tracking-widest">Data Egg</span></div>
-                        </div>
-                        <div class="hatch-core" id="inside-core"><div class="flex flex-col items-center"><div class="flex h-20 w-20 items-center justify-center rounded-full border-4 border-primary bg-white shadow-[0_0_50px_rgba(68,165,255,0.4)]"><span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">stars</span></div><div class="mt-4 rounded-full bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg">Unlocked</div></div></div>
-                    </div>
-                </div>
-
                 @if ($isFlashcards && ! $isOralReading)
                     <x-frog-pond :question="$firstQuestion" :question-count="$questionCount" />
                 @endif
-                @if ($isTreasureQuest && ! $isOralReading)
-                    <x-treasure-quest :student="$student" :question-count="$questionCount" />
+                @if ($isReadingRally && ! $isOralReading)
+                    <x-reading-rally :student="$student" :question-count="$questionCount" :passage="$isListeningComprehension ? null : $storyText" :story-title="$storyTitle ?: $assessment->title" />
                 @endif
                 @if ($hasReadingStage)
                     <div id="story-gate" class="assessment-story-gate">
@@ -547,12 +518,7 @@
                     const reducedMotion = () => window.PgaalsPreferences?.reducedMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const scoreEl = document.getElementById('score');
                     const progressEl = document.getElementById('progress-bar');
-                    const bag = document.getElementById('power-core');
                     const modal = document.getElementById('mission-modal');
-                    const eggWrapper = document.getElementById('egg-wrapper');
-                    const shellMain = document.getElementById('shell-main');
-                    const hatchFlash = document.getElementById('hatch-flash');
-                    const missionInfo = document.getElementById('mission-info');
                     const questionNode = document.getElementById('question-node');
                     const resultSummary = document.getElementById('result-summary');
                     const resultAccuracy = document.getElementById('result-accuracy');
@@ -592,11 +558,11 @@
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const assessmentType = @json($assessmentType);
                     const isFlashcards = @json($isFlashcards);
-                    const isTreasureQuest = @json($isTreasureQuest);
+                    const isReadingRally = @json($isReadingRally);
                     const isFishing = @json($isFishing);
-                    const treasureGame = document.querySelector('.treasure-quest');
-                    const treasureButtons = Array.from(document.querySelectorAll('[data-treasure-answer]'));
-                    const treasureNext = document.getElementById('treasure-next');
+                    const rallyGame = document.querySelector('.reading-rally');
+                    const rallyButtons = Array.from(document.querySelectorAll('[data-rally-answer]'));
+                    const rallyNext = document.getElementById('rally-next');
                     const isOralReading = assessmentType === 'oral_reading';
                     const isSilentReading = assessmentType === 'silent_reading';
                     const canTrackPronunciation = isOralReading;
@@ -640,7 +606,7 @@
                     let progressRevision = Number(initialProgress.revision || 0);
                     let saveTimeout = null;
                     let frogRoundEnding = false;
-                    let treasureRoundEnding = false;
+                    let rallyRoundEnding = false;
 
                     function stopQuestionTimer(clearDeadline = true) {
                         clearInterval(questionTimer);
@@ -708,18 +674,20 @@
                             return;
                         }
 
-                        if (isTreasureQuest) {
+                        if (isReadingRally) {
                             caughtCount++;
-                            treasureButtons.forEach(button => button.disabled = true);
-                            treasureGame.dataset.outcome = 'incorrect';
-                            document.getElementById('treasure-feedback').textContent = "Time's up. Following the trail to the next question.";
-                            updateTreasureProgress();
+                            rallyButtons.forEach(button => button.disabled = true);
+                            updateRallyProgress();
+                            rallyGame.dispatchEvent(new CustomEvent('rally:answer', {
+                                detail: { correct: false, retry: false, timeout: true, index: currentQuestionIndex },
+                            }));
+                            document.getElementById('rally-feedback').textContent = "Time's up. Your car is recovering for the next question.";
                             setTimeout(() => {
-                                if (caughtCount >= targetsNeeded) return endTreasureRound();
+                                if (caughtCount >= targetsNeeded) return endRallyRound();
                                 currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
                                 isProcessingCapture = false;
-                                renderTreasureQuestion(true);
-                            }, reducedMotion() ? 250 : 900);
+                                renderRallyQuestion(true);
+                            }, reducedMotion() ? 250 : 1700);
                             return;
                         }
 
@@ -734,85 +702,96 @@
                         if (caughtCount < targetsNeeded) setTimeout(nextQuestion, reducedMotion() ? 250 : 900);
                     }
 
-                    function updateTreasureProgress() {
-                        if (!treasureGame) return;
-                        treasureGame.dataset.answered = String(caughtCount);
-                        treasureGame.style.setProperty('--treasure-route', String(targetsNeeded ? caughtCount / targetsNeeded : 0));
-                        document.getElementById('treasure-gems').textContent = String(totalScore);
-                        document.getElementById('treasure-progress').value = caughtCount;
-                        document.getElementById('treasure-progress-text').textContent = `${caughtCount} / ${targetsNeeded} explored`;
+                    function updateRallyProgress() {
+                        if (!rallyGame) return;
+                        rallyGame.dataset.completed = String(caughtCount);
+                        rallyGame.dataset.correct = String(totalScore);
+                        document.getElementById('rally-correct').textContent = String(totalScore);
+                        document.getElementById('rally-progress').value = caughtCount;
+                        document.getElementById('rally-progress-text').textContent = `${caughtCount} / ${targetsNeeded} questions`;
+                        rallyGame.dispatchEvent(new CustomEvent('rally:progress'));
                     }
 
-                    function renderTreasureQuestion(focus = false) {
-                        if (!treasureGame || !questions[currentQuestionIndex]) return;
+                    function rallyHint(question) {
+                        const text = question.text.toLowerCase();
+                        const source = assessmentType === 'listening_comprehension' ? 'Think back to the story you heard.' : 'Look back at the passage.';
+                        const clue = /mean|word|phrase|vocabulary/.test(text) ? 'Use the words around it to work out its meaning.'
+                            : /main idea|mostly about|best title|summary/.test(text) ? 'Think about the whole passage, not just one detail.'
+                            : /why|cause|because|effect|result/.test(text) ? 'Find what happened first and what happened because of it.'
+                            : /feel|character|describe/.test(text) ? 'Use what the character says and does as your evidence.'
+                            : /before|after|first|next|last/.test(text) ? 'Put the events in order.'
+                            : 'Find the sentence about the person, place, or event in the question.';
+                        return `${source} ${clue}`;
+                    }
+
+                    function renderRallyQuestion(focus = false) {
+                        if (!rallyGame || !questions[currentQuestionIndex]) return;
                         const question = questions[currentQuestionIndex];
-                        treasureGame.dataset.selected = '';
-                        treasureGame.dataset.outcome = '';
-                        treasureNext.hidden = true;
-                        document.getElementById('treasure-feedback').textContent = '';
-                        document.getElementById('treasure-question-number').textContent = `Question ${currentQuestionIndex + 1} / ${targetsNeeded}`;
-                        const heading = document.getElementById('treasure-question-text');
+                        rallyGame.dataset.outcome = '';
+                        rallyNext.hidden = true;
+                        document.getElementById('rally-feedback').textContent = '';
+                        document.getElementById('rally-question-number').textContent = `Question ${currentQuestionIndex + 1} / ${targetsNeeded}`;
+                        const heading = document.getElementById('rally-question-text');
                         heading.textContent = question.text;
-                        treasureButtons.forEach(button => {
-                            const option = question.options.find(item => item.l === button.dataset.treasureAnswer);
+                        rallyButtons.forEach(button => {
+                            const option = question.options.find(item => item.l === button.dataset.rallyAnswer);
                             button.hidden = !option;
-                            button.disabled = !option || !missionStarted;
+                            button.disabled = !option || !missionStarted || !!capturedAnswers[currentQuestionIndex];
                             delete button.dataset.result;
-                            button.querySelector('[data-treasure-answer-label]').textContent = option?.t || '';
-                            button.querySelector('.treasure-verdict').textContent = '';
-                            const label = treasureGame.querySelector(`[data-chest-label="${button.dataset.treasureAnswer}"]`);
-                            delete label.dataset.result;
+                            button.querySelector('[data-rally-answer-label]').textContent = option?.t || '';
+                            button.querySelector('.rally-verdict').textContent = '';
                         });
-                        updateTreasureProgress();
+                        updateRallyProgress();
+                        rallyGame.dispatchEvent(new CustomEvent('rally:question'));
                         if (missionStarted) startQuestionTimer(false);
                         if (focus) heading.focus({ preventScroll: true });
                     }
 
-                    function answerTreasure(letter, button) {
-                        if (!treasureGame || !missionStarted || missionFinished || isProcessingCapture) return;
+                    function answerRally(letter, button) {
+                        if (!rallyGame || !missionStarted || missionFinished || isProcessingCapture) return;
                         const question = questions[currentQuestionIndex];
-                        if (!question || capturedAnswers[currentQuestionIndex] || !question.options.some(option => option.l === letter)) return;
+                        if (!question || capturedAnswers[currentQuestionIndex] || button.disabled || !question.options.some(option => option.l === letter)) return;
                         isProcessingCapture = true;
-                        stopQuestionTimer();
                         playGameMusic();
+                        stopQuestionTimer();
+                        const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
                         caughtCount++;
-                        const correct = question.correct === letter;
                         if (correct) totalScore++;
-                        treasureButtons.forEach(item => item.disabled = true);
                         button.dataset.result = correct ? 'correct' : 'incorrect';
-                        button.querySelector('.treasure-verdict').textContent = correct ? 'check_circle' : 'cancel';
-                        treasureGame.dataset.selected = letter;
-                        treasureGame.dataset.outcome = correct ? 'correct' : 'incorrect';
-                        treasureGame.querySelector(`[data-chest-label="${letter}"]`).dataset.result = button.dataset.result;
-                        document.getElementById('treasure-feedback').textContent = correct
-                            ? 'Correct! You found a gem.'
-                            : 'Not quite. This chest holds sand. Keep exploring!';
-                        updateTreasureProgress();
+                        button.querySelector('.rally-verdict').textContent = correct ? 'check_circle' : 'cancel';
+                        rallyButtons.forEach(item => item.disabled = true);
+                        updateRallyProgress();
+                        rallyGame.dispatchEvent(new CustomEvent('rally:answer', { detail: { correct } }));
+                        document.getElementById('rally-feedback').textContent = correct
+                            ? 'Correct! Boost activated!'
+                            : `A little skid! You can catch up. ${rallyHint(question)}`;
                         persistProgress(true);
-                        treasureNext.hidden = false;
-                        treasureNext.disabled = true;
-                        document.getElementById('treasure-next-label').textContent = caughtCount >= targetsNeeded ? 'Open the vault' : 'Continue';
+                        rallyNext.hidden = false;
+                        rallyNext.disabled = true;
+                        document.getElementById('rally-next-label').textContent = caughtCount >= targetsNeeded ? 'Finish race' : 'Next question';
                         setTimeout(() => {
                             if (missionFinished) return;
-                            treasureNext.disabled = false;
-                            treasureNext.focus({ preventScroll: true });
-                        }, reducedMotion() ? 150 : 1000);
+                            rallyNext.disabled = false;
+                            rallyNext.focus({ preventScroll: true });
+                        }, reducedMotion() ? 150 : 1700);
                     }
 
-                    function endTreasureRound() {
-                        if (!treasureGame || treasureRoundEnding) return;
-                        treasureRoundEnding = true;
+                    function endRallyRound() {
+                        if (!rallyGame || rallyRoundEnding) return;
+                        rallyRoundEnding = true;
                         isProcessingCapture = true;
+                        stopQuestionTimer();
                         canvas.classList.remove('assessment-reading');
                         storyGate?.classList.add('hidden');
-                        treasureGame.dataset.finished = 'true';
-                        treasureNext.hidden = true;
-                        treasureButtons.forEach(button => button.disabled = true);
-                        updateTreasureProgress();
-                        document.getElementById('treasure-feedback').textContent = `Trail complete! ${totalScore} of ${targetsNeeded} answers correct.`;
-                        treasureGame.querySelector('.treasure-map').scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
-                        setTimeout(victory, reducedMotion() ? 200 : 1600);
+                        rallyGame.dataset.finished = 'true';
+                        rallyNext.hidden = true;
+                        rallyButtons.forEach(button => button.disabled = true);
+                        updateRallyProgress();
+                        rallyGame.dispatchEvent(new CustomEvent('rally:finish'));
+                        document.getElementById('rally-feedback').textContent = `Race complete! ${totalScore} of ${targetsNeeded} answers correct.`;
+                        rallyGame.querySelector('.rally-stage').scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
+                        setTimeout(victory, reducedMotion() ? 200 : 1800);
                     }
 
                     function progressSnapshot() {
@@ -872,6 +851,13 @@
                             if (backup?.revision > Number(snapshot.revision || 0)) snapshot = backup;
                         } catch (_) {}
                         const state = snapshot.state || {};
+                        if (isReadingRally) Object.entries(state.rescue_attempts || {}).forEach(([index, attempts]) => {
+                            if (questions[index] && Array.isArray(attempts)) {
+                                // Carry the original choice from an unfinished legacy retry into the race.
+                                const first = attempts.find(answer => questions[index].options.some(option => option.l === answer));
+                                if (first) capturedAnswers[index] = first;
+                            }
+                        });
                         progressRevision = Number(snapshot.revision || 0);
                         Object.entries(state.answers || {}).forEach(([index, answer]) => {
                             if (answer === 'TIMEOUT' || questions[index]?.options.some(option => option.l === answer)) capturedAnswers[index] = answer;
@@ -918,12 +904,10 @@
                         }
                         if (progressRevision > 0) saveStatus.textContent = 'Progress restored';
                         if (isFlashcards) updateFrogProgress();
-                        else if (isTreasureQuest) updateTreasureProgress();
+                        else if (isReadingRally) updateRallyProgress();
                         else if (!isOralReading && targetsNeeded > 0) {
                             scoreEl.textContent = `${caughtCount}/${targetsNeeded}`;
                             progressEl.style.width = `${caughtCount / targetsNeeded * 100}%`;
-                            for (let index = 1; index <= Math.ceil(caughtCount / targetsNeeded * 5); index++) document.getElementById(`crack-${index}`)?.classList.add('crack-visible');
-                            bag.style.setProperty('--base-scale', 1 + caughtCount / targetsNeeded * .4);
                         }
                     }
 
@@ -1519,15 +1503,10 @@
                         caughtCount++;
                         scoreEl.innerText = `${caughtCount}/${targetsNeeded}`;
                         progressEl.style.width = `${Math.min((caughtCount / targetsNeeded) * 100, 100)}%`;
-                        const visibleCracks = Math.min(5, Math.ceil((caughtCount / targetsNeeded) * 5));
-                        for (let index = 1; index <= visibleCracks; index++) document.getElementById(`crack-${index}`)?.classList.add('crack-visible');
-                        const baseScale = 1 + (caughtCount / targetsNeeded) * 0.4;
-                        bag.style.setProperty('--base-scale', baseScale);
-                        bag.animate([{ transform: `scale(${baseScale})` }, { transform: `scale(${baseScale * 1.15})` }, { transform: `scale(${baseScale})` }], { duration: 500, easing: 'ease-out' });
-                        if (caughtCount >= targetsNeeded) hatchEgg();
+                        if (caughtCount >= targetsNeeded) finishFishingGame();
                     }
 
-                    function hatchEgg() {
+                    function finishFishingGame() {
                         isHatching = true;
                         cancelAnimationFrame(fishFrame);
                         fishFrame = null;
@@ -1535,81 +1514,8 @@
                         container.replaceChildren();
                         fishSchool = [];
                         hookAssembly.style.opacity = '0';
-                        if (canvas.classList.contains('ocean-game')) {
-                            if (catchStatus) catchStatus.textContent = 'All answers caught!';
-                            setTimeout(victory, 450);
-                            return;
-                        }
-                        missionInfo.style.opacity = '0';
-                        questionNode.style.opacity = '0.3';
-                        bag.style.animation = 'none';
-                        bag.animate([{ transform: 'scale(1.4) rotate(0)' }, { transform: 'scale(1.8) rotate(3deg)' }, { transform: 'scale(1.8) rotate(-3deg)' }, { transform: 'scale(2.2) rotate(0)' }], { duration: 800, easing: 'ease-in-out' });
-                        setTimeout(() => {
-                            createShellExplosion();
-                            eggWrapper.classList.add('hatch-active');
-                            const shockwave = document.createElement('div');
-                            Object.assign(shockwave.style, { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) scale(0)', width: '100px', height: '100px', borderRadius: '50%', border: '10px solid #44a5ff', boxShadow: '0 0 60px #44a5ff, inset 0 0 40px #ffeb3b', opacity: '1', zIndex: '5' });
-                            eggWrapper.appendChild(shockwave);
-                            shockwave.animate([{ transform: 'translate(-50%, -50%) scale(0.2)', opacity: 1, borderWidth: '20px' }, { transform: 'translate(-50%, -50%) scale(30)', opacity: 0, borderWidth: '1px' }], { duration: 1800, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)' });
-                            hatchFlash.animate([{ opacity: 0, transform: 'scale(0.5)' }, { opacity: 1, transform: 'scale(3)' }, { opacity: 0, transform: 'scale(4)' }], { duration: 1200, easing: 'ease-out' });
-                            createCelebrationParticles();
-                            setTimeout(victory, 1500);
-                        }, 800);
-                    }
-
-                    function createShellExplosion() {
-                        const shellRect = shellMain.getBoundingClientRect();
-                        const centerX = shellRect.left + shellRect.width / 2;
-                        const centerY = shellRect.top + shellRect.height / 2;
-                        for (let index = 0; index < 15; index++) {
-                            const shard = document.createElement('div');
-                            shard.className = 'shell-piece';
-                            shard.style.borderRadius = `${Math.random() * 50}%`;
-                            shard.style.width = `${30 + Math.random() * 60}px`;
-                            shard.style.height = `${30 + Math.random() * 60}px`;
-                            shard.style.left = `${centerX - 40}px`;
-                            shard.style.top = `${centerY - 40}px`;
-                            const angle = (index / 15) * Math.PI * 2 + (Math.random() * 0.5);
-                            const distance = 500 + Math.random() * 400;
-                            shard.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
-                            shard.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
-                            shard.style.setProperty('--tr', `${Math.random() * 1080}deg`);
-                            document.body.appendChild(shard);
-                            shard.classList.add('shell-exploded');
-                            setTimeout(() => shard.remove(), 1500);
-                        }
-                    }
-
-                    function createCelebrationParticles() {
-                        const shellRect = shellMain.getBoundingClientRect();
-                        const centerX = shellRect.left + shellRect.width / 2;
-                        const centerY = shellRect.top + shellRect.height / 2;
-                        const colors = ['#005e9f', '#44a5ff', '#2498f5', '#91f78e', '#ffeb3b', '#ffffff'];
-                        for (let index = 0; index < 400; index++) {
-                            const particle = document.createElement('div');
-                            particle.className = 'particle';
-                            const size = Math.random() * 8 + 3;
-                            particle.style.width = `${size}px`;
-                            particle.style.height = `${size}px`;
-                            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                            particle.style.left = `${centerX}px`;
-                            particle.style.top = `${centerY}px`;
-                            particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                            document.body.appendChild(particle);
-                            const angle = Math.random() * Math.PI * 2;
-                            const velocity = Math.random() * 50 + 20;
-                            let vx = Math.cos(angle) * velocity;
-                            let vy = Math.sin(angle) * velocity;
-                            let opacity = 1;
-                            let posX = centerX;
-                            let posY = centerY;
-                            function updateParticle() {
-                                posX += vx; posY += vy; vx *= 0.94; vy *= 0.94; vy += 0.15; opacity -= 0.01;
-                                particle.style.left = `${posX}px`; particle.style.top = `${posY}px`; particle.style.opacity = opacity;
-                                if (opacity > 0) requestAnimationFrame(updateParticle); else particle.remove();
-                            }
-                            requestAnimationFrame(updateParticle);
-                        }
+                        if (catchStatus) catchStatus.textContent = 'All answers caught!';
+                        setTimeout(victory, 450);
                     }
 
                     function uniqueMarkedWords(mark) {
@@ -1730,6 +1636,15 @@
                                 resultBadgeTitle.innerText = 'Finish Line Crossed!';
                                 resultBadge.innerText = 'A perfect run. Every answer was correct!';
                             }
+                            if (isReadingRally && !isOralReading && result.question_count > 0) {
+                                rallyGame.dataset.total = String(result.question_count);
+                                rallyGame.dataset.completed = String(result.question_count);
+                                rallyGame.dataset.correct = String(result.correct_count);
+                                rallyGame.dispatchEvent(new CustomEvent('rally:progress'));
+                                const place = ['1st', '2nd', '3rd', '4th'][Number(rallyGame.dataset.position || 4) - 1];
+                                resultBadgeTitle.innerText = `Reading Rally - ${place} place`;
+                                resultBadge.innerText = 'Finish line crossed! Keep reading and racing.';
+                            }
                         } catch (error) {
                             resultPoints.innerText = 'Sync failed';
                             resultCoins.textContent = 'Coin reward not confirmed. Retry saving.';
@@ -1756,7 +1671,7 @@
                         frogAnswerButtons.forEach(button => button.disabled = true);
                         canvas.dispatchEvent(new CustomEvent('frog:finished'));
                         canvas.dispatchEvent(new CustomEvent('fishing:finished'));
-                        treasureGame?.dispatchEvent(new CustomEvent('treasure:finished'));
+                        rallyGame?.dispatchEvent(new CustomEvent('rally:finished'));
                         fadeOutGameMusic();
                         fadeHookReelSound();
                         updatePronunciationResults();
@@ -1814,7 +1729,7 @@
 
                     function startMission() {
                         if (isOralReading || missionFinished || !questions[currentQuestionIndex]) return;
-                        if (missionStarted && (fishFrame || frogGame?.dataset.started === 'true' || treasureGame?.dataset.started === 'true')) return;
+                        if (missionStarted && (fishFrame || frogGame?.dataset.started === 'true' || rallyGame?.dataset.started === 'true')) return;
                         missionStarted = true;
                         persistProgress();
                         playGameMusic();
@@ -1825,9 +1740,9 @@
                             renderFlashcardQuestion();
                             return;
                         }
-                        if (isTreasureQuest) {
-                            treasureGame.dataset.started = 'true';
-                            renderTreasureQuestion();
+                        if (isReadingRally) {
+                            rallyGame.dataset.started = 'true';
+                            renderRallyQuestion();
                             return;
                         }
                         renderHookQuestion();
@@ -1843,13 +1758,13 @@
                     frogAnswerButtons.forEach((button) => {
                         button.addEventListener('click', () => answerFlashcard(button.dataset.frogAnswer, button));
                     });
-                    treasureButtons.forEach(button => button.addEventListener('click', () => answerTreasure(button.dataset.treasureAnswer, button)));
-                    treasureNext?.addEventListener('click', () => {
-                        if (treasureNext.disabled || !isProcessingCapture || treasureRoundEnding) return;
-                        if (caughtCount >= targetsNeeded) { endTreasureRound(); return; }
+                    rallyButtons.forEach(button => button.addEventListener('click', () => answerRally(button.dataset.rallyAnswer, button)));
+                    rallyNext?.addEventListener('click', () => {
+                        if (rallyNext.disabled || !isProcessingCapture || rallyRoundEnding) return;
+                        if (caughtCount >= targetsNeeded) { endRallyRound(); return; }
                         currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
                         isProcessingCapture = false;
-                        renderTreasureQuestion(true);
+                        renderRallyQuestion(true);
                     });
                     startQuestionsButton?.addEventListener('click', () => {
                         if (isOralReading) {
@@ -1915,16 +1830,16 @@
                         if (isFlashcards && !isOralReading) {
                             renderFlashcardQuestion(Math.max(0, targetsNeeded - 1));
                             endFrogRound();
-                        } else if (isTreasureQuest && !isOralReading) {
+                        } else if (isReadingRally && !isOralReading) {
                             currentQuestionIndex = Math.max(0, targetsNeeded - 1);
-                            renderTreasureQuestion();
-                            endTreasureRound();
+                            renderRallyQuestion();
+                            endRallyRound();
                         }
                         else victory();
                     }
                     else {
                         if (isFlashcards) renderFlashcardQuestion();
-                        if (isTreasureQuest) renderTreasureQuestion();
+                        if (isReadingRally) renderRallyQuestion();
                         if (missionStarted && !isOralReading) startMission();
                     }
                 })();

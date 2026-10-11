@@ -67,7 +67,7 @@ class AssessmentController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'subject' => ['required', 'in:literacy,numeracy'],
-            'quiz_type' => ['required', Rule::in(['multiple_choice', 'data_egg', 'flashcards', 'treasure_quest'])],
+            'quiz_type' => ['required', Rule::in(['multiple_choice', 'flashcards', 'reading_rally'])],
             'question_selection' => ['sometimes', Rule::in(['fixed', 'automatic'])],
             'delivery_method' => ['required', Rule::in(['manual'])],
             'target_section' => ['required', Rule::in(['all', 'section_a', 'section_b', 'section_c'])],
@@ -346,7 +346,10 @@ class AssessmentController extends Controller
     private function progressRules(): array
     {
         return [
-            'state' => ['sometimes', 'array:answers,phase,reading_seconds,timer_status,question_deadline_ms,question_timer_index,word_marks,sentence_marks,mark_mode,scroll_ratio'],
+            'state' => ['sometimes', 'array:answers,phase,reading_seconds,timer_status,question_deadline_ms,question_timer_index,word_marks,sentence_marks,mark_mode,scroll_ratio,rescue_attempts'],
+            'state.rescue_attempts' => ['sometimes', 'array', 'max:1000'],
+            'state.rescue_attempts.*' => ['array', 'min:1', 'max:4'],
+            'state.rescue_attempts.*.*' => ['required', Rule::in(['A', 'B', 'C', 'D'])],
             'state.answers' => ['present_with:state', 'array'],
             'state.answers.*' => ['required', Rule::in(['A', 'B', 'C', 'D', 'TIMEOUT'])],
             'state.phase' => ['required_with:state', Rule::in(['reading', 'questions', 'finished'])],
@@ -389,6 +392,7 @@ class AssessmentController extends Controller
             abort_if($progress->submission_id !== null, 409, 'This attempt has already been submitted.');
             $progress = AdaptiveQuestions::freeze($progress, $assessment, $student);
             $this->validateAnswerIndexes($validated['state']['answers'], $progress->question_snapshot ?? []);
+            $this->validateAnswerIndexes($validated['state']['rescue_attempts'] ?? [], $progress->question_snapshot ?? []);
 
             // Delayed autosaves must not overwrite a newer snapshot.
             if ($validated['revision'] > $progress->revision) {
@@ -447,6 +451,7 @@ class AssessmentController extends Controller
             if (isset($validated['state']['answers'])) {
                 $this->validateAnswerIndexes($validated['state']['answers'], $questions);
             }
+            $this->validateAnswerIndexes($validated['state']['rescue_attempts'] ?? [], $questions);
             $questionCount = count($questions);
             if (count($validated['answers']) !== $questionCount) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['answers' => 'Answer every question in this attempt before submitting.']);

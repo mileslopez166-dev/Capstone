@@ -110,7 +110,13 @@
                                         $isImageAsset = in_array($assetExtension, ['jpg', 'jpeg', 'png'], true);
                                         $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
                                         $targetLabel = str($assessment->target_section ?? 'all')->replace('_', ' ')->title();
-                                        $quizLabel = str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title();
+                                        $quizLabel = match ($assessment->quiz_type ?? 'multiple_choice') {
+                                            'multiple_choice' => 'Fishing Game',
+                                            'data_egg' => 'Fishing Game',
+                                            'flashcards' => 'Frog Adventure',
+                                            'reading_rally', 'word_rescue', 'treasure_quest' => 'Reading Rally',
+                                            default => str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title(),
+                                        };
                                         $focusLabel = collect($assessment->focus_areas ?? [])->join(', ');
                                         $gameNames = $worksheetGameNames->get($assessment->worksheet_number, []);
                                     @endphp

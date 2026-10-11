@@ -58,7 +58,6 @@
 .ocean-game .ocean-eyebrow .material-symbols-outlined { font-size: 17px; }
 .hook-game.ocean-game #fish-container { min-height: 340px; margin: 0; border: 0; background: transparent; overflow: visible; }
 .hook-game.ocean-game #fish-container::after { display: none; }
-.ocean-game #egg-wrapper { display: none; }
 .ocean-game .answer-fish { width: 150px; height: 88px; }
 .fish-design-yellowfin, .fish-design-pufferfish, .fish-design-shark, .fish-design-jellyfish { display: none; }
 .answer-fish[data-fish-species="yellowfin"] .fish-design-yellowfin,

@@ -20,7 +20,7 @@ class AdaptiveQuestionsTest extends TestCase
         $story = json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true)[0];
 
         return array_replace([
-            'title' => $story['story_title'], 'subject' => 'literacy', 'quiz_type' => 'treasure_quest',
+            'title' => $story['story_title'], 'subject' => 'literacy', 'quiz_type' => 'reading_rally',
             'assessment_type' => 'silent_reading', 'delivery_method' => 'manual', 'target_section' => 'all',
             'story_title' => $story['story_title'], 'story_description' => $story['story_description'],
             'manual_questions' => array_merge(...array_values($story['question_sets'])),
@@ -80,7 +80,7 @@ class AdaptiveQuestionsTest extends TestCase
     public function test_first_attempt_is_balanced_for_every_game_without_exposing_placement_or_the_bank(): void
     {
         $teacher = User::factory()->teacher()->create();
-        foreach (['multiple_choice', 'flashcards', 'treasure_quest'] as $game) {
+        foreach (['multiple_choice', 'flashcards', 'reading_rally'] as $game) {
             $student = User::factory()->create();
             $assessment = $this->assessment($teacher, ['quiz_type' => $game]);
             $progress = $this->open($student, $assessment);

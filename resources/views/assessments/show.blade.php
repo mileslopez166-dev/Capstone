@@ -167,7 +167,13 @@
                                     {{ $assessment->subject }}
                                 </span>
                                 <span class="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                                    {{ str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title() }}
+                                    {{ match ($assessment->quiz_type ?? 'multiple_choice') {
+                                        'multiple_choice' => 'Fishing Game',
+                                        'data_egg' => 'Fishing Game',
+                                        'flashcards' => 'Frog Adventure',
+                                        'reading_rally', 'word_rescue', 'treasure_quest' => 'Reading Rally',
+                                        default => str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title(),
+                                    } }}
                                 </span>
                                 <span class="rounded-full bg-primary-container/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
                                     Story Assessment
