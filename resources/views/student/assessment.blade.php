@@ -470,33 +470,61 @@
                     </article>
                 </div>
 
-                @if ($assessment->subject === 'literacy')
-                    <x-phil-iri-result :live="true" />
-                @endif
-                <x-ml-prediction-result :live="true" />
                 <p class="assessment-coin-reward" role="status"><span class="material-symbols-outlined" aria-hidden="true">toll</span><strong id="result-coins">Saving coin reward...</strong></p>
-                <div class="assessment-result-detail">
-                    <section class="assessment-breakdown" aria-labelledby="breakdown-title">
-                        <h3 id="breakdown-title">Performance Breakdown</h3>
-                        <dl>
-                            <div><dt>Passage</dt><dd>{{ $storyTitle ?: $assessment->title }}</dd></div>
-                            <div><dt>Assessment Type</dt><dd>{{ $assessmentTypeLabel }}</dd></div>
-                            <div class="hidden" id="result-reading-time-row"><dt>Reading Time</dt><dd id="result-reading-time">00:00</dd></div>
-                        </dl>
-                        @if ($isOralReading)
-                            <div class="assessment-pronunciation">
-                                <h4><span class="assessment-color-red"></span> Mispronounced</h4>
-                                <div class="flex flex-wrap gap-2" id="result-wrong-pronunciation"><span>No red words marked.</span></div>
+                <div class="assessment-result-panels" aria-label="Assessment result details">
+                    @if ($assessment->subject === 'literacy')
+                        <details class="assessment-result-panel" open>
+                            <summary>
+                                <span class="assessment-result-panel-title"><span class="material-symbols-outlined" aria-hidden="true">school</span><span>Learning level and guidance</span></span>
+                                <span class="material-symbols-outlined assessment-result-panel-chevron" aria-hidden="true">expand_more</span>
+                            </summary>
+                            <div class="assessment-result-panel-body">
+                                <x-phil-iri-result :live="true" />
                             </div>
-                        @else
-                            <div id="result-wrong-pronunciation" hidden></div>
-                        @endif
-                    </section>
-                    <aside class="assessment-achievement">
-                        <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
-                        <h3 id="result-badge-title">Your Achievement</h3>
-                        <p id="result-badge">Calculating your achievement...</p>
-                    </aside>
+                        </details>
+                    @endif
+
+                    <details class="assessment-result-panel">
+                        <summary>
+                            <span class="assessment-result-panel-title"><span class="material-symbols-outlined" aria-hidden="true">psychology</span><span>ML learning prediction</span></span>
+                            <span class="material-symbols-outlined assessment-result-panel-chevron" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <div class="assessment-result-panel-body">
+                            <x-ml-prediction-result :live="true" />
+                        </div>
+                    </details>
+
+                    <details class="assessment-result-panel">
+                        <summary>
+                            <span class="assessment-result-panel-title"><span class="material-symbols-outlined" aria-hidden="true">analytics</span><span>Performance details</span></span>
+                            <span class="material-symbols-outlined assessment-result-panel-chevron" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <div class="assessment-result-panel-body">
+                            <div class="assessment-result-detail">
+                                <section class="assessment-breakdown" aria-labelledby="breakdown-title">
+                                    <h3 id="breakdown-title">Performance Breakdown</h3>
+                                    <dl>
+                                        <div><dt>Passage</dt><dd>{{ $storyTitle ?: $assessment->title }}</dd></div>
+                                        <div><dt>Assessment Type</dt><dd>{{ $assessmentTypeLabel }}</dd></div>
+                                        <div class="hidden" id="result-reading-time-row"><dt>Reading Time</dt><dd id="result-reading-time">00:00</dd></div>
+                                    </dl>
+                                    @if ($isOralReading)
+                                        <div class="assessment-pronunciation">
+                                            <h4><span class="assessment-color-red"></span> Mispronounced</h4>
+                                            <div class="flex flex-wrap gap-2" id="result-wrong-pronunciation"><span>No red words marked.</span></div>
+                                        </div>
+                                    @else
+                                        <div id="result-wrong-pronunciation" hidden></div>
+                                    @endif
+                                </section>
+                                <aside class="assessment-achievement">
+                                    <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+                                    <h3 id="result-badge-title">Your Achievement</h3>
+                                    <p id="result-badge">Calculating your achievement...</p>
+                                </aside>
+                            </div>
+                        </div>
+                    </details>
                 </div>
 
                 <footer class="assessment-result-actions">

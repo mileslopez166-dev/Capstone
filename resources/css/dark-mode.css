@@ -509,6 +509,17 @@ html.dark .phil-result .phil-practice-link { background: #235ace; }
 html.dark .activity-subject-copy :is(strong, span, small) { color: var(--dark-ink); }
 html.dark .intervention-queue-row:hover { background: var(--dark-surface-2); }
 html.dark .ml-result { color: var(--dark-ink); }
+html.dark .assessment-results { background: var(--dark-surface); border-color: #426078; }
+html.dark .assessment-result-panel { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .assessment-result-panel > summary { color: var(--dark-ink); }
+html.dark .assessment-result-panel > summary:hover { background: #173d32; }
+html.dark .assessment-result-panel[open] > summary { border-color: var(--dark-line); }
+html.dark .assessment-result-panel-title > .material-symbols-outlined,
+html.dark .assessment-result-panel-chevron { color: var(--dark-ink); }
+html.dark .assessment-result-detail :is(dt, p) { color: #c4cfda; }
+html.dark .assessment-result-detail dd { color: var(--dark-ink); }
+html.dark .assessment-achievement { border-color: #c69a32; }
+html.dark .assessment-achievement p { color: #c4cfda; }
 
 html.dark .teacher-theme :is(.teacher-metric, .teacher-section-heading, .teacher-result, .teacher-empty, .teacher-workspace-heading, .class-comparison-row, .teacher-focus) :is(h1, h2, h3, p, small, strong, span:not(.material-symbols-outlined), a) { color: var(--dark-ink); }
 html.dark .teacher-theme main .bg-surface-container-low:where(:not(.campus-search, .campus-account-link)):not(input):not(select):not(textarea) { background-color: var(--dark-surface-2); }

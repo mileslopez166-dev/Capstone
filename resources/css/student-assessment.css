@@ -211,6 +211,21 @@ html.dark .assessment-question-timer[data-urgency='critical'] { border-color: #e
 .assessment-result-value > span { font-size: 18px; }
 .assessment-result-track { height: 8px; background: #dceaf4; border-radius: 4px; overflow: hidden; }
 .assessment-result-track > div { height: 100%; background: #239862; transition: width .4s ease; }
+.assessment-result-panels { display: grid; gap: 12px; margin-top: 22px; }
+.assessment-result-panel { overflow: hidden; border: 1px solid #b5d4e6; border-radius: 8px; background: rgba(255, 255, 255, .74); }
+.assessment-result-panel > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 14px 18px; cursor: pointer; list-style: none; color: #174573; font-size: 15px; font-weight: 800; }
+.assessment-result-panel > summary::-webkit-details-marker { display: none; }
+.assessment-result-panel > summary:hover { background: #f0f8ff; }
+.assessment-result-panel > summary:focus-visible { outline: 3px solid #55a8df; outline-offset: -3px; }
+.assessment-result-panel-title { display: inline-flex; min-width: 0; align-items: center; gap: 10px; }
+.assessment-result-panel-title > .material-symbols-outlined { flex-shrink: 0; color: #1675b9; font-size: 22px; }
+.assessment-result-panel-chevron { flex-shrink: 0; color: #52637b; transition: transform .2s ease; }
+.assessment-result-panel[open] > summary { border-bottom: 1px solid #d8e8f2; }
+.assessment-result-panel[open] .assessment-result-panel-chevron { transform: rotate(180deg); }
+.assessment-result-panel-body { padding: 16px 18px 18px; }
+.assessment-result-panel-body > .phil-result,
+.assessment-result-panel-body > .ml-result { margin: 0; }
+.assessment-result-panel-body > .assessment-result-detail { margin-top: 0; }
 .assessment-result-detail { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; margin-top: 30px; }
 .assessment-result-detail h3 { font-size: 18px; font-weight: 800; }
 .assessment-breakdown dl { margin-top: 14px; }
@@ -292,6 +307,8 @@ html.dark .assessment-question-timer[data-urgency='critical'] { border-color: #e
     .assessment-result-metrics { gap: 10px; }
     .assessment-result-metric { padding: 14px; }
     .assessment-result-value strong { font-size: 28px; }
+    .assessment-result-panel > summary { min-height: 54px; padding: 13px 14px; font-size: 14px; }
+    .assessment-result-panel-body { padding: 12px; }
 }
 @container (max-width: 760px) {
     html[data-assessment-answers='large'] .assessment-workspace .ocean-game .hook-options,
