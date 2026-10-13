@@ -288,9 +288,9 @@
                                         <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Target Section</label>
                                         <select class="w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" name="target_section">
                                             <option value="all" @selected(old('target_section', 'all') === 'all')>All Sections</option>
-                                            <option value="section_a" @selected(old('target_section') === 'section_a')>Section A</option>
-                                            <option value="section_b" @selected(old('target_section') === 'section_b')>Section B</option>
-                                            <option value="section_c" @selected(old('target_section') === 'section_c')>Section C</option>
+                                            @foreach (\App\Support\SectionCatalog::targets() as $value => $label)
+                                                <option value="{{ $value }}" @selected(old('target_section') === $value)>{{ $label }}</option>
+                                            @endforeach
                                         </select>
                                         @error('target_section')
                                             <p class="mt-2 text-sm text-error">{{ $message }}</p>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\NotificationSender;
+use App\Support\SectionCatalog;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class UserManagementController extends Controller
             'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
-            'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'section' => ['nullable', 'string', Rule::in(SectionCatalog::labels())],
             'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -90,7 +91,7 @@ class UserManagementController extends Controller
             'adminInitials' => $this->initials($request->user()->name),
             'managedUser' => $user,
             'managedUserInitials' => $this->initials($user->name),
-            'sections' => ['Section A', 'Section B', 'Section C'],
+            'sections' => SectionCatalog::labels(),
         ]);
     }
 
@@ -107,7 +108,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
-            'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'section' => ['nullable', 'string', Rule::in(SectionCatalog::labels())],
             'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],

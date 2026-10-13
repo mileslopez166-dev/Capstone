@@ -23,10 +23,12 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
+        libcurl4-openssl-dev \
         libonig-dev \
         libzip-dev \
         unzip \
     && docker-php-ext-install -j"$(nproc)" \
+        curl \
         mbstring \
         zip \
     && rm -rf /var/lib/apt/lists/*
@@ -54,6 +56,7 @@ WORKDIR /var/www/html
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libfreetype6-dev \
+        libcurl4-openssl-dev \
         libjpeg62-turbo-dev \
         libonig-dev \
         libpng-dev \
@@ -62,6 +65,7 @@ RUN apt-get update \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" \
+        curl \
         exif \
         gd \
         mbstring \

@@ -191,7 +191,7 @@
                             <dl class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                                 <div class="rounded-xl bg-surface-container-low p-4">
                                     <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Target Section</dt>
-                                    <dd class="mt-2 font-bold text-on-surface">{{ str($assessment->target_section ?? 'all')->replace('_', ' ')->title() }}</dd>
+                                    <dd class="mt-2 font-bold text-on-surface">{{ \App\Support\SectionCatalog::displayTarget($assessment->target_section) }}</dd>
                                 </div>
                                 <div class="rounded-xl bg-surface-container-low p-4">
                                     <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Focus Areas</dt>

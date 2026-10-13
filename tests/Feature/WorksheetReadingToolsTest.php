@@ -49,7 +49,7 @@ class WorksheetReadingToolsTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create(['password' => 'Only-Teacher-Secret!']);
         User::factory()->teacher()->create(['password' => 'Another-Teacher-Secret!']);
-        $student = User::factory()->create(['section' => 'Section A', 'password' => 'Student-Secret!']);
+        $student = User::factory()->create(['section' => 'Magalang', 'password' => 'Student-Secret!']);
         $assignment = $this->assignment($teacher);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $url = route('worksheets.table', $assignment);
@@ -77,7 +77,7 @@ class WorksheetReadingToolsTest extends TestCase
     public function test_password_attempts_are_rate_limited_and_client_state_cannot_grant_access(): void
     {
         $teacher = User::factory()->teacher()->create(['password' => 'Never-Sent-Secret!']);
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment($teacher);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $this->actingAs($student);
@@ -95,13 +95,13 @@ class WorksheetReadingToolsTest extends TestCase
     public function test_table_is_private_locked_after_submission_and_unavailable_for_locked_assignments(): void
     {
         $teacher = User::factory()->teacher()->create(['password' => 'Teacher-Secret!']);
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment($teacher);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $progress->forceFill(['multiplication_table_unlocked_at' => now()])->save();
         $payload = ['attempt_key' => $progress->attempt_key];
         $url = route('worksheets.table', $assignment);
-        $this->actingAs(User::factory()->create(['section' => 'Section A']))->postJson($url, $payload)->assertNotFound();
+        $this->actingAs(User::factory()->create(['section' => 'Magalang']))->postJson($url, $payload)->assertNotFound();
         $this->actingAs($teacher)->postJson($url, $payload)->assertForbidden();
         $this->actingAs($student);
         $assignment->update(['status' => 'draft']);
@@ -114,7 +114,7 @@ class WorksheetReadingToolsTest extends TestCase
 
     public function test_fraction_models_save_and_invalid_model_cells_are_rejected(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment(User::factory()->teacher()->create(), 14);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $payload = ['attempt_key' => $progress->attempt_key, 'revision' => 1, 'page' => 0, 'step' => 'answer', 'pages' => [
@@ -134,7 +134,7 @@ class WorksheetReadingToolsTest extends TestCase
     public function test_reading_only_parts_need_no_fabricated_answers_and_figures_are_authorized(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment($teacher, 3);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $this->actingAs($student)->postJson(route('worksheets.submit', $assignment), ['attempt_key' => $progress->attempt_key,

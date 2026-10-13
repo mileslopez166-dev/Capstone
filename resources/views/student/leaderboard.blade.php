@@ -6,9 +6,7 @@
         $currentStudentRank = $currentStudentRank ?? null;
         $scopes = [
             'all' => 'All',
-            'section_a' => 'Section A',
-            'section_b' => 'Section B',
-            'section_c' => 'Section C',
+            ...\App\Support\SectionCatalog::targets(),
         ];
     @endphp
 

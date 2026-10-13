@@ -24,7 +24,7 @@ class InterventionFollowUpTest extends TestCase
         parent::setUp();
         $this->travelTo(now()->startOfSecond());
         $this->teacher = User::factory()->teacher()->create();
-        $this->student = User::factory()->create(['section' => 'Section A']);
+        $this->student = User::factory()->create(['section' => 'Magalang']);
         $this->assessment = $this->assessment();
         $this->baseline = $this->submission($this->assessment, ['submitted_at' => now()->subDay()]);
     }

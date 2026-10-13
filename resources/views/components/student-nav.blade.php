@@ -1,5 +1,6 @@
 @props([
     'active' => 'home',
+    'sticky' => true,
 ])
 
 @php
@@ -122,7 +123,7 @@
     </div>
 </aside>
 
-<header class="campus-topbar campus-student-topbar sticky top-0 z-30 flex items-center justify-between bg-white/80 px-5 py-5 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl sm:px-8 sm:py-6 lg:ml-72">
+<header class="campus-topbar campus-student-topbar {{ $sticky ? 'sticky top-0' : 'relative' }} z-30 flex items-center justify-between bg-white/80 px-5 py-5 shadow-[0_20px_40px_rgba(0,94,159,0.06)] backdrop-blur-xl sm:px-8 sm:py-6 lg:ml-72">
     <div class="flex min-w-0 items-center gap-3 sm:gap-4">
         <x-role-mobile-menu role="student" />
         <a class="hidden font-headline text-xl font-black uppercase tracking-tighter text-blue-700 sm:inline lg:hidden" href="{{ route('student.dashboard') }}">AI-PGAALS</a>

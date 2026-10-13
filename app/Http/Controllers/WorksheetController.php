@@ -14,6 +14,7 @@ use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\NumeracyWorksheets;
+use App\Support\SectionCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -65,7 +66,7 @@ class WorksheetController extends Controller
         $worksheet = NumeracyWorksheets::find($number);
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'target_section' => ['required', Rule::in(['all', 'section_a', 'section_b', 'section_c'])],
+            'target_section' => ['required', Rule::in(['all', ...SectionCatalog::targetKeys()])],
             'instructions' => ['nullable', 'string', 'max:2000'],
             'worksheet_total' => ['required', 'integer', 'min:1', 'max:1000'],
             'retry_limit' => ['required', Rule::in(array_map('strval', array_keys(Assessment::retryLimitOptions())))],
@@ -86,6 +87,7 @@ class WorksheetController extends Controller
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
         ]));
+        NotificationSender::notifyAdminsAboutAssessmentCreated($assessment->loadMissing('teacher'));
         if ($assessment->status === 'published') {
             NotificationSender::notifyAssessmentPublished($assessment);
         }
@@ -99,7 +101,7 @@ class WorksheetController extends Controller
         $user = $request->user();
         if (! $user->isTeacher()) {
             abort_unless($user->isStudent(), 403);
-            $section = $user->section ? strtolower(str_replace(' ', '_', $user->section)) : null;
+            $section = SectionCatalog::targetKeyForLabel($user->section);
             $assigned = Assessment::where('worksheet_number', $number)->where('status', 'published')
                 ->where(fn ($query) => $query->whereIn('target_section', ['all', $section])->orWhereNull('target_section'))->exists();
             $submitted = WorksheetAttempt::where('user_id', $user->id)

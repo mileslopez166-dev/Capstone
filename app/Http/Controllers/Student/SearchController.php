@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
+use App\Support\SectionCatalog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,7 +19,7 @@ class SearchController extends Controller
 
         $query = trim((string) $request->query('q', ''));
         $like = '%'.$query.'%';
-        $targetSection = $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
+        $targetSection = SectionCatalog::targetKeyForLabel($student->section);
 
         $assessments = collect();
         $submissions = collect();

@@ -16,8 +16,8 @@ class TeacherAssistedAssessmentTest extends TestCase
 
     private function fixture(array $attributes = []): array
     {
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
-        $student = User::factory()->create(['section' => 'Section A']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = Assessment::create(array_merge([
             'created_by' => $teacher->id, 'title' => 'Shared Device Reading', 'subject' => 'literacy',
             'quiz_type' => 'flashcards', 'delivery_method' => 'manual', 'assessment_type' => 'silent_reading',
@@ -48,8 +48,8 @@ class TeacherAssistedAssessmentTest extends TestCase
     public function test_picker_and_profile_only_offer_eligible_students_and_owned_assessments(): void
     {
         [$teacher, $student, $assessment] = $this->fixture();
-        User::factory()->create(['section' => 'Section B']);
-        User::factory()->pendingApproval()->create(['section' => 'Section A']);
+        User::factory()->create(['section' => 'Masunurin']);
+        User::factory()->pendingApproval()->create(['section' => 'Magalang']);
         $this->actingAs($teacher)->get(route('assessments.show', $assessment))->assertOk()
             ->assertViewHas('eligibleStudents', fn ($users) => $users->pluck('id')->all() === [$student->id])
             ->assertSee('Take with a Student');
@@ -88,7 +88,7 @@ class TeacherAssistedAssessmentTest extends TestCase
     public function test_student_can_continue_teachers_saved_progress_and_cannot_spoof_participant_or_assistance(): void
     {
         [$teacher, $student, $assessment] = $this->fixture();
-        $other = User::factory()->create(['section' => 'Section A']);
+        $other = User::factory()->create(['section' => 'Magalang']);
         $progress = $this->open($teacher, $student, $assessment);
         $this->postJson(route('teacher.assessments.progress', [$assessment, $student]), [
             'attempt_key' => $progress->attempt_key, 'revision' => 10, 'state' => $this->state(),
@@ -106,7 +106,7 @@ class TeacherAssistedAssessmentTest extends TestCase
     public function test_attempts_and_local_backups_are_isolated_between_students(): void
     {
         [$teacher, $student, $assessment] = $this->fixture();
-        $other = User::factory()->create(['section' => 'Section A']);
+        $other = User::factory()->create(['section' => 'Magalang']);
         $first = $this->open($teacher, $student, $assessment);
         $second = $this->open($teacher, $other, $assessment);
         $this->assertNotSame($first->attempt_key, $second->attempt_key);
@@ -166,7 +166,7 @@ class TeacherAssistedAssessmentTest extends TestCase
             [fn () => $this->actingAs(User::factory()->teacher()->create()), 404],
             [fn () => $this->actingAs($student), 403],
             [fn () => $this->actingAs(User::factory()->admin()->create()), 403],
-            [fn () => $student->update(['section' => 'Section B']), 404],
+            [fn () => $student->update(['section' => 'Masunurin']), 404],
             [fn () => $student->update(['approval_status' => 'pending']), 404],
             [fn () => $student->update(['role' => 'teacher']), 404],
             [fn () => $assessment->update(['status' => 'draft']), 404],
@@ -180,7 +180,7 @@ class TeacherAssistedAssessmentTest extends TestCase
             foreach (['progress', 'submit', 'worksheet.save', 'worksheet.submit', 'worksheet.table'] as $action) {
                 $this->postJson(route('teacher.assessments.'.$action, [$assessment, $student]), [])->assertStatus($status);
             }
-            $student->update(['section' => 'Section A', 'approval_status' => 'approved', 'role' => 'student']);
+            $student->update(['section' => 'Magalang', 'approval_status' => 'approved', 'role' => 'student']);
             $assessment->update(['status' => 'published']);
             $teacher->update(['approval_status' => 'approved']);
         }
@@ -202,7 +202,7 @@ class TeacherAssistedAssessmentTest extends TestCase
             ->assertViewHas('progress', fn ($row) => $row->state['pages'] === $pages);
         $this->postJson(route('teacher.assessments.worksheet.table', [$assessment, $student]), ['attempt_key' => $progress->attempt_key])->assertUnprocessable();
         $this->postJson(route('teacher.assessments.worksheet.table', [$assessment, $student]), ['attempt_key' => $progress->attempt_key, 'password' => 'password'])->assertOk()->assertJsonPath('table.11.11', 144);
-        $other = User::factory()->create(['section' => 'Section A']);
+        $other = User::factory()->create(['section' => 'Magalang']);
         foreach (['worksheet.save', 'worksheet.submit', 'worksheet.table'] as $action) {
             $this->postJson(route('teacher.assessments.'.$action, [$assessment, $other]), $data)->assertNotFound();
         }

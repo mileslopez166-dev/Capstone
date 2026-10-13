@@ -244,7 +244,7 @@ class LearningRecommender
 
     private function eligible(User $student): Collection
     {
-        $section = $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
+        $section = SectionCatalog::targetKeyForLabel($student->section);
 
         return Assessment::query()->with('teacher')->where('status', 'published')->inActivityCatalog()
             ->where(fn ($query) => $query->where('target_section', 'all')->orWhereNull('target_section')

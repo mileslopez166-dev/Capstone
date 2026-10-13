@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\NotificationSender;
+use App\Support\SectionCatalog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:student,teacher'],
-            'section' => ['required_if:role,teacher', 'nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'section' => ['required_if:role,teacher', 'nullable', 'string', Rule::in(SectionCatalog::labels())],
             'gender' => ['required_if:role,student', 'nullable', 'string', Rule::in(['male', 'female'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [

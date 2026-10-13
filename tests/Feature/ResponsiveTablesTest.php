@@ -16,12 +16,12 @@ class ResponsiveTablesTest extends TestCase
     {
         config(['tutor.enabled' => true, 'tutor.key' => 'test-placeholder']);
         $admin = User::factory()->admin()->create();
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
-        $student = User::factory()->create(['section' => 'Section A',
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $student = User::factory()->create(['section' => 'Magalang',
             'name' => 'Alexandra Maria Verylongfamilynameforlayoutchecking',
             'email' => 'long.student.email.for.layout.checks@example.test']);
-        User::factory()->pendingApproval()->create(['section' => 'Section A']);
-        User::factory()->teacher()->pendingApproval()->create(['section' => 'Section A']);
+        User::factory()->pendingApproval()->create(['section' => 'Magalang']);
+        User::factory()->teacher()->pendingApproval()->create(['section' => 'Magalang']);
         User::factory()->create()->delete();
         $assessment = Assessment::create([
             'created_by' => $teacher->id, 'title' => 'The School Garden and Our Helpful Neighbors',

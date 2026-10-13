@@ -35,6 +35,7 @@ import './worksheet-book';
 import { initFrogJump } from './frog-jump';
 import comfortControls, { preferences } from './ui-preferences';
 import './page-transitions';
+import './phone-notifications';
 
 import Alpine from 'alpinejs';
 import studentCompanion from './student-companion';

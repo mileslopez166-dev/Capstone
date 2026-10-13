@@ -27,7 +27,7 @@ class WorksheetResponseFormatTest extends TestCase
     public function test_every_question_has_a_specific_format_and_all_formats_save_submit_and_review(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $types = [];
         foreach (NumeracyWorksheets::all() as $worksheet) {
             $assignment = $this->assignment($teacher, $worksheet['number']);
@@ -76,7 +76,7 @@ class WorksheetResponseFormatTest extends TestCase
     public function test_invalid_answers_and_forged_controls_are_rejected_without_overwriting_work(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $this->actingAs($student);
         $cases = [
             [1, 0, '1-0', ['divisors' => ['7']]], [1, 0, '1-0', ['divisors' => ['2', '2']]],
@@ -100,7 +100,7 @@ class WorksheetResponseFormatTest extends TestCase
     public function test_game_timeout_marker_is_saved_only_for_game_items(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment($teacher, 1);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $payload = $this->payload($progress, NumeracyWorksheets::find(1));
@@ -117,7 +117,7 @@ class WorksheetResponseFormatTest extends TestCase
     public function test_empty_controls_do_not_count_but_zero_no_and_saved_legacy_answers_are_retained(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assignment = $this->assignment($teacher, 4);
         $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
         $payload = $this->payload($progress, NumeracyWorksheets::find(4));

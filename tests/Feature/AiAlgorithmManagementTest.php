@@ -88,7 +88,7 @@ class AiAlgorithmManagementTest extends TestCase
     public function test_content_recommendations_and_hybrid_cold_start_use_real_eligible_activities(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $sourceAssessment = $this->assessment($teacher, ['title' => 'Source Reading', 'focus_areas' => ['Inference']]);
         $target = $this->assessment($teacher, ['title' => 'Inference Practice', 'focus_areas' => ['Inference']]);
         $this->assessment($teacher, ['title' => 'Other Section', 'target_section' => 'section_b']);

@@ -52,12 +52,12 @@ class ProfileTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create([
             'name' => 'Miles Lopez',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $topStudent = User::factory()->create([
             'name' => 'Lyra Vale',
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'approval_status' => 'approved',
         ]);
 

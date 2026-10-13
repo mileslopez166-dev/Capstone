@@ -36,17 +36,17 @@ class AdminTokenRequestTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $teacher = User::factory()->teacher()->pendingApproval()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
         ]);
 
         $response = $this->actingAs($admin)->post(route('admin.token-requests.approve', $teacher), [
-            'section' => 'Section B',
+            'section' => 'Masunurin',
         ]);
 
         $response->assertRedirect(route('admin.token-requests.index'));
         $this->assertDatabaseHas('users', [
             'id' => $teacher->id,
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'approval_status' => 'approved',
             'approved_by' => $admin->id,
         ]);
@@ -56,14 +56,14 @@ class AdminTokenRequestTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $teacher = User::factory()->teacher()->pendingApproval()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
         ]);
 
         $response = $this->actingAs($admin)->get(route('admin.token-requests.index'));
 
         $response->assertOk();
         $response->assertSee('form="approve-request-'.$teacher->id.'"', false);
-        $response->assertSee('value="Section A" selected', false);
+        $response->assertSee('value="Magalang" selected', false);
     }
 
     public function test_admin_can_decline_a_pending_teacher_request(): void
@@ -110,12 +110,12 @@ class AdminTokenRequestTest extends TestCase
         User::factory()->teacher()->pendingApproval()->create([
             'name' => 'Mila Santos',
             'email' => 'mila.teacher@example.com',
-            'section' => 'Section A',
+            'section' => 'Magalang',
         ]);
         User::factory()->teacher()->pendingApproval()->create([
             'name' => 'Noel Reyes',
             'email' => 'noel.teacher@example.com',
-            'section' => 'Section B',
+            'section' => 'Masunurin',
         ]);
 
         $response = $this->actingAs($admin)->get(route('admin.token-requests.index', ['search' => 'mila']));
@@ -132,7 +132,7 @@ class AdminTokenRequestTest extends TestCase
         User::factory()->teacher()->pendingApproval()->create([
             'name' => 'Lyra Vale',
             'email' => 'lyra.teacher@example.com',
-            'section' => 'Section C',
+            'section' => 'Matapat',
         ]);
 
         $this->actingAs($admin)
@@ -141,6 +141,6 @@ class AdminTokenRequestTest extends TestCase
             ->assertSee('token-search-suggestions')
             ->assertSee('Lyra Vale')
             ->assertSee('lyra.teacher@example.com')
-            ->assertSee('Section C');
+            ->assertSee('Matapat');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\NotificationSender;
+use App\Support\SectionCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -90,9 +91,7 @@ class TokenRequestController extends Controller
         $shortcuts = collect([
             'Student',
             'Teacher',
-            'Section A',
-            'Section B',
-            'Section C',
+            ...SectionCatalog::labels(),
             'Pending Approvals',
         ]);
 
@@ -121,7 +120,7 @@ class TokenRequestController extends Controller
             'section' => [
                 $user->isTeacher() ? 'required' : 'nullable',
                 'string',
-                Rule::in(['Section A', 'Section B', 'Section C']),
+                Rule::in(SectionCatalog::labels()),
             ],
         ]);
 

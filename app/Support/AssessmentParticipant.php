@@ -10,7 +10,7 @@ class AssessmentParticipant
 {
     public static function matchesSection(Assessment $assessment, User $student): bool
     {
-        $section = $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
+        $section = SectionCatalog::targetKeyForLabel($student->section);
 
         return in_array($assessment->target_section, ['all', null], true)
             || ($section && $assessment->target_section === $section);

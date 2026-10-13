@@ -62,5 +62,29 @@
                 </div>
             @endforelse
         </div>
+
+        <div class="border-t border-surface-variant/40 p-3">
+            @if (filled(config('webpush.vapid.public_key')) && filled(config('webpush.vapid.private_key')))
+                <button
+                    class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-primary transition-colors hover:bg-primary-container/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    type="button"
+                    data-phone-push
+                    data-public-key="{{ config('webpush.vapid.public_key') }}"
+                    data-subscribe-url="{{ route('notifications.phone-subscription.store') }}"
+                    data-unsubscribe-url="{{ route('notifications.phone-subscription.destroy') }}"
+                >
+                    <span class="material-symbols-outlined" data-phone-push-icon aria-hidden="true">notifications_active</span>
+                    <span class="min-w-0">
+                        <strong class="block text-sm" data-phone-push-label>Enable phone alerts</strong>
+                        <span class="block text-xs text-on-surface-variant" data-phone-push-status>Get important alerts on this device.</span>
+                    </span>
+                </button>
+            @else
+                <div class="flex items-center gap-3 px-3 py-2 text-outline">
+                    <span class="material-symbols-outlined" aria-hidden="true">notifications_paused</span>
+                    <span class="text-xs">Phone alerts are awaiting server setup.</span>
+                </div>
+            @endif
+        </div>
     </div>
 </details>

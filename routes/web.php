@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AvatarController;
 use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
@@ -30,6 +31,7 @@ use App\Support\AssessmentScores;
 use App\Support\InterventionFollowUp;
 use App\Support\StudentLeaderboard;
 use App\Support\StudentProgress;
+use App\Support\SectionCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +61,13 @@ Route::get('/dashboard', function () {
 Route::post('/notifications/mark-read', [NotificationController::class, 'markRead'])
     ->middleware(['auth', 'verified'])
     ->name('notifications.mark-read');
+
+Route::post('/notifications/phone-subscription', [PushSubscriptionController::class, 'store'])
+    ->middleware(['auth', 'verified', 'throttle:10,1'])
+    ->name('notifications.phone-subscription.store');
+Route::delete('/notifications/phone-subscription', [PushSubscriptionController::class, 'destroy'])
+    ->middleware(['auth', 'verified', 'throttle:10,1'])
+    ->name('notifications.phone-subscription.destroy');
 
 Route::view('/support', 'support.developing')
     ->middleware(['auth', 'verified'])
@@ -116,9 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/teacher/practice/{mission}/cancel', [TeacherPracticeController::class, 'cancel'])->name('teacher.practice.cancel');
 });
 
-$studentTargetSection = function (User $student): ?string {
-    return $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
-};
+$studentTargetSection = fn (User $student): ?string => SectionCatalog::targetKeyForLabel($student->section);
 
 $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSection) {
     $targetSection = $studentTargetSection($student);
@@ -411,9 +418,7 @@ Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') {
 
     $scopes = [
         'all' => 'All Sections',
-        'section_a' => 'Section A',
-        'section_b' => 'Section B',
-        'section_c' => 'Section C',
+        ...SectionCatalog::targets(),
     ];
 
     abort_unless(array_key_exists($scope, $scopes), 404);

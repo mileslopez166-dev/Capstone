@@ -47,7 +47,7 @@ class WorksheetGameCatalogTest extends TestCase
     public function test_activity_details_show_each_worksheets_actual_game_names_once(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $expected = [1 => ['Divisibility Archer', 'Number Puzzle'], 2 => ['Divisibility Archer'],
             3 => ['Rocket Launch'], 4 => ['Rocket Launch', 'Divisibility Archer']];
         $assignments = [];
@@ -62,7 +62,7 @@ class WorksheetGameCatalogTest extends TestCase
         $xpath = new \DOMXPath($dom);
         $this->assertCount(4, $xpath->query('//*[@data-assessment-games]'));
         foreach ($assignments as $number => $assessment) {
-            $card = '//a[@href="'.route('student.assessments.show', $assessment).'"]';
+            $card = '//details[.//a[@href="'.route('student.assessments.show', $assessment).'"]]';
             $names = $xpath->query($card.'//*[@data-assessment-game-names]');
             $this->assertCount(1, $names);
             $this->assertSame(implode(', ', $expected[$number]), trim($names->item(0)->textContent));
@@ -75,7 +75,7 @@ class WorksheetGameCatalogTest extends TestCase
     public function test_available_queues_search_and_mission_only_include_the_game_catalog(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $one = $this->assignment($teacher, 1);
         $this->assignment($teacher, 2, ['status' => 'draft']);
         $this->assignment($teacher, 3, ['target_section' => 'section_b']);
@@ -104,7 +104,7 @@ class WorksheetGameCatalogTest extends TestCase
     public function test_older_work_remains_reviewable_and_gradable_without_counting_toward_the_mission(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = $this->assignment($teacher, 25);
         $progress = AssessmentProgress::forAttempt($assessment, $student, 1);
         $attempt = WorksheetAttempt::create(['assessment_id' => $assessment->id, 'user_id' => $student->id,

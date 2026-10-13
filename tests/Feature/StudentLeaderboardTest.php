@@ -17,12 +17,12 @@ class StudentLeaderboardTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $currentStudent = User::factory()->create([
             'name' => 'Miles Lopez',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $topStudent = User::factory()->create([
             'name' => 'Lyra Vale',
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'approval_status' => 'approved',
             'gender' => 'female',
         ]);
@@ -48,12 +48,12 @@ class StudentLeaderboardTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $sectionAStudent = User::factory()->create([
             'name' => 'Nova Finch',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $sectionBStudent = User::factory()->create([
             'name' => 'Rowan Moss',
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'approval_status' => 'approved',
         ]);
 
@@ -65,7 +65,7 @@ class StudentLeaderboardTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeText('Section A Rankings')
+            ->assertSeeText('Magalang Rankings')
             ->assertSeeText('Nova Finch')
             ->assertDontSeeText('Rowan Moss');
     }
@@ -83,7 +83,7 @@ class StudentLeaderboardTest extends TestCase
         ])->map(fn (array $entry) => [
             'student' => User::factory()->create([
                 'name' => $entry['name'],
-                'section' => 'Section A',
+                'section' => 'Magalang',
                 'approval_status' => 'approved',
             ]),
             'points' => $entry['points'],
@@ -115,7 +115,7 @@ class StudentLeaderboardTest extends TestCase
     public function test_retries_use_only_the_best_score_and_count_one_completed_activity(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['approval_status' => 'approved', 'section' => 'Section A']);
+        $student = User::factory()->create(['approval_status' => 'approved', 'section' => 'Magalang']);
         $assessment = $this->assessment($teacher);
         $this->actingAs($student);
 
@@ -159,7 +159,7 @@ class StudentLeaderboardTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create();
         $assessment = $this->assessment($teacher);
-        $students = collect(['Section A', 'Section B', 'Section C'])->map(function (string $section, int $index) use ($assessment) {
+        $students = collect(['Magalang', 'Masunurin', 'Matapat'])->map(function (string $section, int $index) use ($assessment) {
             $student = User::factory()->create(['section' => $section, 'approval_status' => 'approved']);
             $this->submission($assessment, $student, ($index + 1) * 250, $index + 1, 3);
             $this->submission($assessment, $student, 0, 0, 3);

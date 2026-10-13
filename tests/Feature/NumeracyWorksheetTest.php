@@ -72,9 +72,9 @@ class NumeracyWorksheetTest extends TestCase
     {
         $teacher = User::factory()->teacher()->create();
         $assignment = $this->assignment($teacher, ['target_section' => 'section_a']);
-        $this->actingAs(User::factory()->create(['section' => 'Section B']))->get(route('student.assessments.show', $assignment))->assertNotFound();
+        $this->actingAs(User::factory()->create(['section' => 'Masunurin']))->get(route('student.assessments.show', $assignment))->assertNotFound();
         $this->get(route('worksheets.image', [1, 1]))->assertNotFound();
-        $this->actingAs(User::factory()->create(['section' => 'Section A']))->get(route('student.assessments.show', $assignment))
+        $this->actingAs(User::factory()->create(['section' => 'Magalang']))->get(route('student.assessments.show', $assignment))
             ->assertOk()->assertSee('data-worksheet-reader', false)->assertDontSee('assessment-game-music');
         $this->get(route('worksheets.image', [1, 1]))->assertOk()->assertHeader('Content-Type', 'image/jpeg');
         $this->get(route('worksheets.image', [1, 3]))->assertNotFound();

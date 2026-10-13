@@ -68,7 +68,7 @@ class AdminDashboardTest extends TestCase
             'last_name' => 'Teacher',
             'email' => 'created.teacher@example.com',
             'role' => 'teacher',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -79,7 +79,7 @@ class AdminDashboardTest extends TestCase
             'name' => 'Created Middle Teacher',
             'email' => 'created.teacher@example.com',
             'role' => 'teacher',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
             'approved_by' => $admin->id,
         ]);
@@ -95,7 +95,7 @@ class AdminDashboardTest extends TestCase
             'last_name' => 'Student',
             'email' => 'created.student@example.com',
             'role' => 'student',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'gender' => 'male',
             'approval_status' => 'approved',
             'password' => 'password',
@@ -163,7 +163,7 @@ class AdminDashboardTest extends TestCase
             ->patch(route('admin.users.update', $systemAdmin), [
                 'name' => 'Changed Administrator',
                 'role' => 'student',
-                'section' => 'Section A',
+                'section' => 'Magalang',
                 'approval_status' => 'pending',
             ])
             ->assertRedirect(route('admin.dashboard').'#user-management');

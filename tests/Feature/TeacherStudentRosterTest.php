@@ -201,7 +201,7 @@ class TeacherStudentRosterTest extends TestCase
     public function test_teacher_can_create_a_student_account(): void
     {
         $teacher = User::factory()->teacher()->create([
-            'section' => 'Section B',
+            'section' => 'Masunurin',
         ]);
 
         $response = $this->actingAs($teacher)->post(route('students.store'), [
@@ -219,7 +219,7 @@ class TeacherStudentRosterTest extends TestCase
             'name' => 'New Middle Learner',
             'email' => 'new.learner@example.com',
             'role' => 'student',
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'gender' => 'female',
             'approval_status' => 'approved',
             'approved_by' => $teacher->id,

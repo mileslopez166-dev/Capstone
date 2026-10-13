@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\NotificationSender;
+use App\Support\SectionCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -30,7 +31,7 @@ class StudentController extends Controller
             'middle_name' => ['nullable', 'string', 'max:100', 'not_regex:/\d/'],
             'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'section' => ['nullable', 'string', Rule::in(['Section A', 'Section B', 'Section C'])],
+            'section' => ['nullable', 'string', Rule::in(SectionCatalog::labels())],
             'gender' => ['required', 'string', Rule::in(['male', 'female'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [

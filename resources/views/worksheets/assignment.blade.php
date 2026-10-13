@@ -1,6 +1,6 @@
 <x-worksheet-layout teacher :title="$assessment->title" :back="route('assessments.index', ['subject' => 'numeracy'])">
     @php($questionTimeParts = $assessment->questionTimeLimitParts())
-    <div class="worksheet-summary"><span>Worksheet {{ $assessment->worksheet_number }}</span><span>{{ count($worksheet['pages']) }} parts</span><span>{{ $assessment->worksheet_total }} scored items</span><span>{{ str($assessment->target_section)->replace('_', ' ')->title() }}</span><strong>{{ $assessment->status === 'published' ? 'Published' : 'Locked' }}</strong></div>
+    <div class="worksheet-summary"><span>Worksheet {{ $assessment->worksheet_number }}</span><span>{{ count($worksheet['pages']) }} parts</span><span>{{ $assessment->worksheet_total }} scored items</span><span>{{ \App\Support\SectionCatalog::displayTarget($assessment->target_section) }}</span><strong>{{ $assessment->status === 'published' ? 'Published' : 'Locked' }}</strong></div>
     @if ($assessment->instructions)<p class="worksheet-instructions">{{ $assessment->instructions }}</p>@endif
     <div class="worksheet-actions">
         <form method="POST" action="{{ route('assessments.availability', $assessment) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="{{ $assessment->status === 'published' ? 'draft' : 'published' }}"><button class="ui-button"><span class="material-symbols-outlined">{{ $assessment->status === 'published' ? 'lock' : 'lock_open' }}</span>{{ $assessment->status === 'published' ? 'Lock' : 'Publish' }} Worksheet</button></form>

@@ -82,7 +82,7 @@ class StudentTaskQueueTest extends TestCase
 
     public function test_queue_excludes_other_sections_locked_work_and_other_students_progress(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = $this->assessment();
         AssessmentProgress::forAttempt($assessment, User::factory()->create(), 1)->update(['state' => ['phase' => 'questions']]);
         $this->assessment(['status' => 'draft', 'title' => 'Hidden draft']);

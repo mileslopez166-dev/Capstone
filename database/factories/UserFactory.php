@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Support\SectionCatalog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'role' => 'student',
-            'section' => fake()->randomElement(['Grade 6-A', 'Grade 6-B', 'Grade 6-C']),
+            'section' => fake()->randomElement(SectionCatalog::labels()),
             'gender' => fake()->randomElement(['male', 'female']),
             'approval_status' => 'approved',
             'approved_at' => now(),

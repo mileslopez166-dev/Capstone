@@ -12,7 +12,7 @@ class WorksheetMission
     public static function forStudent(User $student): array
     {
         $worksheets = NumeracyWorksheets::gameEnabled();
-        $section = $student->section ? strtolower(str_replace(' ', '_', $student->section)) : null;
+        $section = SectionCatalog::targetKeyForLabel($student->section);
         $assignments = Assessment::with('teacher')->whereIn('worksheet_number', array_column($worksheets, 'number'))->where('status', 'published')
             ->where(fn ($query) => $query->whereIn('target_section', ['all', $section])->orWhereNull('target_section'))
             ->latest()->orderByDesc('id')->get();

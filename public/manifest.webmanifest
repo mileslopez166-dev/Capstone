@@ -1,0 +1,18 @@
+{
+    "name": "AI-PGAALS",
+    "short_name": "AI-PGAALS",
+    "description": "Bontoc Central School literacy and numeracy learning system",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#eef8fc",
+    "theme_color": "#0879bb",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\User;
+use App\Support\SectionCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -201,7 +202,7 @@ class DashboardController extends Controller
             ->paginate(10, ['*'], 'users_page')
             ->withQueryString();
 
-        $sections = collect(['Section A', 'Section B', 'Section C']);
+        $sections = collect(SectionCatalog::labels());
         $searchSuggestions = $this->buildSearchSuggestions();
 
         return view('admin.dashboard', [
@@ -232,9 +233,7 @@ class DashboardController extends Controller
             'Admin',
             'Token Requests',
             'Pending Approvals',
-            'Section A',
-            'Section B',
-            'Section C',
+            ...SectionCatalog::labels(),
         ]);
 
         $users = User::query()

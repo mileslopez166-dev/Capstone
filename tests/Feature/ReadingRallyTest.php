@@ -28,8 +28,8 @@ class ReadingRallyTest extends TestCase
 
     private function fixture(array $overrides = []): array
     {
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
-        $student = User::factory()->create(['section' => 'Section A', 'avatar_config' => ['character' => 'lyra']]);
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $student = User::factory()->create(['section' => 'Magalang', 'avatar_config' => ['character' => 'lyra']]);
         $assessment = Assessment::create($this->payload($overrides) + ['created_by' => $teacher->id]);
 
         return [$teacher, $student, $assessment];

@@ -9,7 +9,7 @@
     @endphp
 
     <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface selection:bg-primary-container/30">
-        <x-student-nav active="activities" />
+        <x-student-nav active="activities" :sticky="false" />
 
         <main class="campus-activities min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl space-y-8">
@@ -109,7 +109,7 @@
                                         $assetExtension = $assetPath ? strtolower(pathinfo($assetPath, PATHINFO_EXTENSION)) : null;
                                         $isImageAsset = in_array($assetExtension, ['jpg', 'jpeg', 'png'], true);
                                         $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
-                                        $targetLabel = str($assessment->target_section ?? 'all')->replace('_', ' ')->title();
+                                        $targetLabel = \App\Support\SectionCatalog::displayTarget($assessment->target_section);
                                         $quizLabel = match ($assessment->quiz_type ?? 'multiple_choice') {
                                             'multiple_choice' => 'Fishing Game',
                                             'data_egg' => 'Fishing Game',

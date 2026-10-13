@@ -152,9 +152,9 @@
                                     class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-10 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
                                 >
                                     <option value="" disabled selected>Select assigned section</option>
-                                    <option value="Section A" {{ old('section') == 'Section A' ? 'selected' : '' }}>Section A</option>
-                                    <option value="Section B" {{ old('section') == 'Section B' ? 'selected' : '' }}>Section B</option>
-                                    <option value="Section C" {{ old('section') == 'Section C' ? 'selected' : '' }}>Section C</option>
+                                    @foreach (\App\Support\SectionCatalog::labels() as $section)
+                                        <option value="{{ $section }}" @selected(old('section') === $section)>{{ $section }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <x-input-error :messages="$errors->get('section')" class="mt-2 text-sm text-error" />

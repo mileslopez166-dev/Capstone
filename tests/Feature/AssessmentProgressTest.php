@@ -176,7 +176,7 @@ class AssessmentProgressTest extends TestCase
         $this->actingAs($student)->postJson(route('student.assessments.progress', $assessment), $payload)->assertNotFound();
         $this->postJson(route('student.assessments.submit', $assessment), $payload + ['answers' => ['A', 'B']])->assertNotFound();
         $assessment->update(['status' => 'published', 'target_section' => 'section_c']);
-        $student->update(['section' => 'Section A']);
+        $student->update(['section' => 'Magalang']);
         $this->actingAs($student)->postJson(route('student.assessments.progress', $assessment), $payload)->assertNotFound();
         $this->assertDatabaseCount('assessment_submissions', 0);
     }

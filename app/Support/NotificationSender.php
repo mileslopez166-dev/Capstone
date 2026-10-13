@@ -6,6 +6,7 @@ use App\Models\AppNotification;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
+use App\Notifications\PhonePushNotification;
 use Illuminate\Support\Collection;
 
 class NotificationSender
@@ -15,13 +16,20 @@ class NotificationSender
         collect($users)
             ->filter(fn ($user): bool => $user instanceof User && $user->exists)
             ->unique('id')
-            ->each(fn (User $user): AppNotification => AppNotification::create([
-                'user_id' => $user->id,
-                'type' => $type,
-                'title' => $title,
-                'body' => $body,
-                'url' => $url,
-            ]));
+            ->each(function (User $user) use ($type, $title, $body, $url): void {
+                AppNotification::create([
+                    'user_id' => $user->id,
+                    'type' => $type,
+                    'title' => $title,
+                    'body' => $body,
+                    'url' => $url,
+                ]);
+
+                if (in_array($type, ['registration', 'assessment_created', 'assessment_published'], true)
+                    && PhonePushNotification::isConfigured()) {
+                    $user->notify(new PhonePushNotification($type, $title, $body, $url));
+                }
+            });
     }
 
     public static function notifyAdminsAboutRegistration(User $registeredUser): void
@@ -82,6 +90,19 @@ class NotificationSender
         );
     }
 
+    public static function notifyAdminsAboutAssessmentCreated(Assessment $assessment): void
+    {
+        $teacherName = $assessment->teacher?->name ?? 'A teacher';
+
+        self::sendToUsers(
+            User::query()->where('role', 'admin')->where('approval_status', 'approved')->get(),
+            'assessment_created',
+            'New assessment created',
+            sprintf('%s created %s.', $teacherName, $assessment->title),
+            route('admin.dashboard')
+        );
+    }
+
     public static function notifyAssessmentCompleted(AssessmentSubmission $submission): void
     {
         $assessment = $submission->assessment;
@@ -115,11 +136,6 @@ class NotificationSender
 
     private static function sectionLabelFromTarget(?string $targetSection): ?string
     {
-        return match ($targetSection) {
-            'section_a' => 'Section A',
-            'section_b' => 'Section B',
-            'section_c' => 'Section C',
-            default => null,
-        };
+        return SectionCatalog::labelForTarget($targetSection);
     }
 }

@@ -7,7 +7,7 @@
             ->take(2)
             ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
             ->implode('');
-        $sections = ['Section A', 'Section B', 'Section C'];
+        $sections = \App\Support\SectionCatalog::labels();
     @endphp
 
     <div class="min-h-screen bg-background">

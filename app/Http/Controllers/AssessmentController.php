@@ -15,6 +15,7 @@ use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
 use App\Support\PhilIri;
+use App\Support\SectionCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class AssessmentController extends Controller
             'quiz_type' => ['required', Rule::in(['multiple_choice', 'flashcards', 'reading_rally'])],
             'question_selection' => ['sometimes', Rule::in(['fixed', 'automatic'])],
             'delivery_method' => ['required', Rule::in(['manual'])],
-            'target_section' => ['required', Rule::in(['all', 'section_a', 'section_b', 'section_c'])],
+            'target_section' => ['required', Rule::in(['all', ...SectionCatalog::targetKeys()])],
             'assessment_type' => ['required', Rule::in(['silent_reading', 'oral_reading', 'listening_comprehension', 'group_screening'])],
             'focus_areas' => ['required', 'array', 'min:1'],
             'focus_areas.*' => ['string', Rule::in([
@@ -146,6 +147,8 @@ class AssessmentController extends Controller
             'retry_limit' => Assessment::normalizeRetryLimit($validated['retry_limit'] ?? 0),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
         ]);
+
+        NotificationSender::notifyAdminsAboutAssessmentCreated($assessment->loadMissing('teacher'));
 
         if ($assessment->status === 'published') {
             NotificationSender::notifyAssessmentPublished($assessment);

@@ -97,7 +97,7 @@ class StudentTutorTest extends TestCase
 
     public function test_live_assessment_helper_uses_story_choices_and_private_answer_key_without_exposing_it_to_the_student(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = Assessment::create([
             'created_by' => User::factory()->teacher()->create()->id, 'title' => 'Internet safety story',
             'subject' => 'literacy', 'quiz_type' => 'multiple_choice', 'delivery_method' => 'manual',
@@ -132,9 +132,9 @@ class StudentTutorTest extends TestCase
 
     public function test_live_assessment_helper_rejects_unassigned_students_without_paid_calls(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = Assessment::create([
-            'created_by' => User::factory()->teacher()->create()->id, 'title' => 'Section B only',
+            'created_by' => User::factory()->teacher()->create()->id, 'title' => 'Masunurin only',
             'subject' => 'literacy', 'quiz_type' => 'multiple_choice', 'delivery_method' => 'manual',
             'target_section' => 'section_b', 'assessment_type' => 'silent_reading', 'focus_areas' => [],
             'manual_questions' => [['question' => 'Question', 'answers' => ['A' => 'A'], 'correct_answer' => 'A']],
@@ -214,8 +214,8 @@ class StudentTutorTest extends TestCase
 
     public function test_off_topic_tutor_reply_notifies_teacher_without_extra_model_call_or_transcript(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
         $this->fakeReply(['api.openai.com/v1/responses' => Http::response(['status' => 'completed', 'output' => [
             ['type' => 'message', 'role' => 'assistant', 'content' => [[
                 'type' => 'output_text',
@@ -240,8 +240,8 @@ class StudentTutorTest extends TestCase
 
     public function test_obvious_unrelated_topic_is_redirected_locally_without_token_call(): void
     {
-        $student = User::factory()->create(['section' => 'Section A']);
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
 
         $response = $this->actingAs($student)->postJson(route('student.tutor.send'), $this->payload(['question' => 'What is cybersecurity?']))
             ->assertOk()
@@ -257,8 +257,8 @@ class StudentTutorTest extends TestCase
 
     public function test_safety_block_notifies_teacher_without_saving_chat_or_transcript(): void
     {
-        $student = User::factory()->create(['section' => 'Section C']);
-        $teacher = User::factory()->teacher()->create(['section' => 'Section C']);
+        $student = User::factory()->create(['section' => 'Matapat']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Matapat']);
         $this->fakeReply(['api.openai.com/v1/moderations' => Http::response(['results' => [['flagged' => true]]])]);
 
         $this->actingAs($student)->postJson(route('student.tutor.send'), $this->payload(['question' => 'PRIVATE_SAFETY_MESSAGE']))
@@ -408,10 +408,10 @@ class StudentTutorTest extends TestCase
 
     public function test_general_help_only_notifies_approved_section_teachers(): void
     {
-        $student = User::factory()->create(['section' => 'Section B']);
-        $teacher = User::factory()->teacher()->create(['section' => 'Section B']);
-        User::factory()->teacher()->create(['section' => 'Section A']);
-        User::factory()->teacher()->create(['section' => 'Section B', 'approval_status' => 'pending']);
+        $student = User::factory()->create(['section' => 'Masunurin']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Masunurin']);
+        User::factory()->teacher()->create(['section' => 'Magalang']);
+        User::factory()->teacher()->create(['section' => 'Masunurin', 'approval_status' => 'pending']);
         $chat = TutorChat::create(['user_id' => $student->id, 'subject' => 'numeracy']);
         $this->actingAs($student)->postJson(route('student.tutor.help', $chat))->assertOk();
         $this->assertEquals([$teacher->id], AppNotification::where('type', 'tutor_help')->pluck('user_id')->all());

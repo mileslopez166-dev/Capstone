@@ -17,7 +17,7 @@ class AssessmentScoreReportingTest extends TestCase
     public function test_verified_oral_reading_uses_phil_iri_word_reading_score_in_reports(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['name' => 'Mila Santos', 'section' => 'Section A']);
+        $student = User::factory()->create(['name' => 'Mila Santos', 'section' => 'Magalang']);
         $assessment = $this->oralAssessment($teacher);
         $submission = $this->oralSubmission($assessment, $student, [
             'reviewed_by' => $teacher->id,
@@ -53,7 +53,7 @@ class AssessmentScoreReportingTest extends TestCase
     public function test_unmarked_oral_reading_is_not_averaged_as_zero(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = $this->oralAssessment($teacher);
         $submission = $this->oralSubmission($assessment, $student);
 

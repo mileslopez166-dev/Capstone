@@ -12,7 +12,7 @@ class TeacherStudentPagesTest extends TestCase
 
     public function test_creation_and_roster_are_distinct_pages(): void
     {
-        $teacher = User::factory()->teacher()->create(['section' => 'Section B']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Masunurin']);
         $student = User::factory()->create(['name' => 'Roster Learner']);
         $this->actingAs($teacher);
         $list = $this->get(route('students.index'))->assertOk()->assertViewIs('students.index')
@@ -21,7 +21,7 @@ class TeacherStudentPagesTest extends TestCase
             ->assertDontSee('id="add-student"', false)->assertDontSee('id="student-password"', false);
         $create = $this->get(route('students.create'))->assertOk()->assertViewIs('students.create')
             ->assertSee('action="'.route('students.store').'"', false)
-            ->assertSee('id="student-first-name"', false)->assertSeeText('Section B (my section)')
+            ->assertSee('id="student-first-name"', false)->assertSeeText('Masunurin (my section)')
             ->assertSeeText('Cancel')->assertDontSeeText('Student Roster')->assertDontSeeText($student->name);
         if (getenv('CAPTURE_STUDENT_PAGES')) {
             file_put_contents(storage_path('app/student-list-fixture.html'), $list->getContent());
@@ -42,7 +42,7 @@ class TeacherStudentPagesTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $this->actingAs($teacher)->from(route('students.create'))->post(route('students.store'), [
             'first_name' => 'New', 'last_name' => 'Learner', 'email' => 'not-an-email',
-            'gender' => 'female', 'section' => 'Section B', 'password' => 'secret-pass', 'password_confirmation' => 'mismatch',
+            'gender' => 'female', 'section' => 'Masunurin', 'password' => 'secret-pass', 'password_confirmation' => 'mismatch',
         ])->assertRedirect(route('students.create'))->assertSessionHasErrors(['email', 'password']);
         $this->get(route('students.create'))->assertOk()->assertSee('value="New"', false)
             ->assertSee('value="not-an-email"', false)->assertDontSee('value="secret-pass"', false);

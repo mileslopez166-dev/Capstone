@@ -33,7 +33,7 @@ class WorksheetMissionTest extends TestCase
             ->assertDontSee('Choose Quiz Type')->assertDontSee('Frog Flashcards')->assertDontSee('Interactive Egg');
         $this->get(route('assessments.create'))->assertSee('data-numeracy-mission', false)->assertDontSee('value="numeracy"', false);
         $this->get(route('worksheets.mission'))->assertForbidden();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $this->actingAs($student)->get(route('worksheets.mission'))->assertOk()->assertSee('0 / 4 submitted')->assertSee('Worksheet 4')->assertDontSee('Worksheet 5');
         $mission = WorksheetMission::forStudent($student);
         $this->assertSame(4, $mission['steps']->where('state', 'locked')->count());
@@ -44,7 +44,7 @@ class WorksheetMissionTest extends TestCase
 
     public function test_path_tracks_each_worksheet_once_and_prioritizes_saved_work(): void
     {
-        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create(['section' => 'Section A']);
+        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create(['section' => 'Magalang']);
         $one = $this->worksheet($teacher, 1); $two = $this->worksheet($teacher, 2); $three = $this->worksheet($teacher, 3);
         $this->worksheet($teacher, 4, ['status' => 'draft']);
         $this->worksheet($teacher, 5, ['target_section' => 'section_b']);
@@ -66,7 +66,7 @@ class WorksheetMissionTest extends TestCase
 
     public function test_submitting_all_four_game_worksheets_finishes_the_mission_without_inventing_grades(): void
     {
-        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create(['section' => 'Section A']);
+        $teacher = User::factory()->teacher()->create(); $student = User::factory()->create(['section' => 'Magalang']);
         foreach (range(1, 4) as $number) $this->submit($this->worksheet($teacher, $number), $student);
         $mission = WorksheetMission::forStudent($student);
         $this->assertTrue($mission['complete']);

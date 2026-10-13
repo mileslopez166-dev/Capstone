@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\AppNotification;
 use App\Models\Assessment;
 use App\Models\User;
+use App\Notifications\PhonePushNotification;
+use App\Support\NotificationSender;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AppNotificationTest extends TestCase
@@ -24,7 +27,7 @@ class AppNotificationTest extends TestCase
             'last_name' => 'Santos',
             'email' => 'mila@example.com',
             'role' => 'teacher',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertRedirect(route('login'));
@@ -37,14 +40,31 @@ class AppNotificationTest extends TestCase
         ]);
     }
 
+    public function test_configured_phone_alert_is_queued_for_a_new_registration(): void
+    {
+        Notification::fake();
+        config()->set('webpush.vapid.public_key', 'test-public-key');
+        config()->set('webpush.vapid.private_key', 'test-private-key');
+
+        $admin = User::factory()->admin()->create(['approval_status' => 'approved']);
+        $registeredUser = User::factory()->teacher()->create(['approval_status' => 'pending']);
+
+        NotificationSender::notifyAdminsAboutRegistration($registeredUser);
+
+        Notification::assertSentTo(
+            $admin,
+            PhonePushNotification::class,
+        );
+    }
+
     public function test_teacher_is_notified_when_student_finishes_assessment(): void
     {
         $teacher = User::factory()->teacher()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $student = User::factory()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
 
@@ -83,15 +103,15 @@ class AppNotificationTest extends TestCase
     public function test_students_are_notified_when_teacher_publishes_assessment(): void
     {
         $teacher = User::factory()->teacher()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $student = User::factory()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $otherSectionStudent = User::factory()->create([
-            'section' => 'Section B',
+            'section' => 'Masunurin',
             'approval_status' => 'approved',
         ]);
 
@@ -131,14 +151,51 @@ class AppNotificationTest extends TestCase
         ]);
     }
 
+    public function test_admin_is_notified_when_teacher_creates_assessment(): void
+    {
+        $admin = User::factory()->admin()->create(['approval_status' => 'approved']);
+        $teacher = User::factory()->teacher()->create([
+            'section' => 'Magalang',
+            'approval_status' => 'approved',
+        ]);
+
+        $this->actingAs($teacher)
+            ->post(route('assessments.store'), [
+                'title' => 'Admin Alert Reading Check',
+                'subject' => 'literacy',
+                'quiz_type' => 'multiple_choice',
+                'question_selection' => 'fixed',
+                'delivery_method' => 'manual',
+                'target_section' => 'section_a',
+                'assessment_type' => 'silent_reading',
+                'focus_areas' => ['Reading Fluency'],
+                'manual_questions' => [[
+                    'question' => 'Which answer is correct?',
+                    'answers' => ['A' => 'One', 'B' => 'Two', 'C' => 'Three', 'D' => 'Four'],
+                    'correct_answer' => 'A',
+                ]],
+                'status' => 'draft',
+                'retry_limit' => '0',
+                'question_time_minutes' => 2,
+                'question_time_seconds' => 0,
+            ])
+            ->assertRedirect(route('assessments.index'));
+
+        $this->assertDatabaseHas(AppNotification::class, [
+            'user_id' => $admin->id,
+            'type' => 'assessment_created',
+            'title' => 'New assessment created',
+        ]);
+    }
+
     public function test_teacher_and_classmates_are_notified_when_student_is_enrolled(): void
     {
         $teacher = User::factory()->teacher()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $classmate = User::factory()->create([
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
 
@@ -148,7 +205,7 @@ class AppNotificationTest extends TestCase
                 'middle_name' => 'Aidirian',
                 'last_name' => 'Lopez',
                 'email' => 'miles.student@example.com',
-                'section' => 'Section A',
+                'section' => 'Magalang',
                 'gender' => 'male',
                 'password' => 'password',
                 'password_confirmation' => 'password',

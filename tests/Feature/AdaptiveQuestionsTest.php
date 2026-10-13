@@ -159,8 +159,8 @@ class AdaptiveQuestionsTest extends TestCase
 
     public function test_teacher_assisted_attempt_has_same_snapshot_and_private_key(): void
     {
-        $teacher = User::factory()->teacher()->create(['section' => 'Section A']);
-        $student = User::factory()->create(['section' => 'Section A']);
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         $assessment = $this->assessment($teacher);
         $progress = $this->open($student, $assessment);
         $response = $this->actingAs($teacher)->get(route('teacher.assessments.take', [$assessment, $student]));

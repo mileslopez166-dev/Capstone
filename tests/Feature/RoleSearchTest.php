@@ -17,7 +17,7 @@ class RoleSearchTest extends TestCase
         $student = User::factory()->create([
             'name' => 'Miles Aidrian Lopez',
             'email' => 'miles@example.com',
-            'section' => 'Section A',
+            'section' => 'Magalang',
         ]);
         $assessment = $this->assessment($teacher, [
             'title' => 'Frog Reading Mission',
@@ -45,7 +45,7 @@ class RoleSearchTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create([
             'name' => 'Student One',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
         $visibleAssessment = $this->assessment($teacher, [

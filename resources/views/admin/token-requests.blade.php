@@ -136,7 +136,7 @@
                                                 form="approve-request-{{ $requestUser->id }}"
                                                 name="section"
                                             >
-                                                @foreach (["Section A", "Section B", "Section C"] as $section)
+                                                @foreach (\App\Support\SectionCatalog::labels() as $section)
                                                     <option value="{{ $section }}" @selected($requestUser->section === $section)>{{ $section }}</option>
                                                 @endforeach
                                             </select>

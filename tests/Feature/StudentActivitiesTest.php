@@ -41,7 +41,7 @@ class StudentActivitiesTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create([
             'name' => 'Miles Lopez',
-            'section' => 'Section A',
+            'section' => 'Magalang',
             'approval_status' => 'approved',
         ]);
 
@@ -187,7 +187,7 @@ class StudentActivitiesTest extends TestCase
     public function test_subject_counts_and_queues_only_include_available_section_assessments(): void
     {
         $teacher = User::factory()->teacher()->create();
-        $student = User::factory()->create(['section' => 'Section A']);
+        $student = User::factory()->create(['section' => 'Magalang']);
         foreach (['literacy', 'numeracy'] as $subject) {
             foreach (['Available', 'Locked', 'Other section', 'Exhausted'] as $state) {
                 $assessment = Assessment::create(['created_by' => $teacher->id, 'title' => $state.' '.$subject,
