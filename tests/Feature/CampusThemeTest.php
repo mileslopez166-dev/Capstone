@@ -53,6 +53,16 @@ class CampusThemeTest extends TestCase
         }
     }
 
+    public function test_activity_and_rewards_headers_remain_visible_while_scrolling(): void
+    {
+        $student = User::factory()->create();
+
+        foreach (['student.activities', 'student.rewards'] as $routeName) {
+            $this->actingAs($student)->get(route($routeName))->assertOk()
+                ->assertSee('campus-student-topbar sticky top-0', false);
+        }
+    }
+
     public function test_admin_profile_keeps_its_existing_layout(): void
     {
         $admin = User::factory()->admin()->create();

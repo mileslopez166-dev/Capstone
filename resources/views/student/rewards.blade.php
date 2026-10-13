@@ -11,8 +11,8 @@
         ];
     @endphp
 
-    <div class="min-h-screen overflow-x-hidden bg-background font-body text-on-surface">
-        <x-student-nav active="rewards" :sticky="false" />
+    <div class="min-h-screen overflow-x-clip bg-background font-body text-on-surface">
+        <x-student-nav active="rewards" />
 
         <main class="relative min-h-screen px-4 py-8 pb-32 sm:px-8 lg:ml-72 lg:px-12">
             <div class="mx-auto max-w-7xl">
