@@ -1,12 +1,22 @@
 <x-guest-layout>
     <div class="login-page">
+        <canvas class="login-garden-canvas" aria-hidden="true"></canvas>
         <div class="login-playground" aria-hidden="true">
             <canvas class="login-playground-canvas"></canvas>
+        </div>
+        <div class="login-day-scene" aria-hidden="true">
+            <img class="login-day-landscape" src="{{ asset('images/campus/pixel-campus-morning.png') }}" alt="" fetchpriority="high">
         </div>
         <div class="login-live-scene" aria-hidden="true">
             <span class="login-bird login-bird-one"></span>
             <span class="login-bird login-bird-two"></span>
             <span class="login-bird login-bird-three"></span>
+        </div>
+        <div class="login-night-scene" aria-hidden="true">
+            <img class="login-night-landscape" src="{{ asset('images/campus/pixel-campus-night.png') }}" alt="" fetchpriority="high">
+            <span class="login-night-star login-night-star-one"></span>
+            <span class="login-night-star login-night-star-two"></span>
+            <span class="login-night-star login-night-star-three"></span>
         </div>
         <div class="login-landmark-layer" aria-hidden="true">
             <img class="login-campus-marker" src="{{ asset('images/campus/bcs-stone-landmark.png') }}" alt="">
@@ -15,6 +25,7 @@
             <a class="login-brand" href="{{ route('login') }}"><x-application-logo /><span>AI-PGAALS</span></a>
             <div class="login-header-actions">
                 <span>Grade 6 Learning Community</span>
+                <x-comfort-controls />
                 <button type="button" class="login-motion-toggle" aria-label="Pause background animation" title="Pause background animation" aria-pressed="false" data-no-click-sound>
                     <span class="material-symbols-outlined" aria-hidden="true">pause</span>
                 </button>

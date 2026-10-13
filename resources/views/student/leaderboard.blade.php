@@ -136,7 +136,7 @@
                                 };
 
                             @endphp
-                            <div class="relative overflow-hidden flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 {{ $tier['row'] }} {{ $isCurrentStudent ? 'bg-primary/5' : '' }}">
+                            <div class="leaderboard-row relative overflow-hidden flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 {{ $tier['row'] }} {{ $isCurrentStudent ? 'bg-primary/5' : '' }}">
                                 <div class="flex min-w-0 items-center gap-4">
                                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg font-headline text-lg font-black {{ $tier['rank'] }}">
                                         #{{ $entry['rank'] }}

@@ -18,6 +18,26 @@
                 document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
             })();
         </script>
+        @if (auth()->user()?->role === 'student')
+            <script>
+                (() => {
+                    const key = 'pgaals-comfort';
+                    const update = () => {
+                        let preferences = {};
+                        try { preferences = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+                        const automatic = !['light', 'dark'].includes(preferences.theme);
+                        const hour = new Date().getHours();
+                        document.documentElement.classList.toggle('student-night', automatic && (hour >= 19 || hour < 6));
+                    };
+                    update();
+                    window.setInterval(update, 60000);
+                    window.addEventListener('pageshow', update);
+                    document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
+                    window.addEventListener('storage', event => { if (event.key === key) update(); });
+                    window.addEventListener('pgaals:preferences', update);
+                })();
+            </script>
+        @endif
 
         <title>{{ config('app.name', 'AI-PGAALS') }}</title>
 
@@ -35,6 +55,9 @@
         $isAssessmentSession = $routeName === 'student.assessments.show' || $routeName === 'teacher.assessments.take';
     @endphp
     <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }}">
+        @if ($hasCampusTheme && ! $isAssessmentSession && $routeName !== 'student.practice.show')
+            <canvas class="student-garden-canvas" aria-hidden="true"></canvas>
+        @endif
         {{ $slot }}
         @if (in_array($campusRole, ['teacher', 'student'], true) && ! $isAssessmentSession)
             <x-app-footer />

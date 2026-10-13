@@ -84,60 +84,57 @@ html.dark .assessment-text-panel-heading {
 }
 html.dark .comfort-option:hover { color: #ffffff; }
 
-html.dark .login-page {
-    background: linear-gradient(rgba(5, 16, 30, .72), rgba(5, 16, 30, .88)), url('/images/campus/pixel-world.png') center bottom / cover fixed no-repeat;
+:is(html.dark .login-page, .login-page.is-night) {
+    --dark-ink: #f3f8fc;
+    --dark-muted: #d2e2ef;
+    --dark-line: #29435f;
     color: var(--dark-ink);
 }
-html.dark .login-campus-marker { filter: brightness(.82) saturate(.94) drop-shadow(8px 10px 0 #020810aa) drop-shadow(0 18px 22px #00000066); }
-html.dark .login-bird { color: #b7d9ec; }
-html.dark .login-motion-toggle { background: #10283c; border-color: #355875; color: #ffffff; }
-html.dark .login-header-actions > span { color: #c4cfda; }
-html.dark .login-header,
-html.dark .login-footer {
-    background: rgba(9, 24, 39, .94);
+:is(html.dark .login-page, .login-page.is-night) .login-bird { color: #b7d9ec; }
+:is(html.dark .login-page, .login-page.is-night) :is(.login-motion-toggle, .ui-icon-button) { background: #10283c; border-color: #355875; color: #ffffff; }
+:is(html.dark .login-page, .login-page.is-night) .login-header-actions > span { color: #c4cfda; }
+:is(html.dark .login-page, .login-page.is-night) :is(.login-header, .login-footer) {
+    background: rgba(7, 23, 38, .96);
     border-color: #294765;
     color: var(--dark-muted);
 }
-html.dark .login-brand,
-html.dark .login-options a,
-html.dark .login-register a { color: #77c8ff; }
-html.dark .login-form-panel {
-    background: rgba(10, 26, 43, .96);
+:is(html.dark .login-page, .login-page.is-night) :is(.login-brand, .login-options a, .login-register a) { color: #77c8ff; }
+:is(html.dark .login-page, .login-page.is-night) .login-form-panel {
+    max-width: 410px;
+    background: rgba(7, 23, 38, .97);
     border-color: #345875;
     border-top-color: #60b7ff;
     box-shadow: 0 18px 42px rgba(0, 0, 0, .36);
 }
-html.dark .login-heading h1 { color: var(--dark-ink); }
-html.dark .login-heading p,
-html.dark .login-options label,
-html.dark .login-register { color: var(--dark-muted); }
-html.dark .login-page .auth-input {
-    background: #0d1c2d;
+:is(html.dark .login-page, .login-page.is-night) .login-heading h1 { color: var(--dark-ink); }
+:is(html.dark .login-page, .login-page.is-night) .login-heading > span { color: #69cda6; }
+:is(html.dark .login-page, .login-page.is-night) :is(.login-heading p, .login-options label, .login-register) { color: var(--dark-muted); }
+:is(html.dark .login-page, .login-page.is-night) .login-form .auth-input {
+    background: #1d324a;
     border-color: #35536c;
     color: var(--dark-ink);
 }
-html.dark .login-password-toggle:hover { background: #17324d; color: #91d4ff; }
-html.dark .login-register { border-color: var(--dark-line); }
-html.dark .login-app-download { border-color: #355875; background: #10283c; color: #e6f4ff; }
-html.dark .login-app-download:hover { border-color: #65b8e8; background: #16364f; }
-html.dark .login-app-download > .material-symbols-outlined:first-child { color: #77c8ff; }
-html.dark .login-app-download-copy small { color: #b4c8d8; }
-html.dark .login-install-overlay { background: rgba(0, 7, 14, .82); }
-html.dark .login-install-dialog { border-color: #355875; background: #0a1a2b; }
-html.dark .login-install-heading,
-html.dark .login-install-actions,
-html.dark .login-install-blocked { border-color: #294760; }
-html.dark .login-install-heading h2 { color: #f3f8fc; }
-html.dark .login-install-icon { background: #123b31; color: #8be0be; }
-html.dark .login-install-close { border-color: #35536c; color: #c0d3df; }
-html.dark .login-install-close:hover { background: #17324d; color: #fff; }
-html.dark .login-install-intro,
-html.dark .login-install-steps p { color: #c0d3df; }
-html.dark .login-install-warning { background: #0f3029; color: #d4f6e8; }
-html.dark .login-install-blocked { color: #ead9b7; }
-html.dark .login-install-actions { background: #0d1f31; }
-html.dark .login-install-actions button { border-color: #3b5b73; color: #d7e6f0; }
-html.dark .login-install-actions button:hover { background: #17324d; }
+:is(html.dark .login-page, .login-page.is-night) .login-password-toggle:hover { background: #17324d; color: #91d4ff; }
+:is(html.dark .login-page, .login-page.is-night) .login-register { border-color: var(--dark-line); }
+:is(html.dark .login-page, .login-page.is-night) .login-app-download { border-color: #355875; background: #10283c; color: #e6f4ff; }
+:is(html.dark .login-page, .login-page.is-night) .login-app-download:hover { border-color: #65b8e8; background: #16364f; }
+:is(html.dark .login-page, .login-page.is-night) .login-app-download > .material-symbols-outlined:first-child { color: #77c8ff; }
+:is(html.dark .login-page, .login-page.is-night) .login-app-download-copy small { color: #b4c8d8; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-overlay { background: rgba(0, 7, 14, .82); }
+:is(html.dark .login-page, .login-page.is-night) .login-install-dialog { border-color: #355875; background: #0a1a2b; }
+:is(html.dark .login-page, .login-page.is-night) :is(.login-install-heading, .login-install-actions, .login-install-blocked) { border-color: #294760; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-heading h2 { color: #f3f8fc; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-icon { background: #123b31; color: #8be0be; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-close { border-color: #35536c; color: #c0d3df; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-close:hover { background: #17324d; color: #fff; }
+:is(html.dark .login-page, .login-page.is-night) :is(.login-install-intro, .login-install-steps p) { color: #c0d3df; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-warning { background: #0f3029; color: #d4f6e8; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-blocked { color: #ead9b7; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-actions { background: #0d1f31; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-actions button { border-color: #3b5b73; color: #d7e6f0; }
+:is(html.dark .login-page, .login-page.is-night) .login-install-actions button:hover { background: #17324d; }
+:is(html.dark .login-page, .login-page.is-night) .comfort-panel { background: #0e1d2e; border-color: #365976; color: #f3f8fc; }
+:is(html.dark .login-page, .login-page.is-night) .comfort-heading { border-color: #29435f; }
 
 html.dark .campus-theme {
     --campus-ink: #ffffff;
@@ -488,6 +485,62 @@ html.dark .tutor-notice { background: #0f3028; color: #c8f7e6; }
 html.dark .tutor-error,
 html.dark .teacher-ai-error,
 html.dark .tutor-delete { background: #321b20; color: #ffb4b9; border-color: #71434b; }
+
+/* Automatic night styling is limited to student pages; staff themes stay untouched. */
+html.student-night .campus-student {
+    --dark-bg: #061827;
+    --dark-surface: #091b2d;
+    --dark-surface-2: #102b45;
+    --dark-surface-3: #18324d;
+    --dark-line: #24557a;
+    --dark-ink: #ffffff;
+    --dark-muted: #d2e2ef;
+    --dark-primary: #64b7ff;
+    --ui-ink: #ffffff;
+    --ui-line: #29435f;
+    --campus-ink: #ffffff;
+    --campus-line: #24557a;
+    --campus-blue: #64b7ff;
+    background: #061827;
+    color: #ffffff;
+}
+html.student-night .campus-student::before {
+    background: linear-gradient(rgba(4, 18, 31, .78), rgba(4, 18, 31, .92)), url('/images/campus/pixel-world.png') center bottom / cover no-repeat;
+}
+html.student-night .campus-student :is(.text-on-surface, .text-on-surface-variant, .text-on-primary-container, .text-primary-dim, .text-secondary, .text-secondary-dim, .text-outline, .text-slate-900, .text-slate-700, .text-slate-600, .text-slate-500, .text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500) { color: #ffffff; }
+html.student-night .campus-student :is(.campus-sidebar, .campus-sidebar-footer, .campus-topbar, .campus-bottom-nav) { background: rgba(8, 25, 42, .96); border-color: #24557a; color: #eaf6ff; }
+html.student-night .campus-student :is(.campus-sidebar-links > a, .campus-sidebar-footer a, .campus-sidebar-footer button) { color: #bdd7eb; }
+html.student-night .campus-student .campus-sidebar-links > a .material-symbols-outlined { color: #75c3ff; }
+html.student-night .campus-student :is(.campus-sidebar-links > a.border-r-4, .campus-sidebar-links > a:hover, .campus-sidebar-footer a:hover, .campus-sidebar-footer button:hover) { background: #12375a; color: #ffffff; }
+html.student-night .campus-student main :is(.bg-surface-container-lowest, .bg-white, .campus-panel, .student-output-details, .student-assessment-details, .assessment-results) { background: rgba(9, 27, 45, .97); border-color: #2f668e; color: #ffffff; box-shadow: 0 3px 0 #17415f, 0 12px 26px rgba(0, 0, 0, .22); }
+html.student-night .campus-student main :is(.bg-surface-container-low, .bg-surface-container, .bg-surface-container-high, .assessment-result-panel, .student-output-details[open]) { background: #102b45; border-color: #315f83; color: #ffffff; }
+html.student-night .campus-student main :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { background: #091b2d; border-color: #315f83; color: #ffffff; }
+html.student-night .campus-student main :is(input, textarea)::placeholder { color: #a9bfd1; }
+html.student-night .campus-student main :is(table thead, .bg-gray-50, .bg-slate-50) { background: #13263b; color: #ffffff; }
+html.student-night .campus-student main :is(table, th, td, tr, .border-outline-variant) { border-color: #29435f; }
+html.student-night .campus-student :is(.campus-xp, .campus-speech, .campus-avatar-chat-panel) { background: #0c2034; border-color: #4b9ade; color: #eaf6ff; }
+html.student-night .campus-student .campus-xp { background: #0c253c; border-color: #3c91d3; box-shadow: 2px 2px 0 #0a4c82; }
+html.student-night .campus-student .campus-xp-track { background: #10263b; border-color: #5ca2d8; }
+html.student-night .campus-student :is(.campus-avatar-chat-log, .campus-avatar-chat-empty) { background: #091b2d; border-color: #2e5577; color: #c4d9eb; }
+html.student-night .campus-student :is(.campus-mobile-menu > summary, .campus-mobile-menu > nav) { background: #0d2135; border-color: #3a77a8; color: #eaf6ff; }
+html.student-night .campus-student :is(.activity-subject, .activity-subject-heading > a) { background: #0d2338; border-color: #2e668d; color: #eaf6ff; }
+html.student-night .campus-student .activity-subject:hover,
+html.student-night .campus-student .activity-subject[aria-current=page] { background: #12375a; }
+html.student-night .campus-student :is(.campus-bottom-nav a, .campus-brand, .student-output-details > summary) { color: #ffffff; }
+html.student-night .campus-student .campus-bottom-nav a[aria-current="page"] { background: #173d59; box-shadow: inset 0 -3px 0 #83c9ff; }
+html.student-night .campus-student :is(.student-home, .reading-progress-card, .phil-result, .intervention-plan, .intervention-queue, .activity-subject-heading, .student-profile-progress, .assessment-result-detail) { color: #ffffff; }
+html.student-night .campus-student :is(.home-next, .home-stats, .home-section, .reading-progress-card, .reading-progress-empty, .reading-progress-metrics > div, .phil-formula, .phil-recommendation, .reading-progress-metrics, .student-output-details, .student-assessment-details, .assessment-result-panel) { background: #091b2d; border-color: #29435f; }
+html.student-night .campus-student :is(.student-output-details > summary > p, .assessment-result-detail :is(dt, p), .assessment-achievement p) { color: #c4cfda; }
+html.student-night .campus-student .student-output-details > summary > span { background: #102b45; color: #ffffff; }
+html.student-night .campus-student :is(.assessment-output, .assessment-output *) { color: inherit; }
+
+:is(html.dark, html.student-night) .campus-student .leaderboard-row {
+    background: linear-gradient(110deg, #142a3f 0%, #10243a 58%, #0c1d30 100%);
+    border-bottom-color: #29435f;
+}
+:is(html.dark, html.student-night) .campus-student .leaderboard-row :is(.text-on-surface, .text-on-surface-variant) { color: #f3f8fc; }
+:is(html.dark, html.student-night) .campus-student .leaderboard-row .text-on-surface-variant { color: #c1d3e2; }
+:is(html.dark, html.student-night) .campus-student .leaderboard-row .bg-surface-container-low { background: #1a3550; border: 1px solid #315571; }
 
 /* Role-specific components must not retain their light-mode ink or surfaces. */
 html.dark .student-profile-progress,

@@ -4,6 +4,7 @@ import '../css/campus.css';
 import '../css/workspaces.css';
 import '../css/login.css';
 import './login-playground';
+import './student-garden';
 import '../css/frog-pond.css';
 import '../css/fishing-sea.css';
 import '../css/student-assessment.css';

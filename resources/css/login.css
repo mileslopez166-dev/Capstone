@@ -4,12 +4,13 @@
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
-    background: #c8edff url('/images/campus/pixel-world.png') center bottom / cover fixed no-repeat;
+    background: #c8edff;
     color: #17314a;
     letter-spacing: 0;
 }
 .login-page * { letter-spacing: 0; }
-.login-landmark-layer { position: absolute; z-index: 0; inset: 0; pointer-events: none; overflow: hidden; }
+.login-garden-canvas { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+.login-landmark-layer { position: absolute; z-index: 1; inset: 0; pointer-events: none; overflow: hidden; }
 .login-campus-marker {
     position: absolute;
     right: max(20px, calc((100% - 1100px) / 2));
@@ -18,13 +19,22 @@
     width: min(400px, 30vw);
     height: auto;
     image-rendering: pixelated;
-    filter: drop-shadow(8px 10px 0 #253d4b66) drop-shadow(0 18px 22px #17314a33);
+    filter: drop-shadow(0 5px 0 #274c3a44);
     transform: translateZ(0);
 }
 .login-playground { position: relative; z-index: 1; order: 2; flex: 0 0 180px; height: 180px; width: 100%; overflow: hidden; pointer-events: none; }
 .login-playground-canvas { display: block; width: 100%; height: 180px; image-rendering: pixelated; }
-.login-live-scene { position: absolute; z-index: 0; inset: 0; overflow: hidden; pointer-events: none; }
-.login-bird { position: absolute; left: -44px; display: block; width: 30px; height: 15px; color: #214a66; animation: login-bird-flight 18s linear infinite; }
+.login-live-scene { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.login-day-scene { position: absolute; z-index: 0; inset: 40px 0 5px; overflow: hidden; pointer-events: none; }
+.login-night-scene { position: absolute; z-index: 0; inset: 0; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .4s ease; background: #071a30; }
+.login-day-landscape, .login-night-landscape { display: block; width: 100%; height: 100%; object-fit: fill; }
+.login-night-star { position: absolute; width: 4px; height: 4px; background: #fff8d7; box-shadow: 0 0 9px 2px #d8e9ffad; animation: login-star-twinkle 2.8s ease-in-out infinite; }
+.login-night-star-one { top: 13%; left: 24%; }
+.login-night-star-two { top: 26%; left: 64%; animation-delay: -.9s; }
+.login-night-star-three { top: 9%; right: 29%; animation-delay: -1.8s; }
+:is(html.dark .login-page, .login-page.is-night) .login-night-scene { opacity: 1; }
+:is(html.dark .login-page, .login-page.is-night) .login-campus-marker { filter: brightness(.8) saturate(.85) drop-shadow(0 5px 0 #071a3066); }
+.login-bird { position: absolute; left: -44px; display: block; width: 30px; height: 15px; color: #f8fbff; filter: drop-shadow(0 -2px 0 #254c60); animation: login-bird-flight 18s linear infinite; }
 .login-bird::before, .login-bird::after { content: ''; position: absolute; top: 5px; width: 14px; height: 7px; border-top: 3px solid currentColor; }
 .login-bird::before { left: 0; transform: rotate(25deg); }
 .login-bird::after { right: 0; transform: rotate(-25deg); }
@@ -33,12 +43,13 @@
 .login-bird-three { top: 11%; scale: .52; animation-delay: -16s; animation-duration: 26s; }
 .login-bird::before { transform-origin: right center; animation: login-wing-left .65s steps(2) infinite; }
 .login-bird::after { transform-origin: left center; animation: login-wing-right .65s steps(2) infinite; }
-.login-page.is-motion-paused .login-live-scene * { animation-play-state: paused; }
+.login-page.is-motion-paused :is(.login-live-scene *, .login-live-scene *::before, .login-live-scene *::after, .login-night-scene *) { animation-play-state: paused; }
 .login-header-actions { display: flex; align-items: center; gap: 16px; }
 .login-header-actions > span { color: #526d7e; font-size: 12px; }
 .login-motion-toggle { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #b0d8ed; border-radius: 6px; background: #f8fbfd; color: #174573; }
 .login-motion-toggle:hover { background: #d4efff; }
 .login-header, .login-main, .login-footer { position: relative; z-index: 2; }
+.login-header { z-index: 10; }
 .login-header {
     display: flex;
     align-items: center;
@@ -71,7 +82,7 @@
 .login-field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
 .login-field-wrap { position: relative; }
 .login-field-wrap > .material-symbols-outlined { position: absolute; left: 13px; top: 14px; font-size: 20px; color: #6a8190; pointer-events: none; }
-.login-page .auth-input { height: 48px; padding: 12px 46px 12px 42px; border: 1px solid #ccd9e1; border-radius: 6px; background: #f8fbfd; font-size: 14px; font-weight: 400; box-shadow: none; }
+.login-page .auth-input { height: 48px; padding: 12px 46px 12px 42px; border: 1px solid #ccd9e1; border-radius: 6px; background: #eaf1fc; font-size: 14px; font-weight: 400; box-shadow: none; }
 .login-page .auth-input:focus { border-color: #0879bb; outline: 3px solid #d4efff; }
 .login-page .auth-input[aria-invalid=true] { border-color: #b31b25; }
 .login-password-toggle { position: absolute; right: 3px; top: 3px; display: grid; place-items: center; width: 42px; height: 42px; color: #6a8190; border-radius: 4px; }
@@ -120,11 +131,11 @@
 .login-footer { order: 3; padding: 12px 20px; text-align: center; background: #ffffffed; color: #486878; font-size: 11px; }
 .login-page :is(a, button, input):focus-visible { outline: 3px solid #0879bb; outline-offset: 3px; }
 @media (max-width: 520px) {
-    .login-header { padding: 16px 20px; }
+    .login-header { padding: 16px; gap: 8px; }
+    .login-header-actions { gap: 8px; }
     .login-header-actions > span { display: none; }
     .login-main { padding: 24px 16px 12px; }
     .login-form-panel { padding: 26px 22px; }
-    .login-page { background-attachment: scroll; }
     .login-campus-marker { right: 10px; bottom: clamp(58px, 9vh, 84px); width: 190px; max-width: 48vw; }
     .login-install-overlay { align-items: end; padding: 10px; }
     .login-install-dialog { max-height: 92dvh; }
@@ -135,16 +146,21 @@
 @media (min-width: 521px) {
     .login-campus-marker { left: max(8px, calc((100% - 1420px) / 2)); right: auto; }
 }
-@media (min-width: 768px) {
+@media (min-width: 768px) and (min-height: 600px) {
     .login-page { height: 100dvh; min-height: 0; overflow: hidden; }
-    .login-campus-marker { bottom: clamp(70px, calc(12vh - 12px), 104px); }
+    .login-campus-marker { left: 13.5%; right: auto; width: 22%; bottom: 16.8%; }
     .login-playground {
         position: absolute;
-        inset: auto 0 35px;
+        inset: auto 0 calc(11.2% - 32px);
         z-index: 1;
         width: 100%;
     }
-    .login-main { min-height: 0; overflow: hidden; }
+    .login-page .login-main { min-height: 0; overflow: hidden; padding-bottom: 70px; }
+    .login-footer { display: grid; place-items: center; min-height: 7.5%; }
+}
+@media (max-width: 767px), (max-height: 599px) {
+    .login-day-landscape, .login-night-landscape { object-fit: cover; object-position: 72% bottom; }
+    .login-campus-marker { bottom: 10.5%; }
 }
 @media (min-width: 768px) and (max-height: 820px) {
     .login-header { padding: 11px 28px; }
@@ -173,6 +189,12 @@
 }
 @keyframes login-wing-left { 50% { transform: rotate(-25deg); } }
 @keyframes login-wing-right { 50% { transform: rotate(25deg); } }
+@keyframes login-star-twinkle { 0%, 100% { opacity: .55; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.4); } }
 @media (prefers-reduced-motion: reduce) {
     .login-live-scene * { animation: none !important; }
+    .login-night-scene * { animation: none !important; }
 }
+.login-page.is-motion-paused .login-bird { left: auto; animation: none; transform: none; }
+.login-page.is-motion-paused .login-bird-one { top: 17%; right: 24%; }
+.login-page.is-motion-paused .login-bird-two { top: 27%; right: 52%; scale: .72; }
+.login-page.is-motion-paused .login-bird-three { top: 11%; right: 76%; scale: .52; }

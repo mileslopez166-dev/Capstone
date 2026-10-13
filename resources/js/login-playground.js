@@ -1,3 +1,5 @@
+import { createGardenScene } from './garden-scene';
+
 const canvas = document.querySelector('.login-playground-canvas');
 
 if (canvas) {
@@ -9,9 +11,14 @@ function initPlayground(canvas, ctx) {
     const page = canvas.closest('.login-page');
     const button = page.querySelector('.login-motion-toggle');
     const marker = page.querySelector('.login-campus-marker');
+    const garden = createGardenScene(page.querySelector('.login-garden-canvas'), {
+        exclusion: page.querySelector('.login-form-panel'),
+    });
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let paused = motion.matches;
+    let manuallyPaused = false;
+    let reducedMotion = window.PgaalsPreferences?.reducedMotion ?? motion.matches;
     let dark = document.documentElement.classList.contains('dark');
+    let night = isNightTime();
     let frame = 0;
     let previous = 0;
     let elapsed = 0;
@@ -19,6 +26,8 @@ function initPlayground(canvas, ctx) {
     let height = 90;
     let playingWidth = 0;
     let playOffset = 0;
+    let sceneFloor = 74;
+    let timeOfDay = 0;
 
     const rect = (x, y, w, h, color) => {
         ctx.fillStyle = color;
@@ -26,6 +35,16 @@ function initPlayground(canvas, ctx) {
     };
     const ease = value => value * value * (3 - 2 * value);
     const clamp = value => Math.max(0, Math.min(1, value));
+
+    function isNightTime() {
+        try {
+            const theme = JSON.parse(localStorage.getItem('pgaals-comfort'))?.theme;
+            if (theme === 'light') return false;
+            if (theme === 'dark') return true;
+        } catch { /* Use the clock when saved preferences are unavailable. */ }
+        const hour = new Date().getHours();
+        return hour >= 19 || hour < 6;
+    }
 
     function child(x, floor, direction, shirt, hair, ponytail, run, kick, jump, time) {
         // Feet stay on the shared ground line; only the jump arc lifts the sprite.
@@ -72,21 +91,9 @@ function initPlayground(canvas, ctx) {
     function draw() {
         if (!width) return;
         ctx.clearRect(0, 0, width, height);
-        const floor = height - 16;
-        rect(0, floor, width, 16, dark ? '#4c454b' : '#846447');
-        for (let x = 0; x < width; x += 12) {
-            rect(x, floor + 5, 11, 10, dark ? '#60515b' : '#a07c52');
-            rect(x + 2, floor + 7, 3, 2, '#c59d6955');
-            rect(x + 7, floor + 12, 3, 2, '#312d4355');
-            rect(x, floor, 12, 3, dark ? '#3b9363' : '#56ad46');
-            rect(x + 1, floor, 8, 1, dark ? '#73bc82' : '#a3de66');
-            rect(x + 8, floor + 3, 3, 2, '#366d42');
-        }
-        for (let x = 7; x < width; x += 29) {
-            rect(x, floor - 3, 1, 4, '#3b864a');
-            rect(x - 2, floor - 2, 2, 1, '#65b354');
-            if (x % 3 === 0) rect(x - 1, floor - 5, 3, 2, '#f9d96d');
-        }
+        const nighttime = dark || night;
+        garden?.draw(elapsed, nighttime);
+        const floor = sceneFloor;
 
         const left = playOffset + Math.max(16, playingWidth * .15);
         const right = playOffset + Math.max(playingWidth * .15 + 40, playingWidth * .83);
@@ -122,7 +129,7 @@ function initPlayground(canvas, ctx) {
             const sign = returning ? 1 : -1;
             for (let i = 0; i < 3; i++) {
                 const age = (elapsed * 3 + i / 3) % 1;
-                rect(runner + sign * (7 + age * 12), floor - 2 - age * 4, 2, 2, dark ? '#ad9b76' : '#dec187');
+                rect(runner + sign * (7 + age * 12), floor - 2 - age * 4, 2, 2, nighttime ? '#a99b83' : '#dec187');
             }
         }
     }
@@ -135,43 +142,80 @@ function initPlayground(canvas, ctx) {
     }
 
     function sync() {
+        const paused = manuallyPaused || reducedMotion || document.hidden;
         cancelAnimationFrame(frame);
         previous = 0;
-        page.classList.toggle('is-motion-paused', paused || document.hidden);
+        page.classList.toggle('is-motion-paused', paused);
         button.setAttribute('aria-pressed', String(paused));
-        button.title = paused ? 'Play background animation' : 'Pause background animation';
+        button.disabled = reducedMotion;
+        button.title = reducedMotion ? 'Background animation is disabled by Reduce motion' : paused ? 'Play background animation' : 'Pause background animation';
         button.setAttribute('aria-label', button.title);
         button.querySelector('span').textContent = paused ? 'play_arrow' : 'pause';
         draw();
         if (!paused && !document.hidden) frame = requestAnimationFrame(tick);
     }
 
-    const resize = new ResizeObserver(() => {
+    function measureScene() {
         const box = canvas.getBoundingClientRect();
         width = canvas.width = Math.ceil(box.width / 2);
         height = canvas.height = Math.ceil(box.height / 2);
+        const pageBox = page.getBoundingClientRect();
+        // Both landscape assets share the same foreground grass line.
+        sceneFloor = (pageBox.top + pageBox.height * .888 - box.top) / 2;
         const markerBox = marker.getBoundingClientRect();
         const markerLeft = (markerBox.left - box.left) / 2;
         const markerRight = (markerBox.right - box.left) / 2;
-        if (markerLeft < width / 2) {
+        const leftSpace = Math.max(0, markerLeft - 8);
+        const rightSpace = Math.max(0, width - markerRight - 8);
+        if (rightSpace > leftSpace) {
             playOffset = markerRight + 8;
-            playingWidth = width - playOffset - 8;
+            playingWidth = rightSpace;
         } else {
             playOffset = 0;
-            playingWidth = markerLeft - 8;
+            playingWidth = leftSpace;
         }
         ctx.imageSmoothingEnabled = false;
+        garden?.resize();
         draw();
-    });
+    }
+    const resize = new ResizeObserver(measureScene);
     resize.observe(canvas);
-    button.addEventListener('click', () => { paused = !paused; sync(); });
-    motion.addEventListener('change', () => { paused = motion.matches; sync(); });
+    resize.observe(page);
+    resize.observe(marker);
+    function updateTimeOfDay() {
+        night = isNightTime();
+        page.classList.toggle('is-night', night);
+        measureScene();
+    }
+    function startClock() {
+        window.clearInterval(timeOfDay);
+        updateTimeOfDay();
+        timeOfDay = window.setInterval(updateTimeOfDay, 60_000);
+    }
+    startClock();
+    button.addEventListener('click', () => { manuallyPaused = !manuallyPaused; sync(); });
+    motion.addEventListener('change', () => { reducedMotion = window.PgaalsPreferences?.reducedMotion ?? motion.matches; sync(); });
+    window.addEventListener('pgaals:preferences', event => {
+        reducedMotion = event.detail?.reducedMotion ?? window.PgaalsPreferences?.reducedMotion ?? motion.matches;
+        updateTimeOfDay();
+        sync();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        reducedMotion = window.PgaalsPreferences?.reducedMotion ?? motion.matches;
+        sync();
+    }, { once: true });
     document.addEventListener('visibilitychange', sync);
     new MutationObserver(() => {
         dark = document.documentElement.classList.contains('dark');
-        draw();
+        measureScene();
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    window.addEventListener('pagehide', () => cancelAnimationFrame(frame));
-    window.addEventListener('pageshow', sync);
+    window.addEventListener('pagehide', () => {
+        cancelAnimationFrame(frame);
+        window.clearInterval(timeOfDay);
+    });
+    window.addEventListener('pageshow', () => {
+        startClock();
+        sync();
+    });
     sync();
 }
