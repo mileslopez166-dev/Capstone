@@ -271,6 +271,18 @@ html.dark .admin-account {
     border-color: #31506c;
     color: var(--workspace-ink);
 }
+html.dark .campus-topbar .campus-search,
+html.dark .admin-topbar .admin-search { background: #102338; border-color: #3a5870; }
+html.dark .campus-topbar .campus-search input,
+html.dark .admin-topbar .admin-search input { color: #f0f5fa; }
+html.dark .campus-topbar .campus-search input::placeholder,
+html.dark .admin-topbar .admin-search input::placeholder { color: #a8b9c9; }
+html.dark .campus-topbar .campus-search button,
+html.dark .admin-topbar .admin-search button { color: #aec1d2; }
+html.dark .campus-topbar .campus-search button:hover,
+html.dark .admin-topbar .admin-search button:hover { background: #1a3853; color: #fff; }
+html.dark .campus-topbar .campus-search:focus-within,
+html.dark .admin-topbar .admin-search:focus-within { background: #122c46; border-color: #69aff0; outline-color: #69aff03d; }
 html.dark .teacher-theme .campus-sidebar-links > a,
 html.dark .teacher-theme .campus-sidebar-footer :is(a, button) { color: #bac9d7; }
 html.dark .teacher-theme .campus-sidebar-links > a.border-r-4,
