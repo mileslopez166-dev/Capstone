@@ -89,6 +89,82 @@ class TeacherStudentRosterTest extends TestCase
         $response->assertSeeText($student->email);
     }
 
+    public function test_teacher_sees_only_pending_enrollment_requests_for_their_section(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $matchingStudent = User::factory()->pendingApproval()->create([
+            'name' => 'Matching Request',
+            'section' => 'Magalang',
+        ]);
+        $otherStudent = User::factory()->pendingApproval()->create([
+            'name' => 'Other Section Request',
+            'section' => 'Masunurin',
+        ]);
+
+        $this->actingAs($teacher)->get(route('students.index'))
+            ->assertOk()
+            ->assertSeeText('Enrollment Requests')
+            ->assertSeeText($matchingStudent->name)
+            ->assertSee(route('students.enrollment.approve', $matchingStudent))
+            ->assertDontSeeText($otherStudent->name);
+    }
+
+    public function test_teacher_can_accept_a_pending_student_into_their_section(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Matapat']);
+        $student = User::factory()->pendingApproval()->create([
+            'name' => 'Pending Matapat Learner',
+            'section' => 'Matapat',
+        ]);
+
+        $this->actingAs($teacher)
+            ->post(route('students.enrollment.approve', $student))
+            ->assertRedirect(route('students.index'))
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'section' => 'Matapat',
+            'approval_status' => 'approved',
+            'approved_by' => $teacher->id,
+        ]);
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $student->id,
+            'type' => 'enrollment_approved',
+        ]);
+    }
+
+    public function test_teacher_cannot_accept_a_student_from_another_section(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Masipag']);
+        $student = User::factory()->pendingApproval()->create(['section' => 'Magalang']);
+
+        $this->actingAs($teacher)
+            ->post(route('students.enrollment.approve', $student))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'approval_status' => 'pending',
+            'approved_by' => null,
+        ]);
+    }
+
+    public function test_non_teacher_cannot_accept_an_enrollment_request(): void
+    {
+        $student = User::factory()->pendingApproval()->create(['section' => 'Magalang']);
+        $otherStudent = User::factory()->create(['section' => 'Magalang']);
+
+        $this->actingAs($otherStudent)
+            ->post(route('students.enrollment.approve', $student))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'approval_status' => 'pending',
+        ]);
+    }
+
     public function test_students_index_shows_online_and_offline_student_statuses(): void
     {
         $teacher = User::factory()->teacher()->create();

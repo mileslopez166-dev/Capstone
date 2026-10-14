@@ -140,18 +140,17 @@
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="group" x-show="role === 'teacher'" x-transition>
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="section">Assigned Section</label>
+                        <div class="group">
+                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="section" x-text="role === 'teacher' ? 'Assigned Section' : 'Your Section'"></label>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">class</span>
                                 <select
                                     id="section"
                                     name="section"
-                                    x-bind:disabled="role !== 'teacher'"
-                                    x-bind:required="role === 'teacher'"
+                                    required
                                     class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-10 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
                                 >
-                                    <option value="" disabled selected>Select assigned section</option>
+                                    <option value="" disabled @selected(! old('section'))>Select section</option>
                                     @foreach (\App\Support\SectionCatalog::labels() as $section)
                                         <option value="{{ $section }}" @selected(old('section') === $section)>{{ $section }}</option>
                                     @endforeach
@@ -164,8 +163,8 @@
                             <div class="flex items-start gap-3">
                                 <span class="material-symbols-outlined mt-0.5 text-primary">pending_actions</span>
                                 <div>
-                                    <p class="font-semibold text-on-surface" x-text="role === 'teacher' ? 'Teacher accounts require administrator approval.' : 'Student accounts require administrator approval.'"></p>
-                                    <p class="mt-1" x-text="role === 'teacher' ? 'After registration, your request will be reviewed in the admin token request queue before you can sign in.' : 'After registration, your request will be reviewed first. Your section will be assigned by a teacher or administrator.'"></p>
+                                    <p class="font-semibold text-on-surface" x-text="role === 'teacher' ? 'Teacher accounts require administrator approval.' : 'Student accounts require section approval.'"></p>
+                                    <p class="mt-1" x-text="role === 'teacher' ? 'After registration, your request will be reviewed in the admin token request queue before you can sign in.' : 'After registration, a teacher assigned to your selected section or an administrator can approve your account.'"></p>
                                 </div>
                             </div>
                         </div>

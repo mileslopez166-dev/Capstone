@@ -36,14 +36,14 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:student,teacher'],
-            'section' => ['required_if:role,teacher', 'nullable', 'string', Rule::in(SectionCatalog::labels())],
+            'section' => ['required', 'string', Rule::in(SectionCatalog::labels())],
             'gender' => ['required_if:role,student', 'nullable', 'string', Rule::in(['male', 'female'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             'first_name.not_regex' => 'The first name must not contain numbers.',
             'middle_name.not_regex' => 'The middle name must not contain numbers.',
             'last_name.not_regex' => 'The last name must not contain numbers.',
-            'section.required_if' => 'Please choose the section you are assigned to.',
+            'section.required' => 'Please choose your section.',
             'gender.required_if' => 'Please choose the student avatar style.',
         ]);
 
@@ -63,7 +63,7 @@ class RegisteredUserController extends Controller
             'name' => $fullName,
             'email' => $request->email,
             'role' => $selectedRole,
-            'section' => $selectedRole === 'teacher' ? $request->section : null,
+            'section' => $request->section,
             'gender' => $selectedRole === 'student' ? $request->gender : null,
             'teacher_token' => null,
             'approval_status' => $requiresApproval ? 'pending' : 'approved',
@@ -74,11 +74,13 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         NotificationSender::notifyAdminsAboutRegistration($user);
-        NotificationSender::notifyStudentEnrolled($user);
+        NotificationSender::notifyTeachersAboutEnrollmentRequest($user);
 
-        $statusMessage = $requiresApproval
-            ? "{$roleLabel} account request submitted. Please wait for an administrator to approve your access."
-            : 'Account created successfully. Please log in to continue.';
+        $statusMessage = match ($selectedRole) {
+            'student' => "{$roleLabel} account request submitted. A teacher from your section or an administrator will review it.",
+            'teacher' => "{$roleLabel} account request submitted. Please wait for an administrator to approve your access.",
+            default => 'Account created successfully. Please log in to continue.',
+        };
 
         return redirect()->route('login')->with('status', $statusMessage);
     }

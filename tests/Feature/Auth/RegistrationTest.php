@@ -86,9 +86,25 @@ class RegistrationTest extends TestCase
             'name' => 'Student User',
             'email' => 'student@example.com',
             'role' => 'student',
+            'section' => 'Masunurin',
             'gender' => 'female',
             'approval_status' => 'pending',
         ]);
+    }
+
+    public function test_student_registration_requires_a_section(): void
+    {
+        $this->from('/register')->post('/register', [
+            'first_name' => 'Student',
+            'last_name' => 'Without Section',
+            'email' => 'no.section@example.com',
+            'role' => 'student',
+            'gender' => 'male',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect('/register')->assertSessionHasErrors('section');
+
+        $this->assertDatabaseMissing('users', ['email' => 'no.section@example.com']);
     }
 
     public function test_admin_role_can_not_be_self_registered(): void

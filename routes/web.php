@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentRetakeRequestController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Student\AvatarController;
 use App\Http\Controllers\Student\PracticeController as StudentPracticeController;
 use App\Http\Controllers\Student\SearchController as StudentSearchController;
@@ -29,9 +29,9 @@ use App\Models\InterventionPlan;
 use App\Models\User;
 use App\Support\AssessmentScores;
 use App\Support\InterventionFollowUp;
+use App\Support\SectionCatalog;
 use App\Support\StudentLeaderboard;
 use App\Support\StudentProgress;
-use App\Support\SectionCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -153,6 +153,7 @@ Route::get('/teacher/dashboard', function () use ($submissionAverage) {
 
     $students = User::query()
         ->where('role', 'student')
+        ->where('approval_status', 'approved')
         ->orderBy('name')
         ->get();
 
@@ -479,6 +480,7 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
 
     $students = User::query()
         ->where('role', 'student')
+        ->where('approval_status', 'approved')
         ->orderBy('name')
         ->get()
         ->map(function (User $student) use ($teacherSubmissions, $submissionAverage, $activeStudentIds): User {
@@ -491,6 +493,16 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
         });
 
     return view('students.index', [
+        'pendingStudents' => User::query()
+            ->where('role', 'student')
+            ->where('approval_status', 'pending')
+            ->when(
+                filled($teacher->section),
+                fn ($query) => $query->where('section', $teacher->section),
+                fn ($query) => $query->whereRaw('1 = 0')
+            )
+            ->oldest()
+            ->get(),
         'students' => $students,
     ]);
 })->middleware(['auth', 'verified'])->name('students.index');
@@ -502,6 +514,10 @@ Route::post('/teacher/students', [StudentController::class, 'store'])
 Route::get('/teacher/students/create', [StudentController::class, 'create'])
     ->middleware(['auth', 'verified'])
     ->name('students.create');
+
+Route::post('/teacher/students/{student}/enrollment/approve', [StudentController::class, 'approveEnrollment'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.enrollment.approve');
 
 Route::get('/teacher/students/{student}/ml-level', function (User $student, \App\Support\MLPredictionService $ml) {
     abort_unless(auth()->user()?->isTeacher(), 403);

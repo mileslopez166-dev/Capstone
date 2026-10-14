@@ -40,6 +40,59 @@
                         </div>
                     @endif
 
+                    <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.03)]" aria-labelledby="enrollment-requests-title">
+                        <div class="flex flex-col gap-3 border-b border-outline-variant/10 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                            <div>
+                                <h2 id="enrollment-requests-title" class="font-headline text-xl font-extrabold text-on-surface">Enrollment Requests</h2>
+                                <p class="mt-2 text-sm text-on-surface-variant">Students waiting to join {{ $teacher->section ?: 'your assigned section' }}.</p>
+                            </div>
+                            <span class="inline-flex w-fit items-center gap-2 rounded-full bg-primary-container/30 px-3 py-1 text-xs font-bold text-primary">
+                                <span class="material-symbols-outlined text-base">pending_actions</span>
+                                {{ $pendingStudents->count() }} pending
+                            </span>
+                        </div>
+
+                        @if ($pendingStudents->isEmpty())
+                            <div class="px-6 py-8 text-center text-sm text-on-surface-variant sm:px-8">
+                                No students are waiting for section approval.
+                            </div>
+                        @else
+                            <x-data-table-scroll label="Pending student enrollment requests">
+                                <table class="w-full min-w-[620px] border-collapse text-left">
+                                    <thead>
+                                        <tr class="bg-surface-container-low/50">
+                                            <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Student</th>
+                                            <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Section</th>
+                                            <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Requested</th>
+                                            <th class="px-8 py-4 text-right text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-outline-variant/5">
+                                        @foreach ($pendingStudents as $pendingStudent)
+                                            <tr>
+                                                <td class="px-8 py-5">
+                                                    <p class="font-bold text-on-surface">{{ $pendingStudent->name }}</p>
+                                                    <p class="ui-table-copy text-xs text-on-surface-variant">{{ $pendingStudent->email }}</p>
+                                                </td>
+                                                <td class="px-8 py-5 text-sm font-semibold text-on-surface">{{ $pendingStudent->section }}</td>
+                                                <td class="px-8 py-5 text-sm text-on-surface-variant">{{ $pendingStudent->created_at?->format('M d, Y') }}</td>
+                                                <td class="px-8 py-5 text-right">
+                                                    <form method="POST" action="{{ route('students.enrollment.approve', $pendingStudent) }}">
+                                                        @csrf
+                                                        <button class="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-bold text-surface-container-lowest transition-colors hover:bg-secondary-dim" type="submit">
+                                                            <span class="material-symbols-outlined text-lg">person_check</span>
+                                                            Accept
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </x-data-table-scroll>
+                        @endif
+                    </section>
+
 
                     <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
                         <div class="border-b border-outline-variant/10 p-8">

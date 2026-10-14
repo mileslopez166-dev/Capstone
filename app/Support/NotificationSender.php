@@ -31,7 +31,7 @@ class NotificationSender
                     self::reportFailure($exception, $user, $type, 'in-app');
                 }
 
-                if (in_array($type, ['registration', 'assessment_created', 'assessment_published'], true)
+                if (in_array($type, ['registration', 'student_enrollment_request', 'assessment_created', 'assessment_published'], true)
                     && PhonePushNotification::isConfigured()) {
                     try {
                         $user->notify(new PhonePushNotification($type, $title, $body, $url));
@@ -62,6 +62,38 @@ class NotificationSender
             sprintf('%s registered as %s and is waiting for review.', $registeredUser->name, ucfirst($registeredUser->role)),
             route('admin.token-requests.index')
         );
+    }
+
+    public static function notifyTeachersAboutEnrollmentRequest(User $student): void
+    {
+        if (! $student->isStudent() || blank($student->section)) {
+            return;
+        }
+
+        self::sendToUsers(
+            User::query()
+                ->where('role', 'teacher')
+                ->where('approval_status', 'approved')
+                ->where('section', $student->section)
+                ->get(),
+            'student_enrollment_request',
+            'Student enrollment request',
+            sprintf('%s wants to join %s.', $student->name, $student->section),
+            route('students.index')
+        );
+    }
+
+    public static function notifyStudentEnrollmentApproved(User $student, User $approver): void
+    {
+        self::sendToUsers(
+            [$student],
+            'enrollment_approved',
+            'Enrollment approved',
+            sprintf('%s approved your enrollment in %s.', $approver->name, $student->section),
+            route('student.dashboard')
+        );
+
+        self::notifyStudentEnrolled($student, $approver);
     }
 
     public static function notifyStudentEnrolled(User $student, ?User $creator = null): void

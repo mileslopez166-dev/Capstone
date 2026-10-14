@@ -137,7 +137,7 @@ class TokenRequestController extends Controller
         $user->forceFill($changes)->save();
 
         if ($user->isStudent()) {
-            NotificationSender::notifyStudentEnrolled($user, $request->user());
+            NotificationSender::notifyStudentEnrollmentApproved($user, $request->user());
         }
 
         return redirect()

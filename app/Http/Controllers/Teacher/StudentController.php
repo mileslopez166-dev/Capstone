@@ -72,4 +72,32 @@ class StudentController extends Controller
             ->route('students.index')
             ->with('status', "{$student->name}'s student account has been created.");
     }
+
+    public function approveEnrollment(Request $request, User $student): RedirectResponse
+    {
+        $teacher = $request->user();
+
+        abort_unless($teacher?->isTeacher() && $teacher->isApproved(), 403);
+        abort_unless(filled($teacher->section), 403, 'Your teacher account needs an assigned section.');
+
+        $approved = User::query()
+            ->whereKey($student->id)
+            ->where('role', 'student')
+            ->where('approval_status', 'pending')
+            ->where('section', $teacher->section)
+            ->update([
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => $teacher->id,
+            ]);
+
+        abort_unless($approved === 1, 404);
+
+        $student->refresh();
+        NotificationSender::notifyStudentEnrollmentApproved($student, $teacher);
+
+        return redirect()
+            ->route('students.index')
+            ->with('status', "{$student->name} has been accepted into {$teacher->section}.");
+    }
 }

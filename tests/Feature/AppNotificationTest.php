@@ -57,6 +57,38 @@ class AppNotificationTest extends TestCase
         );
     }
 
+    public function test_student_registration_notifies_only_teachers_in_the_requested_section(): void
+    {
+        $matchingTeacher = User::factory()->teacher()->create([
+            'section' => 'Magalang',
+            'approval_status' => 'approved',
+        ]);
+        $otherTeacher = User::factory()->teacher()->create([
+            'section' => 'Masunurin',
+            'approval_status' => 'approved',
+        ]);
+
+        $this->post(route('register'), [
+            'first_name' => 'Section',
+            'last_name' => 'Applicant',
+            'email' => 'section.applicant@example.com',
+            'role' => 'student',
+            'section' => 'Magalang',
+            'gender' => 'female',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect(route('login'));
+
+        $this->assertDatabaseHas(AppNotification::class, [
+            'user_id' => $matchingTeacher->id,
+            'type' => 'student_enrollment_request',
+        ]);
+        $this->assertDatabaseMissing(AppNotification::class, [
+            'user_id' => $otherTeacher->id,
+            'type' => 'student_enrollment_request',
+        ]);
+    }
+
     public function test_teacher_is_notified_when_student_finishes_assessment(): void
     {
         $teacher = User::factory()->teacher()->create([
