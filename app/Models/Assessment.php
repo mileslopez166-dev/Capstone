@@ -8,10 +8,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Assessment extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $assessment): void {
+            if ($assessment->asset_path) {
+                Storage::disk('public')->delete($assessment->asset_path);
+            }
+        });
+    }
 
     public const UNLIMITED_RETRY_LIMIT = 65535;
 

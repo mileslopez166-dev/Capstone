@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,6 +40,29 @@ class RegistrationTest extends TestCase
             'section' => 'Magalang',
             'approval_status' => 'pending',
         ]);
+    }
+
+    public function test_registration_succeeds_with_database_queued_phone_notifications(): void
+    {
+        config([
+            'queue.default' => 'database',
+            'webpush.vapid.public_key' => 'test-public-key',
+            'webpush.vapid.private_key' => 'test-private-key',
+        ]);
+        User::factory()->admin()->create(['approval_status' => 'approved']);
+
+        $this->post('/register', [
+            'first_name' => 'Queue',
+            'last_name' => 'Tester',
+            'email' => 'queue.tester@example.com',
+            'role' => 'teacher',
+            'section' => 'Magalang',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect(route('login'));
+
+        $this->assertDatabaseHas('users', ['email' => 'queue.tester@example.com']);
+        $this->assertDatabaseHas('jobs', ['queue' => 'default']);
     }
 
     public function test_student_registration_redirects_to_the_login_screen(): void

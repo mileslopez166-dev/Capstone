@@ -8,6 +8,8 @@ use App\Models\AssessmentSubmission;
 use App\Models\User;
 use App\Notifications\PhonePushNotification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NotificationSender
 {
@@ -17,19 +19,38 @@ class NotificationSender
             ->filter(fn ($user): bool => $user instanceof User && $user->exists)
             ->unique('id')
             ->each(function (User $user) use ($type, $title, $body, $url): void {
-                AppNotification::create([
-                    'user_id' => $user->id,
-                    'type' => $type,
-                    'title' => $title,
-                    'body' => $body,
-                    'url' => $url,
-                ]);
+                try {
+                    AppNotification::create([
+                        'user_id' => $user->id,
+                        'type' => $type,
+                        'title' => $title,
+                        'body' => $body,
+                        'url' => $url,
+                    ]);
+                } catch (Throwable $exception) {
+                    self::reportFailure($exception, $user, $type, 'in-app');
+                }
 
                 if (in_array($type, ['registration', 'assessment_created', 'assessment_published'], true)
                     && PhonePushNotification::isConfigured()) {
-                    $user->notify(new PhonePushNotification($type, $title, $body, $url));
+                    try {
+                        $user->notify(new PhonePushNotification($type, $title, $body, $url));
+                    } catch (Throwable $exception) {
+                        self::reportFailure($exception, $user, $type, 'phone');
+                    }
                 }
             });
+    }
+
+    private static function reportFailure(Throwable $exception, User $user, string $type, string $channel): void
+    {
+        Log::warning('A non-critical notification could not be delivered.', [
+            'channel' => $channel,
+            'notification_type' => $type,
+            'user_id' => $user->id,
+            'exception' => $exception::class,
+            'message' => $exception->getMessage(),
+        ]);
     }
 
     public static function notifyAdminsAboutRegistration(User $registeredUser): void

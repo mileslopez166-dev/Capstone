@@ -5,17 +5,25 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasPushSubscriptions, Notifiable;
-
     use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $user): void {
+            if ($user->isTeacher()) {
+                $user->createdAssessments()->get()->each->delete();
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.

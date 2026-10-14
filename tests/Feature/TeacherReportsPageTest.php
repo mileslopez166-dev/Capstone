@@ -136,6 +136,31 @@ class TeacherReportsPageTest extends TestCase
         $response->assertDontSee(route('reports.student', ['student' => $foreignStudent]));
     }
 
+    public function test_other_teachers_scores_are_hidden_across_teacher_pages_and_search(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $otherTeacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Shared Learner']);
+        $ownedAssessment = $this->createAssessment($teacher, ['title' => 'Visible Owner Score']);
+        $foreignAssessment = $this->createAssessment($otherTeacher, ['title' => 'Hidden Foreign Score']);
+        $this->createSubmission($ownedAssessment, $student, ['points' => 250]);
+        $this->createSubmission($foreignAssessment, $student, ['points' => 999]);
+
+        foreach (['teacher.dashboard', 'students.show', 'reports.index', 'reports.student'] as $routeName) {
+            $parameters = in_array($routeName, ['students.show', 'reports.student'], true) ? [$student] : [];
+            $this->actingAs($teacher)->get(route($routeName, $parameters))->assertOk()
+                ->assertSeeText('Visible Owner Score')
+                ->assertDontSeeText('Hidden Foreign Score')
+                ->assertDontSeeText('999');
+        }
+
+        $this->actingAs($teacher)
+            ->get(route('teacher.search', ['q' => 'Hidden Foreign Score']))
+            ->assertOk()
+            ->assertSeeText('No matches found')
+            ->assertDontSeeText('999');
+    }
+
     public function test_reports_index_class_comparison_lists_students_with_finished_assessments(): void
     {
         $teacher = User::factory()->teacher()->create();

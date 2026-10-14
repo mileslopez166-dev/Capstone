@@ -20,7 +20,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -285,10 +284,6 @@ class AssessmentController extends Controller
     {
         abort_unless($request->user()?->isTeacher(), 403);
         abort_unless($assessment->created_by === $request->user()->id, 404);
-
-        if ($assessment->asset_path) {
-            Storage::disk('public')->delete($assessment->asset_path);
-        }
 
         $assessment->delete();
 

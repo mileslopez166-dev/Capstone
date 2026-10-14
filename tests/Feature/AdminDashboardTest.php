@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Assessment;
+use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -131,6 +132,37 @@ class AdminDashboardTest extends TestCase
         $response->assertSessionHas('status', 'All trashed users have been permanently deleted.');
         $this->assertDatabaseMissing('users', ['email' => 'trashed.teacher@example.com']);
         $this->assertDatabaseMissing('users', ['email' => 'trashed.student@example.com']);
+    }
+
+    public function test_deleting_a_teacher_removes_their_assessments_and_scores(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Teacher Owned Assessment',
+            'subject' => 'literacy',
+            'status' => 'published',
+        ]);
+        $submission = AssessmentSubmission::query()->create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'answers' => [],
+            'correct_count' => 1,
+            'question_count' => 1,
+            'points' => 50,
+            'possible_points' => 50,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $teacher))
+            ->assertRedirect(route('admin.dashboard').'#user-management');
+
+        $this->assertSoftDeleted('users', ['id' => $teacher->id]);
+        $this->assertDatabaseMissing('assessments', ['id' => $assessment->id]);
+        $this->assertDatabaseMissing('assessment_submissions', ['id' => $submission->id]);
     }
 
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void
