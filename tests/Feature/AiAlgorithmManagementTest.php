@@ -39,6 +39,73 @@ class AiAlgorithmManagementTest extends TestCase
         $this->assertDatabaseHas('ai_model_evaluations', ['subject' => 'literacy', 'status' => 'queued']);
     }
 
+    public function test_admin_sees_a_separate_evidence_table_for_each_algorithm(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $evaluation = AiModelEvaluation::create([
+            'requested_by' => $admin->id,
+            'subject' => 'literacy',
+            'status' => 'evaluated',
+            'dataset_info' => [
+                'rows' => 48,
+                'learners' => 12,
+                'development_rows' => 38,
+                'held_out_rows' => 10,
+                'class_distribution' => ['Frustration' => 16, 'Instructional' => 18, 'Independent' => 14],
+                'features' => ['reading_score', 'comprehension_score'],
+            ],
+            'recommended_algorithm' => 'decision_tree',
+            'completed_at' => now(),
+        ]);
+        AiModelVersion::create([
+            'evaluation_id' => $evaluation->id,
+            'subject' => 'literacy',
+            'algorithm' => 'decision_tree',
+            'model_name' => 'literacy_decision_tree_defense',
+            'version' => 'defense-v1',
+            'status' => 'validated',
+            'metrics' => [
+                'accuracy' => .81,
+                'precision_macro' => .80,
+                'recall_macro' => .79,
+                'f1_macro' => .795,
+                'folds' => 5,
+                'standard_deviation_f1' => .03,
+                'best_parameters' => ['classifier__max_depth' => 6],
+            ],
+            'provenance' => [
+                'dataset' => $evaluation->dataset_info,
+                'protocol' => ['model_selection' => '5-fold stratified learner-grouped cross-validation'],
+                'random_seed' => 42,
+            ],
+            'validated_at' => now(),
+        ]);
+        AiRecommendationEvaluation::create([
+            'requested_by' => $admin->id,
+            'subject' => 'all',
+            'approach' => 'content_based',
+            'status' => 'evaluated',
+            'metrics' => ['precision_at_5' => .20, 'recall_at_5' => .60, 'ndcg_at_5' => .52, 'coverage' => .75],
+            'dataset_info' => ['interactions' => 80, 'learners' => 12, 'activities' => 9, 'holdouts' => 8],
+            'evaluated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.ai-models.index'))->assertOk();
+
+        $response->assertSeeText('Classification algorithm evidence')
+            ->assertSeeText('Recommendation algorithm evidence')
+            ->assertSeeText('Selected parameters')
+            ->assertSeeText('Max Depth: 6')
+            ->assertSeeText('79.5%')
+            ->assertSeeText('Cosine similarity');
+        $this->assertStringContainsString('aria-label="Decision Tree literacy evidence table"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Random Forest literacy evidence table"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Support Vector Machine literacy evidence table"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Content-Based Filtering evidence table"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Collaborative Filtering evidence table"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Hybrid Recommendation evidence table"', $response->getContent());
+    }
+
     public function test_validated_exact_model_can_be_activated_without_changing_scores(): void
     {
         Http::fake(['*/admin/activate' => Http::response([
