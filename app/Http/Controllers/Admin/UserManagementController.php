@@ -9,6 +9,7 @@ use App\Support\SectionCatalog;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
@@ -172,6 +173,50 @@ class UserManagementController extends Controller
         return redirect()
             ->to(route('admin.dashboard').'#user-management')
             ->with('status', "{$user->name} has been deleted.");
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $validated = $request->validate([
+            'user_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'user_ids.*' => ['required', 'integer', 'distinct'],
+        ], [
+            'user_ids.required' => 'Select at least one account to delete.',
+            'user_ids.min' => 'Select at least one account to delete.',
+        ]);
+
+        $selectedIds = collect($validated['user_ids'])
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+        $selectedUsers = User::query()->whereKey($selectedIds)->get();
+        $deletableUsers = $selectedUsers->filter(fn (User $user): bool =>
+            in_array($user->role, ['student', 'teacher'], true)
+            && ! $user->isSystemAdministrator()
+            && ! $request->user()->is($user)
+        );
+
+        DB::transaction(function () use ($deletableUsers): void {
+            $deletableUsers->each(fn (User $user) => $user->delete());
+        });
+
+        $deletedCount = $deletableUsers->count();
+        $skippedCount = $selectedIds->count() - $deletedCount;
+        $message = $deletedCount === 1
+            ? '1 account has been moved to Trash.'
+            : "{$deletedCount} accounts have been moved to Trash.";
+
+        if ($skippedCount > 0) {
+            $message .= ' '.($skippedCount === 1
+                ? '1 protected or unavailable account was skipped.'
+                : "{$skippedCount} protected or unavailable accounts were skipped.");
+        }
+
+        return redirect()
+            ->to(route('admin.dashboard').'#user-management')
+            ->with('status', $message);
     }
 
     public function trash(Request $request)

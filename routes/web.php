@@ -260,6 +260,10 @@ Route::patch('/admin/users/{user}', [UserManagementController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.update');
 
+Route::delete('/admin/users/bulk', [UserManagementController::class, 'bulkDestroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.users.bulk-destroy');
+
 Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.destroy');

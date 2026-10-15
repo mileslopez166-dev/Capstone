@@ -165,6 +165,76 @@ class AdminDashboardTest extends TestCase
         $this->assertDatabaseMissing('assessment_submissions', ['id' => $submission->id]);
     }
 
+    public function test_admin_can_bulk_delete_student_and_teacher_accounts(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Bulk Delete Assessment',
+            'subject' => 'literacy',
+            'status' => 'published',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.bulk-destroy'), [
+                'user_ids' => [$teacher->id, $student->id],
+            ])
+            ->assertRedirect(route('admin.dashboard').'#user-management')
+            ->assertSessionHas('status', '2 accounts have been moved to Trash.');
+
+        $this->assertSoftDeleted('users', ['id' => $teacher->id]);
+        $this->assertSoftDeleted('users', ['id' => $student->id]);
+        $this->assertDatabaseMissing('assessments', ['id' => $assessment->id]);
+    }
+
+    public function test_bulk_delete_skips_administrator_accounts(): void
+    {
+        config(['auth.bootstrap_admin.email' => 'admin@aipgaals.com']);
+        $admin = User::factory()->admin()->create();
+        $otherAdmin = User::factory()->admin()->create();
+        $systemAdmin = $this->systemAdministratorAccount();
+        $student = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.bulk-destroy'), [
+                'user_ids' => [$admin->id, $otherAdmin->id, $systemAdmin->id, $student->id],
+            ])
+            ->assertRedirect(route('admin.dashboard').'#user-management')
+            ->assertSessionHas('status', '1 account has been moved to Trash. 3 protected or unavailable accounts were skipped.');
+
+        $this->assertFalse($admin->fresh()->trashed());
+        $this->assertFalse($otherAdmin->fresh()->trashed());
+        $this->assertFalse($systemAdmin->fresh()->trashed());
+        $this->assertTrue($student->fresh()->trashed());
+    }
+
+    public function test_non_admin_cannot_bulk_delete_accounts(): void
+    {
+        $student = User::factory()->create();
+        $otherStudent = User::factory()->create();
+
+        $this->actingAs($student)
+            ->delete(route('admin.users.bulk-destroy'), ['user_ids' => [$otherStudent->id]])
+            ->assertForbidden();
+
+        $this->assertFalse($otherStudent->fresh()->trashed());
+    }
+
+    public function test_user_management_shows_bulk_selection_controls_only_for_deletable_accounts(): void
+    {
+        $admin = User::factory()->admin()->create(['name' => 'Protected Admin']);
+        $student = User::factory()->create(['name' => 'Selectable Student']);
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('select-all-managed-users')
+            ->assertSee('bulk-delete-users-form')
+            ->assertSee('Select Selectable Student for deletion')
+            ->assertDontSee('Select Protected Admin for deletion');
+    }
+
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void
     {
         config(['auth.bootstrap_admin.email' => 'admin@aipgaals.com']);

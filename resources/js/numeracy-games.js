@@ -21,6 +21,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
     let timerDeadline = null;
     let timerItemKey = null;
     let timeoutPending = false;
+    let advanceTimerId = null;
     const current = () => items[index];
     const values = key => getState().pages[page]?.responses[key] || {};
     const answer = () => values(current().key)[current().game.field];
@@ -35,6 +36,19 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
             timerItemKey = null;
             find('timer').hidden = true;
         }
+    }
+
+    function cancelAdvance() {
+        clearTimeout(advanceTimerId);
+        advanceTimerId = null;
+    }
+
+    function scheduleAdvance() {
+        cancelAdvance();
+        advanceTimerId = setTimeout(() => {
+            advanceTimerId = null;
+            advance();
+        }, motion() ? 1800 : 900);
     }
 
     function updateTimer() {
@@ -66,6 +80,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
 
     function advance() {
         if (!canEdit() || !checked) return;
+        cancelAdvance();
         stopTimer();
         if (index < items.length - 1) { index++; render(); find('check').focus({ preventScroll: true }); }
         else {
@@ -87,8 +102,9 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
         find('feedback').textContent = "Time's up. This question was skipped.";
         find('next').hidden = false;
         find('check').hidden = true;
+        syncDisabled();
         stats();
-        setTimeout(advance, motion() ? 900 : 250);
+        scheduleAdvance();
     }
 
     function stats() {
@@ -102,6 +118,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
     }
 
     function clearFeedback() {
+        cancelAdvance();
         checked = false;
         panel.dataset.result = '';
         find('feedback').textContent = '';
@@ -213,6 +230,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
 
     function syncDisabled() {
         panel.querySelectorAll('button, textarea').forEach(control => control.disabled = !canEdit());
+        panel.querySelectorAll('[data-ng-option], [data-ng-reason]').forEach(control => control.disabled = !canEdit() || checked);
         find('prev').disabled = !canEdit() || index === 0;
         select.disabled = !canEdit();
     }
@@ -246,6 +264,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
             panel.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
             clearInterval(timerId);
             timerId = null;
+            cancelAdvance();
         }
         if (items.length) {
             syncAnswer();
@@ -278,6 +297,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
         find('feedback').textContent = `${result.correct ? 'Correct!' : 'Not quite.'} ${result.explanation}`;
         find('next').hidden = false;
         find('check').hidden = true;
+        syncDisabled();
         if (game.type === 'archer') {
             const scene = find('scene').getBoundingClientRect();
             const bow = find('bow');
@@ -321,14 +341,18 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
                 element.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 450 });
             });
         }
+        scheduleAdvance();
     });
     find('prev').addEventListener('click', () => { if (canEdit() && index > 0) { index--; render(); } });
     find('next').addEventListener('click', advance);
     find('return').addEventListener('click', () => { mode = 'worksheet'; summary = false; render(); sync(); views[1].focus(); });
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { clearInterval(timerId); timerId = null; }
-        else if (!panel.hidden && !summary) startTimer(false);
+        if (document.hidden) { clearInterval(timerId); timerId = null; cancelAdvance(); }
+        else if (!panel.hidden && !summary) {
+            if (checked) scheduleAdvance();
+            else startTimer(false);
+        }
     });
-    window.addEventListener('pagehide', () => { clearInterval(timerId); timerId = null; });
+    window.addEventListener('pagehide', () => { clearInterval(timerId); timerId = null; cancelAdvance(); });
     return { sync, focus: () => { if (!panel.hidden && !summary) find('check').focus({ preventScroll: true }); } };
 }

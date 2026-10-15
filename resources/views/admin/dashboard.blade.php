@@ -103,10 +103,28 @@
                         </div>
                     </form>
 
+                    <div class="flex flex-col gap-3 border-b border-outline-variant/15 bg-surface px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">checklist</span>
+                            <span id="bulk-user-selection-count" aria-live="polite">0 selected</span>
+                        </div>
+                        <form id="bulk-delete-users-form" method="POST" action="{{ route('admin.users.bulk-destroy') }}">
+                            @csrf
+                            @method('DELETE')
+                            <button id="bulk-delete-users-button" class="inline-flex items-center justify-center gap-2 rounded-lg bg-error px-4 py-2.5 text-sm font-bold text-on-error transition-opacity disabled:cursor-not-allowed disabled:opacity-40" type="submit" disabled>
+                                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">delete_sweep</span>
+                                Delete Selected
+                            </button>
+                        </form>
+                    </div>
+
                     <x-data-table-scroll label="User management">
-                        <table class="w-full min-w-[900px] border-collapse text-left">
+                        <table class="w-full min-w-[940px] border-collapse text-left">
                             <thead>
                                 <tr class="bg-surface-container-low text-xs uppercase tracking-wider text-on-surface-variant">
+                                    <th class="w-14 px-4 py-4 text-center font-semibold">
+                                        <input id="select-all-managed-users" class="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox" aria-label="Select all deletable users on this page">
+                                    </th>
                                     <th class="px-6 py-4 font-semibold">User</th>
                                     <th class="px-6 py-4 font-semibold">Role</th>
                                     <th class="px-6 py-4 font-semibold">Section</th>
@@ -126,8 +144,24 @@
                                         };
                                         $status = $managedUser->approval_status ?? 'approved';
                                         $isSystemAdministrator = $managedUser->isSystemAdministrator();
+                                        $canBulkDelete = ! $isSystemAdministrator && in_array($managedUser->role, ['student', 'teacher'], true) && ! $adminUser->is($managedUser);
                                     @endphp
                                     <tr class="transition-colors hover:bg-surface-bright">
+                                        <td class="px-4 py-4 text-center">
+                                            @if($canBulkDelete)
+                                                <input
+                                                    class="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+                                                    type="checkbox"
+                                                    name="user_ids[]"
+                                                    value="{{ $managedUser->id }}"
+                                                    form="bulk-delete-users-form"
+                                                    data-managed-user-select
+                                                    aria-label="Select {{ $managedUser->name }} for deletion"
+                                                >
+                                            @else
+                                                <span class="material-symbols-outlined text-[18px] text-outline" aria-label="Protected account">lock</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container/30 text-xs font-bold text-primary">
@@ -192,7 +226,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td class="px-6 py-10 text-center text-sm text-on-surface-variant" colspan="6">No users match the selected filters.</td>
+                                        <td class="px-6 py-10 text-center text-sm text-on-surface-variant" colspan="7">No users match the selected filters.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -716,6 +750,11 @@
         const oldEditUserId = @json(old('edit_user_id'));
         const oldEditValues = @json($oldEditValues);
         const shouldOpenCreateUserModal = @json((bool) old('create_user_form'));
+        const selectAllManagedUsers = document.getElementById('select-all-managed-users');
+        const managedUserSelections = Array.from(document.querySelectorAll('[data-managed-user-select]'));
+        const bulkDeleteUsersForm = document.getElementById('bulk-delete-users-form');
+        const bulkDeleteUsersButton = document.getElementById('bulk-delete-users-button');
+        const bulkUserSelectionCount = document.getElementById('bulk-user-selection-count');
         let createUserCloseTimer;
         let editUserCloseTimer;
 
@@ -741,6 +780,32 @@
 
         window.addEventListener('hashchange', setAdminNavState);
         setAdminNavState();
+
+        function updateBulkUserSelection() {
+            const selectedCount = managedUserSelections.filter((checkbox) => checkbox.checked).length;
+            bulkUserSelectionCount.textContent = `${selectedCount} selected`;
+            bulkDeleteUsersButton.disabled = selectedCount === 0;
+            selectAllManagedUsers.disabled = managedUserSelections.length === 0;
+            selectAllManagedUsers.checked = managedUserSelections.length > 0 && selectedCount === managedUserSelections.length;
+            selectAllManagedUsers.indeterminate = selectedCount > 0 && selectedCount < managedUserSelections.length;
+        }
+
+        selectAllManagedUsers.addEventListener('change', () => {
+            managedUserSelections.forEach((checkbox) => {
+                checkbox.checked = selectAllManagedUsers.checked;
+            });
+            updateBulkUserSelection();
+        });
+
+        managedUserSelections.forEach((checkbox) => checkbox.addEventListener('change', updateBulkUserSelection));
+        bulkDeleteUsersForm.addEventListener('submit', (event) => {
+            const selectedCount = managedUserSelections.filter((checkbox) => checkbox.checked).length;
+
+            if (selectedCount === 0 || ! confirm(`Move ${selectedCount} selected ${selectedCount === 1 ? 'account' : 'accounts'} to Trash?`)) {
+                event.preventDefault();
+            }
+        });
+        updateBulkUserSelection();
 
         function openCreateUserModal() {
             clearTimeout(createUserCloseTimer);
