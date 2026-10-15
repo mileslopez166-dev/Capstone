@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
@@ -277,7 +278,14 @@ class UserManagementController extends Controller
             return redirect()->route('admin.users.trash')->with('status', 'You cannot delete your own account.');
         }
 
-        $user->forceDelete();
+        try {
+            $this->permanentlyDelete($user);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('admin.users.trash')
+                ->with('status', "{$user->name} could not be permanently deleted. The account remains in Trash.");
+        }
 
         return redirect()->route('admin.users.trash')->with('status', "{$user->name} has been permanently deleted.");
     }
@@ -292,13 +300,55 @@ class UserManagementController extends Controller
             return redirect()->route('admin.users.trash')->with('status', 'Trash is already empty.');
         }
 
-        $trashedUsers->each(function (User $user) use ($request) {
-            if (! $request->user()->is($user) && ! $user->isSystemAdministrator()) {
-                $user->forceDelete();
+        $deletedCount = 0;
+        $failedCount = 0;
+
+        foreach ($trashedUsers as $user) {
+            if ($request->user()->is($user) || $user->isSystemAdministrator()) {
+                continue;
             }
-        });
+
+            try {
+                $this->permanentlyDelete($user);
+                $deletedCount++;
+            } catch (\Throwable $exception) {
+                report($exception);
+                $failedCount++;
+            }
+        }
+
+        if ($failedCount > 0) {
+            $message = $deletedCount === 1
+                ? '1 trashed user was permanently deleted.'
+                : "{$deletedCount} trashed users were permanently deleted.";
+            $message .= ' '.($failedCount === 1
+                ? '1 account could not be deleted and remains in Trash.'
+                : "{$failedCount} accounts could not be deleted and remain in Trash.");
+
+            return redirect()->route('admin.users.trash')->with('status', $message);
+        }
 
         return redirect()->route('admin.users.trash')->with('status', 'All trashed users have been permanently deleted.');
+    }
+
+    private function permanentlyDelete(User $user): void
+    {
+        DB::transaction(function () use ($user): void {
+            if (Schema::hasTable('personal_access_tokens')) {
+                $user->tokens()->delete();
+            }
+
+            $pushSubscriptionsTable = (string) config('webpush.table_name', 'push_subscriptions');
+            if (Schema::hasTable($pushSubscriptionsTable)) {
+                $user->pushSubscriptions()->delete();
+            }
+
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+            }
+
+            $user->forceDelete();
+        });
     }
 
     private function initials(string $name): string

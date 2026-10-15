@@ -122,6 +122,16 @@ class AdminDashboardTest extends TestCase
         $student = User::factory()->create([
             'email' => 'trashed.student@example.com',
         ]);
+        $student->createToken('trash-test');
+        $student->updatePushSubscription('https://push.example.test/trashed-student', 'public-key', 'auth-token');
+        DB::table('sessions')->insert([
+            'id' => 'trashed-student-session',
+            'user_id' => $student->id,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'PHPUnit',
+            'payload' => 'test',
+            'last_activity' => now()->timestamp,
+        ]);
 
         $teacher->delete();
         $student->delete();
@@ -132,6 +142,63 @@ class AdminDashboardTest extends TestCase
         $response->assertSessionHas('status', 'All trashed users have been permanently deleted.');
         $this->assertDatabaseMissing('users', ['email' => 'trashed.teacher@example.com']);
         $this->assertDatabaseMissing('users', ['email' => 'trashed.student@example.com']);
+        $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $student->id, 'tokenable_type' => User::class]);
+        $this->assertDatabaseMissing((string) config('webpush.table_name'), ['subscribable_id' => $student->id, 'subscribable_type' => User::class]);
+        $this->assertDatabaseMissing('sessions', ['user_id' => $student->id]);
+    }
+
+    public function test_empty_trash_keeps_a_failed_account_without_returning_a_server_error(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $deletable = User::factory()->create(['email' => 'deletable@example.com']);
+        $blocked = User::factory()->create(['email' => 'blocked@example.com']);
+        $deletable->delete();
+        $blocked->delete();
+        User::deleting(function (User $user): void {
+            if ($user->email === 'blocked@example.com' && $user->isForceDeleting()) {
+                throw new \RuntimeException('Simulated legacy account constraint.');
+            }
+        });
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.trash.empty'))
+            ->assertRedirect(route('admin.users.trash'))
+            ->assertSessionHas('status', '1 trashed user was permanently deleted. 1 account could not be deleted and remains in Trash.');
+
+        $this->assertDatabaseMissing('users', ['email' => 'deletable@example.com']);
+        $this->assertSoftDeleted('users', ['email' => 'blocked@example.com']);
+    }
+
+    public function test_admin_can_view_a_deleted_user_in_trash(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $student = User::factory()->create([
+            'name' => 'Deleted Student',
+            'email' => 'deleted.student@example.com',
+            'section' => 'Magalang',
+        ]);
+        $student->delete();
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.trash'))
+            ->assertOk()
+            ->assertSee('Deleted Student')
+            ->assertSee('deleted.student@example.com')
+            ->assertSee(route('admin.users.restore', $student->id), false)
+            ->assertSee(route('admin.users.force-delete', $student->id), false);
+    }
+
+    public function test_deleting_a_user_returns_to_a_working_user_management_page(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $student = User::factory()->create(['name' => 'Deleted Student']);
+
+        $this->actingAs($admin)
+            ->followingRedirects()
+            ->delete(route('admin.users.destroy', $student))
+            ->assertOk()
+            ->assertSee('User Management')
+            ->assertSee('Deleted Student has been deleted.');
     }
 
     public function test_deleting_a_teacher_removes_their_assessments_and_scores(): void
