@@ -46,7 +46,7 @@ class RegistrationTest extends TestCase
     {
         config([
             'queue.default' => 'database',
-            'admin-notifications.registration_email' => 'school.admin@gmail.com',
+            'admin-notifications.registration_emails' => ['school.admin@gmail.com'],
         ]);
         User::factory()->admin()->create(['approval_status' => 'approved']);
 

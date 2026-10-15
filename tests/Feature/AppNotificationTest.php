@@ -41,10 +41,14 @@ class AppNotificationTest extends TestCase
         ]);
     }
 
-    public function test_registration_email_is_queued_for_the_configured_admin_inbox(): void
+    public function test_registration_email_is_queued_for_all_configured_admin_inboxes(): void
     {
         Notification::fake();
-        config()->set('admin-notifications.registration_email', 'school.admin@gmail.com');
+        config()->set('admin-notifications.registration_emails', [
+            'first.admin@gmail.com',
+            'second.admin@gmail.com',
+            'third.admin@gmail.com',
+        ]);
 
         $admin = User::factory()->admin()->create(['approval_status' => 'approved']);
         $registeredUser = User::factory()->teacher()->create(['approval_status' => 'pending']);
@@ -54,7 +58,11 @@ class AppNotificationTest extends TestCase
         Notification::assertSentOnDemand(
             RegistrationApprovalEmail::class,
             fn (RegistrationApprovalEmail $notification, array $channels, object $notifiable): bool =>
-                $notifiable->routes['mail'] === 'school.admin@gmail.com'
+                $notifiable->routes['mail'] === [
+                    'first.admin@gmail.com',
+                    'second.admin@gmail.com',
+                    'third.admin@gmail.com',
+                ]
                 && $channels === ['mail']
         );
         Notification::assertNotSentTo($admin, PhonePushNotification::class);
@@ -63,7 +71,7 @@ class AppNotificationTest extends TestCase
     public function test_registration_email_is_skipped_when_admin_inbox_is_not_configured(): void
     {
         Notification::fake();
-        config()->set('admin-notifications.registration_email', null);
+        config()->set('admin-notifications.registration_emails', []);
 
         $registeredUser = User::factory()->teacher()->create(['approval_status' => 'pending']);
 

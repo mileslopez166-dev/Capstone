@@ -68,7 +68,7 @@ class NotificationSender
 
         if (RegistrationApprovalEmail::isConfigured()) {
             try {
-                Notification::route('mail', config('admin-notifications.registration_email'))
+                Notification::route('mail', RegistrationApprovalEmail::recipients())
                     ->notify(new RegistrationApprovalEmail($registeredUser));
             } catch (Throwable $exception) {
                 Log::warning('The registration approval email could not be queued.', [

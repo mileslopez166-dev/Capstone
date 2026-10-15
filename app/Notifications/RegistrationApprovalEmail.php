@@ -19,7 +19,13 @@ class RegistrationApprovalEmail extends Notification implements ShouldQueue
 
     public static function isConfigured(): bool
     {
-        return filter_var(config('admin-notifications.registration_email'), FILTER_VALIDATE_EMAIL) !== false;
+        return self::recipients() !== [];
+    }
+
+    /** @return array<int, string> */
+    public static function recipients(): array
+    {
+        return array_values(config('admin-notifications.registration_emails', []));
     }
 
     public function via(object $notifiable): array
