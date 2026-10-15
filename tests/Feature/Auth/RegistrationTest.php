@@ -14,7 +14,14 @@ class RegistrationTest extends TestCase
     {
         $response = $this->get('/register');
 
-        $response->assertStatus(200);
+        $response
+            ->assertStatus(200)
+            ->assertSee('login-page register-page', false)
+            ->assertSee('login-playground-canvas', false)
+            ->assertSee('login-form-panel register-form-panel', false)
+            ->assertSee('login-motion-toggle', false)
+            ->assertSee('name="role"', false)
+            ->assertSee('name="section"', false);
     }
 
     public function test_new_users_can_register(): void

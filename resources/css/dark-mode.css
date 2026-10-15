@@ -116,6 +116,13 @@ html.dark .comfort-option:hover { color: #ffffff; }
 }
 :is(html.dark .login-page, .login-page.is-night) .login-password-toggle:hover { background: #17324d; color: #91d4ff; }
 :is(html.dark .login-page, .login-page.is-night) .login-register { border-color: var(--dark-line); }
+:is(html.dark .login-page, .login-page.is-night) .register-role-options { border-color: #355875; background: #10283c; }
+:is(html.dark .login-page, .login-page.is-night) .register-role-options button { color: #c6d8e5; }
+:is(html.dark .login-page, .login-page.is-night) .register-role-options button:hover { background: #17364f; color: #91d4ff; }
+:is(html.dark .login-page, .login-page.is-night) .register-role-options button.is-active { background: #1b4261; color: #fff; box-shadow: none; }
+:is(html.dark .login-page, .login-page.is-night) .register-form .login-field label small { color: #b4c8d8; }
+:is(html.dark .login-page, .login-page.is-night) .register-approval { border-color: #69cda6; background: #12352d; color: #d4f6e8; }
+:is(html.dark .login-page, .login-page.is-night) .register-approval .material-symbols-outlined { color: #8be0be; }
 :is(html.dark .login-page, .login-page.is-night) .login-app-download { border-color: #355875; background: #10283c; color: #e6f4ff; }
 :is(html.dark .login-page, .login-page.is-night) .login-app-download:hover { border-color: #65b8e8; background: #16364f; }
 :is(html.dark .login-page, .login-page.is-night) .login-app-download > .material-symbols-outlined:first-child { color: #77c8ff; }

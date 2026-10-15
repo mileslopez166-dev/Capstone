@@ -129,7 +129,36 @@
 .login-install-actions a { background: #076fae; color: #fff; text-decoration: none; }
 .login-install-actions a:hover { background: #06588c; text-decoration: none; }
 .login-footer { order: 3; padding: 12px 20px; text-align: center; background: #ffffffed; color: #486878; font-size: 11px; }
-.login-page :is(a, button, input):focus-visible { outline: 3px solid #0879bb; outline-offset: 3px; }
+.login-page :is(a, button, input, select):focus-visible { outline: 3px solid #0879bb; outline-offset: 3px; }
+
+.register-form-panel { max-width: 760px; padding: 24px 30px; }
+.register-heading { margin-bottom: 16px; }
+.register-heading > span { margin-bottom: 5px; }
+.register-heading h1 { font-size: 25px; }
+.register-heading p { margin-top: 3px; line-height: 1.45; }
+.register-form { gap: 13px; }
+.register-role { min-width: 0; }
+.register-role legend { margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.register-role-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 4px; border: 1px solid #c9dce7; border-radius: 7px; background: #edf5f9; }
+.register-role-options button { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; border-radius: 5px; color: #486273; font-size: 13px; font-weight: 700; }
+.register-role-options button:hover { background: #dcecf5; color: #075f96; }
+.register-role-options button.is-active { background: #fff; color: #076fae; box-shadow: 0 1px 5px #234e6726; }
+.register-role-options .material-symbols-outlined { font-size: 19px; }
+.register-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px; }
+.register-form .login-field label { margin-bottom: 5px; }
+.register-form .login-field label small { color: #6a8190; font-size: 11px; font-weight: 500; }
+.register-form .auth-input { height: 44px; }
+.register-form .login-field-wrap > .material-symbols-outlined { top: 12px; }
+.register-form .login-password-toggle { top: 1px; }
+.register-select { appearance: auto; padding-right: 14px !important; }
+.register-approval { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-left: 3px solid #16805b; background: #edf8f3; color: #315a4c; font-size: 12px; line-height: 1.45; }
+.register-approval .material-symbols-outlined { flex: 0 0 auto; color: #16805b; font-size: 20px; }
+.register-login { margin-top: 14px; padding-top: 12px; }
+
+@media (min-width: 768px) and (min-height: 600px) {
+    .register-main { align-items: center; padding-block: 14px !important; }
+    .register-form-panel { max-height: 100%; overflow-y: auto; scrollbar-width: thin; }
+}
 @media (max-width: 520px) {
     .login-header { padding: 16px; gap: 8px; }
     .login-header-actions { gap: 8px; }
@@ -142,6 +171,8 @@
     .login-install-heading, .login-install-body, .login-install-actions { padding-left: 16px; padding-right: 16px; }
     .login-install-actions { display: grid; grid-template-columns: 1fr; }
     .login-install-actions a { grid-row: 1; }
+    .register-form-panel { padding: 24px 20px; }
+    .register-grid { grid-template-columns: 1fr; }
 }
 @media (min-width: 521px) {
     .login-campus-marker { left: max(8px, calc((100% - 1420px) / 2)); right: auto; }
@@ -180,6 +211,20 @@
     .login-register { margin-top: 14px; padding-top: 12px; }
     .login-app-download { margin-top: 10px; padding-block: 9px; }
     .login-footer { padding-block: 8px; }
+    .register-form-panel { max-width: 720px; padding: 15px 24px; }
+    .register-heading { margin-bottom: 9px; }
+    .register-heading h1 { font-size: 23px; }
+    .register-heading p { font-size: 12px; }
+    .register-form { gap: 9px; }
+    .register-role legend { margin-bottom: 4px; }
+    .register-role-options button { min-height: 34px; }
+    .register-grid { gap: 7px 15px; }
+    .register-form .auth-input { height: 40px; }
+    .register-form .login-field-wrap > .material-symbols-outlined { top: 10px; }
+    .register-form .login-password-toggle { top: 0; width: 40px; height: 40px; }
+    .register-approval { padding-block: 7px; }
+    .register-form .login-submit { min-height: 40px; }
+    .register-login { margin-top: 8px; padding-top: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .login-page * { transition: none !important; } }
 @keyframes login-bird-flight {

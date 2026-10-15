@@ -1,235 +1,173 @@
 <x-guest-layout>
-    <div class="relative flex app-safe-screen items-center justify-center overflow-x-hidden bg-background px-4 py-6 sm:px-6 sm:py-10">
-        <div class="absolute left-20 top-20 -z-10 h-32 w-32 rounded-full bg-primary/5 blur-2xl"></div>
-        <div class="absolute bottom-40 right-40 -z-10 h-48 w-48 rounded-full bg-secondary/5 blur-3xl"></div>
-        <div class="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_left,rgba(68,165,255,0.15),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(145,247,142,0.15),transparent_30%),radial-gradient(circle_at_top_right,rgba(255,235,59,0.10),transparent_28%)]"></div>
+    <div class="login-page register-page">
+        <canvas class="login-garden-canvas" aria-hidden="true"></canvas>
+        <div class="login-playground" aria-hidden="true">
+            <canvas class="login-playground-canvas"></canvas>
+        </div>
+        <div class="login-day-scene" aria-hidden="true">
+            <img class="login-day-landscape" src="{{ asset('images/campus/pixel-campus-morning.png') }}" alt="" fetchpriority="high">
+        </div>
+        <div class="login-live-scene" aria-hidden="true">
+            <span class="login-bird login-bird-one"></span>
+            <span class="login-bird login-bird-two"></span>
+            <span class="login-bird login-bird-three"></span>
+        </div>
+        <div class="login-night-scene" aria-hidden="true">
+            <img class="login-night-landscape" src="{{ asset('images/campus/pixel-campus-night.png') }}" alt="" fetchpriority="high">
+            <span class="login-night-star login-night-star-one"></span>
+            <span class="login-night-star login-night-star-two"></span>
+            <span class="login-night-star login-night-star-three"></span>
+        </div>
+        <div class="login-landmark-layer" aria-hidden="true">
+            <img class="login-campus-marker" src="{{ asset('images/campus/bcs-stone-landmark.png') }}" alt="">
+        </div>
 
-        <main class="glass-panel w-full max-w-[620px] overflow-hidden rounded-xl border border-white/40 shadow-2xl">
-            <section class="flex flex-col justify-center p-5 sm:p-8 md:p-12 lg:p-16" x-data="{ role: '{{ old('role', 'student') }}', showPassword: false, showConfirmPassword: false }">
-                <div class="mb-8 sm:mb-10">
-                    <h2 class="mb-2 font-headline text-3xl font-bold text-on-surface">Create Account</h2>
-                    <p class="text-on-surface-variant">Fill in your details to get started with AI-PGAALS.</p>
+        <header class="login-header">
+            <a class="login-brand" href="{{ route('login') }}"><x-application-logo /><span>AI-PGAALS</span></a>
+            <div class="login-header-actions">
+                <span>Grade 6 Learning Community</span>
+                <x-comfort-controls />
+                <button type="button" class="login-motion-toggle" aria-label="Pause background animation" title="Pause background animation" aria-pressed="false" data-no-click-sound>
+                    <span class="material-symbols-outlined" aria-hidden="true">pause</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="login-main register-main">
+            <section
+                class="login-form-panel register-form-panel"
+                aria-labelledby="register-title"
+                x-data="{ role: '{{ old('role', 'student') }}', showPassword: false, showConfirmPassword: false, submitting: false }"
+            >
+                <div class="login-heading register-heading">
+                    <span><span class="material-symbols-outlined" aria-hidden="true">school</span>Begin your learning journey</span>
+                    <h1 id="register-title">Create account</h1>
+                    <p>Register for your AI-PGAALS learning community.</p>
                 </div>
 
-                <form method="POST" action="{{ route('register') }}" class="space-y-6">
+                <form method="POST" action="{{ route('register') }}" class="login-form register-form" @submit="submitting = true">
                     @csrf
-
                     <input type="hidden" name="role" x-model="role">
 
-                    <div class="space-y-3">
-                        <span class="px-1 text-sm font-semibold text-on-surface-variant">I am a...</span>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                            <button
-                                type="button"
-                                class="flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all"
-                                :class="role === 'student' ? 'border-primary bg-primary text-white shadow-[0_10px_25px_-5px_rgba(0,94,159,0.3)]' : 'border-primary/20 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10'"
-                                @click="role = 'student'"
-                            >
-                                <span class="material-symbols-outlined mb-1">school</span>
-                                <span class="text-sm font-bold">Student</span>
+                    <fieldset class="register-role">
+                        <legend>I am registering as</legend>
+                        <div class="register-role-options">
+                            <button type="button" :class="{ 'is-active': role === 'student' }" :aria-pressed="role === 'student'" @click="role = 'student'">
+                                <span class="material-symbols-outlined" aria-hidden="true">school</span>
+                                Student
                             </button>
-                            <button
-                                type="button"
-                                class="flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all"
-                                :class="role === 'teacher' ? 'border-primary bg-primary text-white shadow-[0_10px_25px_-5px_rgba(0,94,159,0.3)]' : 'border-primary/20 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10'"
-                                @click="role = 'teacher'"
-                            >
-                                <span class="material-symbols-outlined mb-1">co_present</span>
-                                <span class="text-sm font-bold">Teacher</span>
+                            <button type="button" :class="{ 'is-active': role === 'teacher' }" :aria-pressed="role === 'teacher'" @click="role = 'teacher'">
+                                <span class="material-symbols-outlined" aria-hidden="true">co_present</span>
+                                Teacher
                             </button>
                         </div>
                         <x-input-error :messages="$errors->get('role')" class="mt-2 text-sm text-error" />
-                    </div>
+                    </fieldset>
 
-                    <div class="space-y-4">
-                        <div class="space-y-4">
-                            <div class="group">
-                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="first_name">First Name</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
-                                    <input
-                                        id="first_name"
-                                        name="first_name"
-                                        type="text"
-                                        value="{{ old('first_name') }}"
-                                        required
-                                        autofocus
-                                        autocomplete="given-name"
-                                        pattern="[^0-9]*"
-                                        title="First name must not contain numbers."
-                                        placeholder="John"
-                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                    >
-                                </div>
-                                <x-input-error :messages="$errors->get('first_name')" class="mt-2 text-sm text-error" />
+                    <div class="register-grid">
+                        <div class="login-field">
+                            <label for="first_name">First name</label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" required autofocus autocomplete="given-name" pattern="[^0-9]*" title="First name must not contain numbers." placeholder="First name" aria-invalid="{{ $errors->has('first_name') ? 'true' : 'false' }}" @if ($errors->has('first_name')) aria-describedby="first-name-error" @endif>
+                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
                             </div>
-
-                            <div class="group">
-                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="middle_name">Middle Name</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
-                                    <input
-                                        id="middle_name"
-                                        name="middle_name"
-                                        type="text"
-                                        value="{{ old('middle_name') }}"
-                                        autocomplete="additional-name"
-                                        pattern="[^0-9]*"
-                                        title="Middle name must not contain numbers."
-                                        placeholder="A."
-                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                    >
-                                </div>
-                                <x-input-error :messages="$errors->get('middle_name')" class="mt-2 text-sm text-error" />
-                            </div>
-
-                            <div class="group">
-                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="last_name">Last Name</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">person</span>
-                                    <input
-                                        id="last_name"
-                                        name="last_name"
-                                        type="text"
-                                        value="{{ old('last_name') }}"
-                                        required
-                                        autocomplete="family-name"
-                                        pattern="[^0-9]*"
-                                        title="Last name must not contain numbers."
-                                        placeholder="Doe"
-                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                    >
-                                </div>
-                                <x-input-error :messages="$errors->get('last_name')" class="mt-2 text-sm text-error" />
-                            </div>
-                            <div class="group" x-show="role === 'student'" x-transition>
-                                <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="gender">Avatar Style</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">face</span>
-                                    <select
-                                        id="gender"
-                                        name="gender"
-                                        x-bind:disabled="role !== 'student'"
-                                        x-bind:required="role === 'student'"
-                                        class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-10 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option value="" disabled @selected(! old('gender'))>Choose avatar style</option>
-                                        <option value="male" @selected(old('gender') === 'male')>Nova Finch - Boys</option>
-                                        <option value="female" @selected(old('gender') === 'female')>Lyra Vale - Girls</option>
-                                    </select>
-                                </div>
-                                <x-input-error :messages="$errors->get('gender')" class="mt-2 text-sm text-error" />
-                            </div>
+                            <x-input-error id="first-name-error" :messages="$errors->get('first_name')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="group">
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="email">Email Address</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">alternate_email</span>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value="{{ old('email') }}"
-                                    required
-                                    autocomplete="username"
-                                    placeholder="name@example.com"
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-4 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                >
+                        <div class="login-field">
+                            <label for="middle_name">Middle name <small>(optional)</small></label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" pattern="[^0-9]*" title="Middle name must not contain numbers." placeholder="Middle name">
+                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
                             </div>
-                            <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-error" />
+                            <x-input-error id="middle-name-error" :messages="$errors->get('middle_name')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="group">
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="section" x-text="role === 'teacher' ? 'Assigned Section' : 'Your Section'"></label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">class</span>
-                                <select
-                                    id="section"
-                                    name="section"
-                                    required
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-10 transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                >
+                        <div class="login-field">
+                            <label for="last_name">Last name</label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" required autocomplete="family-name" pattern="[^0-9]*" title="Last name must not contain numbers." placeholder="Last name" aria-invalid="{{ $errors->has('last_name') ? 'true' : 'false' }}" @if ($errors->has('last_name')) aria-describedby="last-name-error" @endif>
+                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                            </div>
+                            <x-input-error id="last-name-error" :messages="$errors->get('last_name')" class="mt-2 text-sm text-error" />
+                        </div>
+
+                        <div class="login-field" x-show="role === 'student'" x-transition>
+                            <label for="gender">Avatar style</label>
+                            <div class="login-field-wrap">
+                                <select class="auth-input register-select" id="gender" name="gender" x-bind:disabled="role !== 'student'" x-bind:required="role === 'student'" aria-invalid="{{ $errors->has('gender') ? 'true' : 'false' }}" @if ($errors->has('gender')) aria-describedby="gender-error" @endif>
+                                    <option value="" disabled @selected(! old('gender'))>Choose avatar style</option>
+                                    <option value="male" @selected(old('gender') === 'male')>Nova Finch - Boys</option>
+                                    <option value="female" @selected(old('gender') === 'female')>Lyra Vale - Girls</option>
+                                </select>
+                                <span class="material-symbols-outlined" aria-hidden="true">face</span>
+                            </div>
+                            <x-input-error id="gender-error" :messages="$errors->get('gender')" class="mt-2 text-sm text-error" />
+                        </div>
+
+                        <div class="login-field">
+                            <label for="email">Email address</label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username" placeholder="name@example.com" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" @if ($errors->has('email')) aria-describedby="email-error" @endif>
+                                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                            </div>
+                            <x-input-error id="email-error" :messages="$errors->get('email')" class="mt-2 text-sm text-error" />
+                        </div>
+
+                        <div class="login-field">
+                            <label for="section" x-text="role === 'teacher' ? 'Assigned section' : 'Your section'">Your section</label>
+                            <div class="login-field-wrap">
+                                <select class="auth-input register-select" id="section" name="section" required aria-invalid="{{ $errors->has('section') ? 'true' : 'false' }}" @if ($errors->has('section')) aria-describedby="section-error" @endif>
                                     <option value="" disabled @selected(! old('section'))>Select section</option>
                                     @foreach (\App\Support\SectionCatalog::labels() as $section)
                                         <option value="{{ $section }}" @selected(old('section') === $section)>{{ $section }}</option>
                                     @endforeach
                                 </select>
+                                <span class="material-symbols-outlined" aria-hidden="true">class</span>
                             </div>
-                            <x-input-error :messages="$errors->get('section')" class="mt-2 text-sm text-error" />
+                            <x-input-error id="section-error" :messages="$errors->get('section')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="rounded-xl border border-primary/10 bg-primary/5 p-4 text-sm text-on-surface-variant" x-show="role === 'teacher' || role === 'student'" x-transition>
-                            <div class="flex items-start gap-3">
-                                <span class="material-symbols-outlined mt-0.5 text-primary">pending_actions</span>
-                                <div>
-                                    <p class="font-semibold text-on-surface" x-text="role === 'teacher' ? 'Teacher accounts require administrator approval.' : 'Student accounts require section approval.'"></p>
-                                    <p class="mt-1" x-text="role === 'teacher' ? 'After registration, your request will be reviewed in the admin token request queue before you can sign in.' : 'After registration, a teacher assigned to your selected section or an administrator can approve your account.'"></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="group">
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="password">Password</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">lock</span>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    x-bind:type="showPassword ? 'text' : 'password'"
-                                    required
-                                    autocomplete="new-password"
-                                    placeholder="********"
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-12 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                >
-                                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface" type="button" @click="showPassword = !showPassword">
-                                    <span class="material-symbols-outlined text-xl" x-text="showPassword ? 'visibility_off' : 'visibility'"></span>
+                        <div class="login-field">
+                            <label for="password">Password</label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="password" name="password" type="password" :type="showPassword ? 'text' : 'password'" required autocomplete="new-password" placeholder="Create a password" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" @if ($errors->has('password')) aria-describedby="password-error" @endif>
+                                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                                <button class="login-password-toggle" type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Hide password' : 'Show password'" :title="showPassword ? 'Hide password' : 'Show password'" :aria-pressed="showPassword">
+                                    <span class="material-symbols-outlined" x-text="showPassword ? 'visibility_off' : 'visibility'" aria-hidden="true">visibility</span>
                                 </button>
                             </div>
-                            <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-error" />
+                            <x-input-error id="password-error" :messages="$errors->get('password')" class="mt-2 text-sm text-error" />
                         </div>
 
-                        <div class="group">
-                            <label class="mb-1.5 block px-1 text-sm font-semibold text-on-surface-variant" for="password_confirmation">Confirm Password</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant transition-colors group-focus-within:text-primary">verified_user</span>
-                                <input
-                                    id="password_confirmation"
-                                    name="password_confirmation"
-                                    x-bind:type="showConfirmPassword ? 'text' : 'password'"
-                                    required
-                                    autocomplete="new-password"
-                                    placeholder="Re-enter your password"
-                                    class="w-full rounded-xl border-none bg-surface-container-low py-3.5 pl-12 pr-12 placeholder:text-outline-variant transition-all focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
-                                >
-                                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface" type="button" @click="showConfirmPassword = !showConfirmPassword">
-                                    <span class="material-symbols-outlined text-xl" x-text="showConfirmPassword ? 'visibility_off' : 'visibility'"></span>
+                        <div class="login-field">
+                            <label for="password_confirmation">Confirm password</label>
+                            <div class="login-field-wrap">
+                                <input class="auth-input" id="password_confirmation" name="password_confirmation" type="password" :type="showConfirmPassword ? 'text' : 'password'" required autocomplete="new-password" placeholder="Repeat your password">
+                                <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+                                <button class="login-password-toggle" type="button" @click="showConfirmPassword = !showConfirmPassword" :aria-label="showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'" :title="showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'" :aria-pressed="showConfirmPassword">
+                                    <span class="material-symbols-outlined" x-text="showConfirmPassword ? 'visibility_off' : 'visibility'" aria-hidden="true">visibility</span>
                                 </button>
                             </div>
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm text-error" />
+                            <x-input-error id="password-confirmation-error" :messages="$errors->get('password_confirmation')" class="mt-2 text-sm text-error" />
                         </div>
                     </div>
 
-                    <div class="pt-2">
-                        <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-primary to-primary-dim py-4 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 active:scale-[0.98]" type="submit">
-                            Create Account
-                            <span class="material-symbols-outlined text-xl">arrow_forward</span>
-                        </button>
+                    <div class="register-approval" role="note">
+                        <span class="material-symbols-outlined" aria-hidden="true">pending_actions</span>
+                        <p x-text="role === 'teacher' ? 'An administrator will review your teacher account before you can sign in.' : 'A teacher assigned to your section or an administrator will review your student account.'"></p>
                     </div>
+
+                    <button class="login-submit" type="submit" :disabled="submitting">
+                        <span x-text="submitting ? 'Creating account...' : 'Create account'">Create account</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </button>
                 </form>
 
-                <div class="mt-10 text-center">
-                    <p class="font-medium text-on-surface-variant">
-                        Already have an account?
-                        <a class="ml-1 font-bold text-primary hover:underline" href="{{ route('login') }}">Log in</a>
-                    </p>
-                </div>
-
-                <p class="mt-8 text-center text-[11px] leading-tight text-outline">
-                    By clicking "Create Account", you agree to AI-PGAALS's <br>
-                    <a class="underline" href="#">Terms of Service</a> and <a class="underline" href="#">Privacy Policy</a>.
-                </p>
+                <p class="login-register register-login">Already have an account? <a href="{{ route('login') }}">Sign in</a></p>
             </section>
         </main>
+
+        <footer class="login-footer">AI-PGAALS &middot; Literacy &amp; Numeracy</footer>
     </div>
 </x-guest-layout>
