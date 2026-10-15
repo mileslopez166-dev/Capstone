@@ -6,7 +6,7 @@
     <title>AI-PGAALS Admin Overview</title>
     <x-admin-head />
 </head>
-<body class="staff-theme admin-theme min-h-screen overflow-x-hidden bg-surface text-on-surface">
+<body class="staff-theme admin-theme min-h-screen overflow-x-clip bg-surface text-on-surface">
     <div id="admin-page-shell" class="min-h-screen transition-[filter] duration-200 ease-out lg:flex">
         <x-admin-sidebar active="overview" :admin-user="$adminUser" :admin-initials="$adminInitials" />
 

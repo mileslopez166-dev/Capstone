@@ -122,6 +122,11 @@ class User extends Authenticatable
         return $this->hasMany(AppNotification::class);
     }
 
+    public function profileChangeRequests(): HasMany
+    {
+        return $this->hasMany(ProfileChangeRequest::class);
+    }
+
     public function practiceCoinTransactions(): HasMany
     {
         return $this->hasMany(PracticeCoinTransaction::class);

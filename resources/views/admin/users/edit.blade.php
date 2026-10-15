@@ -6,7 +6,7 @@
     <title>Edit User - AI-PGAALS</title>
     <x-admin-head />
 </head>
-<body class="staff-theme admin-theme min-h-screen overflow-x-hidden bg-surface text-on-surface">
+<body class="staff-theme admin-theme min-h-screen overflow-x-clip bg-surface text-on-surface">
     <div class="min-h-screen lg:flex">
         <x-admin-sidebar active="users" :admin-user="$adminUser" :admin-initials="$adminInitials" />
 

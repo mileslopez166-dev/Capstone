@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ProfileChangeRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -142,5 +143,144 @@ class AdminTokenRequestTest extends TestCase
             ->assertSee('Lyra Vale')
             ->assertSee('lyra.teacher@example.com')
             ->assertSee('Matapat');
+    }
+
+    public function test_admin_can_view_pending_profile_change_requests(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $student = User::factory()->create([
+            'name' => 'Current Student',
+            'email' => 'current.student@example.com',
+            'section' => 'Magalang',
+        ]);
+        ProfileChangeRequest::query()->create([
+            'user_id' => $student->id,
+            'current_name' => $student->name,
+            'current_email' => $student->email,
+            'requested_name' => 'Requested Student',
+            'requested_email' => 'requested.student@example.com',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)->get(route('admin.token-requests.index'))
+            ->assertOk()
+            ->assertSeeText('Profile Change Requests')
+            ->assertSeeText('Current Student')
+            ->assertSeeText('Requested Student')
+            ->assertSeeText('requested.student@example.com')
+            ->assertSeeText('Magalang');
+    }
+
+    public function test_admin_can_approve_a_profile_change_request(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $student = User::factory()->create([
+            'name' => 'Current Student',
+            'email' => 'current.student@example.com',
+        ]);
+        $change = ProfileChangeRequest::query()->create([
+            'user_id' => $student->id,
+            'current_name' => $student->name,
+            'current_email' => $student->email,
+            'requested_name' => 'Approved Student',
+            'requested_email' => 'approved.student@example.com',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.profile-change-requests.approve', $change))
+            ->assertRedirect(route('admin.token-requests.index'));
+
+        $student->refresh();
+        $this->assertSame('Approved Student', $student->name);
+        $this->assertSame('approved.student@example.com', $student->email);
+        $this->assertNull($student->email_verified_at);
+        $this->assertDatabaseHas('profile_change_requests', [
+            'id' => $change->id,
+            'status' => 'approved',
+            'reviewed_by' => $admin->id,
+        ]);
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $student->id,
+            'type' => 'profile_change_approved',
+        ]);
+    }
+
+    public function test_admin_can_decline_a_profile_change_request_without_changing_the_account(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $teacher = User::factory()->teacher()->create([
+            'name' => 'Current Teacher',
+            'email' => 'current.teacher@example.com',
+        ]);
+        $change = ProfileChangeRequest::query()->create([
+            'user_id' => $teacher->id,
+            'current_name' => $teacher->name,
+            'current_email' => $teacher->email,
+            'requested_name' => 'Requested Teacher',
+            'requested_email' => 'requested.teacher@example.com',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.profile-change-requests.decline', $change))
+            ->assertRedirect(route('admin.token-requests.index'));
+
+        $teacher->refresh();
+        $this->assertSame('Current Teacher', $teacher->name);
+        $this->assertSame('current.teacher@example.com', $teacher->email);
+        $this->assertDatabaseHas('profile_change_requests', [
+            'id' => $change->id,
+            'status' => 'declined',
+            'reviewed_by' => $admin->id,
+        ]);
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $teacher->id,
+            'type' => 'profile_change_declined',
+        ]);
+    }
+
+    public function test_non_admin_cannot_review_a_profile_change_request(): void
+    {
+        $student = User::factory()->create();
+        $otherStudent = User::factory()->create();
+        $change = ProfileChangeRequest::query()->create([
+            'user_id' => $student->id,
+            'current_name' => $student->name,
+            'current_email' => $student->email,
+            'requested_name' => 'Requested Name',
+            'requested_email' => 'requested@example.com',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($otherStudent)
+            ->post(route('admin.profile-change-requests.approve', $change))
+            ->assertForbidden();
+
+        $this->assertSame('pending', $change->fresh()->status);
+    }
+
+    public function test_profile_change_cannot_be_approved_when_requested_email_is_taken(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $student = User::factory()->create();
+        $otherStudent = User::factory()->create(['email' => 'taken@example.com']);
+        $change = ProfileChangeRequest::query()->create([
+            'user_id' => $student->id,
+            'current_name' => $student->name,
+            'current_email' => $student->email,
+            'requested_name' => 'Requested Name',
+            'requested_email' => $otherStudent->email,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.token-requests.index'))
+            ->post(route('admin.profile-change-requests.approve', $change))
+            ->assertRedirect(route('admin.token-requests.index'))
+            ->assertSessionHasErrors('email');
+
+        $this->assertSame('pending', $change->fresh()->status);
+        $this->assertSame($student->email, $student->fresh()->email);
     }
 }

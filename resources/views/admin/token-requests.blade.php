@@ -6,7 +6,7 @@
     <title>Token Requests - Admin Console</title>
     <x-admin-head />
 </head>
-<body class="staff-theme admin-theme min-h-screen overflow-x-hidden bg-surface text-on-surface">
+<body class="staff-theme admin-theme min-h-screen overflow-x-clip bg-surface text-on-surface">
     <div class="min-h-screen lg:flex">
         <x-admin-sidebar active="tokens" :admin-user="$adminUser" :admin-initials="$adminInitials" />
 
@@ -17,7 +17,7 @@
                 <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h1 class="font-headline text-4xl font-bold leading-tight text-on-surface">Token Requests</h1>
-                    <p class="mt-2 max-w-2xl text-lg text-on-surface-variant">Review student and teacher registration approvals before access is granted.</p>
+                    <p class="mt-2 max-w-2xl text-lg text-on-surface-variant">Review account registrations and profile information changes submitted by students and teachers.</p>
                 </div>
                 <div class="hidden gap-3 lg:flex">
                     <a class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary" href="{{ route('admin.dashboard') }}#user-management"><span class="material-symbols-outlined text-lg" aria-hidden="true">group</span>Manage accounts</a>
@@ -27,6 +27,12 @@
             @if (session('status'))
                 <div class="mb-6 rounded-DEFAULT border border-secondary/10 bg-secondary-container/35 px-5 py-4 text-sm font-medium text-on-surface">
                     {{ session('status') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-6 rounded-DEFAULT border border-error/20 bg-error-container/30 px-5 py-4 text-sm font-medium text-on-error-container" role="alert">
+                    {{ $errors->first() }}
                 </div>
             @endif
 
@@ -41,7 +47,8 @@
                             </div>
                         </div>
                         <div>
-                            <span class="font-display text-4xl font-extrabold text-on-surface">{{ number_format($pendingCount) }}</span>
+                            <span class="font-display text-4xl font-extrabold text-on-surface">{{ number_format($pendingCount + $pendingProfileChangeCount) }}</span>
+                            <p class="mt-1 text-sm text-on-surface-variant">{{ number_format($pendingCount) }} registrations, {{ number_format($pendingProfileChangeCount) }} profile changes</p>
                             <p class="mt-1 flex items-center gap-1 text-sm text-on-surface-variant">
                                 <span class="material-symbols-outlined {{ $pendingTrend['is_positive'] ? 'text-error' : 'text-secondary' }} text-sm">
                                     {{ $pendingTrend['is_positive'] ? 'arrow_upward' : 'arrow_downward' }}
@@ -212,6 +219,76 @@
                     </div>
                 </div>
             </div>
+
+            <section id="profile-change-requests" class="mt-8 overflow-hidden rounded-DEFAULT bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,94,159,0.02)]">
+                <div class="flex flex-col gap-2 bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="font-headline text-2xl font-bold text-on-surface">Profile Change Requests</h3>
+                        <p class="mt-1 text-sm text-on-surface-variant">Compare the current account information with the requested name and email.</p>
+                    </div>
+                    <span class="ui-table-badge inline-flex w-fit items-center rounded-full bg-tertiary-container px-3 py-1 text-sm font-bold text-on-tertiary-container">
+                        {{ number_format($pendingProfileChangeCount) }} pending
+                    </span>
+                </div>
+
+                <x-data-table-scroll label="Pending profile change requests">
+                    <table class="w-full min-w-[1000px] border-collapse text-left">
+                        <thead>
+                            <tr class="border-b border-outline-variant/15 bg-surface text-sm font-semibold text-on-surface-variant">
+                                <th class="px-6 py-4 font-headline text-xs uppercase tracking-wider">Account</th>
+                                <th class="px-6 py-4 font-headline text-xs uppercase tracking-wider">Current Information</th>
+                                <th class="px-6 py-4 font-headline text-xs uppercase tracking-wider">Requested Information</th>
+                                <th class="px-6 py-4 font-headline text-xs uppercase tracking-wider">Requested</th>
+                                <th class="px-6 py-4 text-right font-headline text-xs uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/15">
+                            @forelse ($profileChangeRequests as $changeRequest)
+                                <tr class="align-top transition-colors duration-150 hover:bg-surface-container-low">
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-on-surface">{{ $changeRequest->user?->name ?? 'Deleted account' }}</p>
+                                        <p class="mt-1 text-xs text-on-surface-variant">{{ ucfirst($changeRequest->user?->role ?? 'Account') }}@if($changeRequest->user?->section) &middot; {{ $changeRequest->user->section }}@endif</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <p class="font-medium text-on-surface">{{ $changeRequest->current_name }}</p>
+                                        <p class="mt-1 break-all text-on-surface-variant">{{ $changeRequest->current_email }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <p class="font-bold text-primary">{{ $changeRequest->requested_name }}</p>
+                                        <p class="mt-1 break-all font-medium text-primary">{{ $changeRequest->requested_email }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-on-surface-variant">{{ $changeRequest->created_at?->format('M d, h:i A') }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <form method="POST" action="{{ route('admin.profile-change-requests.decline', $changeRequest) }}">
+                                                @csrf
+                                                <button class="rounded-DEFAULT px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error-container/20" type="submit">Decline</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}">
+                                                @csrf
+                                                <button class="rounded-DEFAULT bg-secondary px-4 py-2 text-sm font-bold text-surface-container-lowest shadow-sm transition-colors hover:bg-secondary-dim" type="submit">Approve</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td class="px-6 py-12 text-center text-sm text-on-surface-variant" colspan="5">
+                                        {{ ($filters['search'] ?? '') !== '' ? 'No profile change requests match your search.' : 'No pending profile change requests right now.' }}
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </x-data-table-scroll>
+
+                <div class="ui-table-footer border-t border-outline-variant/15 bg-surface px-6 py-4 text-sm text-on-surface-variant">
+                    <span>Showing {{ $profileChangeRequests->count() > 0 ? $profileChangeRequests->firstItem() : 0 }} to {{ $profileChangeRequests->count() > 0 ? $profileChangeRequests->lastItem() : 0 }} of {{ $profileChangeRequests->total() }} entries</span>
+                    @if ($profileChangeRequests->hasPages())
+                        <div>{{ $profileChangeRequests->links() }}</div>
+                    @endif
+                </div>
+            </section>
             </main>
         </div>
     </div>

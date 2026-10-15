@@ -3,7 +3,13 @@
     <x-student-nav active="home" />
     <main class="student-home lg:ml-72">
         <header class="home-heading">
-            <div><p>YOUR LEARNING SPACE</p><h1>Hi, {{ str($student->name)->before(' ')->title() }}!</h1></div>
+            <div class="home-heading-copy">
+                <p>YOUR LEARNING SPACE</p>
+                <div class="home-greeting-row">
+                    <h1>Hi, {{ str($student->name)->before(' ')->title() }}!</h1>
+                    <span class="home-section-label"><span class="material-symbols-outlined" aria-hidden="true">groups</span>Section {{ $student->section ?: 'Not Assigned' }}</span>
+                </div>
+            </div>
             <a class="ui-button ui-button-secondary" href="{{ route('student.wardrobe.edit') }}"><span class="material-symbols-outlined" aria-hidden="true">checkroom</span>Wardrobe</a>
         </header>
         @if (session('status'))<p class="wardrobe-notice" role="status">{{ session('status') }}</p>@endif

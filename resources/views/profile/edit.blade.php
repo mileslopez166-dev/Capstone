@@ -54,14 +54,15 @@
                         <div>
                             <p class="font-headline text-xl font-bold">{{ $user->name }}</p>
                             <p class="text-sm font-medium text-white/75">{{ $user->email }}</p>
+                            @if ($isStudent)<p class="mt-1 text-sm font-bold text-white/90">Section {{ $user->section ?: 'Not Assigned' }}</p>@endif
                         </div>
                     </div>
                 </div>
 
                 <div class="teacher-summary-metrics grid gap-4 sm:grid-cols-3">
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Account Type</p>
-                        <p class="mt-3 font-headline text-2xl font-bold text-primary">{{ ucfirst($user->role ?? 'student') }}</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">{{ $isStudent ? 'Assigned Section' : 'Account Type' }}</p>
+                        <p class="mt-3 font-headline text-2xl font-bold text-primary">{{ $isStudent ? ($user->section ?: 'Not Assigned') : ucfirst($user->role ?? 'student') }}</p>
                     </div>
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Profile Status</p>
@@ -80,8 +81,34 @@
                     <div class="rounded-lg bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <div class="mb-6">
                             <h2 class="font-headline text-2xl font-bold text-on-surface">Profile Information</h2>
-                            <p class="mt-2 text-on-surface-variant">Update your display name and email address.</p>
+                            <p class="mt-2 text-on-surface-variant">
+                                {{ $isStudent || $isTeacher
+                                    ? 'Request a change to your display name or email address. An administrator must approve it before your account is updated.'
+                                    : 'Update your display name and email address.' }}
+                            </p>
                         </div>
+
+                        @if (($isStudent || $isTeacher) && $pendingProfileChange)
+                            <div class="mb-6 rounded-lg border border-tertiary/30 bg-tertiary-container/30 p-5" role="status">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined mt-0.5 text-tertiary" aria-hidden="true">pending_actions</span>
+                                    <div class="min-w-0">
+                                        <p class="font-headline font-bold text-on-surface">Pending administrator approval</p>
+                                        <p class="mt-1 text-sm text-on-surface-variant">Your current name and sign-in email remain active until this request is approved.</p>
+                                        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                                            <div>
+                                                <dt class="font-bold text-on-surface-variant">Requested name</dt>
+                                                <dd class="mt-1 break-words text-on-surface">{{ $pendingProfileChange->requested_name }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="font-bold text-on-surface-variant">Requested email</dt>
+                                                <dd class="mt-1 break-all text-on-surface">{{ $pendingProfileChange->requested_email }}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <form id="send-verification" method="post" action="{{ route('verification.send') }}">
                             @csrf
@@ -93,13 +120,13 @@
 
                             <div>
                                 <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="name">Full Name</label>
-                                <input id="name" name="name" type="text" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+                                <input id="name" name="name" type="text" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20" value="{{ old('name', $pendingProfileChange?->requested_name ?? $user->name) }}" required autofocus autocomplete="name">
                                 <x-input-error class="mt-2 text-sm text-error" :messages="$errors->get('name')" />
                             </div>
 
                             <div>
                                 <label class="mb-2 block text-sm font-bold text-on-surface-variant" for="email">Email Address</label>
-                                <input id="email" name="email" type="email" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20" value="{{ old('email', $user->email) }}" required autocomplete="username">
+                                <input id="email" name="email" type="email" class="w-full rounded-xl border-none bg-surface-container-low px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20" value="{{ old('email', $pendingProfileChange?->requested_email ?? $user->email) }}" required autocomplete="username">
                                 <x-input-error class="mt-2 text-sm text-error" :messages="$errors->get('email')" />
 
                                 @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
@@ -114,6 +141,32 @@
                                 @endif
                             </div>
                             @if ($isStudent)
+                                <div class="border-y border-outline-variant/20 py-5" aria-labelledby="student-details-heading">
+                                    <div class="mb-4">
+                                        <h3 id="student-details-heading" class="font-headline text-lg font-bold text-on-surface">Student Details</h3>
+                                        <p class="mt-1 text-sm text-on-surface-variant">School information is managed by your teacher or administrator.</p>
+                                    </div>
+                                    <dl class="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+                                        <div>
+                                            <dt class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Assigned Section</dt>
+                                            <dd class="mt-2 flex items-center gap-2 font-headline text-lg font-bold text-primary"><span class="material-symbols-outlined text-xl" aria-hidden="true">groups</span>{{ $user->section ?: 'Not Assigned' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Grade Level</dt>
+                                            <dd class="mt-2 font-headline text-lg font-bold text-on-surface">Grade 6</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Enrollment Status</dt>
+                                            <dd class="mt-2 font-headline text-lg font-bold text-secondary">{{ str($user->approval_status ?? 'pending')->title() }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Student ID</dt>
+                                            <dd class="mt-2 font-headline text-lg font-bold text-on-surface">STU-{{ str_pad((string) $user->id, 5, '0', STR_PAD_LEFT) }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            @endif
+                            @if ($isStudent)
                                 <a class="wardrobe-profile-link" href="{{ route('student.wardrobe.edit') }}">
                                     <span class="material-symbols-outlined" aria-hidden="true">checkroom</span>
                                     <span>Customize Avatar</span>
@@ -123,16 +176,23 @@
                             <input name="gender" type="hidden" value="{{ $user->gender }}">
 
                             <div class="flex items-center gap-4">
-                                <button class="rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-bold text-on-primary shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]" type="submit">Save Changes</button>
+                                <button class="rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-bold text-on-primary shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]" type="submit">
+                                    {{ $isStudent || $isTeacher ? ($pendingProfileChange ? 'Update Request' : 'Request Changes') : 'Save Changes' }}
+                                </button>
 
-                                @if (session('status') === 'profile-updated')
+                                @if (in_array(session('status'), ['profile-updated', 'profile-change-requested', 'profile-change-cancelled', 'profile-change-unchanged'], true))
                                     <p
                                         x-data="{ show: true }"
                                         x-show="show"
                                         x-transition
-                                        x-init="setTimeout(() => show = false, 2000)"
+                                        x-init="setTimeout(() => show = false, 5000)"
                                         class="text-sm font-medium text-secondary"
-                                    >Saved.</p>
+                                    >{{ match (session('status')) {
+                                        'profile-change-requested' => 'Request sent for administrator approval.',
+                                        'profile-change-cancelled' => 'Pending request cancelled.',
+                                        'profile-change-unchanged' => 'No profile changes to request.',
+                                        default => 'Saved.',
+                                    } }}</p>
                                 @endif
                             </div>
                         </form>
@@ -207,6 +267,12 @@
                                 <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Role Access</p>
                                 <p class="mt-2 text-sm font-bold text-primary">{{ ucfirst($user->role ?? 'student') }}</p>
                             </div>
+                            @if ($isStudent)
+                                <div class="rounded-xl bg-surface-container-lowest p-4">
+                                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Section</p>
+                                    <p class="mt-2 text-sm font-bold text-primary">{{ $user->section ?: 'Not Assigned' }}</p>
+                                </div>
+                            @endif
                         </div>
 
                         <form method="post" action="{{ route('logout') }}" class="mt-6">

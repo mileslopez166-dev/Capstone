@@ -63,6 +63,19 @@ class CampusThemeTest extends TestCase
         }
     }
 
+    public function test_admin_header_remains_visible_while_scrolling(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        foreach (['admin.dashboard', 'admin.token-requests.index', 'admin.ai-models.index', 'admin.users.trash'] as $routeName) {
+            $this->actingAs($admin)->get(route($routeName))->assertOk()
+                ->assertSee('admin-topbar sticky z-30', false)
+                ->assertSee('staff-theme admin-theme min-h-screen overflow-x-clip', false)
+                ->assertSeeInOrder(['admin-menu-toggle', 'admin-brand'], false)
+                ->assertDontSee('staff-theme admin-theme min-h-screen overflow-x-hidden', false);
+        }
+    }
+
     public function test_admin_profile_keeps_its_existing_layout(): void
     {
         $admin = User::factory()->admin()->create();

@@ -73,6 +73,37 @@
                 </div>
 
                 <div class="space-y-6 lg:col-span-5">
+                    <section class="overflow-hidden rounded-lg border border-primary/20 bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,94,159,0.06)]" aria-labelledby="leaderboard-status-heading">
+                        <div class="flex items-start justify-between gap-4 border-b border-outline-variant/15 bg-surface-container-low px-6 py-5">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Your Standing</p>
+                                <h2 id="leaderboard-status-heading" class="mt-1 font-headline text-xl font-bold text-on-surface">Leaderboard Status</h2>
+                            </div>
+                            <a class="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-primary" href="{{ route('student.leaderboard') }}">Full rankings<span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span></a>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-primary font-headline text-2xl font-black text-on-primary shadow-md">{{ $leaderboardStatus['rank'] ? '#'.$leaderboardStatus['rank'] : '--' }}</div>
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Overall Rank</p>
+                                        <p class="mt-1 flex items-center gap-2 font-headline text-xl font-black text-on-surface"><span class="material-symbols-outlined text-tertiary" aria-hidden="true">{{ $leaderboardStatus['tier']['icon'] }}</span>{{ $leaderboardStatus['tier']['label'] }} Tier</p>
+                                    </div>
+                                </div>
+                                <div class="border-t border-outline-variant/20 pt-4 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 sm:text-right">
+                                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">{{ $student->section ?: 'No Section' }}</p>
+                                    <p class="mt-1 font-headline text-lg font-black text-secondary">Section Rank {{ $leaderboardStatus['section_rank'] ? '#'.$leaderboardStatus['section_rank'] : '--' }}</p>
+                                </div>
+                            </div>
+                            <dl class="mt-6 grid grid-cols-3 divide-x divide-outline-variant/20 border-y border-outline-variant/20 py-4 text-center">
+                                <div class="px-2"><dt class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Points</dt><dd class="mt-1 font-headline text-lg font-black text-on-surface">{{ number_format($leaderboardStatus['points']) }}</dd></div>
+                                <div class="px-2"><dt class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Completed</dt><dd class="mt-1 font-headline text-lg font-black text-on-surface">{{ $leaderboardStatus['completed'] }}</dd></div>
+                                <div class="px-2"><dt class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Accuracy</dt><dd class="mt-1 font-headline text-lg font-black text-on-surface">{{ $leaderboardStatus['accuracy'] === null ? '--' : $leaderboardStatus['accuracy'].'%' }}</dd></div>
+                            </dl>
+                            @if (! $leaderboardStatus['rank'])<p class="mt-4 text-sm text-on-surface-variant">Complete an assessment to enter the leaderboard.</p>@endif
+                        </div>
+                    </section>
+
                     <div class="rounded-lg bg-surface-container-low p-8">
                         <h4 class="mb-6 flex items-center gap-2 font-headline text-xl font-bold">
                             <span class="material-symbols-outlined text-secondary">assessment</span>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\ProfileChangeRequest;
 use App\Models\User;
+use App\Support\NotificationSender;
 use App\Support\StudentLeaderboard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,9 @@ class ProfileController extends Controller
 
         return view('profile.edit', [
             'user' => $user,
+            'pendingProfileChange' => ($user->isStudent() || $user->isTeacher())
+                ? $user->profileChangeRequests()->pending()->latest()->first()
+                : null,
             'studentRank' => $studentRank,
             'studentRankTier' => $this->rankTier($studentRank),
         ]);
@@ -37,13 +42,48 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isStudent() || $user->isTeacher()) {
+            $pending = $user->profileChangeRequests()->pending()->latest()->first();
+            $requestedName = trim($validated['name']);
+            $requestedEmail = strtolower($validated['email']);
+            $hasChanges = $requestedName !== $user->name || $requestedEmail !== strtolower($user->email);
+
+            if (! $hasChanges) {
+                if ($pending) {
+                    $pending->update(['status' => 'cancelled', 'reviewed_at' => now()]);
+
+                    return Redirect::route('profile.edit')->with('status', 'profile-change-cancelled');
+                }
+
+                return Redirect::route('profile.edit')->with('status', 'profile-change-unchanged');
+            }
+
+            $changeRequest = ProfileChangeRequest::updateOrCreate([
+                'user_id' => $user->id,
+                'status' => 'pending',
+            ], [
+                'current_name' => $user->name,
+                'current_email' => $user->email,
+                'requested_name' => $requestedName,
+                'requested_email' => $requestedEmail,
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+            ]);
+            NotificationSender::notifyAdminsAboutProfileChange($changeRequest);
+
+            return Redirect::route('profile.edit')->with('status', 'profile-change-requested');
         }
 
-        $request->user()->save();
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

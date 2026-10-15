@@ -67,6 +67,16 @@ class StudentTaskQueueTest extends TestCase
             ->assertSeeText('Frustration to Independent');
     }
 
+    public function test_dashboard_heading_shows_the_students_section(): void
+    {
+        $student = User::factory()->create(['name' => 'Miles Learner', 'section' => 'Magalang']);
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk()
+            ->assertSeeText('Hi, Miles!')
+            ->assertSeeText('Section Magalang')
+            ->assertSee('home-section-label', false);
+    }
+
     public function test_empty_or_stale_progress_is_not_a_current_attempt(): void
     {
         $student = User::factory()->create();

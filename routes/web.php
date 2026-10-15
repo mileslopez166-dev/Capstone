@@ -232,6 +232,14 @@ Route::post('/admin/token-requests/{user}/decline', [TokenRequestController::cla
     ->middleware(['auth', 'verified'])
     ->name('admin.token-requests.decline');
 
+Route::post('/admin/profile-change-requests/{profileChangeRequest}/approve', [TokenRequestController::class, 'approveProfileChange'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.profile-change-requests.approve');
+
+Route::post('/admin/profile-change-requests/{profileChangeRequest}/decline', [TokenRequestController::class, 'declineProfileChange'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.profile-change-requests.decline');
+
 Route::post('/admin/users', [UserManagementController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('admin.users.store');
@@ -445,9 +453,30 @@ Route::get('/student/rewards', function () use ($submissionAccuracy, $submission
         ->where('user_id', $student->id)
         ->latest('submitted_at')
         ->get();
+    $overallEntry = StudentLeaderboard::entries()->firstWhere('student.id', $student->id);
+    $sectionEntry = filled($student->section)
+        ? StudentLeaderboard::entries($student->section)->firstWhere('student.id', $student->id)
+        : null;
+    $rank = $overallEntry['rank'] ?? null;
+    $tier = match ($rank) {
+        1 => ['label' => 'Flaming', 'icon' => 'local_fire_department'],
+        2 => ['label' => 'Diamond', 'icon' => 'diamond'],
+        3 => ['label' => 'Platinum', 'icon' => 'workspace_premium'],
+        4 => ['label' => 'Gold', 'icon' => 'military_tech'],
+        5 => ['label' => 'Silver', 'icon' => 'shield'],
+        default => $rank ? ['label' => 'Bronze', 'icon' => 'editor_choice'] : ['label' => 'Unranked', 'icon' => 'hourglass_empty'],
+    };
 
     return view('student.rewards', [
         'recentSubmissions' => $submissions->take(5),
+        'leaderboardStatus' => [
+            'rank' => $rank,
+            'section_rank' => $sectionEntry['rank'] ?? null,
+            'tier' => $tier,
+            'points' => $overallEntry['points'] ?? 0,
+            'completed' => $overallEntry['completed'] ?? 0,
+            'accuracy' => $overallEntry['accuracy'] ?? null,
+        ],
         'studentMetrics' => [
             'completed_count' => $submissions->count(),
             'saved_results' => $submissions->count(),

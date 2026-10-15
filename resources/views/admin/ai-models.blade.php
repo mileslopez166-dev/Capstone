@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>AI Model Evaluation | AI-PGAALS</title><x-admin-head /></head>
-<body class="staff-theme admin-theme min-h-screen overflow-x-hidden bg-surface text-on-surface">
+<body class="staff-theme admin-theme min-h-screen overflow-x-clip bg-surface text-on-surface">
 <div class="min-h-screen lg:flex">
 <x-admin-sidebar active="ai-models" :admin-user="$adminUser" :admin-initials="$adminInitials" />
 <div class="w-full lg:ml-64">

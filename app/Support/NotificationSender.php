@@ -5,10 +5,13 @@ namespace App\Support;
 use App\Models\AppNotification;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
+use App\Models\ProfileChangeRequest;
 use App\Models\User;
 use App\Notifications\PhonePushNotification;
+use App\Notifications\RegistrationApprovalEmail;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Throwable;
 
 class NotificationSender
@@ -31,7 +34,7 @@ class NotificationSender
                     self::reportFailure($exception, $user, $type, 'in-app');
                 }
 
-                if (in_array($type, ['registration', 'student_enrollment_request', 'assessment_created', 'assessment_published'], true)
+                if (in_array($type, ['student_enrollment_request', 'assessment_created', 'assessment_published'], true)
                     && PhonePushNotification::isConfigured()) {
                     try {
                         $user->notify(new PhonePushNotification($type, $title, $body, $url));
@@ -61,6 +64,52 @@ class NotificationSender
             'New account registration',
             sprintf('%s registered as %s and is waiting for review.', $registeredUser->name, ucfirst($registeredUser->role)),
             route('admin.token-requests.index')
+        );
+
+        if (RegistrationApprovalEmail::isConfigured()) {
+            try {
+                Notification::route('mail', config('admin-notifications.registration_email'))
+                    ->notify(new RegistrationApprovalEmail($registeredUser));
+            } catch (Throwable $exception) {
+                Log::warning('The registration approval email could not be queued.', [
+                    'registered_user_id' => $registeredUser->id,
+                    'exception' => $exception::class,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    public static function notifyAdminsAboutProfileChange(ProfileChangeRequest $changeRequest): void
+    {
+        $user = $changeRequest->user;
+        if (! $user) {
+            return;
+        }
+
+        self::sendToUsers(
+            User::query()->where('role', 'admin')->where('approval_status', 'approved')->get(),
+            'profile_change_requested',
+            'Profile change needs review',
+            sprintf('%s requested changes to their name or email.', $user->name),
+            route('admin.token-requests.index').'#profile-change-requests'
+        );
+    }
+
+    public static function notifyProfileChangeReviewed(ProfileChangeRequest $changeRequest): void
+    {
+        $user = $changeRequest->user;
+        if (! $user) {
+            return;
+        }
+
+        $approved = $changeRequest->status === 'approved';
+        self::sendToUsers(
+            [$user],
+            'profile_change_'.$changeRequest->status,
+            $approved ? 'Profile change approved' : 'Profile change declined',
+            $approved ? 'Your approved profile information is now active.' : 'Your profile information was not changed.',
+            route('profile.edit')
         );
     }
 

@@ -6,6 +6,7 @@ use App\Models\AppNotification;
 use App\Models\Assessment;
 use App\Models\User;
 use App\Notifications\PhonePushNotification;
+use App\Notifications\RegistrationApprovalEmail;
 use App\Support\NotificationSender;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -40,21 +41,35 @@ class AppNotificationTest extends TestCase
         ]);
     }
 
-    public function test_configured_phone_alert_is_queued_for_a_new_registration(): void
+    public function test_registration_email_is_queued_for_the_configured_admin_inbox(): void
     {
         Notification::fake();
-        config()->set('webpush.vapid.public_key', 'test-public-key');
-        config()->set('webpush.vapid.private_key', 'test-private-key');
+        config()->set('admin-notifications.registration_email', 'school.admin@gmail.com');
 
         $admin = User::factory()->admin()->create(['approval_status' => 'approved']);
         $registeredUser = User::factory()->teacher()->create(['approval_status' => 'pending']);
 
         NotificationSender::notifyAdminsAboutRegistration($registeredUser);
 
-        Notification::assertSentTo(
-            $admin,
-            PhonePushNotification::class,
+        Notification::assertSentOnDemand(
+            RegistrationApprovalEmail::class,
+            fn (RegistrationApprovalEmail $notification, array $channels, object $notifiable): bool =>
+                $notifiable->routes['mail'] === 'school.admin@gmail.com'
+                && $channels === ['mail']
         );
+        Notification::assertNotSentTo($admin, PhonePushNotification::class);
+    }
+
+    public function test_registration_email_is_skipped_when_admin_inbox_is_not_configured(): void
+    {
+        Notification::fake();
+        config()->set('admin-notifications.registration_email', null);
+
+        $registeredUser = User::factory()->teacher()->create(['approval_status' => 'pending']);
+
+        NotificationSender::notifyAdminsAboutRegistration($registeredUser);
+
+        Notification::assertNothingSent();
     }
 
     public function test_student_registration_notifies_only_teachers_in_the_requested_section(): void

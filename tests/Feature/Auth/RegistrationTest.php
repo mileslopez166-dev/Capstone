@@ -42,12 +42,11 @@ class RegistrationTest extends TestCase
         ]);
     }
 
-    public function test_registration_succeeds_with_database_queued_phone_notifications(): void
+    public function test_registration_succeeds_with_database_queued_admin_email(): void
     {
         config([
             'queue.default' => 'database',
-            'webpush.vapid.public_key' => 'test-public-key',
-            'webpush.vapid.private_key' => 'test-private-key',
+            'admin-notifications.registration_email' => 'school.admin@gmail.com',
         ]);
         User::factory()->admin()->create(['approval_status' => 'approved']);
 

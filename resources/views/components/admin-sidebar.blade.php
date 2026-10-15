@@ -1,13 +1,13 @@
 @props(['active' => 'overview', 'adminUser', 'adminInitials'])
 
 <aside class="admin-sidebar" x-data="{ navOpen: false }" @keydown.escape.window="navOpen = false" @click.outside="navOpen = false">
+    <button class="admin-menu-toggle" type="button" @click="navOpen = !navOpen" :aria-expanded="navOpen" aria-controls="admin-navigation" aria-label="Admin navigation" title="Admin navigation">
+        <span class="material-symbols-outlined" x-text="navOpen ? 'close' : 'menu'" aria-hidden="true">menu</span>
+    </button>
     <a class="admin-brand" href="{{ route('admin.dashboard') }}">
         <x-application-logo class="h-8 w-8" />
         <span>AI-PGAALS<small>Administration</small></span>
     </a>
-    <button class="admin-menu-toggle" type="button" @click="navOpen = !navOpen" :aria-expanded="navOpen" aria-controls="admin-navigation" aria-label="Admin navigation" title="Admin navigation">
-        <span class="material-symbols-outlined" x-text="navOpen ? 'close' : 'menu'" aria-hidden="true">menu</span>
-    </button>
     <div id="admin-navigation" class="admin-navigation" :class="{ 'is-open': navOpen }">
         <p class="admin-nav-label">Workspace</p>
         <nav class="admin-nav-links" aria-label="Admin navigation">

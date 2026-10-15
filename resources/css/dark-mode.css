@@ -530,6 +530,7 @@ html.student-night .campus-student :is(.campus-bottom-nav a, .campus-brand, .stu
 html.student-night .campus-student .campus-bottom-nav a[aria-current="page"] { background: #173d59; box-shadow: inset 0 -3px 0 #83c9ff; }
 html.student-night .campus-student :is(.student-home, .reading-progress-card, .phil-result, .intervention-plan, .intervention-queue, .activity-subject-heading, .student-profile-progress, .assessment-result-detail) { color: #ffffff; }
 html.student-night .campus-student :is(.home-next, .home-stats, .home-section, .reading-progress-card, .reading-progress-empty, .reading-progress-metrics > div, .phil-formula, .phil-recommendation, .reading-progress-metrics, .student-output-details, .student-assessment-details, .assessment-result-panel) { background: #091b2d; border-color: #29435f; }
+html.student-night .campus-student .home-section-label { background: #102b45; border-color: #3a77a8; color: #ffffff; }
 html.student-night .campus-student :is(.student-output-details > summary > p, .assessment-result-detail :is(dt, p), .assessment-achievement p) { color: #c4cfda; }
 html.student-night .campus-student .student-output-details > summary > span { background: #102b45; color: #ffffff; }
 html.student-night .campus-student :is(.assessment-output, .assessment-output *) { color: inherit; }
@@ -571,6 +572,7 @@ html.dark .ui-status-red { background: #49282e; }
 html.dark :is(.student-home, .reading-progress-card, .phil-result, .intervention-plan, .intervention-queue, .teacher-identity-copy, .activity-subject-heading) { color: var(--dark-ink); }
 html.dark :is(.student-home, .reading-progress-card, .phil-result, .intervention-plan, .intervention-queue, .teacher-identity-copy, .activity-subject-heading) :is(h1, h2, h3, h4, p, small, strong, dt, dd, li, em, a, span:not(.material-symbols-outlined)) { color: var(--dark-ink); }
 html.dark :is(.home-next, .home-stats, .home-section, .reading-progress-card, .reading-progress-empty, .reading-progress-metrics > div, .phil-formula, .phil-recommendation) { background: var(--dark-surface); border-color: var(--dark-line); }
+html.dark .home-section-label { background: var(--dark-surface-2); border-color: #4f7695; color: var(--dark-ink); }
 html.dark .reading-progress-metrics { background: var(--dark-line); border-color: var(--dark-line); }
 html.dark .reading-progress-status { background: #173d32; }
 html.dark .phil-result .phil-level { --phil-accent: #a3dec6; color: var(--dark-ink); }

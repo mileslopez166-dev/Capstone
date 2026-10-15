@@ -1,6 +1,6 @@
 @props(['title' => 'Overview', 'adminUser', 'adminInitials', 'searchSuggestions' => [], 'searchAction' => null, 'searchName' => 'q', 'searchValue' => null, 'searchPlaceholder' => 'Search users or token requests...'])
 
-<header class="admin-topbar">
+<header class="admin-topbar sticky z-30">
     <div class="admin-breadcrumb"><span>Admin Console</span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span><strong>{{ $title }}</strong></div>
     <form class="admin-search" method="GET" action="{{ $searchAction ?? route('admin.search') }}">
         <button type="submit" aria-label="Search admin workspace" title="Search"><span class="material-symbols-outlined" aria-hidden="true">search</span></button>
