@@ -25,7 +25,7 @@ class AlgorithmEvaluationService
             ->orderBy('user_id')->orderBy('submitted_at')->get()
             ->map(function (AssessmentSubmission $submission) use ($subject): ?array {
                 $features = app(MLPredictionService::class)->features($submission);
-                $label = $subject === 'literacy' ? (PhilIri::forSubmission($submission)['level'] ?? null) : null;
+                $label = $this->label($submission, $subject);
 
                 if (! $label) {
                     return null;
@@ -62,7 +62,7 @@ class AlgorithmEvaluationService
             if (($result['status'] ?? null) === 'insufficient_data') {
                 $evaluation->update([
                     'status' => 'insufficient_data',
-                    'dataset_info' => ['rows_sent' => count($records)],
+                    'dataset_info' => $this->datasetContext($evaluation->subject, ['rows_sent' => count($records)]),
                     'error_message' => $result['message'] ?? 'Insufficient labeled data.',
                     'completed_at' => now(),
                 ]);
@@ -74,9 +74,10 @@ class AlgorithmEvaluationService
             }
 
             DB::transaction(function () use ($evaluation, $result): void {
+                $dataset = $this->datasetContext($evaluation->subject, $result['dataset'] ?? []);
                 $evaluation->update([
                     'status' => 'evaluated',
-                    'dataset_info' => $result['dataset'] ?? null,
+                    'dataset_info' => $dataset,
                     'comparison_metrics' => collect($result['models'])->map(fn ($model) => $model['validation_metrics'] ?? [])->all(),
                     'recommended_algorithm' => $result['recommended_algorithm'] ?? null,
                     'final_test_metrics' => $result['final_test_metrics'] ?? null,
@@ -98,7 +99,7 @@ class AlgorithmEvaluationService
                         'artifact_path' => $model['artifact_path'] ?? null,
                         'metrics' => $model['validation_metrics'] ?? null,
                         'provenance' => [
-                            'dataset' => $result['dataset'] ?? null,
+                            'dataset' => $dataset,
                             'protocol' => $result['evaluation_protocol'] ?? null,
                             'random_seed' => $result['random_seed'] ?? null,
                             'training_date' => $result['training_date'] ?? null,
@@ -110,12 +111,46 @@ class AlgorithmEvaluationService
         } catch (\Throwable $exception) {
             $evaluation->update([
                 'status' => 'failed',
-                'dataset_info' => ['rows_sent' => count($records)],
+                'dataset_info' => $this->datasetContext($evaluation->subject, ['rows_sent' => count($records)]),
                 'error_message' => (string) str($exception->getMessage())->limit(1000),
                 'completed_at' => now(),
             ]);
             report($exception);
         }
+    }
+
+    public function availableData(string $subject): array
+    {
+        $records = AssessmentSubmission::query()
+            ->with('assessment')
+            ->whereHas('assessment', fn ($query) => $query->where('subject', $subject))
+            ->whereNotNull('submitted_at')
+            ->get()
+            ->map(fn (AssessmentSubmission $submission): array => [
+                'user_id' => $submission->user_id,
+                'label' => $this->label($submission, $subject),
+            ])
+            ->filter(fn (array $record): bool => $record['label'] !== null);
+
+        return [
+            'rows' => $records->count(),
+            'learners' => $records->pluck('user_id')->unique()->count(),
+            'class_distribution' => $records->countBy('label')->all(),
+        ];
+    }
+
+    private function label(AssessmentSubmission $submission, string $subject): ?string
+    {
+        return $subject === 'literacy'
+            ? (PhilIri::forSubmission($submission)['level'] ?? null)
+            : NumeracyProficiency::forSubmission($submission);
+    }
+
+    private function datasetContext(string $subject, array $dataset): array
+    {
+        return $subject === 'numeracy'
+            ? array_merge($dataset, ['target_definition' => NumeracyProficiency::evidence()])
+            : $dataset;
     }
 
     public function activate(User $admin, AiModelVersion $version): void

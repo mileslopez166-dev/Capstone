@@ -66,10 +66,10 @@
             <div class="flex flex-wrap gap-2">@foreach (['literacy' => 'Literacy', 'numeracy' => 'Numeracy'] as $subject => $label)<form method="POST" action="{{ route('admin.ai-models.classification.evaluate') }}">@csrf<input type="hidden" name="subject" value="{{ $subject }}"><button class="ui-button {{ $subject === 'literacy' ? 'ui-button-primary' : 'ui-button-secondary' }}" type="submit"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>Run {{ $label }}</button></form>@endforeach</div>
         </div>
         @foreach (['literacy' => 'Literacy', 'numeracy' => 'Numeracy'] as $subject => $label)
-            @php $evaluation=$latestBySubject->get($subject); $active=$activeConfigurations->get('classification:'.$subject); $versions=$evaluation?->versions ?? collect(); @endphp
+            @php $evaluation=$latestBySubject->get($subject); $active=$activeConfigurations->get('classification:'.$subject); $versions=$evaluation?->versions ?? collect(); $available=$availableClassificationData->get($subject, []); @endphp
             <div class="space-y-4 border-t border-outline-variant/20 pt-5">
                 <div class="flex flex-col gap-3 bg-surface-container-low p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div><h3 class="font-headline text-xl font-bold">{{ $label }}</h3><p class="text-sm text-on-surface-variant">{{ data_get($evaluation?->dataset_info, 'rows', data_get($evaluation?->dataset_info, 'rows_sent', 0)) }} labeled records / {{ data_get($evaluation?->dataset_info, 'learners', 0) }} learners</p></div>
+                    <div><h3 class="font-headline text-xl font-bold">{{ $label }}</h3><p class="text-sm text-on-surface-variant">{{ data_get($available, 'rows', 0) }} currently labeled records / {{ data_get($available, 'learners', 0) }} learners</p>@if($subject === 'numeracy')<p class="mt-1 text-xs text-on-surface-variant">Score bands: Beginning 0–59%, Developing 60–74%, Proficient 75–89%, Advanced 90–100%.</p>@endif</div>
                     <div class="flex max-w-full flex-wrap gap-2 text-xs font-bold uppercase tracking-wide"><span class="rounded-full bg-surface-container-high px-3 py-1.5">{{ str($evaluation?->status ?? 'not_trained')->replace('_',' ')->title() }}</span><span class="max-w-full break-all rounded-full bg-primary-container/25 px-3 py-1.5 text-primary">{{ $active?->active_key ? 'Active: '.$active->active_key : 'No active comparison model' }}</span></div>
                 </div>
                 @if ($evaluation?->error_message)<p class="rounded-md border border-error/25 bg-error-container/20 px-5 py-3 text-sm text-on-error-container">{{ $evaluation->error_message }}</p>@endif
@@ -98,6 +98,7 @@
                                     <tr><td>Distinct learners</td><td>{{ data_get($dataset, 'learners', 0) }}</td></tr>
                                     <tr><td>Development / holdout rows</td><td>{{ data_get($dataset, 'development_rows', 'Pending') }} / {{ data_get($dataset, 'held_out_rows', 'Pending') }}</td></tr>
                                     <tr><td>Class distribution</td><td class="ui-table-copy">{{ collect(data_get($dataset, 'class_distribution', []))->map(fn ($count, $level) => $level.': '.$count)->join(' / ') ?: 'Pending' }}</td></tr>
+                                    @if($subject === 'numeracy')<tr><td>Target definition</td><td class="ui-table-copy">Project-defined completed-assessment score bands. Metrics measure reproduction of these bands, not independent learning gains.</td></tr>@endif
                                     <tr><td>Input features</td><td class="ui-table-copy">{{ collect(data_get($dataset, 'features', []))->map(fn ($feature) => str($feature)->replace('_', ' ')->title())->join(', ') ?: 'Pending' }}</td></tr>
                                     <tr><td>Validation method</td><td class="ui-table-copy">{{ data_get($protocol, 'model_selection', 'Pending') }}</td></tr>
                                     <tr><td>Validation folds</td><td>{{ data_get($metrics, 'folds', 'Pending') }}</td></tr>

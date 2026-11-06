@@ -16,7 +16,7 @@ Training uses only stored system records. No synthetic rows are inserted into pr
 
 Literacy targets are the valid Phil-IRI result saved for an assessment submission: **Frustration**, **Instructional**, or **Independent**. Group Screening Test results without an individual reading level are excluded.
 
-Numeracy targets are intentionally unavailable until the project adopts documented ARAL-aligned definitions for **Beginning**, **Developing**, **Proficient**, and **Advanced**. Phil-IRI reading levels are never reused as numeracy labels.
+Numeracy targets use documented project-defined bands from each completed assessment's official percentage: **Beginning** 0–59%, **Developing** 60–74%, **Proficient** 75–89%, and **Advanced** 90–100%. Phil-IRI reading levels are never reused as numeracy labels. Because the target is score-derived, numeracy classifier metrics show how well a model reproduces these operational bands; they are not independent evidence of learning gains.
 
 ### Available features
 
@@ -136,9 +136,9 @@ Populate these tables only from an administrator evaluation record. Do not copy 
 | Literacy | Decision Tree | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
 | Literacy | Random Forest | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
 | Literacy | SVM | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
-| Numeracy | Decision Tree | Pending | Pending | Pending | Pending | Pending | Pending | Insufficient labeled targets |
-| Numeracy | Random Forest | Pending | Pending | Pending | Pending | Pending | Pending | Insufficient labeled targets |
-| Numeracy | SVM | Pending | Pending | Pending | Pending | Pending | Pending | Insufficient labeled targets |
+| Numeracy | Decision Tree | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
+| Numeracy | Random Forest | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
+| Numeracy | SVM | Pending | Pending | Pending | Pending | Pending | Pending | Not evaluated |
 
 ### Selected model final holdout
 

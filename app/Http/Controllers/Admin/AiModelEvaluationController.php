@@ -20,7 +20,7 @@ use Illuminate\View\View;
 
 class AiModelEvaluationController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, AlgorithmEvaluationService $models): View
     {
         $admin = $this->admin($request);
         $evaluations = AiModelEvaluation::with(['versions', 'requester'])->latest()->take(20)->get();
@@ -34,6 +34,8 @@ class AiModelEvaluationController extends Controller
             'latestBySubject' => $evaluations->unique('subject')->keyBy('subject'),
             'recommendationEvaluations' => $recommendations,
             'latestRecommendations' => $recommendations->unique('approach')->keyBy('approach'),
+            'availableClassificationData' => collect(['literacy', 'numeracy'])
+                ->mapWithKeys(fn (string $subject): array => [$subject => $models->availableData($subject)]),
             'activeConfigurations' => AiActiveConfiguration::all()->keyBy(fn ($item) => $item->configuration_type.':'.$item->subject),
             'activationLogs' => AiModelActivationLog::latest()->take(15)->get(),
             'recentLearningRecommendations' => LearningRecommendation::with(['student', 'assessment'])

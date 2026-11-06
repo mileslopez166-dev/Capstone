@@ -10,6 +10,7 @@ use App\Models\AiRecommendationEvaluation;
 use App\Models\Assessment;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
+use App\Support\AlgorithmEvaluationService;
 use App\Support\LearningRecommender;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -98,12 +99,40 @@ class AiAlgorithmManagementTest extends TestCase
             ->assertSeeText('Max Depth: 6')
             ->assertSeeText('79.5%')
             ->assertSeeText('Cosine similarity');
+        $response->assertSeeText('Beginning 0–59%')
+            ->assertSeeText('Metrics measure reproduction of these bands');
         $this->assertStringContainsString('aria-label="Decision Tree literacy evidence table"', $response->getContent());
         $this->assertStringContainsString('aria-label="Random Forest literacy evidence table"', $response->getContent());
         $this->assertStringContainsString('aria-label="Support Vector Machine literacy evidence table"', $response->getContent());
         $this->assertStringContainsString('aria-label="Content-Based Filtering evidence table"', $response->getContent());
         $this->assertStringContainsString('aria-label="Collaborative Filtering evidence table"', $response->getContent());
         $this->assertStringContainsString('aria-label="Hybrid Recommendation evidence table"', $response->getContent());
+    }
+
+    public function test_completed_numeracy_scores_are_exported_with_operational_proficiency_labels(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $assessment = $this->assessment($teacher, [
+            'title' => 'Numeracy Game',
+            'subject' => 'numeracy',
+            'assessment_type' => 'worksheet',
+        ]);
+        $expected = ['Beginning', 'Developing', 'Proficient', 'Advanced'];
+
+        foreach ([5, 6, 8, 9] as $correct) {
+            $this->submission(User::factory()->create(), $assessment, $correct, 10);
+        }
+
+        $service = app(AlgorithmEvaluationService::class);
+        $records = $service->records('numeracy');
+
+        $this->assertSame($expected, array_column($records, 'proficiency_label'));
+        $this->assertSame([50, 60, 80, 90], array_map('intval', array_column($records, 'numeracy_score')));
+        $this->assertSame([
+            'rows' => 4,
+            'learners' => 4,
+            'class_distribution' => array_fill_keys($expected, 1),
+        ], $service->availableData('numeracy'));
     }
 
     public function test_validated_exact_model_can_be_activated_without_changing_scores(): void

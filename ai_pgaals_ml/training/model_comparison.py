@@ -25,7 +25,7 @@ FEATURES = ["reading_score", "reading_accuracy", "reading_speed", "comprehension
             "numeracy_score", "assessment_attempts", "previous_score", "completion_time", "intervention_count"]
 LABELS = {
     "literacy": ["Frustration", "Instructional", "Independent"],
-    # These labels require an approved numeracy definition; this module never derives them from Phil-IRI.
+    # Laravel supplies documented project-defined score-band labels; Phil-IRI labels are never reused here.
     "numeracy": ["Beginning", "Developing", "Proficient", "Advanced"],
 }
 
