@@ -283,6 +283,7 @@ Route::get('/student/search', StudentSearchController::class)
 Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent, $submissionAverage) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
+    app(\App\Support\NumeracyAttemptScorer::class)->backfillForStudent($student);
 
     $retakeAllowances = AssessmentRetakeRequest::query()
         ->where('user_id', $student->id)
@@ -327,6 +328,7 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
 Route::get('/student/activities', function () use ($visibleAssessmentsForStudent, $submissionAccuracy) {
     $student = auth()->user();
     abort_unless($student?->isStudent(), 403);
+    app(\App\Support\NumeracyAttemptScorer::class)->backfillForStudent($student);
     $subject = request()->query('subject');
     if ($subject !== null && ! in_array($subject, ['literacy', 'numeracy'], true)) {
         return redirect()->route('student.activities');

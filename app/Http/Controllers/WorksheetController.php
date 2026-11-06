@@ -13,6 +13,7 @@ use App\Support\AssessmentParticipant;
 use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
+use App\Support\NumeracyAttemptScorer;
 use App\Support\NumeracyWorksheetGrader;
 use App\Support\NumeracyWorksheets;
 use App\Support\SectionCatalog;
@@ -25,9 +26,10 @@ use Illuminate\Validation\ValidationException;
 
 class WorksheetController extends Controller
 {
-    public function mission(Request $request)
+    public function mission(Request $request, NumeracyAttemptScorer $scorer)
     {
         abort_unless($request->user()->isStudent(), 403);
+        $scorer->backfillForStudent($request->user());
 
         return view('worksheets.mission', ['mission' => \App\Support\WorksheetMission::forStudent($request->user())]);
     }
@@ -41,9 +43,10 @@ class WorksheetController extends Controller
         ]);
     }
 
-    public function reviews(Request $request)
+    public function reviews(Request $request, NumeracyAttemptScorer $scorer)
     {
         abort_unless($request->user()->isTeacher(), 403);
+        $scorer->backfillForTeacher($request->user());
 
         return view('worksheets.reviews', [
             'reviews' => WorksheetAttempt::with(['assessment', 'student'])
@@ -297,11 +300,14 @@ class WorksheetController extends Controller
         return response()->json(['url' => route('worksheets.review', $attempt)]);
     }
 
-    public function review(Request $request, WorksheetAttempt $attempt)
+    public function review(Request $request, WorksheetAttempt $attempt, NumeracyAttemptScorer $scorer)
     {
-        $attempt->load(['assessment', 'student', 'progress.submission.coinReward', 'progress.administrator']);
+        $attempt->loadMissing('assessment');
         $teacher = $request->user()->isTeacher() && $attempt->assessment->created_by === $request->user()->id;
         abort_unless($teacher || ($request->user()->isStudent() && $attempt->user_id === $request->user()->id), 404);
+
+        $scorer->score($attempt);
+        $attempt->load(['assessment', 'student', 'progress.submission.coinReward', 'progress.administrator']);
 
         return view('worksheets.review', ['attempt' => $attempt, 'assessment' => $attempt->assessment,
             'worksheet' => NumeracyWorksheets::find($attempt->assessment->worksheet_number), 'teacher' => $teacher]);

@@ -283,6 +283,67 @@ class NumeracyWorksheetTest extends TestCase
         $this->actingAs($teacher)->get(route('worksheets.reviews'))->assertOk()->assertDontSee($student->name);
     }
 
+    public function test_previously_pending_game_attempt_is_backfilled_without_teacher_scoring(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $worksheet = NumeracyWorksheets::find(4);
+        $assignment = $this->assignment($teacher, ['worksheet_number' => 4, 'worksheet_total' => 10]);
+        $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+        $payload = $this->automaticPayload($progress, $worksheet, true);
+        $total = NumeracyWorksheetGrader::scoreableCount($worksheet);
+
+        $attempt = WorksheetAttempt::create([
+            'assessment_id' => $assignment->id,
+            'user_id' => $student->id,
+            'progress_id' => $progress->id,
+            'pages' => $payload['pages'],
+            'total' => $assignment->worksheet_total,
+        ]);
+
+        $this->assertNull($attempt->reviewed_at);
+        $this->assertDatabaseCount(AssessmentSubmission::class, 0);
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk();
+
+        $attempt->refresh();
+        $submission = AssessmentSubmission::firstOrFail();
+        $this->assertNotNull($attempt->reviewed_at);
+        $this->assertSame($total - 1, $attempt->score);
+        $this->assertSame($total, $attempt->total);
+        $this->assertSame($submission->id, $progress->fresh()->submission_id);
+        $this->assertSame($total - 1, $submission->correct_count);
+        $this->assertSame($total, $submission->question_count);
+        $this->assertNotNull($submission->coinReward);
+
+        $this->get(route('student.dashboard'))->assertOk();
+        $this->assertDatabaseCount(AssessmentSubmission::class, 1);
+        $this->actingAs($teacher)->get(route('worksheets.reviews'))->assertOk()->assertDontSee($student->name);
+    }
+
+    public function test_legacy_free_form_attempt_is_not_given_a_guessed_automatic_score(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assignment = $this->assignment($teacher);
+        $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+        $payload = $this->payload($progress);
+
+        $attempt = WorksheetAttempt::create([
+            'assessment_id' => $assignment->id,
+            'user_id' => $student->id,
+            'progress_id' => $progress->id,
+            'pages' => $payload['pages'],
+            'total' => $assignment->worksheet_total,
+        ]);
+
+        $this->artisan('numeracy:backfill-scores')->assertSuccessful();
+
+        $this->assertNull($attempt->fresh()->reviewed_at);
+        $this->assertDatabaseCount(AssessmentSubmission::class, 0);
+        $this->actingAs($teacher)->get(route('worksheets.reviews'))->assertOk()->assertSee($student->name);
+    }
+
     public function test_retry_token_is_consumed_once_at_submission_and_not_again_at_grading(): void
     {
         $teacher = User::factory()->teacher()->create();
