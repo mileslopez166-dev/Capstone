@@ -30,9 +30,9 @@ html.dark .bg-surface-container,
 html.dark .bg-surface-container-high { background-color: var(--dark-surface-3); }
 html.dark .bg-surface-container-highest { background-color: #203b5a; }
 html.dark .text-on-surface,
-html.dark :is(.text-slate-900, .text-gray-900, .text-zinc-900) { color: var(--dark-ink); }
+html.dark :is(.text-slate-900, .text-slate-800, .text-slate-700, .text-gray-900, .text-gray-800, .text-gray-700, .text-zinc-900, .text-zinc-800, .text-zinc-700) { color: var(--dark-ink); }
 html.dark .text-on-surface-variant,
-html.dark :is(.text-slate-500, .text-slate-600, .text-gray-500, .text-gray-600, .text-zinc-500) { color: var(--dark-muted); }
+html.dark :is(.text-slate-400, .text-slate-500, .text-slate-600, .text-gray-400, .text-gray-500, .text-gray-600, .text-zinc-400, .text-zinc-500, .text-zinc-600) { color: var(--dark-muted); }
 html.dark .text-primary { color: var(--dark-primary); }
 html.dark :is(.border-outline-variant, [class*="border-outline-variant"]) { border-color: var(--dark-line); }
 html.dark :is(.shadow-2xl, .shadow-xl, .shadow-lg, .shadow-md, [class*="shadow-"]) { --tw-shadow-color: rgba(0, 0, 0, .45); }
@@ -325,6 +325,54 @@ html.dark .teacher-theme .teacher-quicklinks a {
     border-color: #36516a;
     color: #c5d8e8;
 }
+html.dark .teacher-theme .assessment-list-item {
+    background: var(--dark-surface);
+    border-color: #426078;
+    color: var(--dark-ink);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+}
+html.dark .teacher-theme .assessment-list-item :is(h2, h2 a, dd) { color: #f5f9fc; }
+html.dark .teacher-theme .assessment-list-item :is(dt, time) { color: #c4d4e2; }
+html.dark .teacher-theme .assessment-list-item-actions { border-color: #36516a; }
+html.dark .teacher-theme .worksheet-subjects a {
+    background: #10263a;
+    border-color: #426078;
+    color: #dce9f3;
+}
+html.dark .teacher-theme .worksheet-subjects a:hover {
+    background: #183655;
+    border-color: #6391b3;
+    color: #ffffff;
+}
+html.dark .teacher-theme .worksheet-subjects a[aria-current=page] {
+    background: #175442;
+    border-color: #70c9a9;
+    color: #ffffff;
+}
+html.dark .teacher-theme .assessment-submit-panel {
+    background: rgba(13, 31, 49, .97);
+    border-color: #426078;
+    color: #f5f9fc;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, .38);
+}
+html.dark .teacher-theme .assessment-submit-kicker { color: #7fc8ff; }
+html.dark .teacher-theme .assessment-submit-help { color: #c4d4e2; }
+html.dark .teacher-theme .assessment-submit-panel button {
+    background: #10263a;
+    border-color: #53758a;
+    color: #eaf3f9;
+}
+html.dark .teacher-theme .assessment-submit-panel button:hover {
+    background: #183655;
+    border-color: #7aa4c3;
+    color: #ffffff;
+}
+html.dark .teacher-theme .assessment-submit-panel button.bg-primary {
+    background: #17674f;
+    border-color: #70c9a9;
+    color: #ffffff;
+}
+html.dark .teacher-theme .assessment-submit-panel button.bg-primary:hover { background: #1d795e; }
 html.dark .admin-sidebar { background: #101923; color: #cdd8e4; border-right: 1px solid #23384f; }
 html.dark .admin-nav-links a:hover,
 html.dark .admin-nav-bottom > a:hover,
@@ -428,6 +476,16 @@ html.dark .worksheet-icon[aria-pressed=true] {
     color: var(--dark-ink);
 }
 html.dark .worksheet-item-response :disabled { background: #132338; color: var(--dark-ink); }
+html.dark .worksheet-answer-review { background: var(--dark-surface); border-color: var(--dark-line); }
+html.dark .worksheet-answer-review-heading { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .worksheet-answer-review-heading > dl > div,
+html.dark .worksheet-answer-item { background: var(--dark-surface); color: var(--dark-ink); }
+html.dark .worksheet-answer-list { background: var(--dark-line); }
+html.dark .worksheet-answer-item.is-wrong { background: #321b20; }
+html.dark .worksheet-answer-item dl > div { background: var(--dark-surface-2); border-color: #53758a; }
+html.dark .worksheet-answer-item.is-wrong dl > div:last-child { background: #12352d; border-color: #69cda6; }
+html.dark .worksheet-answer-item :is(h2, p, dt, dd, strong),
+html.dark .worksheet-answer-review-heading :is(h2, p, span, dt, dd) { color: var(--dark-ink); }
 html.dark .worksheet-text-section + .worksheet-text-section,
 html.dark .worksheet-problems > li,
 html.dark .worksheet-reader-progress,

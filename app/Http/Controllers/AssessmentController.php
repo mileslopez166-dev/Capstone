@@ -71,7 +71,7 @@ class AssessmentController extends Controller
             'question_selection' => ['sometimes', Rule::in(['fixed', 'automatic'])],
             'delivery_method' => ['required', Rule::in(['manual'])],
             'target_section' => ['required', Rule::in(['all', ...SectionCatalog::targetKeys()])],
-            'assessment_type' => ['required', Rule::in(['silent_reading', 'oral_reading', 'listening_comprehension', 'group_screening'])],
+            'assessment_type' => ['required', Rule::in(['silent_reading', 'oral_reading'])],
             'focus_areas' => ['required', 'array', 'min:1'],
             'focus_areas.*' => ['string', Rule::in([
                 'Reading Fluency',
@@ -122,8 +122,8 @@ class AssessmentController extends Controller
             $selection = 'fixed';
         }
         if ($selection === 'automatic') {
-            if (! in_array($validated['assessment_type'], ['silent_reading', 'listening_comprehension'], true)) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['question_selection' => 'Automatic question selection is available for silent reading and listening comprehension.']);
+            if ($validated['assessment_type'] !== 'silent_reading') {
+                throw \Illuminate\Validation\ValidationException::withMessages(['question_selection' => 'Automatic question selection is available for silent reading.']);
             }
             AdaptiveQuestions::validateBank($manualQuestions);
         }

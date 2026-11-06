@@ -23,6 +23,17 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertSeeText('Import Story and Questions from TXT');
         $response->assertSee('question-text-file');
         $response->assertSeeText('Frog Adventure');
+        $response->assertSee('value="silent_reading"', false);
+        $response->assertSee('value="oral_reading"', false);
+        $response->assertDontSee('value="listening_comprehension"', false);
+        $response->assertDontSee('value="group_screening"', false);
+        $response->assertDontSeeText('Listening Comprehension Assessment');
+        $response->assertDontSeeText('Group Screening Test');
+        $response->assertSeeText('Question selection');
+        $response->assertDontSeeText('Loaded question delivery');
+        $this->assertSame(1, substr_count($response->getContent(), 'name="question_selection"'));
+        $response->assertSee('value="automatic" selected', false);
+        $response->assertSee('assessment-submit-panel', false);
     }
 
     public function test_multiple_choice_upload_sample_includes_story_format(): void
@@ -91,6 +102,22 @@ class TeacherAssessmentMakerTest extends TestCase
             ->post(route('assessments.store'), $payload)
             ->assertRedirect(route('assessments.create'))
             ->assertSessionHasErrors('manual_questions');
+    }
+
+    public function test_removed_literacy_assessment_types_cannot_be_created_directly(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+
+        foreach (['listening_comprehension', 'group_screening'] as $removedType) {
+            $this->actingAs($teacher)
+                ->post(route('assessments.store'), $this->assessmentPayload([
+                    'title' => 'Removed type '.$removedType,
+                    'assessment_type' => $removedType,
+                ]))
+                ->assertSessionHasErrors('assessment_type');
+        }
+
+        $this->assertDatabaseCount('assessments', 0);
     }
 
     public function test_numeracy_game_creation_redirects_to_worksheet_missions(): void

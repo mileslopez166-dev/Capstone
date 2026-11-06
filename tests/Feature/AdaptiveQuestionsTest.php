@@ -72,7 +72,10 @@ class AdaptiveQuestionsTest extends TestCase
         $this->get(route('assessments.show', $assessment))->assertOk()->assertSeeText('Teacher answer key')->assertSeeText('Correct answer:');
         $this->post(route('assessments.store'), $this->payload(['manual_questions' => array_slice($assessment->manual_questions, 0, 8)]))->assertSessionHasErrors('question_selection');
         $this->post(route('assessments.store'), $this->payload(['question_selection' => 'fixed', 'manual_questions' => array_slice($assessment->manual_questions, 0, 8)]))->assertSessionHasNoErrors();
-        $this->post(route('assessments.store'), $this->payload(['assessment_type' => 'group_screening']))->assertSessionHasErrors('question_selection');
+        foreach (['listening_comprehension', 'group_screening'] as $removedType) {
+            $this->post(route('assessments.store'), $this->payload(['assessment_type' => $removedType]))
+                ->assertSessionHasErrors('assessment_type');
+        }
         $this->post(route('assessments.store'), $this->payload(['assessment_type' => 'oral_reading', 'manual_questions' => null]))->assertSessionHasNoErrors();
         $this->assertSame('fixed', Assessment::latest('id')->firstOrFail()->question_selection);
     }
@@ -86,7 +89,7 @@ class AdaptiveQuestionsTest extends TestCase
             $progress = $this->open($student, $assessment);
             $this->assertMix($progress, 'balanced');
             $response = $this->get(route('student.assessments.show', $assessment));
-            $response->assertOk()->assertDontSee('Teacher answer key')->assertDontSee('rules-v1')->assertDontSee('evidence_assessments');
+            $response->assertOk()->assertDontSee('Teacher answer key')->assertDontSee('rules-v2')->assertDontSee('evidence_assessments');
             foreach ($assessment->manual_questions as $index => $question) {
                 if (! in_array($index, array_column($progress->question_snapshot, 'bank_index'), true)) {
                     $response->assertDontSee(e($question['question']), false);
@@ -180,7 +183,7 @@ class AdaptiveQuestionsTest extends TestCase
         }
     }
 
-    public function test_placement_ignores_other_students_teachers_subjects_modes_and_duplicate_retakes(): void
+    public function test_placement_uses_overall_subject_history_across_teachers_and_counts_each_assessment_once(): void
     {
         $teacher = User::factory()->teacher()->create();
         $student = User::factory()->create();
@@ -191,13 +194,22 @@ class AdaptiveQuestionsTest extends TestCase
             $progress = $this->open($student, $first);
             $this->submit($first, $progress, fn () => true);
         }
+
+        $otherTeacher = User::factory()->teacher()->create();
+        $crossTeacher = $this->assessment($otherTeacher);
+        $this->submit($crossTeacher, $this->open($student, $crossTeacher), fn () => false)
+            ->update(['question_snapshot' => null]);
+
         $target = $this->assessment($teacher);
         $placement = AdaptiveQuestions::placement($target, $student);
-        $this->assertSame(1, $placement['evidence_assessments']);
+        $this->assertSame('rules-v2', $placement['version']);
+        $this->assertSame(2, $placement['evidence_assessments']);
+        $this->assertSame(['correct' => 8, 'total' => 16, 'percentage' => 50], $placement['overall']);
         $this->assertSame(8, array_sum(array_column($placement['bands'], 'total')));
+        $this->assertSame('support', $placement['plan']);
         $this->assertSame('balanced', AdaptiveQuestions::placement($target, User::factory()->create())['plan']);
-        $this->assertSame('balanced', AdaptiveQuestions::placement($this->assessment(User::factory()->teacher()->create()), $student)['plan']);
-        $this->assertSame('balanced', AdaptiveQuestions::placement($this->assessment($teacher, ['assessment_type' => 'listening_comprehension']), $student)['plan']);
+        $this->assertSame('support', AdaptiveQuestions::placement($this->assessment(User::factory()->teacher()->create()), $student)['plan']);
+        $this->assertSame('support', AdaptiveQuestions::placement($this->assessment($teacher, ['assessment_type' => 'listening_comprehension']), $student)['plan']);
         $this->assertSame('balanced', AdaptiveQuestions::placement($this->assessment($teacher, ['subject' => 'numeracy']), $student)['plan']);
     }
 }

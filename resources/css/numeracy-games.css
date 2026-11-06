@@ -1,4 +1,6 @@
 .numeracy-mode { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.numeracy-mode-label { display: inline-flex; align-items: center; gap: 7px; color: #245568; font-size: 16px; }
+.numeracy-mode-label .material-symbols-outlined { color: #267b70; }
 .numeracy-mode-switch { display: inline-flex; border: 1px solid #789caa; border-radius: 6px; overflow: hidden; }
 .numeracy-mode-switch button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 14px; background: #fff; color: #284b57; font-size: 14px; font-weight: 700; }
 .numeracy-mode-switch button[aria-pressed=true] { background: #206e68; color: #fff; }
@@ -74,6 +76,7 @@ html.dark .numeracy-game[data-result=correct] .numeracy-feedback { color: #8ddcb
 html.dark .numeracy-game[data-result=incorrect] .numeracy-feedback { color: #ffa7ac; }
 html.dark .numeracy-mode-switch button { background: #172931; color: #e5eff3; }
 html.dark .numeracy-mode-switch button[aria-pressed=true] { background: #267b70; }
+html.dark .numeracy-mode-label, html.dark .numeracy-mode-label .material-symbols-outlined { color: #e5eff3; }
 @media (max-width: 480px) {
     .numeracy-game-header { padding: 14px 12px 8px; }
     .numeracy-game-header h3 { font-size: 19px; }

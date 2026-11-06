@@ -13,6 +13,7 @@ use App\Support\AssessmentParticipant;
 use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
+use App\Support\NumeracyWorksheetGrader;
 use App\Support\NumeracyWorksheets;
 use App\Support\SectionCatalog;
 use Illuminate\Http\Request;
@@ -68,7 +69,6 @@ class WorksheetController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'target_section' => ['required', Rule::in(['all', ...SectionCatalog::targetKeys()])],
             'instructions' => ['nullable', 'string', 'max:2000'],
-            'worksheet_total' => ['required', 'integer', 'min:1', 'max:1000'],
             'retry_limit' => ['required', Rule::in(array_map('strval', array_keys(Assessment::retryLimitOptions())))],
             'question_time_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:60'],
             'question_time_seconds' => ['sometimes', 'required', 'integer', 'min:0', 'max:59'],
@@ -83,6 +83,7 @@ class WorksheetController extends Controller
         $assessment = $request->user()->createdAssessments()->create(array_merge($data, [
             'subject' => 'numeracy', 'quiz_type' => 'worksheet', 'delivery_method' => 'manual',
             'assessment_type' => 'worksheet', 'worksheet_number' => $worksheet['number'],
+            'worksheet_total' => NumeracyWorksheetGrader::scoreableCount($worksheet),
             'focus_areas' => ['Problem Solving'], 'manual_questions' => [],
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
@@ -218,12 +219,12 @@ class WorksheetController extends Controller
     {
         $student = $this->authorizeStudent($request, $assessment, $student);
         $data = $this->validatedState($request, $assessment);
-        $attempt = DB::transaction(function () use ($request, $student, $assessment, $data) {
+        [$attempt, $submission] = DB::transaction(function () use ($request, $student, $assessment, $data) {
             $student = User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $progress = $this->progress($student, $assessment, $data['attempt_key']);
             $existing = WorksheetAttempt::where('progress_id', $progress->id)->first();
             if ($existing) {
-                return $existing;
+                return [$existing, null];
             }
             abort_unless($data['revision'] >= $progress->revision, 409, 'Newer answers were saved in another tab. Reload before submitting.');
             $count = $assessment->submissions()->where('user_id', $student->id)->count();
@@ -244,15 +245,54 @@ class WorksheetController extends Controller
                 abort_unless($token, 403, 'A teacher-approved retake token is required.');
                 $token->decrement('remaining_tries');
             }
-            $attempt = WorksheetAttempt::create(['assessment_id' => $assessment->id, 'user_id' => $student->id,
-                'progress_id' => $progress->id, 'pages' => $data['pages'], 'total' => $assessment->worksheet_total]);
+            $worksheet = NumeracyWorksheets::find($assessment->worksheet_number);
+            $grading = NumeracyWorksheetGrader::grade($worksheet, $data['pages']);
+            $attempt = WorksheetAttempt::create([
+                'assessment_id' => $assessment->id,
+                'user_id' => $student->id,
+                'progress_id' => $progress->id,
+                'pages' => $data['pages'],
+                'total' => $grading['total'] ?? $assessment->worksheet_total,
+                'score' => $grading['correct'] ?? null,
+                'reviewed_at' => $grading ? now() : null,
+            ]);
             $progress->update(['revision' => $data['revision'], 'state' => ['pages' => $data['pages'], 'page' => $data['page'], 'step' => 'answer', 'phase' => 'finished']]);
             $progress->recordAssistance($request->user());
-            NotificationSender::sendToUsers([$assessment->teacher], 'worksheet_submitted', 'Worksheet ready for review',
-                $student->name.' submitted '.$assessment->title, route('worksheets.review', $attempt));
 
-            return $attempt;
+            $submission = null;
+            if ($grading) {
+                $pointsPerCorrectAnswer = (int) config('gamification.points_per_correct_answer');
+                $submission = AssessmentSubmission::create([
+                    'assessment_id' => $assessment->id,
+                    'user_id' => $student->id,
+                    'attempt_number' => $progress->attempt_number,
+                    'answers' => array_column($grading['items'], 'student_answer'),
+                    'correct_count' => $grading['correct'],
+                    'question_count' => $grading['total'],
+                    'points' => $grading['correct'] * $pointsPerCorrectAnswer,
+                    'possible_points' => $grading['total'] * $pointsPerCorrectAnswer,
+                    'submitted_at' => now(),
+                ]);
+                $progress->update(['submission_id' => $submission->id]);
+                AssessmentCoinRewards::award($submission);
+                NotificationSender::sendToUsers([$student], 'worksheet_graded', 'Your worksheet was checked automatically',
+                    $assessment->title, route('worksheets.review', $attempt));
+            } else {
+                NotificationSender::sendToUsers([$assessment->teacher], 'worksheet_submitted', 'Worksheet ready for review',
+                    $student->name.' submitted '.$assessment->title, route('worksheets.review', $attempt));
+            }
+
+            return [$attempt, $submission];
         });
+
+        if ($submission) {
+            try {
+                app(MLPredictionService::class)->predictForSubmission($submission);
+                app(LearningRecommender::class)->recommend($submission->student, $submission);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
 
         return response()->json(['url' => route('worksheets.review', $attempt)]);
     }

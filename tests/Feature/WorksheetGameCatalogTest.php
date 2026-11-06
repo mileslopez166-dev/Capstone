@@ -72,6 +72,27 @@ class WorksheetGameCatalogTest extends TestCase
         $this->get(route('student.activities', ['subject' => 'literacy']))->assertOk()->assertDontSee('data-assessment-games', false);
     }
 
+    public function test_student_attempt_opens_as_games_only_and_skips_reading_only_parts(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $assessment = $this->assignment($teacher, 3);
+
+        $response = $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertOk()
+            ->assertSee('data-game-only="true"', false)
+            ->assertSee('data-step="answer"', false)
+            ->assertSee('NUMERACY GAMES')
+            ->assertSee('Submit Answers')
+            ->assertDontSee('data-numeracy-view', false);
+
+        $dom = new \DOMDocument;
+        @$dom->loadHTML($response->getContent());
+        $options = (new \DOMXPath($dom))->query('//*[@data-book-part]/option');
+        $this->assertCount(1, $options);
+        $this->assertSame('1', $options->item(0)->getAttribute('value'));
+        $this->assertStringContainsString('Part 2 of 2', trim($options->item(0)->textContent));
+    }
+
     public function test_available_queues_search_and_mission_only_include_the_game_catalog(): void
     {
         $teacher = User::factory()->teacher()->create();

@@ -27,14 +27,18 @@ class LiteracyStoryLibraryTest extends TestCase
         ], $overrides);
     }
 
-    public function test_library_contains_five_new_stories_with_128_grouped_questions_and_matching_guides(): void
+    public function test_library_contains_fifteen_stories_with_368_grouped_questions_and_matching_guides(): void
     {
         $stories = $this->stories();
         $this->assertSame([
             'A Clearer Book Fair', 'The Garden Schedule', 'The Changed Meeting Time',
             'A Fair Turn on the Court', 'The Quiet Recording Corner',
+            'The Map with a Starting Point', 'The Sketchbook on the Bench', 'A Roof for the Model',
+            'The Last Mango Seedling', 'A Line to Remember', 'Four Cups of Fruit',
+            'The Wall of Two Ideas', 'The Loose Page', 'One Vote for Each Pupil',
+            'The Rainy-Day Reading Visit',
         ], array_column($stories, 'story_title'));
-        $this->assertCount(5, array_unique(array_column($stories, 'id')));
+        $this->assertCount(15, array_unique(array_column($stories, 'id')));
         $total = 0;
         foreach ($stories as $index => $story) {
             $this->assertNotEmpty($story['story_description']);
@@ -64,7 +68,7 @@ class LiteracyStoryLibraryTest extends TestCase
                 $this->assertNotEmpty($guide['explanation']);
             }
         }
-        $this->assertSame(128, $total);
+        $this->assertSame(368, $total);
     }
 
     public function test_only_teachers_can_open_the_library_and_opening_it_creates_no_assessments(): void
@@ -143,7 +147,7 @@ class LiteracyStoryLibraryTest extends TestCase
         $teacher = User::factory()->teacher()->create();
         foreach ($this->stories() as $story) {
             foreach ($story['question_sets'] as $questions) {
-                $this->actingAs($teacher)->post(route('assessments.store'), $this->payload($story, ['manual_questions' => $questions, 'status' => 'published', 'assessment_type' => 'listening_comprehension']))->assertSessionHasNoErrors()->assertRedirect();
+                $this->actingAs($teacher)->post(route('assessments.store'), $this->payload($story, ['manual_questions' => $questions, 'status' => 'published', 'assessment_type' => 'silent_reading']))->assertSessionHasNoErrors()->assertRedirect();
                 $assessment = Assessment::latest('id')->firstOrFail();
                 $this->assertEquals($questions, $assessment->manual_questions);
                 $this->actingAs(User::factory()->create())->postJson(route('student.assessments.submit', $assessment), [

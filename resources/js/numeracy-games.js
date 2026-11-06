@@ -1,18 +1,16 @@
 import { gameNames, gameAnswerExists, gradeGameAnswer, gameHint } from './numeracy-game-rules.js';
 
-export function initNumeracyGames(root, templates, getState, canEdit, write) {
+export function initNumeracyGames(root, templates, getState, canEdit, write, advancePart = () => false) {
     const panel = root.querySelector('[data-numeracy-game]');
     if (!panel) return { sync() {} };
     const find = name => panel.querySelector(`[data-ng-${name}]`);
     const modeBar = root.querySelector('[data-numeracy-mode]');
     const select = root.querySelector('[data-numeracy-select]');
     const workspace = root.querySelector('.worksheet-workspace');
-    const views = [...root.querySelectorAll('[data-numeracy-view]')];
     let page = -1;
     let entries = [];
     let items = [];
     let index = 0;
-    let mode = 'worksheet';
     let signature = '';
     let checked = false;
     let summary = false;
@@ -84,6 +82,13 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
         stopTimer();
         if (index < items.length - 1) { index++; render(); find('check').focus({ preventScroll: true }); }
         else {
+            const remaining = entries.find(item => !gameAnswerExists(item.game, values(item.key)));
+            if (remaining) {
+                setType(remaining.game.type);
+                find('check').focus({ preventScroll: true });
+                return;
+            }
+            if (advancePart()) return;
             summary = true;
             panel.dataset.summary = 'true';
             find('summary').hidden = false;
@@ -254,12 +259,11 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
             } else items = [];
         }
         const available = entries.length > 0 && state.step === 'answer';
-        const visible = available && mode === 'game';
+        const visible = available;
         modeBar.hidden = !available;
-        select.hidden = select.options.length < 2 || mode !== 'game';
+        select.hidden = select.options.length < 2;
         panel.hidden = !visible;
         workspace.hidden = visible;
-        views.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.numeracyView === mode)));
         if (!visible) {
             panel.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
             clearInterval(timerId);
@@ -273,7 +277,6 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
         }
     }
 
-    views.forEach(button => button.addEventListener('click', () => { mode = button.dataset.numeracyView; sync(); }));
     select.addEventListener('change', () => { if (canEdit()) setType(select.value); });
     find('reason').addEventListener('input', event => { if (canEdit()) write(current().key, { reason: event.target.value, __timed_out: false }); });
     find('hint-button').addEventListener('click', () => {
@@ -345,7 +348,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write) {
     });
     find('prev').addEventListener('click', () => { if (canEdit() && index > 0) { index--; render(); } });
     find('next').addEventListener('click', advance);
-    find('return').addEventListener('click', () => { mode = 'worksheet'; summary = false; render(); sync(); views[1].focus(); });
+    find('return').addEventListener('click', () => { summary = false; index = 0; render(); sync(); find('check').focus({ preventScroll: true }); });
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) { clearInterval(timerId); timerId = null; cancelAdvance(); }
         else if (!panel.hidden && !summary) {

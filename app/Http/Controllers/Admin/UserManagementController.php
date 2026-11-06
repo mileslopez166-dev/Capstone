@@ -27,9 +27,9 @@ class UserManagementController extends Controller
             'middle_name' => ['nullable', 'string', 'max:100', 'not_regex:/\d/'],
             'last_name' => ['required', 'string', 'max:100', 'not_regex:/\d/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'role' => ['required', 'string', Rule::in(['admin', 'teacher', 'student'])],
-            'section' => ['nullable', 'string', Rule::in(SectionCatalog::labels())],
-            'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
+            'role' => ['required', 'string', Rule::in(['teacher', 'student'])],
+            'section' => ['required', 'string', Rule::in(SectionCatalog::labels())],
+            'gender' => ['nullable', 'required_if:role,student', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
@@ -114,6 +114,10 @@ class UserManagementController extends Controller
             'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
             'approval_status' => ['required', 'string', Rule::in(['approved', 'pending', 'rejected'])],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            'admin_password' => ['required_with:password', 'nullable', 'current_password'],
+        ], [
+            'admin_password.required_with' => 'Enter your admin password to authorize this password change.',
+            'admin_password.current_password' => 'The admin password is incorrect.',
         ]);
 
         if ($request->user()->is($user) && ($validated['role'] !== 'admin' || $validated['approval_status'] !== 'approved')) {

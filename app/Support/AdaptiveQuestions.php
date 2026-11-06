@@ -65,36 +65,48 @@ class AdaptiveQuestions
     public static function placement(Assessment $assessment, User $student): array
     {
         $bands = array_fill_keys(['frustration', 'instructional', 'independent'], ['correct' => 0, 'total' => 0]);
-        // Compare like reading modes, within this teacher's assessments. Retakes count only once.
-        $history = AssessmentSubmission::where('user_id', $student->id)->whereNotNull('question_snapshot')
-            ->whereHas('assessment', fn ($query) => $query->where('created_by', $assessment->created_by)
-                ->where('subject', $assessment->subject)->where('assessment_type', $assessment->assessment_type))
+        $overall = ['correct' => 0, 'total' => 0, 'percentage' => null];
+        // Build one subject-wide learner profile. The latest retake of each assessment counts once.
+        $history = AssessmentSubmission::where('user_id', $student->id)
+            ->whereHas('assessment', fn ($query) => $query->where('subject', $assessment->subject))
             ->where('question_count', '>', 0)->orderByDesc('submitted_at')->orderByDesc('id')->get()
-            ->unique('assessment_id')->take(3);
+            ->unique('assessment_id');
         $used = 0;
         foreach ($history as $submission) {
-            $hasEvidence = false;
-            foreach ($submission->question_snapshot as $index => $question) {
+            $questionCount = max(0, (int) $submission->question_count);
+            $correctCount = max(0, min($questionCount, (int) $submission->correct_count));
+            if ($questionCount === 0) continue;
+
+            $overall['total'] += $questionCount;
+            $overall['correct'] += $correctCount;
+            $used++;
+            foreach ($submission->question_snapshot ?? [] as $index => $question) {
                 $level = $question['difficulty'] ?? null;
                 if (!isset($bands[$level]) || !isset($submission->answers[$index])) continue;
                 $bands[$level]['total']++;
                 $bands[$level]['correct'] += (int) ($submission->answers[$index] === ($question['correct_answer'] ?? null));
-                $hasEvidence = true;
             }
-            if ($hasEvidence) $used++;
         }
-        $moderate = $bands['instructional'];
+
         $hard = $bands['independent'];
         $plan = 'balanced';
-        // These transparent pilot rules select practice difficulty, not an official reading diagnosis.
-        if ($moderate['total'] >= 2) {
-            $rate = $moderate['correct'] / $moderate['total'];
-            $plan = $rate < .6 ? 'support' : 'developing';
-            if ($rate >= .75 && $hard['total'] >= 2 && $hard['correct'] / $hard['total'] >= .75) $plan = 'challenge';
+        // Overall performance chooses the path; harder-item evidence guards challenge placement.
+        if ($overall['total'] > 0) {
+            $rate = $overall['correct'] / $overall['total'];
+            $overall['percentage'] = (int) round($rate * 100);
+            if ($rate < .6) {
+                $plan = 'support';
+            } elseif ($rate < .8) {
+                $plan = 'developing';
+            } else {
+                $plan = $hard['total'] >= 2 && $hard['correct'] / $hard['total'] >= .75
+                    ? 'challenge'
+                    : 'developing';
+            }
         }
         return [
-            'version' => 'rules-v1', 'mode' => 'automatic', 'plan' => $plan,
-            'provisional' => true, 'evidence_assessments' => $used, 'bands' => $bands,
+            'version' => 'rules-v2', 'mode' => 'automatic', 'plan' => $plan,
+            'provisional' => true, 'evidence_assessments' => $used, 'overall' => $overall, 'bands' => $bands,
             'mix' => self::MIXES[$plan],
         ];
     }

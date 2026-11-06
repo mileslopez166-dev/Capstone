@@ -1,9 +1,10 @@
 @props(['worksheet', 'config', 'readonly' => false])
-<section class="worksheet-reader" data-worksheet-reader data-readonly="{{ $readonly ? 'true' : 'false' }}" data-step="{{ $readonly ? 'answer' : 'read' }}" aria-label="Worksheet book">
+@php $gameOnly = ! $readonly && \App\Support\NumeracyWorksheetGrader::scoreableCount($worksheet) > 0; @endphp
+<section class="worksheet-reader" data-worksheet-reader data-readonly="{{ $readonly ? 'true' : 'false' }}" data-game-only="{{ $gameOnly ? 'true' : 'false' }}" data-step="{{ $readonly || $gameOnly ? 'answer' : 'read' }}" aria-label="{{ $gameOnly ? 'Numeracy games' : 'Worksheet book' }}">
     <script type="application/json" data-worksheet-config>{!! json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     <div class="worksheet-reader-heading">
-        <div><p class="worksheet-kicker">WORKSHEET {{ $worksheet['number'] }}</p><h2>{{ $readonly ? 'Your submitted work' : 'One part at a time' }}</h2></div>
-        @unless ($readonly)
+        <div><p class="worksheet-kicker">{{ $gameOnly ? 'NUMERACY GAMES' : 'WORKSHEET '.$worksheet['number'] }}</p><h2>{{ $readonly ? 'Your submitted work' : ($gameOnly ? 'Play one part at a time' : 'One part at a time') }}</h2></div>
+        @unless ($readonly || $gameOnly)
             <div class="worksheet-stages" role="group" aria-label="Worksheet step">
                 <button type="button" data-book-step="read" aria-pressed="true"><span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>1. Read</button>
                 <button type="button" data-book-step="answer" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">edit_note</span>2. Answer</button>
@@ -13,16 +14,16 @@
     <div class="worksheet-toolbar">
         <div class="worksheet-tools" role="group" aria-label="Page navigation">
             <button type="button" class="worksheet-icon" data-book-prev title="Previous part" aria-label="Previous part"><span class="material-symbols-outlined">chevron_left</span></button>
-            <label class="sr-only" for="worksheet-part">Worksheet part</label><select id="worksheet-part" data-book-part>@foreach ($worksheet['pages'] as $i => $page)<option value="{{ $i }}">Part {{ $page['part'] }} of {{ count($worksheet['pages']) }}</option>@endforeach</select>
+            <label class="sr-only" for="worksheet-part">Game part</label><select id="worksheet-part" data-book-part>@foreach ($worksheet['pages'] as $i => $page)@if(! $gameOnly || collect($page['responses'] ?? [])->contains(fn ($response) => ! empty($response['game'])))<option value="{{ $i }}">Part {{ $page['part'] }} of {{ count($worksheet['pages']) }}</option>@endif @endforeach</select>
             <button type="button" class="worksheet-icon" data-book-next title="Next part" aria-label="Next part"><span class="material-symbols-outlined">chevron_right</span></button>
         </div>
-        <div class="worksheet-tools" role="group" aria-label="Worksheet text size">
+        <div class="worksheet-tools" role="group" aria-label="Worksheet text size" @if($gameOnly) hidden @endif>
             <button type="button" class="worksheet-icon" data-book-font="-" title="Smaller worksheet text" aria-label="Smaller worksheet text"><span class="material-symbols-outlined" aria-hidden="true">text_decrease</span></button>
             <output data-book-font-label>16px</output>
             <button type="button" class="worksheet-icon" data-book-font="+" title="Larger worksheet text" aria-label="Larger worksheet text"><span class="material-symbols-outlined" aria-hidden="true">text_increase</span></button>
         </div>
         @unless ($readonly)<button type="button" class="worksheet-icon" data-book-table-open title="Multiplication table - teacher approval" aria-label="Multiplication table - teacher approval"><span class="material-symbols-outlined" aria-hidden="true">grid_on</span></button>@endunless
-        <details class="worksheet-settings" data-book-settings>
+        <details class="worksheet-settings" data-book-settings @if($gameOnly) hidden @endif>
             <summary class="worksheet-icon" title="Reading settings" aria-label="Reading settings"><span class="material-symbols-outlined" aria-hidden="true">tune</span></summary>
             <div class="worksheet-settings-panel">
                 <div><strong>Reading settings</strong><button class="worksheet-icon" type="button" data-book-reset-settings title="Reset reading settings" aria-label="Reset reading settings"><span class="material-symbols-outlined" aria-hidden="true">restart_alt</span></button><button class="worksheet-icon" type="button" data-book-close-settings title="Close reading settings" aria-label="Close reading settings"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
@@ -35,7 +36,7 @@
     </div>
     <div class="worksheet-reader-progress"><p class="worksheet-save-state" data-book-status role="status" aria-live="polite">{{ $readonly ? 'Submitted work' : 'Ready when you are' }}</p><span data-book-completion></span><progress data-book-progress max="{{ count($worksheet['pages']) }}" value="0" aria-label="Parts answered"></progress></div>
     @unless ($readonly)<x-numeracy-game :question-time-limit-seconds="$config['questionTimeLimitSeconds'] ?? \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS" />@endunless
-    <div class="worksheet-workspace">
+    <div class="worksheet-workspace" @if($gameOnly) hidden @endif>
         <div class="worksheet-reference">
             <h3 class="worksheet-area-title"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Worksheet <span data-book-page-label>Part 1</span></h3>
             <div class="worksheet-reading" data-book-reading>
@@ -84,9 +85,9 @@
     </template>
     <div class="worksheet-actions">
         @unless ($readonly)
-            <button class="ui-button" type="button" data-book-start-answer><span class="material-symbols-outlined" aria-hidden="true">edit_note</span>Ready to Answer</button>
+            <button class="ui-button" type="button" data-book-start-answer @if($gameOnly) hidden @endif><span class="material-symbols-outlined" aria-hidden="true">edit_note</span>Ready to Answer</button>
             <button class="ui-button ui-button-secondary" type="button" data-book-save><span class="material-symbols-outlined" aria-hidden="true">save</span>Save Progress</button>
-            <button class="ui-button" type="button" data-book-submit data-book-answer-only><span class="material-symbols-outlined" aria-hidden="true">task_alt</span>Submit Worksheet</button>
+            <button class="ui-button" type="button" data-book-submit data-book-answer-only><span class="material-symbols-outlined" aria-hidden="true">task_alt</span>{{ $gameOnly ? 'Submit Answers' : 'Submit Worksheet' }}</button>
         @endunless
     </div>
     @unless ($readonly)<x-worksheet-table />@endunless

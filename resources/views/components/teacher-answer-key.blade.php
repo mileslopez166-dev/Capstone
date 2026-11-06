@@ -5,7 +5,12 @@
     @if (($context['mode'] ?? '') === 'automatic')
         <div class="answer-key-context">
             <strong>{{ ['balanced' => 'Balanced starter', 'support' => 'Support focus', 'developing' => 'Moderate focus', 'challenge' => 'Challenge focus'][$context['plan']] ?? 'Automatic selection' }}</strong>
-            <p>{{ $context['evidence_assessments'] ?? 0 }} recent comparable assessments. Provisional rule-based placement, not an official Phil-IRI level or ML prediction.</p>
+            <p>{{ $context['evidence_assessments'] ?? 0 }} completed assessments from this learner's subject history. Retakes count once.</p>
+            @if (($context['overall']['total'] ?? 0) > 0)
+                <p>Overall evidence: {{ $context['overall']['correct'] }}/{{ $context['overall']['total'] }} correct ({{ $context['overall']['percentage'] }}%). Provisional rule-based placement, not an official Phil-IRI level or ML prediction.</p>
+            @else
+                <p>No previous evidence yet. The learner starts with a balanced question mix.</p>
+            @endif
             <p>Selected: {{ $context['mix']['frustration'] ?? 0 }} easier, {{ $context['mix']['instructional'] ?? 0 }} moderate, {{ $context['mix']['independent'] ?? 0 }} challenging.</p>
             @foreach (array_intersect_key(\App\Support\AdaptiveQuestions::LABELS, $context['bands'] ?? []) as $level => $label)
                 @php $band = $context['bands'][$level]; @endphp

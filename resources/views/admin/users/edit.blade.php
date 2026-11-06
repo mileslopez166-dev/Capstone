@@ -43,7 +43,7 @@
                         </div>
                     </div>
 
-                    <form class="space-y-8" method="POST" action="{{ route('admin.users.update', $managedUser) }}">
+                    <form class="space-y-8" method="POST" action="{{ route('admin.users.update', $managedUser) }}" x-data="{ showNewPassword: false, showPasswordConfirmation: false, showAdminPassword: false }">
                         @csrf
                         @method('PATCH')
 
@@ -117,8 +117,8 @@
                             <div class="md:col-span-2">
                                 <div class="rounded-DEFAULT bg-surface-container-low p-5">
                                     <div class="mb-5">
-                                        <h3 class="font-headline text-xl font-bold text-on-surface">Change Password</h3>
-                                        <p class="mt-1 text-sm text-on-surface-variant">Leave these fields blank to keep the current password.</p>
+                                        <h3 class="font-headline text-xl font-bold text-on-surface">Reset Account Password</h3>
+                                        <p class="mt-1 text-sm text-on-surface-variant">Existing passwords are securely hashed and cannot be viewed. Set a replacement password and confirm your admin password to authorize the change.</p>
                                     </div>
 
                                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -126,7 +126,10 @@
                                             <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="password">New Password</label>
                                             <div class="relative">
                                                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
-                                                <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="password" name="password" type="password" autocomplete="new-password" placeholder="Enter new password">
+                                                <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="password" name="password" :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Enter new password">
+                                                <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showNewPassword = !showNewPassword" :aria-label="showNewPassword ? 'Hide new password' : 'Show new password'" :title="showNewPassword ? 'Hide new password' : 'Show new password'">
+                                                    <span class="material-symbols-outlined text-xl" x-text="showNewPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                                </button>
                                             </div>
                                             @error('password')
                                                 <p class="text-sm text-error">{{ $message }}</p>
@@ -137,8 +140,25 @@
                                             <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="password_confirmation">Confirm Password</label>
                                             <div class="relative">
                                                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">verified_user</span>
-                                                <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Re-enter password">
+                                                <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="password_confirmation" name="password_confirmation" :type="showPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" placeholder="Re-enter password">
+                                                <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showPasswordConfirmation = !showPasswordConfirmation" :aria-label="showPasswordConfirmation ? 'Hide confirmed password' : 'Show confirmed password'" :title="showPasswordConfirmation ? 'Hide confirmed password' : 'Show confirmed password'">
+                                                    <span class="material-symbols-outlined text-xl" x-text="showPasswordConfirmation ? 'visibility_off' : 'visibility'">visibility</span>
+                                                </button>
                                             </div>
+                                        </div>
+
+                                        <div class="space-y-2 md:col-span-2">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="admin_password">Your Admin Password</label>
+                                            <div class="relative max-w-md">
+                                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">admin_panel_settings</span>
+                                                <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="admin_password" name="admin_password" :type="showAdminPassword ? 'text' : 'password'" autocomplete="current-password" placeholder="Confirm your admin password">
+                                                <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showAdminPassword = !showAdminPassword" :aria-label="showAdminPassword ? 'Hide admin password' : 'Show admin password'" :title="showAdminPassword ? 'Hide admin password' : 'Show admin password'">
+                                                    <span class="material-symbols-outlined text-xl" x-text="showAdminPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                                </button>
+                                            </div>
+                                            @error('admin_password')
+                                                <p class="text-sm text-error">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>

@@ -290,7 +290,7 @@
                                             <x-ml-prediction-result :prediction="$submission->mlPrediction" />
                                             <a class="ui-button ui-button-secondary mt-4" href="{{ route('student.tutor.index', ['submission' => $submission->id]) }}"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>Ask Tutor about this assessment</a>
                                             @if ($submission->worksheetAttempt)
-                                                <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">menu_book</span>Worksheet &amp; Teacher Feedback</a>
+                                                <a class="ui-button ui-button-secondary mt-5" href="{{ route('worksheets.review', $submission->worksheetAttempt) }}"><span class="material-symbols-outlined">fact_check</span>Worksheet Results &amp; Answers</a>
                                             @else
                                             <details class="group mt-5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-5">
                                                 <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

@@ -1,5 +1,6 @@
 import { normalizeResponses, hasResponses, initWorksheetResponses } from './worksheet-responses.js';
 import { initNumeracyGames } from './numeracy-games.js';
+import { gameAnswerExists } from './numeracy-game-rules.js';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const viewKey = 'pgaals-worksheet-view';
@@ -11,10 +12,16 @@ export function worksheetSettings(value) {
     };
 }
 
-export function worksheetState(state, count, templates = []) {
+export function worksheetState(state, count, templates = [], gameOnly = false) {
+    const playablePages = templates.map((template, index) => ({ template, index }))
+        .filter(({ template }) => Object.values(template?.responses || {}).some(response => response?.game))
+        .map(({ index }) => index);
+    let page = clamp(Number.isInteger(state?.page) ? state.page : 0, 0, count - 1);
+    if (gameOnly && !playablePages.includes(page)) page = playablePages[0] ?? page;
+
     return {
-        page: clamp(Number.isInteger(state?.page) ? state.page : 0, 0, count - 1),
-        step: state?.step === 'answer' ? 'answer' : 'read',
+        page,
+        step: gameOnly || state?.step === 'answer' ? 'answer' : 'read',
         pages: Array.from({ length: count }, (_, i) => ({
             text: typeof state?.pages?.[i]?.text === 'string' ? state.pages[i].text.slice(0, 10000) : '',
             responses: normalizeResponses(state?.pages?.[i]?.responses, templates[i]?.responses),
@@ -40,13 +47,14 @@ export const answeredParts = (pages, templates = []) => pages.filter((page, inde
 export function initWorksheetBook(root) {
     const config = JSON.parse(root.querySelector('[data-worksheet-config]').textContent);
     const readonly = root.dataset.readonly === 'true';
+    const gameOnly = root.dataset.gameOnly === 'true';
     const find = name => root.querySelector(`[data-book-${name}]`);
     const status = find('status');
     const image = find('image');
     const canvas = find('canvas');
     const paper = find('paper');
     const context = canvas.getContext('2d');
-    let state = worksheetState(config.state, config.pages.length, config.pages);
+    let state = worksheetState(config.state, config.pages.length, config.pages, gameOnly);
     let revision = Number(config.revision || 0);
     let storedRevision = revision;
     let timer;
@@ -60,13 +68,19 @@ export function initWorksheetBook(root) {
     let color = '#174d97';
     let stroke = null;
     const csrf = document.querySelector('meta[name=csrf-token]').content;
-    const requiredParts = config.pages.filter(page => !page.readingOnly).length;
+    const playablePages = gameOnly
+        ? config.pages.map((page, index) => ({ page, index })).filter(({ page }) => Object.values(page.responses || {}).some(response => response?.game)).map(({ index }) => index)
+        : config.pages.map((_, index) => index);
+    const requiredParts = gameOnly ? playablePages.length : config.pages.filter(page => !page.readingOnly).length;
+    const gamePartComplete = pageIndex => Object.entries(config.pages[pageIndex]?.responses || {})
+        .filter(([, definition]) => definition?.game)
+        .every(([key, definition]) => gameAnswerExists(definition.game, state.pages[pageIndex]?.responses[key] || {}));
 
     if (!readonly) {
         try {
             const backup = JSON.parse(localStorage.getItem(config.storageKey));
             if (Number.isSafeInteger(backup?.revision) && backup.revision > revision) {
-                state = worksheetState(backup, config.pages.length, config.pages);
+                state = worksheetState(backup, config.pages.length, config.pages, gameOnly);
                 revision = backup.revision;
                 status.textContent = 'Restored answers from this device';
             }
@@ -79,6 +93,11 @@ export function initWorksheetBook(root) {
             const page = state.pages[state.page];
             page.responses[key] = { ...page.responses[key], ...fields };
             changed();
+        }, () => {
+            const position = playablePages.indexOf(state.page);
+            if (position < 0 || position >= playablePages.length - 1) return false;
+            navigate(playablePages[position + 1]);
+            return true;
         });
     const snapshot = () => ({ ...state, revision, attempt_key: config.attemptKey });
     function backup() {
@@ -145,9 +164,10 @@ export function initWorksheetBook(root) {
         }
     }
     function updateControls() {
-        const completed = answeredParts(state.pages, config.pages);
-        find('prev').disabled = submitting || state.page === 0;
-        find('next').disabled = submitting || state.page === config.pages.length - 1;
+        const completed = gameOnly ? playablePages.filter(gamePartComplete).length : answeredParts(state.pages, config.pages);
+        const playablePosition = playablePages.indexOf(state.page);
+        find('prev').disabled = submitting || playablePosition <= 0;
+        find('next').disabled = submitting || playablePosition < 0 || playablePosition === playablePages.length - 1;
         find('part').disabled = submitting;
         find('part').value = String(state.page);
         find('response-part').textContent = `Part ${state.page + 1}`;
@@ -176,11 +196,11 @@ export function initWorksheetBook(root) {
     function showStep(step, focus = false) {
         responses.finish();
         if (stroke) endStroke();
-        state.step = readonly ? 'answer' : step;
+        state.step = readonly || gameOnly ? 'answer' : step;
         root.dataset.step = state.step;
         root.querySelectorAll('[data-book-step]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.bookStep === state.step)));
         root.querySelectorAll('[data-book-answer-only]').forEach(element => element.hidden = state.step !== 'answer');
-        if (!readonly) find('start-answer').hidden = state.step === 'answer';
+        if (!readonly) find('start-answer').hidden = gameOnly || state.step === 'answer';
         setTool('read');
         draw();
         syncModels();
@@ -255,9 +275,15 @@ export function initWorksheetBook(root) {
         find('viewport').scrollTo(0, 0);
         updateControls(); draw();
     }
-    function navigate(index) { if (submitting) return; showPage(index); showStep('read'); changed(); }
-    find('prev').addEventListener('click', () => navigate(state.page - 1));
-    find('next').addEventListener('click', () => navigate(state.page + 1));
+    function navigate(index) { if (submitting) return; showPage(index); showStep(gameOnly ? 'answer' : 'read'); changed(); }
+    find('prev').addEventListener('click', () => {
+        const position = playablePages.indexOf(state.page);
+        if (position > 0) navigate(playablePages[position - 1]);
+    });
+    find('next').addEventListener('click', () => {
+        const position = playablePages.indexOf(state.page);
+        if (position >= 0 && position < playablePages.length - 1) navigate(playablePages[position + 1]);
+    });
     find('part').addEventListener('change', event => navigate(Number(event.target.value)));
     function applySettings(persist = false) {
         paper.style.width = `${settings.zoom}%`;
@@ -377,14 +403,17 @@ export function initWorksheetBook(root) {
         if (confirm('Clear the drawing on this part? Typed answers will remain.')) { state.pages[state.page].strokes = []; draw(); changed(); }
     });
     find('submit').addEventListener('click', async () => {
-        if (submitting || conflict || !confirm('Submit this worksheet for teacher review? You cannot edit it after submitting.')) return;
+        const confirmation = gameOnly
+            ? 'Submit your answers for automatic checking? You cannot edit them after submitting.'
+            : 'Submit this worksheet for teacher review? You cannot edit it after submitting.';
+        if (submitting || conflict || !confirm(confirmation)) return;
         responses.finish(); endStroke(); submitting = true; clearTimeout(timer); updateControls();
         find('text').readOnly = true;
         try {
             if (pending) await pending;
             if (conflict) throw new Error('Reload to resolve newer saved work before submitting.');
             revision++; backup();
-            status.textContent = 'Submitting worksheet...';
+            status.textContent = gameOnly ? 'Submitting answers...' : 'Submitting worksheet...';
             const result = await request(config.submitUrl, JSON.stringify(snapshot()));
             submitted = true;
             try { localStorage.removeItem(config.storageKey); } catch {}

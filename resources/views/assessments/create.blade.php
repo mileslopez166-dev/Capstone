@@ -130,8 +130,6 @@
                                                     @foreach ([
                                                         'silent_reading' => 'Silent Reading',
                                                         'oral_reading' => 'Oral Reading Assessment',
-                                                        'listening_comprehension' => 'Listening Comprehension Assessment',
-                                                        'group_screening' => 'Group Screening Test',
                                                     ] as $typeValue => $typeLabel)
                                                         <label class="flex cursor-pointer items-center gap-3 rounded-lg bg-white p-4 text-sm font-bold text-on-surface shadow-sm ring-1 ring-outline-variant/20 transition-all hover:ring-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-primary has-[:checked]:ring-primary">
                                                             <input class="text-primary focus:ring-primary" name="assessment_type" type="radio" value="{{ $typeValue }}" @checked(old('assessment_type', 'silent_reading') === $typeValue)>
@@ -154,8 +152,6 @@
                                                 @foreach ([
                                                     ['Oral Reading Assessment', 'Read aloud', 'Measure fluency + accuracy', 'Reading errors, WCPM, comprehension'],
                                                     ['Silent Reading Assessment', 'Read silently', 'Measure comprehension', 'Score and reading level'],
-                                                    ['Listening Comprehension Assessment', 'Listen only', 'Measure understanding', 'Listening score'],
-                                                    ['Group Screening Test', 'Class activity', 'Identify struggling readers', 'Students for further testing'],
                                                 ] as $row)
                                                     <div class="grid grid-cols-4 gap-0 px-3 py-2 text-on-surface-variant odd:bg-white even:bg-surface-container-lowest">
                                                         @foreach ($row as $cell)
@@ -364,11 +360,11 @@
                         </aside>
                     </section>
 
-                    <div class="sticky bottom-3 z-20 sm:bottom-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest/95 p-3 sm:rounded-2xl sm:p-4 shadow-[0_20px_50px_rgba(0,46,81,0.18)] backdrop-blur-xl">
+                    <div class="assessment-submit-panel sticky bottom-3 z-20 sm:bottom-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest/95 p-3 sm:rounded-2xl sm:p-4 shadow-[0_20px_50px_rgba(0,46,81,0.18)] backdrop-blur-xl">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.22em] text-primary">Ready to save?</p>
-                                <p class="mt-1 text-sm text-on-surface-variant">Choose locked draft or publish when the assessment is complete.</p>
+                                <p class="assessment-submit-kicker text-xs font-bold uppercase tracking-[0.22em] text-primary">Ready to save?</p>
+                                <p class="assessment-submit-help mt-1 text-sm text-on-surface-variant">Choose locked draft or publish when the assessment is complete.</p>
                             </div>
                             <div class="flex flex-col gap-3 sm:flex-row">
                                 <button class="rounded-full border border-outline-variant px-6 py-3 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
@@ -402,7 +398,6 @@
         const storyTemplates = {{ \Illuminate\Support\Js::from($storyTemplates) }};
         const storyLibrary = document.getElementById('story-library');
         const storyLibrarySelect = document.getElementById('story-library-select');
-        const storyLibraryLevel = document.getElementById('story-library-level');
         const difficultyLabels = { frustration: 'Easier', instructional: 'Moderate', independent: 'Challenging', advanced: 'Enrichment' };
         const questionSelection = document.getElementById('question-selection');
         const loadStoryTemplateButton = document.getElementById('load-story-template');
@@ -526,12 +521,9 @@
 
         function toggleQuestionBuilder() {
             const requiresQuestions = assessmentTypeRequiresQuestions();
-            const allowsAutomatic = ['silent_reading', 'listening_comprehension'].includes(selectedAssessmentType());
+            const allowsAutomatic = selectedAssessmentType() === 'silent_reading';
             questionSelection.querySelector('[value="automatic"]').disabled = !allowsAutomatic;
             if (!allowsAutomatic) questionSelection.value = 'fixed';
-            const autoChoice = storyLibraryLevel.querySelector('[value="automatic"]');
-            if (autoChoice) autoChoice.disabled = !allowsAutomatic;
-            if (!allowsAutomatic && storyLibraryLevel.value === 'automatic') storyLibraryLevel.value = 'instructional';
             updateStorySetPreview();
 
             if (requiresQuestions) {
@@ -688,29 +680,23 @@
         });
         function updateStorySetPreview() {
             const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
-            const automatic = storyLibraryLevel.value === 'automatic';
-            const questions = automatic ? Object.values(template?.question_sets || {}).flat() : template?.question_sets[storyLibraryLevel.value] || [];
+            const automatic = questionSelection.value === 'automatic';
+            const questions = automatic ? Object.values(template?.question_sets || {}).flat() : template?.question_sets?.instructional || [];
             loadStoryTemplateButton.disabled = !template || storyLibrarySelect.disabled;
-            document.getElementById('story-library-count').textContent = template ? `${automatic ? '8 per student' : questions.length + ' questions selected'} / ${Object.values(template.question_sets).flat().length} in story bank` : '';
+            document.getElementById('story-library-count').textContent = template ? `${automatic ? '8 per student' : questions.length + ' fixed questions'} / ${Object.values(template.question_sets).flat().length} in story bank` : '';
             document.getElementById('story-library-guide').classList.toggle('hidden', !template);
-            document.getElementById('story-library-guide-items').innerHTML = (template?.answer_guide || []).filter(item => automatic || item.difficulty === storyLibraryLevel.value).map(item => `<li value="${item.number}"><strong>${escapeHtml(item.skill)} - Answer ${escapeHtml(item.correct_answer)}</strong><p>${escapeHtml(item.explanation)}</p></li>`).join('');
+            document.getElementById('story-library-guide-items').innerHTML = (template?.answer_guide || []).filter(item => automatic || item.difficulty === 'instructional').map(item => `<li value="${item.number}"><strong>${escapeHtml(item.skill)} - Answer ${escapeHtml(item.correct_answer)}</strong><p>${escapeHtml(item.explanation)}</p></li>`).join('');
         }
         storyLibrarySelect.addEventListener('change', () => {
-            const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
-            const previous = storyLibraryLevel.value;
-            storyLibraryLevel.disabled = !template;
-            const allowsAutomatic = ['silent_reading', 'listening_comprehension'].includes(selectedAssessmentType());
-            storyLibraryLevel.innerHTML = template ? `<option value="automatic" ${allowsAutomatic ? '' : 'disabled'}>Automatic</option>` + Object.keys(template.question_sets).map(level => `<option value="${level}">${difficultyLabels[level]} - fixed</option>`).join('') : '<option value="">Choose a story first</option>';
-            if (template) storyLibraryLevel.value = template.question_sets[previous] ? previous : (allowsAutomatic ? 'automatic' : 'instructional');
             updateStorySetPreview();
         });
-        storyLibraryLevel.addEventListener('change', updateStorySetPreview);
+        questionSelection.addEventListener('change', updateStorySetPreview);
         loadStoryTemplateButton.addEventListener('click', () => {
             if (storyLibrarySelect.disabled) return;
             const template = storyTemplates.find(story => story.id === storyLibrarySelect.value);
             if (!template) return;
-            const automatic = storyLibraryLevel.value === 'automatic';
-            const questions = automatic ? Object.values(template.question_sets).flat() : template.question_sets[storyLibraryLevel.value];
+            const automatic = questionSelection.value === 'automatic';
+            const questions = automatic ? Object.values(template.question_sets).flat() : template.question_sets.instructional;
             if (!questions?.length) return;
 
             const hasContent = storyTitleInput.value.trim() || storyDescriptionInput.value.trim()
@@ -718,7 +704,6 @@
             if (hasContent && !confirm(`Replace the current story and questions with "${template.story_title}"?`)) return;
 
             applyImportedStory({ storyTitle: template.story_title, storyDescription: template.story_description });
-            questionSelection.value = automatic ? 'automatic' : 'fixed';
             if (!assessmentTitleInput.value.trim() || assessmentTitleInput.value === templateAssessmentTitle) {
                 assessmentTitleInput.value = template.story_title;
                 assessmentTitleInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -731,10 +716,9 @@
             questionTextFile.value = '';
             questionImportStatus.classList.add('hidden');
             const summary = assessmentTypeRequiresQuestions()
-                ? (automatic ? `${questions.length} bank questions loaded. Each student receives 8 questions; the first set is balanced.` : `${questions.length} questions loaded (${difficultyLabels[storyLibraryLevel.value]}).`)
+                ? (automatic ? `${questions.length} bank questions loaded. Each student receives 8 questions based on their overall level.` : `${questions.length} fixed moderate questions loaded.`)
                 : 'Passage loaded for oral reading.';
-            const screeningNote = selectedAssessmentType() === 'group_screening' ? ' Grade 6 GST scoring requires 20 questions.' : '';
-            storyLibraryStatus.textContent = `${template.story_title}: ${summary}${screeningNote}`;
+            storyLibraryStatus.textContent = `${template.story_title}: ${summary}`;
             storyLibraryStatus.classList.remove('hidden');
         });
         addQuestionButton.addEventListener('click', () => {

@@ -196,6 +196,33 @@
 .worksheet-score small { font-size: 16px; display: block; text-align: right; }
 .worksheet-pending { color: #875811; }
 .worksheet-grade { border-top: 2px solid #78a69d; padding: 24px 0; }
+.worksheet-answer-review { margin-block: 24px; border: 1px solid #b7cbd5; border-radius: 8px; overflow: hidden; background: #fff; }
+.worksheet-answer-review-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border-bottom: 1px solid #c8d8df; background: #edf6fa; }
+.worksheet-answer-review-heading > div > p { color: #28637e; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.worksheet-answer-review-heading h2 { margin-top: 2px; font-size: 21px; font-weight: 800; }
+.worksheet-answer-review-heading > div > span { display: block; margin-top: 3px; color: #58717d; font-size: 12px; }
+.worksheet-answer-review-heading > dl { display: flex; gap: 8px; }
+.worksheet-answer-review-heading > dl > div { min-width: 74px; padding: 8px 12px; border-radius: 6px; background: #fff; text-align: center; }
+.worksheet-answer-review-heading dt { color: #58717d; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.worksheet-answer-review-heading dd { font-size: 21px; font-weight: 800; }
+.worksheet-answer-list { display: grid; gap: 1px; background: #dce7eb; }
+.worksheet-answer-item { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 16px 20px; background: #fff; }
+.worksheet-answer-item > .material-symbols-outlined { margin-top: 1px; font-size: 23px; }
+.worksheet-answer-item.is-correct > .material-symbols-outlined { color: #197356; }
+.worksheet-answer-item.is-wrong { background: #fff8f8; }
+.worksheet-answer-item.is-wrong > .material-symbols-outlined { color: #b42c3a; }
+.worksheet-answer-question { display: flex; flex-wrap: wrap; gap: 7px; line-height: 1.5; }
+.worksheet-answer-question strong { color: #255f78; }
+.worksheet-answer-item dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.worksheet-answer-item dl > div { padding: 9px 11px; border-left: 3px solid #a9c2cd; background: #f3f7f9; }
+.worksheet-answer-item.is-wrong dl > div:last-child { border-color: #248265; background: #edf8f3; }
+.worksheet-answer-item dt { color: #607680; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.worksheet-answer-item dd { margin-top: 2px; font-weight: 700; overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+    .worksheet-answer-review-heading { align-items: flex-start; flex-direction: column; }
+    .worksheet-answer-item { padding-inline: 14px; }
+    .worksheet-answer-item dl { grid-template-columns: 1fr; }
+}
 .worksheet-attribution { font-size: 12px; color: #4d6575; margin-top: 30px; line-height: 1.7; }
 .worksheet-attribution a { text-decoration: underline; }
 .worksheet-empty { padding: 24px 0; color: #58717d; }

@@ -1,9 +1,6 @@
 @props(['questionTimeLimitSeconds' => \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS])
 <div class="numeracy-mode" data-numeracy-mode hidden>
-    <div class="numeracy-mode-switch" role="group" aria-label="Answer mode">
-        <button type="button" data-numeracy-view="worksheet" aria-pressed="true"><span class="material-symbols-outlined" aria-hidden="true">table_rows</span>Worksheet</button>
-        <button type="button" data-numeracy-view="game" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>Games</button>
-    </div>
+    <strong class="numeracy-mode-label"><span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>Games</strong>
     <label class="sr-only" for="numeracy-game-select">Choose game</label>
     <select id="numeracy-game-select" data-numeracy-select aria-label="Choose game"></select>
 </div>
@@ -55,6 +52,6 @@
     </div>
     <div class="numeracy-game-summary" data-ng-summary hidden tabindex="-1">
         <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span><h4 data-ng-summary-title>Round complete</h4><p data-ng-summary-text></p>
-        <button type="button" class="ui-button" data-ng-return><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Back to worksheet</button>
+        <button type="button" class="ui-button" data-ng-return><span class="material-symbols-outlined" aria-hidden="true">replay</span>Review games</button>
     </div>
 </section>

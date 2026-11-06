@@ -9,6 +9,7 @@ use App\Models\AssessmentRetakeRequest;
 use App\Models\AssessmentSubmission;
 use App\Models\User;
 use App\Models\WorksheetAttempt;
+use App\Support\NumeracyWorksheetGrader;
 use App\Support\NumeracyWorksheets;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -33,6 +34,35 @@ class NumeracyWorksheetTest extends TestCase
         ]];
     }
 
+    private function automaticPayload(AssessmentProgress $progress, array $worksheet, bool $makeFirstWrong = false): array
+    {
+        $pages = array_map(fn (): array => ['text' => '', 'strokes' => [], 'responses' => []], $worksheet['pages']);
+        $first = true;
+
+        foreach ($worksheet['pages'] as $pageIndex => $page) {
+            foreach ($page['responses'] as $key => $definition) {
+                $game = $definition['game'];
+                $answer = match ($game['type']) {
+                    'archer' => ['divisors' => array_values(array_filter($game['options'], fn ($option) => $game['number'] % (int) $option === 0))],
+                    'rocket' => array_filter([
+                        'choice' => $game['number'] % $game['divisor'] === 0 ? 'Yes' : 'No',
+                        'reason' => in_array('reason', array_column($definition['fields'], 'key'), true) ? 'Checked using the divisibility rule.' : null,
+                    ], fn ($value) => $value !== null),
+                    'puzzle' => ['digit' => collect(range(0, 9))->first(fn ($digit) => ! ($digit === 0 && str_starts_with($game['pattern'], '_') && strlen($game['pattern']) > 1)
+                        && (int) str_replace('_', (string) $digit, $game['pattern']) % $game['divisor'] === 0)],
+                };
+
+                if ($makeFirstWrong && $first) {
+                    $answer = $game['type'] === 'rocket' ? ['choice' => $answer['choice'] === 'Yes' ? 'No' : 'Yes'] : ['__timed_out' => true];
+                }
+                $pages[$pageIndex]['responses'][$key] = array_map(fn ($value) => is_int($value) ? (string) $value : $value, $answer);
+                $first = false;
+            }
+        }
+
+        return ['attempt_key' => $progress->attempt_key, 'revision' => 1, 'page' => count($pages) - 1, 'step' => 'answer', 'pages' => $pages];
+    }
+
     public function test_catalog_preserves_all_35_real_worksheets_and_71_parts(): void
     {
         $library = NumeracyWorksheets::all();
@@ -43,6 +73,24 @@ class NumeracyWorksheetTest extends TestCase
                 $this->assertFileExists(resource_path('worksheets/aral-g6/'.$page['image']));
                 $this->assertGreaterThan(1000, $page['width']);
             }
+        }
+    }
+
+    public function test_every_game_enabled_worksheet_has_a_complete_automatic_answer_key(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+
+        foreach ([1, 2, 3, 4] as $number) {
+            $worksheet = NumeracyWorksheets::find($number);
+            $assignment = $this->assignment($teacher, ['worksheet_number' => $number]);
+            $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+            $payload = $this->automaticPayload($progress, $worksheet);
+            $grading = NumeracyWorksheetGrader::grade($worksheet, $payload['pages']);
+
+            $this->assertNotNull($grading, "Worksheet {$number} must support automatic checking.");
+            $this->assertSame(NumeracyWorksheetGrader::scoreableCount($worksheet), $grading['total']);
+            $this->assertSame($grading['total'], $grading['correct'], "Worksheet {$number} answer key must grade all correct responses correctly.");
         }
     }
 
@@ -62,7 +110,7 @@ class NumeracyWorksheetTest extends TestCase
         $this->assertSame(1, $assignment->worksheet_number);
         $this->assertTrue($assignment->hasUnlimitedRetries());
         $this->assertSame(195, $assignment->question_time_limit_seconds);
-        $this->get(route('assessments.show', $assignment))->assertOk()->assertSee('18 scored items');
+        $this->get(route('assessments.show', $assignment))->assertOk()->assertSee(NumeracyWorksheetGrader::scoreableCount(NumeracyWorksheets::find(1)).' scored items');
         $this->assertDatabaseCount(AssessmentSubmission::class, 0);
         $this->actingAs(User::factory()->create())->get(route('worksheets.index'))->assertForbidden();
         $this->post(route('worksheets.store', 1), [])->assertForbidden();
@@ -189,10 +237,50 @@ class NumeracyWorksheetTest extends TestCase
         $this->assertDatabaseCount(AssessmentSubmission::class, 1);
         $this->assertDatabaseHas(AssessmentSubmission::class, ['correct_count' => 15, 'question_count' => 20, 'points' => 750, 'possible_points' => 1000]);
         $this->get(route('reports.student', $student))->assertOk()->assertSee($assignment->title);
-        $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Worksheet &amp; Teacher Feedback', false)->assertDontSee('Worksheets Awaiting Review');
+        $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Worksheet Results &amp; Answers', false)->assertDontSee('Worksheets Awaiting Review');
         $this->get(route('worksheets.review', $attempt))->assertOk()->assertSee('Check items 3 and 7.');
         $this->get(route('student.assessments.show', $assignment))->assertRedirect(route('student.dashboard'));
         $this->assertDatabaseHas(AssessmentRetakeRequest::class, ['assessment_id' => $assignment->id, 'user_id' => $student->id, 'status' => 'pending']);
+    }
+
+    public function test_game_worksheet_is_automatically_scored_with_a_complete_answer_review(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $worksheet = NumeracyWorksheets::find(4);
+        $assignment = $this->assignment($teacher, ['worksheet_number' => 4, 'worksheet_total' => 10]);
+        $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+
+        $this->actingAs($student)
+            ->postJson(route('worksheets.submit', $assignment), $this->automaticPayload($progress, $worksheet, true))
+            ->assertOk();
+
+        $total = NumeracyWorksheetGrader::scoreableCount($worksheet);
+        $attempt = WorksheetAttempt::firstOrFail();
+        $this->assertNotNull($attempt->reviewed_at);
+        $this->assertSame($total - 1, $attempt->score);
+        $this->assertSame($total, $attempt->total);
+        $this->assertDatabaseHas(AssessmentSubmission::class, [
+            'assessment_id' => $assignment->id,
+            'user_id' => $student->id,
+            'correct_count' => $total - 1,
+            'question_count' => $total,
+        ]);
+        $this->assertDatabaseMissing(AppNotification::class, [
+            'user_id' => $teacher->id,
+            'type' => 'worksheet_submitted',
+        ]);
+
+        $this->get(route('worksheets.review', $attempt))
+            ->assertOk()
+            ->assertSee('Complete Answer Review')
+            ->assertSee(($total - 1).' correct')
+            ->assertSee('1 incorrect')
+            ->assertSee('Your answer')
+            ->assertSee('Correct answer')
+            ->assertDontSee('Awaiting Teacher Review');
+
+        $this->actingAs($teacher)->get(route('worksheets.reviews'))->assertOk()->assertDontSee($student->name);
     }
 
     public function test_retry_token_is_consumed_once_at_submission_and_not_again_at_grading(): void

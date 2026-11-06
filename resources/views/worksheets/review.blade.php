@@ -1,8 +1,9 @@
 <x-worksheet-layout :teacher="$teacher" :title="$assessment->title" :back="$teacher ? route('worksheets.reviews') : route('worksheets.mission')">
+    @php $automaticReview = \App\Support\NumeracyWorksheetGrader::grade($worksheet, $attempt->pages ?? []); @endphp
     @unless ($teacher)<x-teacher-identity :teacher="$assessment->teacher" />@endunless
     <section class="worksheet-review-summary">
         <div><h2>{{ $teacher ? $attempt->student->name : 'Your Worksheet' }}</h2><p>Attempt {{ $attempt->progress->attempt_number }} &middot; Submitted {{ $attempt->created_at->format('M d, Y H:i') }}</p></div>
-        @if ($attempt->reviewed_at)<strong class="worksheet-score">{{ $attempt->score }} / {{ $attempt->total }} <small>{{ round($attempt->score / $attempt->total * 100) }}%</small></strong>@else<strong class="worksheet-pending">Awaiting Teacher Review</strong>@endif
+        @if ($attempt->reviewed_at)<strong class="worksheet-score">{{ $attempt->score }} / {{ $attempt->total }} <small>{{ $attempt->total > 0 ? round($attempt->score / $attempt->total * 100) : 0 }}%</small></strong>@else<strong class="worksheet-pending">Awaiting Teacher Review</strong>@endif
     </section>
     @if ($attempt->progress->submission)
         <x-assessment-coin-reward :submission="$attempt->progress->submission" />
@@ -16,6 +17,35 @@
         <div class="worksheet-actions"><a class="ui-button" href="{{ route('worksheets.mission') }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span>Continue Mission</a></div>
     @endunless
     @if ($attempt->feedback)<div class="worksheet-feedback"><h2>Teacher Feedback</h2><p>{{ $attempt->feedback }}</p></div>@endif
+    @if ($attempt->reviewed_at && $automaticReview)
+        <section class="worksheet-answer-review" aria-labelledby="worksheet-answer-review-title">
+            <header class="worksheet-answer-review-heading">
+                <div>
+                    <p>Automatic checking</p>
+                    <h2 id="worksheet-answer-review-title">Complete Answer Review</h2>
+                    <span>{{ $automaticReview['correct'] }} correct &middot; {{ $automaticReview['incorrect'] }} incorrect</span>
+                </div>
+                <dl>
+                    <div><dt>Correct</dt><dd>{{ $automaticReview['correct'] }}</dd></div>
+                    <div><dt>Wrong</dt><dd>{{ $automaticReview['incorrect'] }}</dd></div>
+                </dl>
+            </header>
+            <div class="worksheet-answer-list">
+                @foreach ($automaticReview['items'] as $item)
+                    <article class="worksheet-answer-item {{ $item['is_correct'] ? 'is-correct' : 'is-wrong' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">{{ $item['is_correct'] ? 'check_circle' : 'cancel' }}</span>
+                        <div>
+                            <p class="worksheet-answer-question"><strong>Item {{ $item['label'] }}</strong>{{ $item['question'] }}</p>
+                            <dl>
+                                <div><dt>Your answer</dt><dd>{{ $item['student_answer'] }}</dd></div>
+                                <div><dt>Correct answer</dt><dd>{{ $item['correct_answer'] }}</dd></div>
+                            </dl>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
     @php $config = ['pages' => \App\Support\NumeracyWorksheets::pageConfig($worksheet), 'state' => ['pages' => $attempt->pages, 'page' => 0], 'revision' => 0]; @endphp
     <x-worksheet-reader :worksheet="$worksheet" :config="$config" readonly />
     @if ($teacher && ! $attempt->reviewed_at)

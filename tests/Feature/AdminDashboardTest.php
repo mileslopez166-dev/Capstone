@@ -7,6 +7,7 @@ use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
@@ -111,6 +112,26 @@ class AdminDashboardTest extends TestCase
             'gender' => 'male',
             'approval_status' => 'approved',
         ]);
+    }
+
+    public function test_admin_create_user_only_accepts_student_or_teacher_roles(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.store'), [
+                'first_name' => 'Another',
+                'last_name' => 'Administrator',
+                'email' => 'another.admin@example.com',
+                'role' => 'admin',
+                'section' => 'Magalang',
+                'approval_status' => 'approved',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ])
+            ->assertSessionHasErrors('role');
+
+        $this->assertDatabaseMissing('users', ['email' => 'another.admin@example.com']);
     }
 
     public function test_admin_can_empty_trash_without_hitting_user_delete_route(): void
@@ -300,6 +321,70 @@ class AdminDashboardTest extends TestCase
             ->assertSee('bulk-delete-users-form')
             ->assertSee('Select Selectable Student for deletion')
             ->assertDontSee('Select Protected Admin for deletion');
+    }
+
+    public function test_admin_password_is_required_to_reset_an_account_password(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => 'admin-secret']);
+        $student = User::factory()->create(['password' => 'student-original']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $student), [
+                'name' => $student->name,
+                'role' => 'student',
+                'section' => 'Magalang',
+                'gender' => 'male',
+                'approval_status' => 'approved',
+                'password' => 'student-replacement',
+                'password_confirmation' => 'student-replacement',
+            ])
+            ->assertSessionHasErrors('admin_password');
+
+        $this->assertTrue(Hash::check('student-original', $student->fresh()->password));
+        $this->assertFalse(Hash::check('student-replacement', $student->fresh()->password));
+    }
+
+    public function test_incorrect_admin_password_can_not_reset_an_account_password(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => 'admin-secret']);
+        $student = User::factory()->create(['password' => 'student-original']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $student), [
+                'name' => $student->name,
+                'role' => 'student',
+                'section' => 'Magalang',
+                'gender' => 'male',
+                'approval_status' => 'approved',
+                'password' => 'student-replacement',
+                'password_confirmation' => 'student-replacement',
+                'admin_password' => 'wrong-admin-password',
+            ])
+            ->assertSessionHasErrors('admin_password');
+
+        $this->assertTrue(Hash::check('student-original', $student->fresh()->password));
+    }
+
+    public function test_admin_can_reset_an_account_password_after_confirming_their_password(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => 'admin-secret']);
+        $student = User::factory()->create(['password' => 'student-original']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $student), [
+                'name' => $student->name,
+                'role' => 'student',
+                'section' => 'Magalang',
+                'gender' => 'male',
+                'approval_status' => 'approved',
+                'password' => 'student-replacement',
+                'password_confirmation' => 'student-replacement',
+                'admin_password' => 'admin-secret',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.dashboard').'#user-management');
+
+        $this->assertTrue(Hash::check('student-replacement', $student->fresh()->password));
     }
 
     public function test_system_administrator_is_marked_as_fixed_on_user_management_dashboard(): void

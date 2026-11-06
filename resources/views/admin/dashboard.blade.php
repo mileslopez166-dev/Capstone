@@ -380,7 +380,7 @@
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">User Management</p>
                     <h2 id="create-user-modal-title" class="mt-1 font-headline text-2xl font-bold text-on-surface">Create User</h2>
-                    <p class="mt-1 text-sm text-on-surface-variant">Add a student, teacher, or administrator account.</p>
+                    <p class="mt-1 text-sm text-on-surface-variant">Add a student or teacher account.</p>
                 </div>
                 <button id="create-user-close" class="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary" type="button" aria-label="Close create form">
                     <span class="material-symbols-outlined">close</span>
@@ -388,11 +388,43 @@
             </div>
 
             <div class="p-6">
-                <form id="create-user-form" class="space-y-6" method="POST" action="{{ route('admin.users.store') }}">
+                <form id="create-user-form" class="space-y-6" method="POST" action="{{ route('admin.users.store') }}" x-data="{ role: @js(old('create_user_form') ? old('role', 'student') : 'student') }">
                     @csrf
                     <input name="create_user_form" type="hidden" value="1">
+                    <input name="role" type="hidden" x-model="role">
 
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <fieldset class="space-y-2 md:col-span-2">
+                            <legend class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">I am creating a</legend>
+                            <div class="grid grid-cols-2 gap-2 rounded-lg border border-outline-variant/20 bg-surface-container-low p-1">
+                                <button
+                                    class="flex min-h-12 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-colors"
+                                    :class="role === 'student' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'"
+                                    type="button"
+                                    :aria-pressed="role === 'student'"
+                                    @click="role = 'student'"
+                                >
+                                    <span class="material-symbols-outlined text-xl" aria-hidden="true">school</span>
+                                    Student
+                                </button>
+                                <button
+                                    class="flex min-h-12 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-colors"
+                                    :class="role === 'teacher' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'"
+                                    type="button"
+                                    :aria-pressed="role === 'teacher'"
+                                    @click="role = 'teacher'"
+                                >
+                                    <span class="material-symbols-outlined text-xl" aria-hidden="true">co_present</span>
+                                    Teacher
+                                </button>
+                            </div>
+                            @if(old('create_user_form'))
+                                @error('role')
+                                    <p class="text-sm text-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </fieldset>
+
                         <div class="space-y-4 md:col-span-2">
                             <div class="space-y-2">
                                 <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-first-name">First Name</label>
@@ -447,29 +479,12 @@
                             @endif
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-role">Role</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">badge</span>
-                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-role" name="role" required>
-                                    <option value="student" @selected(old('create_user_form') && old('role') === 'student')>Student</option>
-                                    <option value="teacher" @selected(old('create_user_form') && old('role') === 'teacher')>Teacher</option>
-                                    <option value="admin" @selected(old('create_user_form') && old('role') === 'admin')>Admin</option>
-                                </select>
-                            </div>
-                            @if(old('create_user_form'))
-                                @error('role')
-                                    <p class="text-sm text-error">{{ $message }}</p>
-                                @enderror
-                            @endif
-                        </div>
-
-                        <div class="space-y-2">
+                        <div class="space-y-2" x-show="role === 'student'" x-transition>
                             <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-gender">Avatar Style</label>
                             <div class="relative">
                                 <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">face</span>
-                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-gender" name="gender">
-                                    <option value="">None</option>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-gender" name="gender" x-bind:disabled="role !== 'student'" x-bind:required="role === 'student'">
+                                    <option value="" disabled @selected(! old('gender'))>Choose avatar style</option>
                                     <option value="male" @selected(old('create_user_form') && old('gender') === 'male')>Nova Finch - Boys</option>
                                     <option value="female" @selected(old('create_user_form') && old('gender') === 'female')>Lyra Vale - Girls</option>
                                 </select>
@@ -482,11 +497,11 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-section">Section Assignment</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="create-section" x-text="role === 'teacher' ? 'Assigned Section' : 'Student Section'">Student Section</label>
                             <div class="relative">
                                 <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">class</span>
-                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-section" name="section">
-                                    <option value="">Unassigned</option>
+                                <select class="w-full rounded-sm border-none bg-surface-container-low py-3 pl-12 pr-10 text-on-surface shadow-inner transition-colors focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary" id="create-section" name="section" required>
+                                    <option value="" disabled @selected(! old('section'))>Select section</option>
                                     @foreach ($sections as $section)
                                         <option value="{{ $section }}" @selected(old('create_user_form') && old('section') === $section)>{{ $section }}</option>
                                     @endforeach
@@ -580,7 +595,7 @@
                     </div>
                 @endif
 
-                <form id="edit-user-form" class="space-y-6" method="POST" action="">
+                <form id="edit-user-form" class="space-y-6" method="POST" action="" x-data="{ showNewPassword: false, showPasswordConfirmation: false, showAdminPassword: false }">
                     @csrf
                     @method('PATCH')
                     <input id="edit-user-id" name="edit_user_id" type="hidden" value="{{ old('edit_user_id') }}">
@@ -670,8 +685,8 @@
                         <div class="md:col-span-2">
                             <div class="rounded-lg bg-surface-container-low p-5">
                                 <div class="mb-5">
-                                    <h3 class="font-headline text-lg font-bold text-on-surface">Change Password</h3>
-                                    <p class="mt-1 text-sm text-on-surface-variant">Leave these fields blank to keep the current password.</p>
+                                    <h3 class="font-headline text-lg font-bold text-on-surface">Reset Account Password</h3>
+                                    <p class="mt-1 text-sm text-on-surface-variant">Existing passwords are securely hashed and cannot be viewed. Set a replacement password and confirm your admin password to authorize the change.</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -679,7 +694,10 @@
                                         <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-password">New Password</label>
                                         <div class="relative">
                                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
-                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password" name="password" type="password" autocomplete="new-password" placeholder="Enter new password">
+                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password" name="password" :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Enter new password">
+                                            <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showNewPassword = !showNewPassword" :aria-label="showNewPassword ? 'Hide new password' : 'Show new password'" :title="showNewPassword ? 'Hide new password' : 'Show new password'">
+                                                <span class="material-symbols-outlined text-xl" x-text="showNewPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                            </button>
                                         </div>
                                         @error('password')
                                             <p class="text-sm text-error">{{ $message }}</p>
@@ -690,8 +708,25 @@
                                         <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-password-confirmation">Confirm Password</label>
                                         <div class="relative">
                                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">verified_user</span>
-                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password-confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Re-enter password">
+                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-password-confirmation" name="password_confirmation" :type="showPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" placeholder="Re-enter password">
+                                            <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showPasswordConfirmation = !showPasswordConfirmation" :aria-label="showPasswordConfirmation ? 'Hide confirmed password' : 'Show confirmed password'" :title="showPasswordConfirmation ? 'Hide confirmed password' : 'Show confirmed password'">
+                                                <span class="material-symbols-outlined text-xl" x-text="showPasswordConfirmation ? 'visibility_off' : 'visibility'">visibility</span>
+                                            </button>
                                         </div>
+                                    </div>
+
+                                    <div class="space-y-2 md:col-span-2">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="edit-admin-password">Your Admin Password</label>
+                                        <div class="relative max-w-md">
+                                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">admin_panel_settings</span>
+                                            <input class="w-full rounded-sm border-none bg-surface-container-lowest py-3 pl-12 pr-12 text-on-surface shadow-inner transition-colors focus:ring-2 focus:ring-primary" id="edit-admin-password" name="admin_password" :type="showAdminPassword ? 'text' : 'password'" autocomplete="current-password" placeholder="Confirm your admin password">
+                                            <button class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary" type="button" @click="showAdminPassword = !showAdminPassword" :aria-label="showAdminPassword ? 'Hide admin password' : 'Show admin password'" :title="showAdminPassword ? 'Hide admin password' : 'Show admin password'">
+                                                <span class="material-symbols-outlined text-xl" x-text="showAdminPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                            </button>
+                                        </div>
+                                        @error('admin_password')
+                                            <p class="text-sm text-error">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
@@ -747,6 +782,7 @@
         const editApprovalStatus = document.getElementById('edit-approval-status');
         const editPassword = document.getElementById('edit-password');
         const editPasswordConfirmation = document.getElementById('edit-password-confirmation');
+        const editAdminPassword = document.getElementById('edit-admin-password');
         const oldEditUserId = @json(old('edit_user_id'));
         const oldEditValues = @json($oldEditValues);
         const shouldOpenCreateUserModal = @json((bool) old('create_user_form'));
@@ -851,6 +887,7 @@
             editApprovalStatus.value = values.approval_status ?? dataset.status ?? 'approved';
             editPassword.value = '';
             editPasswordConfirmation.value = '';
+            editAdminPassword.value = '';
             modalUserInitials.textContent = dataset.initials || 'U';
             modalUserName.textContent = editName.value || 'Selected user';
             modalUserEmail.textContent = dataset.email || '';
