@@ -41,6 +41,10 @@ class AdaptiveQuestions
             if ($assessment->question_selection === 'automatic' && $assessment->assessment_type !== 'oral_reading') {
                 self::validateBank($questions);
                 $context = self::placement($assessment, $student);
+                // Keep the selected bank stable for scoring, then adapt the order
+                // through that bank after every answer in the game.
+                $context['question_flow'] = 'realtime_difficulty';
+                $context['adaptation_rule'] = 'correct_harder_incorrect_easier';
                 $selected = [];
                 foreach (self::MIXES[$context['plan']] as $level => $amount) {
                     $pool = collect($questions)->map(fn ($question, $index) => $question + ['bank_index' => $index])

@@ -78,6 +78,7 @@
                     'text' => (string) ($question['question'] ?? 'Untitled question'),
                     'options' => $answers,
                     'correct' => (string) ($question['correct_answer'] ?? 'A'),
+                    'difficulty' => (string) ($question['difficulty'] ?? 'instructional'),
                 ];
             })
             ->filter(fn (array $question): bool => filled($question['text']) && count($question['options']) > 0)
@@ -663,6 +664,7 @@
                     const frogQuestionCard = document.getElementById('frog-question-card');
                     const frogAnswerButtons = Array.from(document.querySelectorAll('[data-frog-answer]'));
                     const questions = @json($gameQuestions->values());
+                    const adaptiveAssessment = @json($assessment->question_selection === 'automatic' && ! $isOralReading);
                     const targetsNeeded = questions.length;
                     const capturedAnswers = {};
                     let caughtCount = 0;
@@ -671,6 +673,7 @@
                     let isHatching = false;
                     let isProcessingCapture = false;
                     let currentQuestionIndex = 0;
+                    let lastAnswerCorrect = null;
                     let currentHookX = canvas.clientWidth / 2;
                     let missionStarted = !storyGate;
                     let fishSchool = [];
@@ -696,6 +699,34 @@
                     let saveTimeout = null;
                     let frogRoundEnding = false;
                     let rallyRoundEnding = false;
+
+                    function difficultyRank(question) {
+                        return ({ frustration: 0, instructional: 1, independent: 2, advanced: 3 })[question?.difficulty] ?? 1;
+                    }
+
+                    function nextAdaptiveIndex(correct) {
+                        const unanswered = questions
+                            .map((question, index) => ({ question, index }))
+                            .filter(({ index }) => capturedAnswers[index] === undefined);
+                        if (!unanswered.length) return targetsNeeded;
+                        if (!adaptiveAssessment || !questions[currentQuestionIndex]) return unanswered[0].index;
+
+                        const currentRank = difficultyRank(questions[currentQuestionIndex]);
+                        const preferredRank = Math.max(0, Math.min(3, currentRank + (correct ? 1 : -1)));
+                        const rankOrder = [preferredRank, currentRank, correct ? preferredRank - 1 : preferredRank + 1, 1, 0, 2, 3]
+                            .filter((rank, index, values) => rank >= 0 && rank <= 3 && values.indexOf(rank) === index);
+                        for (const rank of rankOrder) {
+                            const match = unanswered.find(({ question }) => difficultyRank(question) === rank);
+                            if (match) return match.index;
+                        }
+
+                        return unanswered[0].index;
+                    }
+
+                    function advanceQuestion(correct = lastAnswerCorrect) {
+                        currentQuestionIndex = nextAdaptiveIndex(correct);
+                        return currentQuestionIndex;
+                    }
 
                     function stopQuestionTimer(clearDeadline = true) {
                         clearInterval(questionTimer);
@@ -742,6 +773,7 @@
                         questionTimeoutPending = true;
                         stopQuestionTimer();
                         capturedAnswers[currentQuestionIndex] = 'TIMEOUT';
+                        lastAnswerCorrect = false;
                         isProcessingCapture = true;
                         persistProgress(true);
 
@@ -756,7 +788,7 @@
                             animateFrogJump(null, false, jumpDuration, safeIndex, safeIndex);
                             setTimeout(() => {
                                 if (caughtCount >= targetsNeeded) return endFrogRound();
-                                currentQuestionIndex++;
+                                advanceQuestion(lastAnswerCorrect);
                                 isProcessingCapture = false;
                                 renderFlashcardQuestion();
                             }, jumpDuration + 80);
@@ -773,7 +805,7 @@
                             document.getElementById('rally-feedback').textContent = "Time's up. Your car is recovering for the next question.";
                             setTimeout(() => {
                                 if (caughtCount >= targetsNeeded) return endRallyRound();
-                                currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                                advanceQuestion(lastAnswerCorrect);
                                 isProcessingCapture = false;
                                 renderRallyQuestion(true);
                             }, reducedMotion() ? 250 : 1700);
@@ -845,6 +877,7 @@
                         stopQuestionTimer();
                         const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
+                        lastAnswerCorrect = correct;
                         caughtCount++;
                         if (correct) totalScore++;
                         button.dataset.result = correct ? 'correct' : 'incorrect';
@@ -861,7 +894,7 @@
                             setTimeout(() => {
                                 if (missionFinished || rallyRoundEnding) return;
                                 if (caughtCount >= targetsNeeded) { endRallyRound(); return; }
-                                currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                                advanceQuestion(lastAnswerCorrect);
                                 isProcessingCapture = false;
                                 renderRallyQuestion(true);
                             }, reducedMotion() ? 500 : 1700);
@@ -1406,6 +1439,7 @@
                         frogAnswerButtons.forEach((item) => item.disabled = true);
                         const correct = question.correct === letter;
                         capturedAnswers[currentQuestionIndex] = letter;
+                        lastAnswerCorrect = correct;
                         persistProgress(true);
                         caughtCount++;
                         const safeIndexBefore = Math.max(-1, totalScore - 1);
@@ -1431,7 +1465,7 @@
                                 return;
                             }
 
-                            currentQuestionIndex++;
+                            advanceQuestion(lastAnswerCorrect);
                             isProcessingCapture = false;
                             renderFlashcardQuestion();
                         }, jumpDuration + 80);
@@ -1487,6 +1521,7 @@
                             : 'Not quite! The fish is pulling the boat under!';
                         isProcessingCapture = true;
                         capturedAnswers[currentQuestionIndex] = element.dataset.letter;
+                        lastAnswerCorrect = correct;
                         persistProgress(true);
                         const previousRect = element.getBoundingClientRect();
                         const visual = element.querySelector('.fish-visual');
@@ -1580,7 +1615,7 @@
 
                     function nextQuestion() {
 
-                        currentQuestionIndex++;
+                        advanceQuestion(lastAnswerCorrect);
                         questionNode.style.opacity = '0';
                         setTimeout(() => {
                             renderHookQuestion();
@@ -1864,7 +1899,7 @@
                     rallyNext?.addEventListener('click', () => {
                         if (rallyNext.disabled || !isProcessingCapture || rallyRoundEnding) return;
                         if (caughtCount >= targetsNeeded) { endRallyRound(); return; }
-                        currentQuestionIndex = questions.findIndex((_, index) => !capturedAnswers[index]);
+                        advanceQuestion(lastAnswerCorrect);
                         isProcessingCapture = false;
                         renderRallyQuestion(true);
                     });

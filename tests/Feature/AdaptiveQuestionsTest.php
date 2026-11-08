@@ -58,6 +58,8 @@ class AdaptiveQuestionsTest extends TestCase
     private function assertMix(AssessmentProgress $progress, string $plan): void
     {
         $this->assertSame($plan, $progress->selection_context['plan']);
+        $this->assertSame('realtime_difficulty', $progress->selection_context['question_flow']);
+        $this->assertSame('correct_harder_incorrect_easier', $progress->selection_context['adaptation_rule']);
         $this->assertCount(8, $progress->question_snapshot);
         $this->assertCount(8, array_unique(array_column($progress->question_snapshot, 'bank_index')));
         $this->assertEquals(AdaptiveQuestions::MIXES[$plan], array_count_values(array_column($progress->question_snapshot, 'difficulty')));
