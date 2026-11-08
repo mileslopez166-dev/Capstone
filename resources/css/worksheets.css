@@ -119,6 +119,7 @@
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide,
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-game { border-color: #7daaba; background: #fffef9; color: #203650; }
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-content { color: #203650; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-heading h2 { color: #203650; }
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-heading,
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-content + .numeracy-guide-content,
 .worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-section + .numeracy-guide-section,
@@ -145,6 +146,7 @@
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide,
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-game { border-color: #9bc7e8; background: #fffef9; color: #1b2c5b; }
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-content { color: #1b2c5b; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-heading h2 { color: #1b2c5b; }
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-heading,
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-content + .numeracy-guide-content,
 .worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-section + .numeracy-guide-section,
