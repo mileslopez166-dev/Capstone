@@ -4,6 +4,8 @@
         $scopeLabel = $scopeLabel ?? 'All Sections';
         $leaderboard = $leaderboard ?? collect();
         $currentStudentRank = $currentStudentRank ?? null;
+        $currentStudentEntry = $currentStudentEntry ?? null;
+        $totalRankedStudents = $totalRankedStudents ?? $leaderboard->count();
         $scopes = [
             'all' => 'All',
             ...\App\Support\SectionCatalog::targets(),
@@ -68,9 +70,15 @@
 
                 <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_50px_rgba(0,94,159,0.06)]">
                     <div class="border-b border-outline-variant/15 bg-surface-container-low px-5 py-4 sm:px-6">
-                        <h2 class="font-headline text-2xl font-bold text-on-surface">Top Students</h2>
-                        <p class="mt-1 text-sm text-on-surface-variant">Completed assessments, total points, and average accuracy.</p>
+                        <h2 class="font-headline text-2xl font-bold text-on-surface">Top 10 Students</h2>
+                        <p class="mt-1 text-sm text-on-surface-variant">Showing the highest-ranked students by completed assessment points.</p>
                     </div>
+
+                    @if ($currentStudentRank && $currentStudentRank > 10 && $currentStudentEntry)
+                        <div class="border-b border-outline-variant/15 bg-primary/5 px-5 py-4 text-sm text-on-surface sm:px-6">
+                            You are currently <strong>#{{ $currentStudentRank }}</strong> with <strong>{{ number_format($currentStudentEntry['points']) }} points</strong>. Your full rank and score remain available on your profile.
+                        </div>
+                    @endif
 
                     <div class="divide-y divide-outline-variant/15">
                         @forelse ($leaderboard as $entry)

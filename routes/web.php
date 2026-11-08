@@ -439,15 +439,18 @@ Route::get('/student/leaderboard/{scope?}', function (?string $scope = 'all') {
 
     abort_unless(array_key_exists($scope, $scopes), 404);
 
-    $leaderboard = StudentLeaderboard::entries($scope === 'all' ? null : $scopes[$scope]);
+    $fullLeaderboard = StudentLeaderboard::entries($scope === 'all' ? null : $scopes[$scope]);
 
-    $currentStudentRank = $leaderboard->firstWhere('student.id', $student->id)['rank'] ?? null;
+    $currentStudentEntry = $fullLeaderboard->firstWhere('student.id', $student->id);
+    $currentStudentRank = $currentStudentEntry['rank'] ?? null;
 
     return view('student.leaderboard', [
         'scope' => $scope,
         'scopeLabel' => $scopes[$scope],
-        'leaderboard' => $leaderboard,
+        'leaderboard' => $fullLeaderboard->take(10)->values(),
         'currentStudentRank' => $currentStudentRank,
+        'currentStudentEntry' => $currentStudentEntry,
+        'totalRankedStudents' => $fullLeaderboard->count(),
     ]);
 })->middleware(['auth', 'verified'])->name('student.leaderboard');
 

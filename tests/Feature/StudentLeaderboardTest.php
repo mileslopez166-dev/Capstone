@@ -103,6 +103,30 @@ class StudentLeaderboardTest extends TestCase
             ->assertSeeText('Bronze');
     }
 
+    public function test_leaderboard_displays_only_the_top_ten_but_keeps_the_students_full_rank(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $students = collect(range(1, 11))->map(fn (int $points) => User::factory()->create([
+            'name' => 'Leaderboard Student '.$points,
+            'approval_status' => 'approved',
+        ]));
+        $assessment = $this->assessment($teacher);
+        $students->each(fn (User $student, int $index) => $this->submission($assessment, $student, (11 - $index) * 250, 1, 1));
+        $lastStudent = $students->last();
+
+        $this->actingAs($lastStudent)->get(route('student.leaderboard'))
+            ->assertOk()
+            ->assertSeeText('Top 10 Students')
+            ->assertSeeText('Leaderboard Student 2')
+            ->assertSeeText('You are currently #11')
+            ->assertViewHas('currentStudentRank', 11)
+            ->assertViewHas('leaderboard', fn ($entries) => $entries->count() === 10 && ! $entries->contains(fn ($entry): bool => $entry['student']->is($lastStudent)));
+
+        $this->get(route('profile.edit'))
+            ->assertOk()
+            ->assertViewHas('studentRank', 11);
+    }
+
     public function test_non_student_can_not_view_student_leaderboard(): void
     {
         $teacher = User::factory()->teacher()->create();

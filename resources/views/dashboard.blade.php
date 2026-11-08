@@ -18,6 +18,12 @@
                     <a class="teacher-primary-action" href="{{ route('assessments.create') }}"><span class="material-symbols-outlined" aria-hidden="true">add</span>Create assessment</a>
                 </header>
 
+                @php
+                    $needsAttentionStudents = $students
+                        ->filter(fn (\App\Models\User $student): bool => $student->average_accuracy !== null && $student->average_accuracy < 75)
+                        ->sortBy(fn (\App\Models\User $student): int => $student->average_accuracy)
+                        ->values();
+                @endphp
                 <section class="teacher-metrics" aria-label="Class performance">
                     @foreach ([
                         ['label' => 'Average Accuracy', 'value' => $dashboardMetrics['average_accuracy'] === null ? 'No Data' : $dashboardMetrics['average_accuracy'].'%', 'note' => 'Completed assessments', 'icon' => 'trending_up'],
@@ -25,11 +31,31 @@
                         ['label' => 'Needs Attention', 'value' => number_format($dashboardMetrics['needs_attention']), 'note' => 'Average accuracy below 75%', 'icon' => 'flag'],
                         ['label' => 'Total Points', 'value' => number_format($dashboardMetrics['total_points']), 'note' => 'Earned by your students', 'icon' => 'stars'],
                     ] as $metric)
-                        <div class="teacher-metric">
-                            <div class="teacher-metric-label"><span>{{ $metric['label'] }}</span><span class="material-symbols-outlined" aria-hidden="true">{{ $metric['icon'] }}</span></div>
-                            <strong>{{ $metric['value'] }}</strong>
-                            <small>{{ $metric['note'] }}</small>
-                        </div>
+                        @if ($metric['label'] === 'Needs Attention')
+                            <details class="teacher-metric teacher-metric-dropdown">
+                                <summary>
+                                    <div class="teacher-metric-label"><span>{{ $metric['label'] }}</span><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></div>
+                                    <strong>{{ $metric['value'] }}</strong>
+                                    <small>{{ $metric['note'] }}</small>
+                                </summary>
+                                <div class="teacher-metric-dropdown-list">
+                                    @forelse ($needsAttentionStudents as $student)
+                                        <a class="teacher-attention-student" href="{{ route('students.show', $student) }}">
+                                            <span>{{ $student->name }}</span>
+                                            <strong>{{ $student->average_accuracy }}%</strong>
+                                        </a>
+                                    @empty
+                                        <p class="teacher-attention-empty">No students currently need attention.</p>
+                                    @endforelse
+                                </div>
+                            </details>
+                        @else
+                            <div class="teacher-metric">
+                                <div class="teacher-metric-label"><span>{{ $metric['label'] }}</span><span class="material-symbols-outlined" aria-hidden="true">{{ $metric['icon'] }}</span></div>
+                                <strong>{{ $metric['value'] }}</strong>
+                                <small>{{ $metric['note'] }}</small>
+                            </div>
+                        @endif
                     @endforeach
                 </section>
 
