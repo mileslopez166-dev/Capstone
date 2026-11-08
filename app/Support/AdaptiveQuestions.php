@@ -29,6 +29,15 @@ class AdaptiveQuestions
         }
     }
 
+    public static function preferredDifficulty(string $plan): string
+    {
+        return match ($plan) {
+            'support' => 'frustration',
+            'challenge' => 'independent',
+            default => 'instructional',
+        };
+    }
+
     public static function freeze(AssessmentProgress $progress, Assessment $assessment, User $student): AssessmentProgress
     {
         if ($assessment->worksheet_number || $progress->question_snapshot !== null) return $progress;

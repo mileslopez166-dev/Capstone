@@ -53,6 +53,12 @@
                                 </div>
                                 <h3 class="mt-3 font-headline text-lg font-extrabold leading-snug text-on-surface">{{ $recommendedAssessment->title }}</h3>
                                 <p class="mt-2 line-clamp-2 text-sm text-on-surface-variant">{{ collect($recommendation->reasons ?? [])->take(2)->join(' / ') }}</p>
+                                @if ($recommendedAssessment->subject === 'literacy' && $recommendedAssessment->question_selection === 'automatic')
+                                    <p class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-secondary-dim">
+                                        <span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
+                                        Story and questions matched to your level
+                                    </p>
+                                @endif
                                 <span class="mt-4 inline-flex items-center gap-1 text-sm font-black text-primary">Open activity <span class="material-symbols-outlined text-base transition-transform group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
                             </a>
                         @endforeach

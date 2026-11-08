@@ -207,6 +207,34 @@ class AiAlgorithmManagementTest extends TestCase
         $this->assertSame(50, $source->fresh()->points);
     }
 
+    public function test_recommendations_prefer_a_story_with_personalized_questions_for_the_student_level(): void
+    {
+        $story = json_decode(file_get_contents(resource_path('data/literacy-stories.json')), true, 512, JSON_THROW_ON_ERROR)[0];
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $bank = array_merge(...array_values($story['question_sets']));
+
+        $sourceAssessment = $this->assessment($teacher, [
+            'title' => 'Completed Reading', 'target_section' => 'all', 'manual_questions' => $bank,
+            'question_selection' => 'automatic', 'story_title' => $story['story_title'],
+        ]);
+        $source = $this->submission($student, $sourceAssessment, 2, 10);
+        $automaticStory = $this->assessment($teacher, [
+            'title' => 'Personalized Story', 'target_section' => 'all', 'manual_questions' => $bank,
+            'question_selection' => 'automatic', 'story_title' => 'Personalized Story',
+        ]);
+        $fixedStory = $this->assessment($teacher, [
+            'title' => 'Fixed Story', 'target_section' => 'all',
+            'manual_questions' => $story['question_sets']['instructional'], 'question_selection' => 'fixed',
+        ]);
+
+        $ranked = app(LearningRecommender::class)->recommend($student, $source, 'content_based', false);
+
+        $this->assertSame($automaticStory->id, $ranked['items']->first()['assessment']->id);
+        $this->assertContains('Questions will be personalized automatically', $ranked['items']->first()['reasons']);
+        $this->assertContains($fixedStory->id, $ranked['items']->pluck('assessment.id')->all());
+    }
+
     public function test_sparse_recommendation_evaluation_reports_insufficient_data(): void
     {
         $admin = User::factory()->admin()->create();
