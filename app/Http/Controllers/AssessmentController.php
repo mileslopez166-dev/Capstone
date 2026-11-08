@@ -68,7 +68,7 @@ class AssessmentController extends Controller
                 'student:id,name,section',
             ])
             ->whereNotNull('submitted_at')
-            ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+            ->forTeacher($teacher)
             ->latest('submitted_at')
             ->latest('id')
             ->get()
@@ -574,6 +574,11 @@ class AssessmentController extends Controller
             app(MLPredictionService::class)->predictForSubmission($submission);
             try {
                 app(LearningRecommender::class)->recommend($submission->student, $submission);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+            try {
+                app(\App\Support\PracticeMissionCreator::class)->createForSubmission($submission);
             } catch (\Throwable $exception) {
                 report($exception);
             }

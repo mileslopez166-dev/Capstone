@@ -105,8 +105,27 @@
 
                     <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
                         <div class="border-b border-outline-variant/10 p-8">
-                            <h4 class="font-headline text-xl font-extrabold text-on-surface">Student Roster</h4>
-                            <p class="mt-2 text-sm text-on-surface-variant">Overall ML estimates use your assessments only. They are provisional teaching support, not official grades or a validated overall diagnosis.</p>
+                            <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+                                <div>
+                                    <h4 class="font-headline text-xl font-extrabold text-on-surface">Student Roster</h4>
+                                    <p class="mt-2 text-sm text-on-surface-variant">Students from every section are available here. Results and ML estimates remain limited to assessments you created.</p>
+                                </div>
+                                <form method="GET" action="{{ route('students.index') }}" class="flex items-center gap-2">
+                                    <label class="sr-only" for="student-section-filter">Filter students by section</label>
+                                    <select class="rounded-lg border border-outline-variant/30 bg-surface-container-low px-3 py-2 text-sm font-bold text-on-surface focus:border-primary focus:ring-primary" id="student-section-filter" name="section" onchange="this.form.submit()">
+                                        <option value="all" @selected(($selectedSection ?? 'all') === 'all')>All Sections</option>
+                                        @foreach ($sections ?? [] as $sectionName)
+                                            <option value="{{ $sectionName }}" @selected(($selectedSection ?? 'all') === $sectionName)>{{ $sectionName }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </div>
+                            <div class="mt-5 flex flex-wrap gap-2" aria-label="Student sections">
+                                <a class="rounded-full px-4 py-2 text-xs font-black transition-colors {{ ($selectedSection ?? 'all') === 'all' ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-primary-container/30 hover:text-primary' }}" href="{{ route('students.index', ['section' => 'all']) }}">All Sections</a>
+                                @foreach ($sections ?? [] as $sectionName)
+                                    <a class="rounded-full px-4 py-2 text-xs font-black transition-colors {{ ($selectedSection ?? 'all') === $sectionName ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-primary-container/30 hover:text-primary' }}" href="{{ route('students.index', ['section' => $sectionName]) }}">{{ $sectionName }}</a>
+                                @endforeach
+                            </div>
                         </div>
 
                         @if ($students->isEmpty())
@@ -121,6 +140,7 @@
                                     <thead>
                                         <tr class="bg-surface-container-low/50">
                                             <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Student Name</th>
+                                            <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Section</th>
                                             <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Email</th>
                                             <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Status</th>
                                             <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Overall ML Estimate</th>
@@ -146,6 +166,7 @@
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td class="px-8 py-5 text-sm font-semibold text-on-surface">{{ $student->section ?: 'Unassigned' }}</td>
                                                 <td class="ui-table-copy px-8 py-5 text-sm text-on-surface">{{ $student->email }}</td>
                                                 <td class="px-8 py-5">
                                                     <div class="flex flex-wrap items-center gap-2">

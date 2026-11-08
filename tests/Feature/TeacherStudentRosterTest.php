@@ -89,6 +89,37 @@ class TeacherStudentRosterTest extends TestCase
         $response->assertSeeText($student->email);
     }
 
+    public function test_teacher_roster_includes_all_sections_and_supports_section_filters(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);
+        $magalang = User::factory()->create(['name' => 'Magalang Learner', 'section' => 'Magalang']);
+        $masunurin = User::factory()->create(['name' => 'Masunurin Learner', 'section' => 'Masunurin']);
+        $matapat = User::factory()->create(['name' => 'Matapat Learner', 'section' => 'Matapat']);
+        $masipag = User::factory()->create(['name' => 'Masipag Learner', 'section' => 'Masipag']);
+
+        $allSections = $this->actingAs($teacher)->get(route('students.index'));
+
+        $allSections->assertOk()
+            ->assertSeeText('All Sections')
+            ->assertSeeText('Magalang')
+            ->assertSeeText('Masunurin')
+            ->assertSeeText('Matapat')
+            ->assertSeeText('Masipag')
+            ->assertSeeText($magalang->name)
+            ->assertSeeText($masunurin->name)
+            ->assertSeeText($matapat->name)
+            ->assertSeeText($masipag->name);
+
+        $allSections->assertViewHas('students', fn ($students): bool => $students->pluck('id')->sort()->values()->all() === collect([
+            $magalang->id, $masunurin->id, $matapat->id, $masipag->id,
+        ])->sort()->values()->all());
+
+        $this->actingAs($teacher)->get(route('students.index', ['section' => 'Matapat']))
+            ->assertOk()
+            ->assertViewHas('selectedSection', 'Matapat')
+            ->assertViewHas('students', fn ($students): bool => $students->count() === 1 && $students->first()->is($matapat));
+    }
+
     public function test_teacher_sees_only_pending_enrollment_requests_for_their_section(): void
     {
         $teacher = User::factory()->teacher()->create(['section' => 'Magalang']);

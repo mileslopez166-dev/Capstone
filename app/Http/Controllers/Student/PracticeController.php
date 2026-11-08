@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\AssessmentSubmission;
 use App\Models\PracticeMission;
 use App\Models\User;
+use App\Support\PracticeMissionCreator;
 use App\Support\NotificationSender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +17,35 @@ class PracticeController extends Controller
 {
     public function index(Request $request)
     {
-        abort_unless($request->user()->isStudent(), 403);
+        $student = $request->user();
+        abort_unless($student->isStudent(), 403);
+
+        // Also recover submissions completed before automatic mission creation was enabled.
+        AssessmentSubmission::query()
+            ->with(['assessment.teacher', 'student'])
+            ->where('user_id', $student->id)
+            ->whereHas('assessment', fn ($query) => $query->where('subject', 'literacy'))
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('practice_missions')
+                    ->whereColumn('practice_missions.submission_id', 'assessment_submissions.id');
+            })
+            ->latest('submitted_at')
+            ->latest('id')
+            ->limit(10)
+            ->get()
+            ->each(function (AssessmentSubmission $submission): void {
+                try {
+                    app(PracticeMissionCreator::class)->createForSubmission($submission);
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
+            });
 
         return view('practice.student-index', [
-            'missions' => PracticeMission::where('student_id', $request->user()->id)->with('teacher')
+            'missions' => PracticeMission::where('student_id', $student->id)->with('teacher')
                 ->orderByRaw("CASE WHEN status = 'assigned' THEN 0 ELSE 1 END")->latest()->paginate(12),
-            'coinBalance' => $request->user()->practiceCoinBalance(),
+            'coinBalance' => $student->practiceCoinBalance(),
         ]);
     }
 

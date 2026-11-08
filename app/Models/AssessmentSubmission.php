@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\AssessmentScores;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -42,6 +43,29 @@ class AssessmentSubmission extends Model
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);
+    }
+
+    /**
+     * Limit result records to assessments created by one teacher.
+     *
+     * A submission is identified by the assessment creator (through the
+     * assessment), assessment_id, and user_id. Keeping this scope on the
+     * result model prevents advisory-section membership from becoming an
+     * accidental authorization rule.
+     */
+    public function scopeForTeacher(Builder $query, User|int $teacher): Builder
+    {
+        $teacherId = $teacher instanceof User ? $teacher->getKey() : $teacher;
+
+        return $query->whereHas('assessment', fn (Builder $assessmentQuery) =>
+            $assessmentQuery->where('created_by', $teacherId));
+    }
+
+    public function scopeForStudent(Builder $query, User|int $student): Builder
+    {
+        $studentId = $student instanceof User ? $student->getKey() : $student;
+
+        return $query->where('user_id', $studentId);
     }
 
     protected $hidden = ['question_snapshot', 'selection_context'];

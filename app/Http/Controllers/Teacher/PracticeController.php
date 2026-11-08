@@ -22,7 +22,7 @@ class PracticeController extends Controller
             'missions' => PracticeMission::where('teacher_id', $request->user()->id)
                 ->when($studentId, fn ($query) => $query->where('student_id', $studentId))
                 ->with('student')->withCount('attempts')->latest()->paginate(12, ['*'], 'missions')->withQueryString(),
-            'submissions' => AssessmentSubmission::whereHas('assessment', fn ($query) => $query->where('created_by', $request->user()->id))
+            'submissions' => AssessmentSubmission::forTeacher($request->user())
                 ->whereHas('student', fn ($query) => $query->where('role', 'student'))
                 ->when($studentId, fn ($query) => $query->where('user_id', $studentId))
                 ->with(['assessment', 'student'])->latest('submitted_at')->paginate(12, ['*'], 'results')->withQueryString(),

@@ -298,9 +298,32 @@ html.dark .teacher-theme .campus-sidebar-footer :is(a, button):hover {
 html.dark .teacher-theme .teacher-page-heading,
 html.dark .teacher-theme .teacher-workspace-heading,
 html.dark .teacher-theme .practice-heading {
-    background: #0f2a24;
-    border-color: #2f7e68;
+    background: linear-gradient(125deg, #082b4a 0%, #075b8e 62%, #123f66 100%);
+    border-color: #2a78a8;
 }
+html.dark .teacher-theme .teacher-page-heading h1,
+html.dark .teacher-theme .teacher-workspace-heading h1 { color: #f5fbff; }
+html.dark .teacher-theme .teacher-page-heading p,
+html.dark .teacher-theme .teacher-workspace-heading p,
+html.dark .teacher-theme .teacher-workspace-heading .text-primary { color: #dff5ff; }
+html.dark .teacher-theme .teacher-builder-steps {
+    background: #0d1f31;
+    border-color: #31506c;
+    color: #d9e8f3;
+    box-shadow: 0 4px 0 #081827;
+}
+html.dark .teacher-theme .teacher-builder-steps span { border-color: #31506c; }
+html.dark .teacher-theme .teacher-builder-steps b { background: #173b58; color: #8ed4ff; }
+html.dark .teacher-theme .teacher-builder-steps .is-current { color: #8ed4ff; }
+html.dark .teacher-theme .teacher-builder-steps .is-current b { background: #087fc4; color: #fff; }
+html.dark .teacher-theme .teacher-builder-button-secondary { background: rgba(5, 20, 34, .52); border-color: #82cfff; color: #fff; }
+html.dark .teacher-theme .teacher-builder-button-primary { background: #ffd65a; border-color: #e7aa22; color: #17354a; }
+html.dark .teacher-theme .teacher-assessment-builder > section > :is(div, aside) > div { box-shadow: 0 5px 0 #081827, 0 14px 24px rgba(0, 0, 0, .2); }
+html.dark .teacher-theme main label > .peer:checked + div { background-color: #4d3d16; border-color: #e0b53d; color: #fff8df; box-shadow: inset 0 0 0 1px #e0b53d; }
+html.dark .teacher-theme .teacher-focus { background: #332b15; border-color: #80682b; }
+html.dark .teacher-theme .teacher-focus-track { background: #4a3d1b; border-color: #80682b; }
+html.dark .teacher-theme .teacher-focus-track > span,
+html.dark .teacher-theme .teacher-focus-row:nth-child(odd) .teacher-focus-track > span { background: #e0b53d; }
 html.dark .teacher-theme .teacher-metric,
 html.dark .teacher-theme .teacher-section > .teacher-section-heading,
 html.dark .teacher-theme .teacher-results,

@@ -52,7 +52,7 @@ class PhilIriScoringTest extends TestCase
         $interpretation = $submission->phil_iri['comprehension_interpretation'];
         $this->assertStringContainsString('strong understanding', $interpretation);
         $this->actingAs($student)->get(route('student.activities'))->assertOk()->assertSee('Silent Reading Assessment')->assertSee('Independent')->assertSee('Comprehension interpretation')->assertSee($interpretation)
-            ->assertSeeText('Enrichment challenge')->assertSeeText('Move into a harder reading task')->assertSeeText('Open enrichment practice')
+            ->assertSeeText('Enrichment challenge')->assertSeeText('Move into a harder reading task')->assertSeeText('Open practice mission')
             ->assertSeeText('Score and points formula')->assertSeeText('Reading comprehension')->assertSeeText('4 / 5 x 100 = 80%')
             ->assertSeeText('4 correct x 50 = 200 points')->assertSeeText('5 questions x 50 = 250 points');
         $this->actingAs($student)->get(route('student.dashboard'))->assertOk()->assertSeeText('Next: Enrichment challenge');
@@ -61,6 +61,25 @@ class PhilIriScoringTest extends TestCase
         $this->get(route('teacher.phil-iri.show', $submission))->assertOk()
             ->assertSee('Silent Reading Assessment')->assertSee('Silent reading comprehension')
             ->assertSee('80% and above')->assertSee($interpretation);
+    }
+
+    public function test_literacy_submission_creates_a_practice_mission_from_missed_items(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = $this->assessment($teacher);
+
+        $this->submit($assessment, $student, 4)->assertOk();
+
+        $mission = \App\Models\PracticeMission::firstOrFail();
+        $this->assertSame($teacher->id, $mission->teacher_id);
+        $this->assertSame($student->id, $mission->student_id);
+        $this->assertDatabaseHas('practice_missions', [
+            'id' => $mission->id, 'submission_id' => AssessmentSubmission::firstOrFail()->id,
+        ]);
+        $this->assertCount(1, $mission->questions);
+        $this->actingAs($student)->get(route('student.practice.index'))
+            ->assertOk()->assertSeeText('Practice: Reading Check');
     }
 
     public function test_listening_uses_comprehension_without_word_reading_or_speed(): void

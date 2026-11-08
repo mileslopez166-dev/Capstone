@@ -38,6 +38,20 @@ class WorksheetController extends Controller
     {
         abort_unless($request->user()->isTeacher(), 403);
 
+        if ($request->filled('worksheet_number')) {
+            $number = (int) $request->input('worksheet_number');
+            abort_unless(in_array($number, NumeracyWorksheets::gameEnabledNumbers(), true), 404);
+
+            $query = collect([
+                'title', 'target_section', 'retry_limit', 'question_time_minutes',
+                'question_time_seconds', 'expiration_value', 'expiration_unit', 'instructions',
+            ])->mapWithKeys(fn (string $key) => [$key => $request->input($key)])
+                ->filter(fn ($value) => is_scalar($value) && $value !== '')
+                ->all();
+
+            return redirect()->route('worksheets.create', array_merge([$number], $query));
+        }
+
         return view('worksheets.index', [
             'worksheets' => NumeracyWorksheets::gameEnabled(),
         ]);

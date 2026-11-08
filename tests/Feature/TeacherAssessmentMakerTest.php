@@ -34,7 +34,8 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertDontSeeText('Loaded question delivery');
         $this->assertSame(1, substr_count($response->getContent(), 'name="question_selection"'));
         $response->assertSee('value="automatic" selected', false);
-        $response->assertSee('assessment-submit-panel', false);
+        $response->assertSee('data-submit-status="draft"', false);
+        $response->assertSee('data-submit-status="published"', false);
     }
 
     public function test_multiple_choice_upload_sample_includes_story_format(): void

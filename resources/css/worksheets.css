@@ -382,6 +382,55 @@
 .worksheet-subjects { display: flex; gap: 8px; margin-bottom: 24px; }
 .worksheet-subjects a { display: inline-flex; gap: 8px; align-items: center; padding: 12px 18px; border: 1px solid #bdd0ce; border-radius: 6px; background: white; font-weight: 700; }
 .worksheet-subjects a[aria-current=page] { color: #176b59; background: #def3eb; border-color: #398574; }
+.teacher-theme .worksheet-builder-form { margin-top: 8px; }
+.teacher-theme .worksheet-builder-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); gap: 22px; align-items: start; }
+.teacher-theme .worksheet-builder-layout-single { grid-template-columns: minmax(0, 1fr); }
+.teacher-theme .worksheet-builder-main { display: grid; gap: 22px; min-width: 0; }
+.teacher-theme .worksheet-builder-panel,
+.teacher-theme .worksheet-builder-advanced-card { border: 1px solid #b4d5e6; border-radius: 10px; background: #fff; box-shadow: 0 4px 0 #d3e9f4; }
+.teacher-theme .worksheet-builder-panel { padding: 22px; }
+.teacher-theme .worksheet-builder-advanced { position: sticky; top: 98px; }
+.teacher-theme .worksheet-builder-advanced-card { padding: 20px; }
+.teacher-theme .worksheet-builder-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.teacher-theme .worksheet-builder-panel-heading h2 { margin: 0; color: #17354a; font-size: 20px; font-weight: 800; }
+.teacher-theme .worksheet-builder-panel-heading p:not(.worksheet-builder-kicker) { margin-top: 5px; color: #557084; font-size: 13px; }
+.teacher-theme .worksheet-builder-panel-heading > .material-symbols-outlined { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 9px; background: #e4f5fc; color: #0878b9; font-size: 24px; }
+.teacher-theme .worksheet-builder-kicker { margin: 0 0 4px; color: #0878b9; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.teacher-theme .worksheet-subject-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.teacher-theme .worksheet-subject-card { position: relative; display: flex; min-height: 130px; flex-direction: column; gap: 7px; padding: 18px; border: 1px solid #bdd6e3; border-radius: 9px; background: #f7fbfd; color: #17354a; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.teacher-theme .worksheet-subject-card:hover { border-color: #087fc4; box-shadow: 0 3px 0 #d3e9f4; transform: translateY(-1px); }
+.teacher-theme .worksheet-subject-card > .material-symbols-outlined { color: #0878b9; font-size: 24px; }
+.teacher-theme .worksheet-subject-card strong { font-size: 16px; }
+.teacher-theme .worksheet-subject-card small { color: #557084; font-size: 12px; line-height: 1.45; }
+.teacher-theme .worksheet-subject-card.is-selected { border: 2px solid #e7aa22; background: #fff8d8; box-shadow: 0 3px 0 #f2d98a; }
+.teacher-theme .worksheet-subject-card.is-selected > .material-symbols-outlined { color: #b97513; }
+.teacher-theme .worksheet-selected-mark { position: absolute; top: 14px; right: 14px; color: #b97513 !important; font-size: 20px !important; }
+.teacher-theme .worksheet-builder-label { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; color: #17354a; font-size: 12px; font-weight: 800; }
+.teacher-theme .worksheet-builder-label span { color: #6b8492; font-weight: 600; }
+.teacher-theme .worksheet-builder-input { width: 100%; min-width: 0; border: 1px solid #accbdc; border-radius: 6px; background: #fff; color: #17354a; padding: 10px 12px; font-size: 13px; }
+.teacher-theme .worksheet-builder-input:focus { border-color: #087fc4; outline: 3px solid #d4effb; }
+.teacher-theme .worksheet-builder-help { margin-top: 6px; color: #607b8a; font-size: 11px; line-height: 1.45; }
+.teacher-theme .worksheet-builder-fieldset { margin: 18px 0 0; border: 0; padding: 0; }
+.teacher-theme .worksheet-builder-fieldset legend { color: #17354a; font-size: 12px; font-weight: 800; }
+.teacher-theme .worksheet-builder-fieldset legend span { color: #6b8492; font-weight: 600; }
+.teacher-theme .worksheet-builder-inline-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.teacher-theme .worksheet-builder-advanced-card > .worksheet-builder-label { margin-top: 18px; }
+.teacher-theme .worksheet-builder-advanced-card > .worksheet-builder-panel-heading + .worksheet-builder-label { margin-top: 0; }
+.teacher-theme .worksheet-builder-textarea { resize: vertical; }
+.teacher-theme .worksheet-library-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.teacher-theme .worksheet-library-heading-row h3 { color: #17354a; font-size: 16px; font-weight: 800; }
+.teacher-theme .worksheet-library-heading-row p { margin-top: 4px; color: #607b8a; font-size: 12px; }
+.teacher-theme .worksheet-library-tip { display: inline-flex; align-items: center; gap: 5px; color: #0878b9; font-size: 11px; font-weight: 800; }
+.teacher-theme button.worksheet-tile { display: block; width: 100%; padding: 0; text-align: left; color: #17354a; cursor: pointer; }
+.teacher-theme button.worksheet-tile:hover { border-color: #087fc4; box-shadow: 0 4px 0 #d3e9f4; transform: translateY(-1px); }
+.teacher-theme .worksheet-tile-details { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 14px; }
+.teacher-theme .worksheet-tile-details > strong { overflow-wrap: anywhere; }
+.teacher-theme .worksheet-tile-details > span { color: #0878b9; font-size: 12px; font-weight: 700; }
+.teacher-theme .worksheet-tile-details .material-symbols-outlined { font-size: 16px; vertical-align: middle; }
+@media (max-width: 980px) {
+    .teacher-theme .worksheet-builder-layout { grid-template-columns: minmax(0, 1fr); }
+    .teacher-theme .worksheet-builder-advanced { position: static; }
+}
 .worksheet-mission-entry { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; padding: 22px 0; border-block: 2px solid #78b5c5; }
 .worksheet-entry-icon { font-size: 36px; padding: 12px; background: #fff0bf; color: #815913; border-radius: 8px; }
 .worksheet-mission-entry > div { flex: 1; min-width: 170px; }

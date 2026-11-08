@@ -1,17 +1,30 @@
 <x-teacher-assessment-layout>
-                <form id="assessment-builder-form" class="space-y-8" method="POST" action="{{ route('assessments.store') }}" enctype="multipart/form-data">
+                <form id="assessment-builder-form" class="teacher-assessment-builder space-y-8" method="POST" action="{{ route('assessments.store') }}" enctype="multipart/form-data">
                     @csrf
                     <input id="assessment-status" name="status" type="hidden" value="{{ old('status', 'published') }}">
                     <input id="delivery-method" name="delivery_method" type="hidden" value="manual">
 
-                    <header class="teacher-workspace-heading mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                    <header class="teacher-workspace-heading teacher-builder-hero mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                         <div>
                             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-primary">Curriculum Builder</span>
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
                             <a class="ui-button ui-button-secondary mt-4" href="{{ route('assessments.index') }}"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>Created Assessments</a>
                         </div>
-
+                        <div class="teacher-builder-actions">
+                            <button class="teacher-builder-button teacher-builder-button-secondary" type="submit" data-submit-status="draft">
+                                <span class="material-symbols-outlined" aria-hidden="true">lock</span>Save locked
+                            </button>
+                            <button class="teacher-builder-button teacher-builder-button-primary" type="submit" data-submit-status="published">
+                                <span class="material-symbols-outlined" aria-hidden="true">publish</span>Publish assessment
+                            </button>
+                        </div>
                     </header>
+
+                    <nav class="teacher-builder-steps" aria-label="Assessment creation steps">
+                        <span class="is-current"><b>01</b>Foundation</span>
+                        <span><b>02</b>Story and questions</span>
+                        <span><b>03</b>Audience and settings</span>
+                    </nav>
 
                     @if (session('status'))
                         <div class="rounded-lg border border-secondary/20 bg-secondary-container/30 px-4 py-3 text-sm font-medium text-on-surface">
@@ -281,11 +294,12 @@
                                 <div class="relative z-10 space-y-5">
 
                                     <div>
+                                        @php($assignedTargetSection = \App\Support\SectionCatalog::targetKeyForLabel(auth()->user()->section) ?? 'all')
                                         <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Target Section</label>
                                         <select class="w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" name="target_section">
-                                            <option value="all" @selected(old('target_section', 'all') === 'all')>All Sections</option>
+                                            <option value="all" @selected(old('target_section', $assignedTargetSection) === 'all')>All Sections</option>
                                             @foreach (\App\Support\SectionCatalog::targets() as $value => $label)
-                                                <option value="{{ $value }}" @selected(old('target_section') === $value)>{{ $label }}</option>
+                                                <option value="{{ $value }}" @selected(old('target_section', $assignedTargetSection) === $value)>{{ $label }}</option>
                                             @endforeach
                                         </select>
                                         @error('target_section')
@@ -346,34 +360,9 @@
                                 </div>
                             </div>
 
-                            <div class="order-4 overflow-hidden rounded-lg shadow-lg lg:order-none">
-                                <div class="relative h-48 bg-gradient-to-br from-primary to-primary-container">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                                    <div class="absolute inset-x-0 bottom-0 p-6">
-                                        <span class="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Student Preview</span>
-                                        <p class="font-bold leading-tight text-white">Students will see a friendly, focused activity screen built from this assessment.</p>
-                                    </div>
-                                </div>
-                            </div>
                         </aside>
                     </section>
 
-                    <div class="assessment-submit-panel sticky bottom-3 z-20 sm:bottom-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest/95 p-3 sm:rounded-2xl sm:p-4 shadow-[0_20px_50px_rgba(0,46,81,0.18)] backdrop-blur-xl">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p class="assessment-submit-kicker text-xs font-bold uppercase tracking-[0.22em] text-primary">Ready to save?</p>
-                                <p class="assessment-submit-help mt-1 text-sm text-on-surface-variant">Choose locked draft or publish when the assessment is complete.</p>
-                            </div>
-                            <div class="flex flex-col gap-3 sm:flex-row">
-                                <button class="rounded-full border border-outline-variant px-6 py-3 font-semibold text-on-surface-variant transition-all hover:border-primary hover:bg-primary/5 hover:text-primary" type="submit" data-submit-status="draft">
-                                    Save Locked
-                                </button>
-                                <button class="rounded-full bg-primary px-8 py-3 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:bg-primary-dim" type="submit" data-submit-status="published">
-                                    Publish Assessment
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </form>
 
 

@@ -164,7 +164,7 @@ Route::get('/teacher/dashboard', function () use ($submissionAverage) {
 
     $submissions = AssessmentSubmission::query()
         ->with(['student', 'assessment', 'mlPrediction'])
-        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->forTeacher($teacher)
         ->latest('submitted_at')
         ->get();
 
@@ -505,9 +505,12 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
     $teacher = auth()->user();
     abort_unless($teacher?->isTeacher(), 403);
 
+    $section = request()->query('section', 'all');
+    abort_unless(in_array($section, ['all', ...SectionCatalog::labels()], true), 404);
+
     $teacherSubmissions = AssessmentSubmission::query()
         ->with('assessment')
-        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->forTeacher($teacher)
         ->get();
 
     $activeStudentIds = DB::table('sessions')
@@ -520,6 +523,7 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
     $students = User::query()
         ->where('role', 'student')
         ->where('approval_status', 'approved')
+        ->when($section !== 'all', fn ($query) => $query->where('section', $section))
         ->orderBy('name')
         ->get()
         ->map(function (User $student) use ($teacherSubmissions, $submissionAverage, $activeStudentIds): User {
@@ -543,6 +547,8 @@ Route::get('/teacher/students', function () use ($submissionAverage) {
             ->oldest()
             ->get(),
         'students' => $students,
+        'sections' => SectionCatalog::labels(),
+        'selectedSection' => $section,
     ]);
 })->middleware(['auth', 'verified'])->name('students.index');
 
@@ -564,6 +570,7 @@ Route::post('/teacher/students/{student}/enrollment/decline', [StudentController
 
 Route::get('/teacher/students/{student}/ml-level', function (User $student, \App\Support\MLPredictionService $ml) {
     abort_unless(auth()->user()?->isTeacher(), 403);
+    abort_unless($student->isStudent() && $student->isApproved(), 404);
 
     return response()->json($ml->overallForStudent(auth()->user(), $student))
         ->header('Cache-Control', 'private, no-store');
@@ -576,8 +583,8 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
 
     $submissions = AssessmentSubmission::query()
         ->with(['assessment', 'interventionPlan.followUpAssessment', 'interventionPlan.followUpSubmission.assessment'])
-        ->where('user_id', $student->id)
-        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->forStudent($student)
+        ->forTeacher($teacher)
         ->latest('submitted_at')
         ->get();
 
@@ -638,7 +645,7 @@ Route::get('/teacher/reports', function () use ($submissionAverage) {
 
     $submissions = AssessmentSubmission::query()
         ->with(['student', 'assessment'])
-        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->forTeacher($teacher)
         ->latest('submitted_at')
         ->get();
 
@@ -715,8 +722,8 @@ Route::get('/teacher/reports/students/{student?}', function (?User $student = nu
 
     $submissions = AssessmentSubmission::query()
         ->with(['assessment', 'interventionPlan.followUpAssessment', 'interventionPlan.followUpSubmission.assessment'])
-        ->where('user_id', $student->id)
-        ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+        ->forStudent($student)
+        ->forTeacher($teacher)
         ->latest('submitted_at')
         ->get();
 

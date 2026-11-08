@@ -38,6 +38,15 @@ if (track) {
         });
     };
 
+    const pause = () => {
+        track.pause();
+    };
+
+    const stop = () => {
+        pause();
+        track.currentTime = 0;
+    };
+
     const sync = event => {
         if (event?.detail?.sound === false || !preferences.sound) {
             track.pause();
@@ -59,9 +68,14 @@ if (track) {
     });
     window.addEventListener('pgaals:preferences', sync);
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) savePosition(true);
+        if (document.hidden) {
+            savePosition(true);
+            pause();
+        }
         else play();
     });
-    window.addEventListener('pagehide', () => savePosition(true));
-    window.addEventListener('beforeunload', () => savePosition(true));
+    window.addEventListener('blur', () => { savePosition(true); pause(); });
+    window.addEventListener('focus', play);
+    window.addEventListener('pagehide', () => { savePosition(true); stop(); });
+    window.addEventListener('beforeunload', () => { savePosition(true); stop(); });
 }

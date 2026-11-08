@@ -51,7 +51,7 @@ class SearchController extends Controller
 
             $submissions = AssessmentSubmission::query()
                 ->with(['student', 'assessment'])
-                ->whereHas('assessment', fn ($builder) => $builder->where('created_by', $teacher->id))
+                ->forTeacher($teacher)
                 ->where(function ($builder) use ($like): void {
                     $builder->whereHas('student', function ($studentQuery) use ($like): void {
                         $studentQuery->where('name', 'like', $like)

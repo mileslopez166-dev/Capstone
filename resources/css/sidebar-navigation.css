@@ -8,7 +8,7 @@
     gap: 4px;
     padding: 0;
 }
-.teacher-theme .role-navigation { --nav-ink: #466255; --nav-accent: #175c43; --nav-selected: #c5e3d3; --nav-hover: #d4e9dd; --nav-line: #a9caba; }
+.teacher-theme .role-navigation { --nav-ink: #b8d6e7; --nav-accent: #ffffff; --nav-selected: #0e6ea6; --nav-hover: #103b59; --nav-line: #2b6282; }
 .role-navigation :is(.navigation-link, summary) { display: flex; align-items: center; gap: 10px; min-height: 44px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; color: var(--nav-ink); font-size: 13px; font-weight: 600; line-height: 1.5; text-transform: none; letter-spacing: 0; }
 .role-navigation :is(.navigation-link, summary):hover { background: var(--nav-hover); }
 .role-navigation .material-symbols-outlined { flex: 0 0 20px; width: 20px; color: inherit; font-size: 20px; }
