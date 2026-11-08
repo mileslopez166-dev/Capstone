@@ -109,6 +109,11 @@
                                         $assetExtension = $assetPath ? strtolower(pathinfo($assetPath, PATHINFO_EXTENSION)) : null;
                                         $isImageAsset = in_array($assetExtension, ['jpg', 'jpeg', 'png'], true);
                                         $assetUrl = $assetPath ? \Illuminate\Support\Facades\Storage::url($assetPath) : null;
+                                        $storyCoverSlug = \Illuminate\Support\Str::slug($assessment->story_title ?: $assessment->title);
+                                        $storyCoverSlug = preg_replace('/-\d+$/', '', $storyCoverSlug);
+                                        $storyCoverPath = "images/assessment-covers/{$storyCoverSlug}.png";
+                                        $storyCoverUrl = file_exists(public_path($storyCoverPath)) ? asset($storyCoverPath) : null;
+                                        $coverUrl = $storyCoverUrl ?: ($isImageAsset ? $assetUrl : null);
                                         $targetLabel = \App\Support\SectionCatalog::displayTarget($assessment->target_section);
                                         $quizLabel = match ($assessment->quiz_type ?? 'multiple_choice') {
                                             'multiple_choice' => 'Fishing Game',
@@ -142,8 +147,8 @@
 
                                         <div class="grid gap-0 lg:grid-cols-[18rem_1fr]">
                                             <div class="relative min-h-56 overflow-hidden bg-gradient-to-br from-primary to-primary-container lg:min-h-full">
-                                                @if ($isImageAsset)
-                                                    <img class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" src="{{ $assetUrl }}" alt="{{ $assessment->title }} assessment image">
+                                                @if ($coverUrl)
+                                                    <img class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" src="{{ $coverUrl }}" alt="{{ $assessment->title }} assessment image">
                                                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                                                 @else
                                                     <div class="absolute inset-0" style="background: radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 32%), linear-gradient(135deg, #005e9f, #44a5ff);"></div>
