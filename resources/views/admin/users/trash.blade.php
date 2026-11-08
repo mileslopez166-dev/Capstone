@@ -32,8 +32,6 @@
                                 @method('DELETE')
                                 <button class="rounded-lg bg-error px-4 py-2 text-sm font-bold text-on-error hover:bg-error-dim" type="submit">Empty Trash</button>
                             </form>
-                        @else
-                            <button class="rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface-variant cursor-not-allowed" type="button" disabled>No items to empty</button>
                         @endif
                     </div>
                 </div>

@@ -91,9 +91,9 @@
                             </div>
                             <h3 class="mt-6 font-headline text-3xl font-bold text-on-surface">No pending assessment</h3>
                             <p class="mt-3 max-w-2xl text-on-surface-variant">You do not have an active assessment right now. When your teacher prepares and publishes one, it will appear in this queue first. You can then click it to begin answering questions.</p>
-                            <button class="mt-8 cursor-not-allowed rounded-lg bg-surface-container-highest px-8 py-4 font-headline text-lg font-bold text-on-surface-variant opacity-80" type="button" disabled>
+                            <span class="mt-8 inline-flex rounded-lg bg-surface-container-highest px-8 py-4 font-headline text-lg font-bold text-on-surface-variant opacity-80" role="status">
                                 Waiting for Assessment
-                            </button>
+                            </span>
                         </div>
                     @else
                         <div>
@@ -350,7 +350,7 @@
                                                 <span class="material-symbols-outlined text-lg">replay</span>
                                             </a>
                                         @elseif ($assessment && $requestStatus === 'pending')
-                                            <button class="cursor-not-allowed rounded-lg bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant" type="button" disabled>Waiting for Teacher Approval</button>
+                                            <span class="inline-flex rounded-lg bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant" role="status">Waiting for Teacher Approval</span>
                                         @elseif ($assessment)
                                             <form class="grid w-full gap-3 sm:grid-cols-[7rem_1fr_auto]" method="POST" action="{{ route('student.assessments.retake-request', $assessment) }}">
                                                 @csrf

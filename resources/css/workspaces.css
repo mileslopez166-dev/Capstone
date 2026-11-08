@@ -462,14 +462,12 @@
 .teacher-theme .practice-actions { border-top: 1px solid #a6becb; margin-top: 24px; }
 .teacher-theme .practice-secondary { background-color: #d5e7dd; border-color: #85af98; }
 .teacher-theme .teacher-report-identity > div:first-child { flex-shrink: 0; }
-.teacher-theme .teacher-report-actions { flex-wrap: wrap; }
 @media (min-width: 1024px) {
     .teacher-theme .lg\:ml-64 { margin-left: 244px; }
 }
 @media (max-width: 767px) {
     .teacher-theme .teacher-workspace-heading, .teacher-theme .practice-heading { padding: 18px; }
     .teacher-theme .teacher-report-identity { align-items: flex-start; flex-direction: column; }
-    .teacher-theme .teacher-report-actions :is(button, a) { padding-inline: 14px; }
     .teacher-theme .practice-stats > div + div { border-left: 0; border-top: 1px solid #a6becb; }
     .class-comparison-row { grid-template-columns: auto minmax(0, 1fr) auto; }
     .class-comparison-row dl { grid-column: 1 / -1; flex-wrap: wrap; }

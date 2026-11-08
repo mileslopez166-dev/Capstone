@@ -53,16 +53,6 @@
                             </div>
                         </div>
 
-                        <div class="teacher-report-actions flex gap-4">
-                            <button class="flex items-center gap-2 rounded-sm border-2 border-outline-variant/20 bg-surface-container-lowest px-6 py-3 font-bold text-on-surface transition-all hover:bg-surface-container" type="button">
-                                <span class="material-symbols-outlined">print</span>
-                                Print
-                            </button>
-                            <button class="flex items-center gap-2 rounded-sm bg-primary px-6 py-3 font-bold text-on-primary shadow-lg transition-all hover:shadow-primary/20" type="button">
-                                <span class="material-symbols-outlined">ios_share</span>
-                                Export PDF
-                            </button>
-                        </div>
                     </section>
 
                     <section class="teacher-summary-metrics grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-6">
