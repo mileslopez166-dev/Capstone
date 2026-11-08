@@ -278,9 +278,35 @@ class NumeracyWorksheetTest extends TestCase
             ->assertSee('1 incorrect')
             ->assertSee('Your answer')
             ->assertSee('Correct answer')
+            ->assertDontSee('data-worksheet-reader', false)
             ->assertDontSee('Awaiting Teacher Review');
 
         $this->actingAs($teacher)->get(route('worksheets.reviews'))->assertOk()->assertDontSee($student->name);
+    }
+
+    public function test_student_results_show_rules_and_answers_without_repeating_the_full_worksheet(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $worksheet = NumeracyWorksheets::find(1);
+        $assignment = $this->assignment($teacher, ['worksheet_number' => 1, 'worksheet_total' => 35]);
+        $progress = AssessmentProgress::forAttempt($assignment, $student, 1);
+
+        $this->actingAs($student)
+            ->postJson(route('worksheets.submit', $assignment), $this->automaticPayload($progress, $worksheet, false))
+            ->assertOk();
+
+        $attempt = WorksheetAttempt::firstOrFail();
+
+        $this->get(route('worksheets.review', $attempt))
+            ->assertOk()
+            ->assertSee('data-results-learning-guide', false)
+            ->assertSeeText('Rules & Examples')
+            ->assertSeeText('Divisibility Rules Review')
+            ->assertSeeText('By 2: All even numbers are divisible by 2.')
+            ->assertSeeText('Complete Answer Review')
+            ->assertDontSeeText('For each number, give all its divisors from this list: 2, 3, 5, 9, 10.')
+            ->assertDontSee('data-worksheet-reader', false);
     }
 
     public function test_previously_pending_game_attempt_is_backfilled_without_teacher_scoring(): void

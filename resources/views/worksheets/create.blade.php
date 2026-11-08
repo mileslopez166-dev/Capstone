@@ -12,9 +12,12 @@
             @error('question_time_seconds')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
             <label class="worksheet-wide">Teacher instructions<textarea name="instructions" maxlength="2000" rows="3">{{ old('instructions') }}</textarea></label>
         </div>
+        <div class="worksheet-actions worksheet-creation-actions" aria-label="Save or publish worksheet">
+            <button class="ui-button ui-button-secondary" name="status" value="draft"><span class="material-symbols-outlined">lock</span>Save Locked</button>
+            <button class="ui-button" name="status" value="published"><span class="material-symbols-outlined">publish</span>Publish Worksheet</button>
+        </div>
         <div class="worksheet-preview">
             @foreach ($worksheet['pages'] as $page)<section><h2>Part {{ $page['part'] }}</h2><x-worksheet-text :worksheet="$worksheet" :page="$page" /></section>@endforeach
         </div>
-        <div class="worksheet-actions"><button class="ui-button ui-button-secondary" name="status" value="draft"><span class="material-symbols-outlined">lock</span>Save Locked</button><button class="ui-button" name="status" value="published"><span class="material-symbols-outlined">publish</span>Publish Worksheet</button></div>
     </form>
 </x-worksheet-layout>

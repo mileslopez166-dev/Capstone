@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Assessment;
+use App\Models\AssessmentSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -202,6 +203,93 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Story Comprehension Drill');
         $response->assertSeeText('Unlocked');
+    }
+
+    public function test_completion_rosters_separate_literacy_and_numeracy_and_only_show_owned_results(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $otherTeacher = User::factory()->teacher()->create();
+        $literacyStudent = User::factory()->create(['name' => 'Lira Reader', 'section' => 'Magalang']);
+        $numeracyStudent = User::factory()->create(['name' => 'Nico Number', 'section' => 'Masipag']);
+        $foreignStudent = User::factory()->create(['name' => 'Hidden Learner']);
+
+        $literacy = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Owned Reading Mission',
+            'subject' => 'literacy',
+            'assessment_type' => 'silent_reading',
+            'status' => 'published',
+        ]);
+        $numeracy = Assessment::query()->create([
+            'created_by' => $teacher->id,
+            'title' => 'Owned Number Mission',
+            'subject' => 'numeracy',
+            'status' => 'published',
+        ]);
+        $foreign = Assessment::query()->create([
+            'created_by' => $otherTeacher->id,
+            'title' => 'Foreign Teacher Mission',
+            'subject' => 'literacy',
+            'status' => 'published',
+        ]);
+
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $literacy->id,
+            'user_id' => $literacyStudent->id,
+            'attempt_number' => 1,
+            'answers' => ['A', 'B'],
+            'correct_count' => 1,
+            'question_count' => 2,
+            'submitted_at' => now()->subDay(),
+        ]);
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $literacy->id,
+            'user_id' => $literacyStudent->id,
+            'attempt_number' => 2,
+            'answers' => ['A', 'A'],
+            'correct_count' => 2,
+            'question_count' => 2,
+            'submitted_at' => now(),
+        ]);
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $numeracy->id,
+            'user_id' => $numeracyStudent->id,
+            'attempt_number' => 1,
+            'answers' => [12, 8, 4, 2],
+            'correct_count' => 3,
+            'question_count' => 4,
+            'submitted_at' => now(),
+        ]);
+        AssessmentSubmission::query()->create([
+            'assessment_id' => $foreign->id,
+            'user_id' => $foreignStudent->id,
+            'attempt_number' => 1,
+            'answers' => ['A'],
+            'correct_count' => 1,
+            'question_count' => 1,
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($teacher)->get(route('assessments.index'));
+
+        $response->assertOk()
+            ->assertSeeText('Students Who Completed Assessments')
+            ->assertSeeText('Lira Reader')
+            ->assertSeeText('Section Magalang')
+            ->assertSeeText('Owned Reading Mission')
+            ->assertSeeText('100%')
+            ->assertSeeText('2 attempts')
+            ->assertSeeText('Nico Number')
+            ->assertSeeText('Section Masipag')
+            ->assertSeeText('Owned Number Mission')
+            ->assertSeeText('75%')
+            ->assertDontSeeText('Hidden Learner')
+            ->assertDontSeeText('Foreign Teacher Mission');
+
+        $response->assertViewHas('completionRosters', function ($rosters): bool {
+            return $rosters->get('literacy')->count() === 1
+                && $rosters->get('numeracy')->count() === 1;
+        });
     }
 
     public function test_teacher_can_only_see_and_manage_assessments_they_created(): void

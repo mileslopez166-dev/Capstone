@@ -26,7 +26,7 @@ export function gradeGameAnswer(game, answer) {
             : `${game.number.toLocaleString()} / ${game.divisor} leaves a remainder of ${remainder}.` };
     }
     if (game.type === 'archer') {
-        if (!Array.isArray(answer) || !answer.every(value => game.options.includes(value)) || new Set(answer).size !== answer.length) return null;
+        if (!Array.isArray(answer) || answer.length === 0 || !answer.every(value => game.options.includes(value)) || new Set(answer).size !== answer.length) return null;
         const expected = game.options.filter(value => Number(value) > 0 && game.number % Number(value) === 0);
         return { correct: answer.length === expected.length && expected.every(value => answer.includes(value)), explanation: expected.length
             ? `${game.number.toLocaleString()} is divisible by ${expected.join(', ')}.`

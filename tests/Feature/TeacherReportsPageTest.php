@@ -54,6 +54,49 @@ class TeacherReportsPageTest extends TestCase
         $response->assertSeeText('Juan Dela Cruz');
         $response->assertSeeText('Owned Reading Mission');
         $response->assertSee('id="submission-'.$submission->id.'"', false);
+        $response->assertSee('data-completed-activities-grid', false);
+        $response->assertSee('data-completed-activity', false);
+        $response->assertSeeText('Select an activity to view its full result and teacher action plan.');
+        $response->assertDontSeeText('Skill Breakdown');
+    }
+
+    public function test_individual_report_subject_cards_show_saved_literacy_and_numeracy_results(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Subject Result Learner']);
+        $literacy = $this->createAssessment($teacher, [
+            'title' => 'Literacy Result',
+            'subject' => 'literacy',
+        ]);
+        $numeracy = $this->createAssessment($teacher, [
+            'title' => 'Numeracy Result',
+            'subject' => 'numeracy',
+            'assessment_type' => 'worksheet',
+            'focus_areas' => ['Number Sense'],
+        ]);
+
+        $this->createSubmission($literacy, $student, [
+            'correct_count' => 3,
+            'question_count' => 4,
+        ]);
+        $this->createSubmission($numeracy, $student, [
+            'correct_count' => 1,
+            'question_count' => 2,
+        ]);
+
+        $this->actingAs($teacher)
+            ->get(route('reports.student', $student))
+            ->assertOk()
+            ->assertViewHas('subjectBreakdown', fn ($breakdown): bool => $breakdown->firstWhere('label', 'Literacy')['accuracy'] === 75
+                && $breakdown->firstWhere('label', 'Literacy')['count'] === 1
+                && $breakdown->firstWhere('label', 'Numeracy')['accuracy'] === 50
+                && $breakdown->firstWhere('label', 'Numeracy')['count'] === 1)
+            ->assertSeeText('75%')
+            ->assertSeeText('1 completed literacy assessment')
+            ->assertSeeText('50%')
+            ->assertSeeText('1 completed numeracy assessment')
+            ->assertDontSeeText('No completed literacy assessments')
+            ->assertDontSeeText('No completed numeracy assessments');
     }
 
     public function test_individual_report_shows_reading_progress_over_time(): void

@@ -14,6 +14,7 @@ use App\Support\AssessmentScores;
 use App\Support\LearningRecommender;
 use App\Support\MLPredictionService;
 use App\Support\NotificationSender;
+use App\Support\NumeracyAttemptScorer;
 use App\Support\PhilIri;
 use App\Support\SectionCatalog;
 use Illuminate\Http\JsonResponse;
@@ -25,9 +26,13 @@ use Illuminate\View\View;
 
 class AssessmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, NumeracyAttemptScorer $numeracyAttemptScorer): View
     {
         abort_unless($request->user()?->isTeacher(), 403);
+        $teacher = $request->user();
+
+        $numeracyAttemptScorer->backfillForTeacher($teacher);
+
         $filters = $request->validate([
             'subject' => ['nullable', Rule::in(['literacy', 'numeracy'])],
             'q' => ['nullable', 'string', 'max:255'],
@@ -36,13 +41,46 @@ class AssessmentController extends Controller
         $search = trim($filters['q'] ?? '');
 
         $assessments = Assessment::query()
-            ->where('created_by', $request->user()->id)
+            ->where('created_by', $teacher->id)
             ->when($subject, fn ($query) => $query->where('subject', $subject))
             ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
             ->latest()
             ->paginate(12)->withQueryString();
 
-        return view('assessments.index', compact('assessments', 'subject', 'search'));
+        $completedSubmissions = AssessmentSubmission::query()
+            ->with([
+                'assessment:id,title,subject,created_by',
+                'student:id,name,section',
+            ])
+            ->whereNotNull('submitted_at')
+            ->whereHas('assessment', fn ($query) => $query->where('created_by', $teacher->id))
+            ->latest('submitted_at')
+            ->latest('id')
+            ->get()
+            ->filter(fn (AssessmentSubmission $submission): bool => $submission->assessment !== null && $submission->student !== null);
+
+        $completionRosters = collect(['literacy', 'numeracy'])->mapWithKeys(function (string $rosterSubject) use ($completedSubmissions): array {
+            $rows = $completedSubmissions
+                ->filter(fn (AssessmentSubmission $submission): bool => $submission->assessment->subject === $rosterSubject)
+                ->groupBy(fn (AssessmentSubmission $submission): string => $submission->assessment_id.':'.$submission->user_id)
+                ->map(function ($attempts): array {
+                    /** @var AssessmentSubmission $latest */
+                    $latest = $attempts->first();
+
+                    return [
+                        'assessment' => $latest->assessment,
+                        'student' => $latest->student,
+                        'score' => AssessmentScores::percentage($latest),
+                        'attempts' => $attempts->count(),
+                        'submitted_at' => $latest->submitted_at,
+                    ];
+                })
+                ->values();
+
+            return [$rosterSubject => $rows];
+        });
+
+        return view('assessments.index', compact('assessments', 'subject', 'search', 'completionRosters'));
     }
 
     public function create(Request $request): View|RedirectResponse

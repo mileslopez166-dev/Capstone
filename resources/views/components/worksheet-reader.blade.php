@@ -35,6 +35,33 @@
         </details>
     </div>
     <div class="worksheet-reader-progress"><p class="worksheet-save-state" data-book-status role="status" aria-live="polite">{{ $readonly ? 'Submitted work' : 'Ready when you are' }}</p><span data-book-completion></span><progress data-book-progress max="{{ count($worksheet['pages']) }}" value="0" aria-label="Parts answered"></progress></div>
+    @if ($gameOnly)
+        @php $previousPlayablePage = -1; $firstGuide = true; @endphp
+        <section class="numeracy-guide" data-numeracy-guide aria-label="Activity guide">
+            @foreach ($worksheet['pages'] as $pageIndex => $page)
+                @php $playablePage = collect($page['responses'] ?? [])->contains(fn ($response) => ! empty($response['game'])); @endphp
+                @if ($playablePage)
+                    <article class="numeracy-guide-page" data-numeracy-guide-page="{{ $pageIndex }}" @if (! $firstGuide) hidden @endif>
+                        <header class="numeracy-guide-heading">
+                            <span class="material-symbols-outlined" aria-hidden="true">school</span>
+                            <div><p>Learn before you play</p><h2>Activity Guide</h2></div>
+                        </header>
+                        @for ($guidePageIndex = $previousPlayablePage + 1; $guidePageIndex <= $pageIndex; $guidePageIndex++)
+                            <x-numeracy-guide :page="$worksheet['pages'][$guidePageIndex]" />
+                        @endfor
+                        <footer class="numeracy-guide-actions">
+                            <p>Review the guide, then start when you are ready.</p>
+                            <button class="ui-button" type="button" data-numeracy-guide-proceed>
+                                Proceed to Activity
+                                <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                            </button>
+                        </footer>
+                    </article>
+                    @php $previousPlayablePage = $pageIndex; $firstGuide = false; @endphp
+                @endif
+            @endforeach
+        </section>
+    @endif
     @unless ($readonly)<x-numeracy-game :question-time-limit-seconds="$config['questionTimeLimitSeconds'] ?? \App\Models\Assessment::DEFAULT_QUESTION_TIME_LIMIT_SECONDS" />@endunless
     <div class="worksheet-workspace" @if($gameOnly) hidden @endif>
         <div class="worksheet-reference">

@@ -100,4 +100,29 @@ class StudentController extends Controller
             ->route('students.index')
             ->with('status', "{$student->name} has been accepted into {$teacher->section}.");
     }
+
+    public function declineEnrollment(Request $request, User $student): RedirectResponse
+    {
+        $teacher = $request->user();
+
+        abort_unless($teacher?->isTeacher() && $teacher->isApproved(), 403);
+        abort_unless(filled($teacher->section), 403, 'Your teacher account needs an assigned section.');
+
+        $declined = User::query()
+            ->whereKey($student->id)
+            ->where('role', 'student')
+            ->where('approval_status', 'pending')
+            ->where('section', $teacher->section)
+            ->update([
+                'approval_status' => 'rejected',
+                'approved_at' => null,
+                'approved_by' => $teacher->id,
+            ]);
+
+        abort_unless($declined === 1, 404);
+
+        return redirect()
+            ->route('students.index')
+            ->with('status', "{$student->name}'s enrollment request has been declined.");
+    }
 }

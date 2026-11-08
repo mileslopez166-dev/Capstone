@@ -1,5 +1,10 @@
 <x-worksheet-layout :teacher="$teacher" :title="$assessment->title" :back="$teacher ? route('worksheets.reviews') : route('worksheets.mission')">
-    @php $automaticReview = \App\Support\NumeracyWorksheetGrader::grade($worksheet, $attempt->pages ?? []); @endphp
+    @php
+        $automaticReview = \App\Support\NumeracyWorksheetGrader::grade($worksheet, $attempt->pages ?? []);
+        $studentResultsOnly = ! $teacher && $attempt->reviewed_at && $automaticReview;
+        $resultsGuidePages = collect($worksheet['pages'])->filter(fn ($page) => collect($page['reading']['sections'] ?? [])
+            ->contains(fn ($section) => isset($section['heading']) || ! empty($section['paragraphs'])));
+    @endphp
     @unless ($teacher)<x-teacher-identity :teacher="$assessment->teacher" />@endunless
     <section class="worksheet-review-summary">
         <div><h2>{{ $teacher ? $attempt->student->name : 'Your Worksheet' }}</h2><p>Attempt {{ $attempt->progress->attempt_number }} &middot; Submitted {{ $attempt->created_at->format('M d, Y H:i') }}</p></div>
@@ -17,6 +22,19 @@
         <div class="worksheet-actions"><a class="ui-button" href="{{ route('worksheets.mission') }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span>Continue Mission</a></div>
     @endunless
     @if ($attempt->feedback)<div class="worksheet-feedback"><h2>Teacher Feedback</h2><p>{{ $attempt->feedback }}</p></div>@endif
+    @if ($studentResultsOnly && $resultsGuidePages->isNotEmpty())
+        <section class="numeracy-guide" data-results-learning-guide aria-labelledby="worksheet-results-guide-title">
+            <article class="numeracy-guide-page">
+                <header class="numeracy-guide-heading">
+                    <span class="material-symbols-outlined" aria-hidden="true">school</span>
+                    <div><p>Learning guide</p><h2 id="worksheet-results-guide-title">Rules &amp; Examples</h2></div>
+                </header>
+                @foreach ($resultsGuidePages as $guidePage)
+                    <x-numeracy-guide :page="$guidePage" :show-instructions="false" />
+                @endforeach
+            </article>
+        </section>
+    @endif
     @if ($attempt->reviewed_at && $automaticReview)
         <section class="worksheet-answer-review" aria-labelledby="worksheet-answer-review-title">
             <header class="worksheet-answer-review-heading">
@@ -46,8 +64,10 @@
             </div>
         </section>
     @endif
-    @php $config = ['pages' => \App\Support\NumeracyWorksheets::pageConfig($worksheet), 'state' => ['pages' => $attempt->pages, 'page' => 0], 'revision' => 0]; @endphp
-    <x-worksheet-reader :worksheet="$worksheet" :config="$config" readonly />
+    @unless ($studentResultsOnly)
+        @php $config = ['pages' => \App\Support\NumeracyWorksheets::pageConfig($worksheet), 'state' => ['pages' => $attempt->pages, 'page' => 0], 'revision' => 0]; @endphp
+        <x-worksheet-reader :worksheet="$worksheet" :config="$config" readonly />
+    @endunless
     @if ($teacher && ! $attempt->reviewed_at)
         <form class="worksheet-grade" method="POST" action="{{ route('worksheets.grade', $attempt) }}">@csrf<h2>Teacher Review</h2><div class="worksheet-fields"><label>Correct items (out of {{ $attempt->total }})<input name="score" type="number" min="0" max="{{ $attempt->total }}" value="{{ old('score') }}" required></label><label class="worksheet-wide">Feedback &amp; Corrections<textarea name="feedback" rows="4" maxlength="5000" required>{{ old('feedback') }}</textarea></label></div><button class="ui-button" type="submit"><span class="material-symbols-outlined">check_circle</span>Save Score</button></form>
     @endif

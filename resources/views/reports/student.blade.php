@@ -9,6 +9,21 @@
         $submissions = $submissions ?? collect();
         $studentMetrics = $studentMetrics ?? ['completed_count' => 0, 'average_accuracy' => null, 'total_points' => 0];
         $subjectBreakdown = $subjectBreakdown ?? collect();
+        $literacyMetrics = $subjectBreakdown->firstWhere('label', 'Literacy') ?? ['accuracy' => null, 'count' => 0];
+        $numeracyMetrics = $subjectBreakdown->firstWhere('label', 'Numeracy') ?? ['accuracy' => null, 'count' => 0];
+        $subjectCard = function (array $metrics, string $subject): array {
+            $count = (int) ($metrics['count'] ?? 0);
+            $accuracy = $metrics['accuracy'] ?? null;
+
+            return [
+                'value' => $count === 0 ? 'No Data' : ($accuracy === null ? 'Awaiting Score' : $accuracy.'%'),
+                'note' => $count === 0
+                    ? "No completed {$subject} assessments"
+                    : $count.' completed '.$subject.' '.($count === 1 ? 'assessment' : 'assessments'),
+            ];
+        };
+        $literacyCard = $subjectCard($literacyMetrics, 'literacy');
+        $numeracyCard = $subjectCard($numeracyMetrics, 'numeracy');
         $studentInitials = collect(explode(' ', $student->name))->filter()->take(2)->map(fn ($part) => strtoupper(substr($part, 0, 1)))->implode('');
     @endphp
 
@@ -52,8 +67,8 @@
 
                     <section class="teacher-summary-metrics grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-6">
                         @foreach ([
-                            ['title' => 'Literacy', 'value' => 'No Data', 'note' => 'No completed literacy assessments', 'icon' => 'auto_stories', 'tone' => 'primary'],
-                            ['title' => 'Numeracy', 'value' => 'No Data', 'note' => 'No completed numeracy assessments', 'icon' => 'calculate', 'tone' => 'error'],
+                            ['title' => 'Literacy', 'value' => $literacyCard['value'], 'note' => $literacyCard['note'], 'icon' => 'auto_stories', 'tone' => 'primary'],
+                            ['title' => 'Numeracy', 'value' => $numeracyCard['value'], 'note' => $numeracyCard['note'], 'icon' => 'calculate', 'tone' => 'error'],
                             ['title' => 'Average Accuracy', 'value' => $studentMetrics['average_accuracy'] === null ? '0%' : $studentMetrics['average_accuracy'].'%', 'note' => $studentMetrics['completed_count'].' completed assessments', 'icon' => 'target', 'tone' => 'secondary'],
                             ['title' => 'Total Points', 'value' => number_format($studentMetrics['total_points']), 'note' => 'Saved assessment points', 'icon' => 'stars', 'tone' => 'tertiary'],
                         ] as $card)
@@ -97,54 +112,65 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
-                        <div class="space-y-8">
+                    <section class="space-y-6" aria-labelledby="completed-activities-heading">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <h2 class="mb-6 font-headline text-2xl font-bold">Skill Breakdown</h2>
-                                <div class="rounded-lg bg-surface-container-lowest p-8 text-center shadow-sm">
-                                    <span class="material-symbols-outlined text-5xl text-outline-variant">insights</span>
-                                    <p class="mt-4 font-headline text-xl font-bold text-on-surface">No skill breakdown yet</p>
-                                    <p class="mt-2 text-sm text-on-surface-variant">Skill strengths and growth areas will appear after real student assessment results are stored.</p>
-                                </div>
+                                <h2 id="completed-activities-heading" class="font-headline text-2xl font-bold">Completed Activities</h2>
+                                <p class="mt-1 text-sm text-on-surface-variant">Select an activity to view its full result and teacher action plan.</p>
                             </div>
+                            <span class="rounded-full bg-primary-container/30 px-3 py-1 text-xs font-bold text-primary">{{ $submissions->count() }} completed</span>
                         </div>
-
-                        <div class="space-y-6">
-                            <div class="flex items-center justify-between">
-                                <h2 class="font-headline text-2xl font-bold">Completed Activities</h2>
+                        @if ($submissions->isEmpty())
+                            <div class="rounded-sm bg-surface-container-lowest p-8 text-center shadow-sm">
+                                <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
+                                <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
+                                <p class="mt-2 text-sm text-on-surface-variant">This report page updates from saved assessment submissions.</p>
                             </div>
-                            @if ($submissions->isEmpty())
-                                <div class="rounded-sm bg-surface-container-lowest p-8 text-center shadow-sm">
-                                    <span class="material-symbols-outlined text-5xl text-outline-variant">assignment</span>
-                                    <p class="mt-4 font-headline text-xl font-bold text-on-surface">No completed activities yet</p>
-                                    <p class="mt-2 text-sm text-on-surface-variant">This report page updates from saved assessment submissions.</p>
-                                </div>
-                            @else
-                                <div class="space-y-3">
-                                    @foreach ($submissions as $submission)
-                                        @php
-                                            $accuracy = $submission->scorePercentage();
-                                        @endphp
-                                        <div id="submission-{{ $submission->id }}" class="rounded-sm bg-surface-container-lowest p-5 shadow-sm">
-                                            <div class="flex items-center justify-between gap-4">
-                                                <div>
-                                                    <p class="font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
-                                                    <p class="text-sm text-on-surface-variant">{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</p>
-                                                    <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
-                                                    @if ($submission->assessment?->subject === 'literacy')
-                                                        <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
-                                                    @endif
+                        @else
+                            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-completed-activities-grid>
+                                @foreach ($submissions as $submission)
+                                    @php
+                                        $accuracy = $submission->scorePercentage();
+                                        $activityShouldOpen = (int) session('intervention_saved') === $submission->id
+                                            || $errors->getBag('intervention-'.$submission->id)->any();
+                                    @endphp
+                                    <details
+                                        id="submission-{{ $submission->id }}"
+                                        class="group overflow-hidden rounded-lg border border-outline-variant/20 bg-surface-container-lowest shadow-sm transition-shadow open:shadow-lg [&[open]]:col-span-full"
+                                        data-completed-activity
+                                        x-data
+                                        x-init="$nextTick(() => { if (window.location.hash) { const target = document.querySelector(window.location.hash); if (target && $el.contains(target)) $el.open = true; } })"
+                                        @if ($activityShouldOpen) open @endif
+                                    >
+                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:content-none [&::-webkit-details-marker]:hidden">
+                                            <div class="min-w-0">
+                                                <p class="truncate font-headline text-lg font-bold text-on-surface">{{ $submission->assessment?->title ?? 'Assessment' }}</p>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant">
+                                                    <span>{{ $submission->submitted_at?->format('M d, Y') ?? 'Saved result' }}</span>
+                                                    <span class="font-bold uppercase tracking-wide">{{ ucfirst($submission->assessment?->subject ?? 'Assessment') }}</span>
+                                                    <span>Attempt {{ $submission->attempt_number }}</span>
                                                 </div>
+                                            </div>
+                                            <div class="flex shrink-0 items-center gap-2">
                                                 <span class="rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-black text-secondary-dim">{{ $accuracy === null ? 'Awaiting score' : $accuracy.'%' }}</span>
+                                                <span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180" aria-hidden="true">expand_more</span>
+                                            </div>
+                                        </summary>
+                                        <div class="border-t border-outline-variant/15 p-5">
+                                            <div class="mb-4 flex flex-wrap gap-3">
+                                                <a class="practice-link" href="{{ route('teacher.practice.create', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">flag</span> Assign practice</a>
+                                                @if ($submission->assessment?->subject === 'literacy')
+                                                    <a class="practice-link" href="{{ route('teacher.phil-iri.show', $submission) }}"><span class="material-symbols-outlined" aria-hidden="true">rule</span>Phil-IRI scoring</a>
+                                                @endif
                                             </div>
                                             <x-phil-iri-result :result="\App\Support\PhilIri::forSubmission($submission)" :submission="$submission" />
                                             <x-intervention-plan :submission="$submission" :assessments="$followUpAssessments" return-to="report" />
                                         </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+                                    </details>
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
                 </div>
             </main>
         </div>

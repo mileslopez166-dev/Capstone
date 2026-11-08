@@ -7,6 +7,9 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
     const modeBar = root.querySelector('[data-numeracy-mode]');
     const select = root.querySelector('[data-numeracy-select]');
     const workspace = root.querySelector('.worksheet-workspace');
+    const guide = root.querySelector('[data-numeracy-guide]');
+    const guidePages = guide ? [...guide.querySelectorAll('[data-numeracy-guide-page]')] : [];
+    const startedGuidePages = new Set();
     let page = -1;
     let entries = [];
     let items = [];
@@ -20,6 +23,7 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
     let timerItemKey = null;
     let timeoutPending = false;
     let advanceTimerId = null;
+    let showingGuide = false;
     const current = () => items[index];
     const values = key => getState().pages[page]?.responses[key] || {};
     const answer = () => values(current().key)[current().game.field];
@@ -41,12 +45,12 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
         advanceTimerId = null;
     }
 
-    function scheduleAdvance() {
+    function scheduleAdvance(delay = motion() ? 1800 : 900) {
         cancelAdvance();
         advanceTimerId = setTimeout(() => {
             advanceTimerId = null;
             advance();
-        }, motion() ? 1800 : 900);
+        }, delay);
     }
 
     function updateTimer() {
@@ -130,8 +134,45 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
         find('next').hidden = true;
         find('check').hidden = false;
         panel.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
-        panel.querySelectorAll('.numeracy-arrow').forEach(arrow => arrow.remove());
+        panel.querySelectorAll('.numeracy-arrow, .numeracy-target-fragment').forEach(element => element.remove());
         panel.querySelectorAll('[data-hit]').forEach(target => delete target.dataset.hit);
+        panel.querySelectorAll('[data-broken]').forEach(target => delete target.dataset.broken);
+    }
+
+    function breakTarget(target) {
+        if (target.dataset.broken) return;
+        const scene = find('scene');
+        const sceneBox = scene.getBoundingClientRect();
+        const box = target.getBoundingClientRect();
+        const animated = motion();
+        target.dataset.broken = 'true';
+        for (let piece = 0; piece < 8; piece++) {
+            const start = piece * Math.PI / 4;
+            const end = start + Math.PI / 4;
+            const middle = (start + end) / 2;
+            const fragment = document.createElement('span');
+            fragment.className = 'numeracy-target-fragment';
+            fragment.setAttribute('aria-hidden', 'true');
+            Object.assign(fragment.style, {
+                left: `${box.left - sceneBox.left}px`, top: `${box.top - sceneBox.top}px`,
+                width: `${box.width}px`, height: `${box.height}px`,
+                clipPath: `polygon(50% 50%, ${50 + 75 * Math.cos(start)}% ${50 + 75 * Math.sin(start)}%, ${50 + 75 * Math.cos(end)}% ${50 + 75 * Math.sin(end)}%)`,
+            });
+            scene.append(fragment);
+            if (!animated) {
+                fragment.style.transform = `translate(${Math.cos(middle) * 7}px, ${Math.sin(middle) * 7}px)`;
+                continue;
+            }
+            const x = Math.cos(middle) * box.width * .7;
+            const y = Math.sin(middle) * box.height * .55;
+            const rotation = (piece % 2 ? 1 : -1) * (35 + piece * 12);
+            fragment.animate([
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+                { transform: `translate(${x * .6}px, ${y - 20}px) rotate(${rotation * .4}deg)`, opacity: 1, offset: .4 },
+                { transform: `translate(${x}px, ${y + 85}px) rotate(${rotation}deg)`, opacity: 0 },
+            ], { duration: 650, easing: 'ease-in', fill: 'forwards' }).finished
+                .then(() => fragment.remove()).catch(() => fragment.remove());
+        }
     }
 
     function syncAnswer() {
@@ -193,6 +234,9 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
         panel.dataset.summary = 'false';
         find('summary').hidden = true;
         find('title').textContent = gameNames[game.type];
+        const description = typeof game.instruction === 'string' ? game.instruction.trim() : '';
+        find('description').textContent = description;
+        find('description').hidden = description === '';
         find('hint').hidden = true;
         find('hint-button').setAttribute('aria-expanded', 'false');
         find('hint').textContent = gameHint(game);
@@ -233,6 +277,24 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
         render();
     }
 
+    function updateVisibility(state = getState()) {
+        const available = entries.length > 0 && state.step === 'answer';
+        const visible = available && !showingGuide;
+        modeBar.hidden = !visible;
+        panel.hidden = !visible;
+        if (guide) {
+            guide.hidden = !available || !showingGuide;
+            guidePages.forEach(item => { item.hidden = Number(item.dataset.numeracyGuidePage) !== page; });
+        }
+        workspace.hidden = guide ? available : visible;
+        if (!visible) {
+            panel.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+            clearInterval(timerId);
+            timerId = null;
+            cancelAdvance();
+        } else if (items.length && !checked) startTimer(false);
+    }
+
     function syncDisabled() {
         panel.querySelectorAll('button, textarea').forEach(control => control.disabled = !canEdit());
         panel.querySelectorAll('[data-ng-option], [data-ng-reason]').forEach(control => control.disabled = !canEdit() || checked);
@@ -246,6 +308,8 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
             page = state.page;
             entries = Object.entries(templates[page]?.responses || {}).filter(([, item]) => gameNames[item.game?.type])
                 .map(([key, item]) => ({ key, ...item }));
+            showingGuide = Boolean(guide && !startedGuidePages.has(page)
+                && !entries.some(item => gameAnswerExists(item.game, values(item.key))));
             select.replaceChildren();
             for (const type of [...new Set(entries.map(item => item.game.type))]) {
                 const option = document.createElement('option');
@@ -258,25 +322,23 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
                 setType(first.game.type);
             } else items = [];
         }
-        const available = entries.length > 0 && state.step === 'answer';
-        const visible = available;
-        modeBar.hidden = !available;
         select.hidden = select.options.length < 2;
-        panel.hidden = !visible;
-        workspace.hidden = visible;
-        if (!visible) {
-            panel.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
-            clearInterval(timerId);
-            timerId = null;
-            cancelAdvance();
-        }
+        updateVisibility(state);
         if (items.length) {
             syncAnswer();
             syncDisabled();
-            if (visible && !checked) startTimer(false);
+            if (!panel.hidden && !checked) startTimer(false);
         }
     }
 
+    guide?.addEventListener('click', event => {
+        const button = event.target.closest('[data-numeracy-guide-proceed]');
+        if (!button || !canEdit()) return;
+        startedGuidePages.add(page);
+        showingGuide = false;
+        updateVisibility();
+        find('check').focus({ preventScroll: true });
+    });
     select.addEventListener('change', () => { if (canEdit()) setType(select.value); });
     find('reason').addEventListener('input', event => { if (canEdit()) write(current().key, { reason: event.target.value, __timed_out: false }); });
     find('hint-button').addEventListener('click', () => {
@@ -286,8 +348,6 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
     find('check').addEventListener('click', () => {
         if (!canEdit()) return;
         const { game, key } = current();
-        // An explicitly confirmed empty selection is different from an untouched item.
-        if (game.type === 'archer' && !Array.isArray(answer())) write(key, { [game.field]: [] });
         if (!gameAnswerExists(game, values(key))) {
             find('feedback').textContent = game.reason && answer() ? 'Add your explanation before launching.' : 'Choose an answer first.';
             if (game.reason && answer()) find('reason').focus();
@@ -309,7 +369,11 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
             const originY = bowBox.top + bowBox.height * .28 - scene.top;
             panel.querySelectorAll('[data-ng-option][aria-pressed=true]').forEach((target, shot) => {
                 const hit = game.number % Number(target.dataset.ngOption) === 0 ? 'correct' : 'incorrect';
-                if (!motion()) { target.dataset.hit = hit; return; }
+                if (!motion()) {
+                    if (hit === 'correct') breakTarget(target);
+                    else target.dataset.hit = 'incorrect';
+                    return;
+                }
                 const box = target.getBoundingClientRect();
                 const x = box.left + box.width / 2 - scene.left;
                 const y = box.top + box.height / 2 - scene.top;
@@ -326,9 +390,8 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
                     { transform: `translate(${x - 44}px, ${y}px) rotate(${angle}deg)`, opacity: 1 },
                 ], { duration: 480, delay: shot * 160, fill: 'both', easing: 'ease-in' }).finished.then(() => {
                     if (arrow.isConnected && checked && !panel.hidden) {
-                        target.dataset.hit = hit;
-                        target.animate([{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-6deg) scale(1.08)' },
-                            { transform: 'rotate(4deg) scale(1)' }, { transform: 'rotate(0) scale(1)' }], { duration: 360 });
+                        if (hit === 'correct') breakTarget(target);
+                        else target.dataset.hit = 'incorrect';
                     }
                     arrow.remove();
                 }).catch(() => arrow.remove());
@@ -344,7 +407,8 @@ export function initNumeracyGames(root, templates, getState, canEdit, write, adv
                 element.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 450 });
             });
         }
-        scheduleAdvance();
+        const shots = panel.querySelectorAll('[data-ng-option][aria-pressed=true]').length;
+        scheduleAdvance(game.type === 'archer' && motion() ? Math.max(1800, (shots - 1) * 160 + 480 + 650 + 200) : undefined);
     });
     find('prev').addEventListener('click', () => { if (canEdit() && index > 0) { index--; render(); } });
     find('next').addEventListener('click', advance);

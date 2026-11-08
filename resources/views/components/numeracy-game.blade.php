@@ -13,6 +13,7 @@
         </div>
     </header>
     <div class="numeracy-game-progress"><span data-ng-counter></span><progress data-ng-progress value="0" max="1" aria-label="Game questions answered"></progress></div>
+    <p class="numeracy-game-description" data-ng-description hidden></p>
     <div class="numeracy-scene" data-ng-scene>
         <svg class="numeracy-rocket-world" viewBox="0 0 800 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
             <path d="M55 25v10m-5-5h10m120 76v12m-6-6h12m517-55v12m-6-6h12m-330-34v9m-4-4h8m210 153v10m-5-5h10" stroke="#f8dfa2" stroke-width="2"/>

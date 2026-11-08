@@ -33,7 +33,11 @@ class WorksheetGameCatalogTest extends TestCase
         $this->actingAs($teacher)->get(route('worksheets.index'))->assertOk()
             ->assertViewHas('worksheets', fn ($worksheets) => array_column($worksheets, 'number') === [1, 2, 3, 4]);
         foreach ([1, 2, 3, 4] as $number) {
-            $this->get(route('worksheets.create', $number))->assertOk();
+            $createPage = $this->get(route('worksheets.create', $number))->assertOk();
+            $this->assertLessThan(
+                strpos($createPage->getContent(), 'class="worksheet-preview"'),
+                strpos($createPage->getContent(), 'Publish Worksheet')
+            );
             $this->post(route('worksheets.store', $number), ['title' => 'Game '.$number, 'target_section' => 'section_a',
                 'worksheet_total' => 10, 'retry_limit' => '0', 'status' => 'draft'])->assertSessionHasNoErrors()->assertRedirect();
         }
@@ -82,15 +86,24 @@ class WorksheetGameCatalogTest extends TestCase
             ->assertSee('data-game-only="true"', false)
             ->assertSee('data-step="answer"', false)
             ->assertSee('NUMERACY GAMES')
+            ->assertSee('data-numeracy-guide', false)
+            ->assertSee('Proceed to Activity')
+            ->assertSeeText('Divisibility Rules')
+            ->assertSeeText('Explain Your Answer')
+            ->assertSee('data-ng-description', false)
             ->assertSee('Submit Answers')
             ->assertDontSee('data-numeracy-view', false);
 
         $dom = new \DOMDocument;
         @$dom->loadHTML($response->getContent());
-        $options = (new \DOMXPath($dom))->query('//*[@data-book-part]/option');
+        $xpath = new \DOMXPath($dom);
+        $options = $xpath->query('//*[@data-book-part]/option');
         $this->assertCount(1, $options);
         $this->assertSame('1', $options->item(0)->getAttribute('value'));
         $this->assertStringContainsString('Part 2 of 2', trim($options->item(0)->textContent));
+        $this->assertCount(1, $xpath->query('//*[@data-numeracy-guide-page]'));
+        $this->assertCount(0, $xpath->query('//*[@data-numeracy-guide]//*[contains(concat(" ", normalize-space(@class), " "), " worksheet-problems ")]'));
+        $this->assertCount(0, $xpath->query('//*[@data-numeracy-guide]//*[@data-item-response]'));
     }
 
     public function test_available_queues_search_and_mission_only_include_the_game_catalog(): void

@@ -554,6 +554,10 @@ Route::post('/teacher/students/{student}/enrollment/approve', [StudentController
     ->middleware(['auth', 'verified'])
     ->name('students.enrollment.approve');
 
+Route::post('/teacher/students/{student}/enrollment/decline', [StudentController::class, 'declineEnrollment'])
+    ->middleware(['auth', 'verified'])
+    ->name('students.enrollment.decline');
+
 Route::get('/teacher/students/{student}/ml-level', function (User $student, \App\Support\MLPredictionService $ml) {
     abort_unless(auth()->user()?->isTeacher(), 403);
 

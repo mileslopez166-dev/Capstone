@@ -68,7 +68,8 @@ class SidebarNavigationTest extends TestCase
         $assessment = $this->assessment($teacher, ['title' => 'Previously created story']);
         $create = $this->actingAs($teacher)->get(route('assessments.create'));
         $create->assertViewIs('assessments.create')->assertSee('id="assessment-builder-form"', false)
-            ->assertDontSeeText($assessment->title)->assertDontSee('assessment-list-item', false);
+            ->assertDontSeeText($assessment->title)->assertDontSee('assessment-list-item', false)
+            ->assertDontSeeText('Worksheet Reviews');
         $this->assertNavigation($create, 'teacher', route('assessments.create'), 'assessments');
         $index = $this->get(route('assessments.index'));
         $index->assertViewIs('assessments.index')->assertSeeText($assessment->title)
@@ -111,7 +112,7 @@ class SidebarNavigationTest extends TestCase
         $reviews = $this->get(route('worksheets.reviews'));
         $reviews->assertViewHas('reviews', fn ($rows) => $rows->count() === 1 && $rows->first()->assessment->created_by === $teacher->id)
             ->assertDontSee('class="worksheet-library"', false);
-        $this->assertNavigation($reviews, 'teacher', route('worksheets.reviews'), 'assessments');
+        $this->assertNavigation($reviews, 'teacher', route('assessments.index'), 'assessments');
         $this->assertNavigation($this->get(route('worksheets.create', 1)), 'teacher', route('assessments.create'), 'assessments');
     }
 

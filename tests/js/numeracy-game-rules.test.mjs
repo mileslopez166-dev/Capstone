@@ -50,12 +50,12 @@ test('archer requires the exact divisor set, allows multiple targets and is orde
     assert.equal(gradeGameAnswer(game, '2'), null);
 });
 
-test('a confirmed empty archer selection differs from an untouched question', () => {
+test('archer requires at least one selected target before continuing', () => {
     const game = { type: 'archer', field: 'divisors', number: 7, options: ['2', '3', '5'] };
     assert.equal(gameAnswerExists(game, {}), false);
-    assert.equal(gameAnswerExists(game, { divisors: [] }), true);
-    assert.equal(gradeGameAnswer(game, []).correct, true);
-    assert.equal(gradeGameAnswer({ ...game, number: 10 }, []).correct, false);
+    assert.equal(gameAnswerExists(game, { divisors: [] }), false);
+    assert.equal(gradeGameAnswer(game, []), null);
+    assert.equal(gradeGameAnswer({ ...game, number: 10 }, []), null);
 });
 
 test('game answers round-trip through the existing worksheet response format', () => {

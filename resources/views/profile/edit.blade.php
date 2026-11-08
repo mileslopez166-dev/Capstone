@@ -66,7 +66,7 @@
                     </div>
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Profile Status</p>
-                        <p class="mt-3 font-headline text-2xl font-bold text-secondary">{{ $user->email_verified_at ? 'Verified' : 'Pending' }}</p>
+                        <p class="mt-3 font-headline text-2xl font-bold text-secondary">{{ str($user->approval_status ?? 'approved')->title() }}</p>
                     </div>
                     <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Security</p>

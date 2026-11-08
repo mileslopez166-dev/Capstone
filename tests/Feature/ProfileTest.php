@@ -36,6 +36,21 @@ class ProfileTest extends TestCase
             ->assertSee(route('teacher.dashboard'), false);
     }
 
+    public function test_approved_teacher_profile_does_not_appear_pending_when_email_is_unverified(): void
+    {
+        $teacher = User::factory()->teacher()->unverified()->create([
+            'approval_status' => 'approved',
+        ]);
+
+        $this
+            ->actingAs($teacher)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSeeText('Profile Status')
+            ->assertSeeText('Approved')
+            ->assertDontSeeText('Pending');
+    }
+
     public function test_student_profile_has_a_back_link_to_student_dashboard(): void
     {
         $student = User::factory()->create();

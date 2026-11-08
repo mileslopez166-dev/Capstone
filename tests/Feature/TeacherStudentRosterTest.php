@@ -106,6 +106,7 @@ class TeacherStudentRosterTest extends TestCase
             ->assertSeeText('Enrollment Requests')
             ->assertSeeText($matchingStudent->name)
             ->assertSee(route('students.enrollment.approve', $matchingStudent))
+            ->assertSee(route('students.enrollment.decline', $matchingStudent))
             ->assertDontSeeText($otherStudent->name);
     }
 
@@ -131,6 +132,44 @@ class TeacherStudentRosterTest extends TestCase
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $student->id,
             'type' => 'enrollment_approved',
+        ]);
+    }
+
+    public function test_teacher_can_decline_a_pending_student_from_their_section(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Matapat']);
+        $student = User::factory()->pendingApproval()->create([
+            'name' => 'Pending Matapat Learner',
+            'section' => 'Matapat',
+        ]);
+
+        $this->actingAs($teacher)
+            ->post(route('students.enrollment.decline', $student))
+            ->assertRedirect(route('students.index'))
+            ->assertSessionHas('status', "{$student->name}'s enrollment request has been declined.");
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'section' => 'Matapat',
+            'approval_status' => 'rejected',
+            'approved_at' => null,
+            'approved_by' => $teacher->id,
+        ]);
+    }
+
+    public function test_teacher_cannot_decline_a_student_from_another_section(): void
+    {
+        $teacher = User::factory()->teacher()->create(['section' => 'Masipag']);
+        $student = User::factory()->pendingApproval()->create(['section' => 'Magalang']);
+
+        $this->actingAs($teacher)
+            ->post(route('students.enrollment.decline', $student))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'approval_status' => 'pending',
+            'approved_by' => null,
         ]);
     }
 

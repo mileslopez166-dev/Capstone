@@ -5,6 +5,24 @@
 .numeracy-mode-switch button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 14px; background: #fff; color: #284b57; font-size: 14px; font-weight: 700; }
 .numeracy-mode-switch button[aria-pressed=true] { background: #206e68; color: #fff; }
 .numeracy-mode select { max-width: 100%; min-height: 44px; }
+.numeracy-guide { margin-bottom: 16px; overflow: hidden; border: 1px solid #abc3ce; border-radius: 8px; background: #fff; color: #26394a; }
+.numeracy-guide[hidden], .numeracy-guide-page[hidden] { display: none; }
+.numeracy-guide-page { padding: clamp(18px, 4vw, 34px); }
+.numeracy-guide-heading { display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid #d2dfe4; }
+.numeracy-guide-heading > .material-symbols-outlined { display: grid; place-items: center; width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: #dcefe9; color: #176759; font-size: 28px; }
+.numeracy-guide-heading p, .numeracy-guide-part { margin: 0 0 4px; color: #267065; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.numeracy-guide-heading h2 { margin: 0; font-size: 24px; font-weight: 900; }
+.numeracy-guide-content { padding: 24px 0; font-size: var(--assessment-story-size, 1rem); line-height: 1.75; }
+.numeracy-guide-content + .numeracy-guide-content { border-top: 1px solid #d2dfe4; }
+.numeracy-guide-content h3 { margin: 0 0 20px; font-size: 21px; font-weight: 900; }
+.numeracy-guide-content h4 { margin: 0 0 14px; font-size: 17px; font-weight: 800; }
+.numeracy-guide-section + .numeracy-guide-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid #dbe5e9; }
+.numeracy-guide-section p { margin: 0 0 14px; }
+.numeracy-guide-section p:last-child { margin-bottom: 0; }
+.numeracy-guide-instruction { color: #176759; font-weight: 800; }
+.numeracy-guide-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #d2dfe4; }
+.numeracy-guide-actions p { margin: 0; color: #526b76; font-size: 14px; }
+.numeracy-guide-actions .ui-button { display: inline-flex; align-items: center; gap: 8px; }
 .numeracy-game { --ng-line: #abc3ce; --ng-ink: #203f4b; --ng-paper: #fff; --ng-soft: #edf5f7; color: var(--ng-ink); border: 1px solid var(--ng-line); border-radius: 8px; background: var(--ng-paper); overflow: hidden; }
 .numeracy-game-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 20px 8px; }
 .numeracy-game-header h3 { font-size: 21px; font-weight: 800; margin: 0; }
@@ -18,6 +36,8 @@
 .numeracy-game-score .material-symbols-outlined { color: #a8750b; }
 .numeracy-game-progress { display: flex; align-items: center; gap: 18px; padding: 4px 20px 16px; font-size: 13px; }
 .numeracy-game-progress progress { flex: 1; min-width: 40px; max-width: 200px; height: 8px; accent-color: #338378; }
+.numeracy-game-description { margin: 0; padding: 0 20px 16px; color: #49646f; font-size: var(--assessment-story-size, 1rem); font-weight: 600; line-height: 1.6; }
+.numeracy-game-description[hidden] { display: none; }
 .numeracy-scene { position: relative; isolation: isolate; min-height: 230px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 24px 18px; gap: 18px; overflow: hidden; background: #eaf4ed; }
 .numeracy-rocket-world, .numeracy-archer-world { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 .numeracy-rocket-world, .numeracy-rocket, .numeracy-archer-world, .numeracy-bow, .numeracy-targets, .numeracy-puzzle-number { display: none; }
@@ -77,11 +97,18 @@ html.dark .numeracy-game[data-result=incorrect] .numeracy-feedback { color: #ffa
 html.dark .numeracy-mode-switch button { background: #172931; color: #e5eff3; }
 html.dark .numeracy-mode-switch button[aria-pressed=true] { background: #267b70; }
 html.dark .numeracy-mode-label, html.dark .numeracy-mode-label .material-symbols-outlined { color: #e5eff3; }
+html.dark .numeracy-game-description { color: #c6d7df; }
+html.dark .numeracy-guide { border-color: #566a78; background: #172931; color: #e5eff3; }
+html.dark .numeracy-guide-heading, html.dark .numeracy-guide-content + .numeracy-guide-content, html.dark .numeracy-guide-section + .numeracy-guide-section, html.dark .numeracy-guide-actions { border-color: #425866; }
+html.dark .numeracy-guide-heading > .material-symbols-outlined { background: #173d32; color: #a9ebcf; }
+html.dark .numeracy-guide :is(.numeracy-guide-heading p, .numeracy-guide-part, .numeracy-guide-instruction) { color: #9ce0c8; }
+html.dark .numeracy-guide-actions p { color: #c6d7df; }
 @media (max-width: 480px) {
     .numeracy-game-header { padding: 14px 12px 8px; }
     .numeracy-game-header h3 { font-size: 19px; }
     .numeracy-game-header-status { width: 100%; justify-content: space-between; }
     .numeracy-game-progress { padding-inline: 12px; gap: 10px; }
+    .numeracy-game-description { padding-inline: 12px; }
     .numeracy-game-body { padding: 14px 12px; }
     .numeracy-scene { min-height: 205px; padding: 18px 12px; }
     .numeracy-game[data-game=rocket] .numeracy-scene { padding-right: 85px; }
@@ -93,6 +120,7 @@ html.dark .numeracy-mode-label, html.dark .numeracy-mode-label .material-symbols
     .numeracy-game[data-game=puzzle] .numeracy-choices { gap: 5px; }
     .numeracy-choice { padding-inline: 3px; }
     .numeracy-game-actions .ui-button { flex: 1 0 100%; }
+    .numeracy-guide-actions .ui-button { width: 100%; justify-content: center; }
     html[data-assessment-answers='large'] .numeracy-game:not([data-game='puzzle']) .numeracy-choices { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 360px) { .numeracy-game[data-game=puzzle] .numeracy-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -151,6 +179,22 @@ html[data-reduced-motion=true] .numeracy-exhaust { animation: none !important; }
 .numeracy-game[data-game=archer] .numeracy-target[data-hit=incorrect] { outline-color: #aa2944; }
 .numeracy-game[data-game=archer] .numeracy-target[data-hit=correct]::after { background: #166b44; }
 .numeracy-game[data-game=archer] .numeracy-target[data-hit=incorrect]::after { content: '\00d7'; background: #aa2944; }
+.numeracy-game[data-game=archer] .numeracy-target[data-broken=true] {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    outline-color: transparent;
+}
+.numeracy-game[data-game=archer] .numeracy-target[data-broken=true] > span,
+.numeracy-game[data-game=archer] .numeracy-target[data-broken=true]::after { visibility: hidden; }
+.numeracy-target-fragment {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    border: 4px solid #344b58;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffe3a0 0 31%, #df6470 32% 44%, #fff4e0 45% 50%, #4a98c0 51% 65%, #f9fcfa 66%);
+}
 .numeracy-target-hit { display: none; position: absolute; width: 36px; height: 4px; right: 8px; bottom: 25px; transform: rotate(-40deg); background: #f8efd7; border: 1px solid #51433c; pointer-events: none; }
 .numeracy-target[data-hit] .numeracy-target-hit { display: block; }
 .numeracy-target-hit::after { content: ''; position: absolute; right: 0; top: -4px; width: 10px; height: 10px; background: #de6370; clip-path: polygon(0 50%, 100% 0, 100% 100%); }

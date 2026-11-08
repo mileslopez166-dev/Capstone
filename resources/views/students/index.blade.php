@@ -77,13 +77,22 @@
                                                 <td class="px-8 py-5 text-sm font-semibold text-on-surface">{{ $pendingStudent->section }}</td>
                                                 <td class="px-8 py-5 text-sm text-on-surface-variant">{{ $pendingStudent->created_at?->format('M d, Y') }}</td>
                                                 <td class="px-8 py-5 text-right">
-                                                    <form method="POST" action="{{ route('students.enrollment.approve', $pendingStudent) }}">
-                                                        @csrf
-                                                        <button class="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-bold text-surface-container-lowest transition-colors hover:bg-secondary-dim" type="submit">
-                                                            <span class="material-symbols-outlined text-lg">person_check</span>
-                                                            Accept
-                                                        </button>
-                                                    </form>
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <form method="POST" action="{{ route('students.enrollment.decline', $pendingStudent) }}" onsubmit="return confirm('Decline {{ addslashes($pendingStudent->name) }}\'s enrollment request?');">
+                                                            @csrf
+                                                            <button class="inline-flex items-center gap-2 rounded-lg border border-error/35 bg-error-container/35 px-4 py-2 text-sm font-bold text-error transition-colors hover:bg-error-container/60" type="submit">
+                                                                <span class="material-symbols-outlined text-lg">person_cancel</span>
+                                                                Decline
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('students.enrollment.approve', $pendingStudent) }}">
+                                                            @csrf
+                                                            <button class="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-bold text-surface-container-lowest transition-colors hover:bg-secondary-dim" type="submit">
+                                                                <span class="material-symbols-outlined text-lg">person_check</span>
+                                                                Accept
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

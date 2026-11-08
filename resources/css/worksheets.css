@@ -35,6 +35,7 @@
 .worksheet-preview figcaption { font-size: 14px; font-weight: 800; margin-bottom: 8px; }
 .worksheet-preview img { display: block; width: 100%; height: auto; border: 1px solid #b9cbd3; }
 .worksheet-actions { justify-content: flex-end; padding: 22px 0; }
+.worksheet-creation-actions { margin-bottom: 6px; border-bottom: 1px solid #bdced3; }
 .worksheet-actions [data-book-completion] { margin-right: auto; font-size: 14px; }
 .worksheet-icon { display: inline-grid; flex: 0 0 42px; place-items: center; width: 42px; height: 42px; border: 1px solid #becdd7; border-radius: 6px; background: #fff; color: #274d65; }
 .worksheet-icon:hover:not(:disabled), .worksheet-icon[aria-pressed=true] { background: #d9eeeb; border-color: #258875; }
