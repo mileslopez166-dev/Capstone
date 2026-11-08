@@ -340,29 +340,9 @@
 
                                     <hr class="border-outline-variant/20">
 
-                                    <div class="space-y-3" id="literacy-options">
+                                    <div class="space-y-3">
                                         <x-phil-iri-rubric />
-                                        <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Literacy Focus</label>
-                                        @foreach (['Reading Fluency', 'Comprehension Depth', 'Spelling & Vocabulary'] as $focus)
-                                            <label class="flex cursor-pointer items-center gap-3 rounded-sm border border-transparent bg-white p-3 transition-all hover:border-primary/20 hover:bg-primary/5" data-focus-choice>
-                                                <input class="rounded-sm text-primary focus:ring-primary" name="focus_areas[]" value="{{ $focus }}" type="checkbox" data-focus-input="literacy" @checked(in_array($focus, old('focus_areas', ['Reading Fluency']), true))>
-                                                <span class="text-sm font-medium">{{ $focus }}</span>
-                                            </label>
-                                        @endforeach
                                     </div>
-
-                                    <div class="hidden space-y-3" id="numeracy-options">
-                                        <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Numeracy Focus</label>
-                                        @foreach (['Mental Arithmetic', 'Problem Solving', 'Data Interpretation'] as $focus)
-                                            <label class="flex cursor-pointer items-center gap-3 rounded-sm border border-transparent bg-white p-3 transition-all hover:border-primary/20 hover:bg-primary/5" data-focus-choice>
-                                                <input class="rounded-sm text-primary focus:ring-primary" name="focus_areas[]" value="{{ $focus }}" type="checkbox" data-focus-input="numeracy" @checked(in_array($focus, old('focus_areas', []), true))>
-                                                <span class="text-sm font-medium">{{ $focus }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    @error('focus_areas')
-                                        <p class="text-sm text-error">{{ $message }}</p>
-                                    @enderror
                                 </div>
                             </div>
 
@@ -399,13 +379,9 @@
 
     <script>
         const subjectChoices = document.querySelectorAll('[data-subject-choice]');
-        const literacyOptions = document.getElementById('literacy-options');
-        const numeracyOptions = document.getElementById('numeracy-options');
         const bgIcon = document.getElementById('bg-icon');
         const statusInput = document.getElementById('assessment-status');
         const statusButtons = document.querySelectorAll('[data-submit-status]');
-        const focusInputs = document.querySelectorAll('[data-focus-input]');
-        const focusChoices = document.querySelectorAll('[data-focus-choice]');
         const manualQuestions = document.getElementById('manual-questions');
         const addQuestionButton = document.getElementById('add-question-button');
         const questionUploadPanel = document.getElementById('question-upload-panel');
@@ -425,23 +401,15 @@
         const assessmentTypeInputs = document.querySelectorAll('input[name="assessment_type"]');
         const activeButtonClasses = ['bg-primary', 'text-on-primary', 'shadow-lg', 'shadow-primary/20'];
         const inactiveButtonClasses = ['bg-surface-container-high', 'text-on-surface-variant'];
-        const activeChoiceClasses = ['border-primary', 'bg-primary/10', 'text-primary', 'shadow-sm'];
-        const inactiveChoiceClasses = ['border-transparent', 'bg-white'];
 
         function toggleSpecifics(type) {
             const isLiteracy = type === 'literacy';
-            literacyOptions.classList.toggle('hidden', !isLiteracy);
-            numeracyOptions.classList.toggle('hidden', isLiteracy);
             storyLibrary.classList.toggle('hidden', !isLiteracy);
             storyLibrarySelect.disabled = !isLiteracy;
             loadStoryTemplateButton.disabled = !isLiteracy || !storyLibrarySelect.value;
             bgIcon.textContent = isLiteracy ? 'menu_book' : 'grid_view';
             bgIcon.classList.toggle('text-primary', isLiteracy);
             bgIcon.classList.toggle('text-secondary', !isLiteracy);
-            focusInputs.forEach((input) => {
-                input.disabled = input.dataset.focusInput !== type;
-            });
-            updateFocusHighlights();
         }
 
 
@@ -451,15 +419,6 @@
             button.classList.toggle('hover:bg-primary/5', !isActive);
             activeButtonClasses.forEach((className) => button.classList.toggle(className, isActive));
             inactiveButtonClasses.forEach((className) => button.classList.toggle(className, !isActive));
-        }
-
-        function updateFocusHighlights() {
-            focusChoices.forEach((choice) => {
-                const input = choice.querySelector('[data-focus-input]');
-                const isActive = input.checked && ! input.disabled;
-                activeChoiceClasses.forEach((className) => choice.classList.toggle(className, isActive));
-                inactiveChoiceClasses.forEach((className) => choice.classList.toggle(className, !isActive));
-            });
         }
 
         function updateSubmitHighlights(status) {
@@ -690,9 +649,6 @@
                 updateSubmitHighlights(button.dataset.submitStatus);
             });
         });
-        focusInputs.forEach((input) => {
-            input.addEventListener('change', updateFocusHighlights);
-        });
         assessmentTypeInputs.forEach((input) => {
             input.addEventListener('change', toggleQuestionBuilder);
         });
@@ -825,7 +781,6 @@
         });
         toggleSpecifics(document.querySelector('[data-subject-choice]:checked')?.value || 'literacy');
         updateSubmitHighlights(statusInput.value || 'published');
-        updateFocusHighlights();
         renumberQuestions();
         toggleQuestionBuilder();
     </script>

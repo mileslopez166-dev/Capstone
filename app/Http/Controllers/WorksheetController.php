@@ -89,7 +89,7 @@ class WorksheetController extends Controller
             'subject' => 'numeracy', 'quiz_type' => 'worksheet', 'delivery_method' => 'manual',
             'assessment_type' => 'worksheet', 'worksheet_number' => $worksheet['number'],
             'worksheet_total' => NumeracyWorksheetGrader::scoreableCount($worksheet),
-            'focus_areas' => ['Problem Solving'], 'manual_questions' => [],
+            'focus_areas' => [], 'manual_questions' => [],
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
             'expiration_value' => $data['expiration_value'] ?? null,

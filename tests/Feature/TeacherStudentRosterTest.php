@@ -36,7 +36,7 @@ class TeacherStudentRosterTest extends TestCase
         $response->assertDontSeeText($studentB->email);
         $response->assertSeeText('2 student accounts');
         $response->assertSeeText('Student Performance Overview');
-        $response->assertSeeText('Focus Areas');
+        $response->assertSeeText('Subject Progress');
         $response->assertSee('href="'.route('students.index').'"', false);
     }
 

@@ -117,7 +117,6 @@
                                             'reading_rally', 'word_rescue', 'treasure_quest' => 'Reading Rally',
                                             default => str($assessment->quiz_type ?? 'multiple_choice')->replace('_', ' ')->title(),
                                         };
-                                        $focusLabel = collect($assessment->focus_areas ?? [])->join(', ');
                                         $gameNames = $worksheetGameNames->get($assessment->worksheet_number, []);
                                     @endphp
 
@@ -168,14 +167,10 @@
                                                         {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
                                                     </p>
 
-                                                    <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-3">
+                                                    <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-2">
                                                         <div class="rounded-xl bg-surface-container-low p-4">
                                                             <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Target</dt>
                                                             <dd class="mt-1 font-bold text-on-surface">{{ $targetLabel }}</dd>
-                                                        </div>
-                                                        <div class="rounded-xl bg-surface-container-low p-4">
-                                                            <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Focus</dt>
-                                                            <dd class="mt-1 font-bold text-on-surface">{{ $focusLabel ?: 'General Skills' }}</dd>
                                                         </div>
                                                         <div class="rounded-xl bg-surface-container-low p-4">
                                                             <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Material</dt>

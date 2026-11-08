@@ -123,15 +123,6 @@ class AssessmentController extends Controller
             'delivery_method' => ['required', Rule::in(['manual'])],
             'target_section' => ['required', Rule::in(['all', ...SectionCatalog::targetKeys()])],
             'assessment_type' => ['required', Rule::in(['silent_reading', 'oral_reading'])],
-            'focus_areas' => ['required', 'array', 'min:1'],
-            'focus_areas.*' => ['string', Rule::in([
-                'Reading Fluency',
-                'Comprehension Depth',
-                'Spelling & Vocabulary',
-                'Mental Arithmetic',
-                'Problem Solving',
-                'Data Interpretation',
-            ])],
             'manual_questions' => ['required_unless:assessment_type,oral_reading', 'nullable', 'array', 'min:1'],
             'manual_questions.*.question' => ['required_unless:assessment_type,oral_reading', 'nullable', 'string', 'max:1000'],
             'manual_questions.*.answers.A' => ['required_unless:assessment_type,oral_reading', 'nullable', 'string', 'max:255'],
@@ -188,7 +179,9 @@ class AssessmentController extends Controller
             'delivery_method' => 'manual',
             'target_section' => $validated['target_section'],
             'assessment_type' => $validated['assessment_type'],
-            'focus_areas' => $validated['focus_areas'],
+            // Literacy focus selection was removed from the assessment builder.
+            // Keep the legacy column populated with an empty list for new records.
+            'focus_areas' => [],
             'asset_path' => null,
             'manual_questions' => $manualQuestions,
             'question_selection' => $selection,

@@ -71,7 +71,7 @@
                         @endif
                     </section>
                     <section class="teacher-focus">
-                        <div class="teacher-section-heading"><div><h2>Focus Areas</h2><p>Average accuracy by subject</p></div><span class="material-symbols-outlined" aria-hidden="true">target</span></div>
+                        <div class="teacher-section-heading"><div><h2>Subject Progress</h2><p>Average accuracy by subject</p></div><span class="material-symbols-outlined" aria-hidden="true">target</span></div>
                         @foreach ($focusAreas as $area)
                             <div class="teacher-focus-row">
                                 <div><span>{{ $area['label'] }}</span><strong>{{ $area['accuracy'] === null ? 'No Data' : $area['accuracy'].'%' }}</strong></div>
