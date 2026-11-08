@@ -106,7 +106,6 @@
                     <section class="overflow-hidden rounded-lg bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
                         <div class="border-b border-outline-variant/10 p-8">
                             <h4 class="font-headline text-xl font-extrabold text-on-surface">Student Roster</h4>
-                            <p class="mt-2 text-sm font-medium text-on-surface-variant">Real-time student accounts with progress from your assessment submissions.</p>
                             <p class="mt-2 text-sm text-on-surface-variant">Overall ML estimates use your assessments only. They are provisional teaching support, not official grades or a validated overall diagnosis.</p>
                         </div>
 

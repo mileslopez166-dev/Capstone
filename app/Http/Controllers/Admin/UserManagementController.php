@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\User;
 use App\Support\NotificationSender;
 use App\Support\SectionCatalog;
@@ -338,6 +339,92 @@ class UserManagementController extends Controller
     private function permanentlyDelete(User $user): void
     {
         DB::transaction(function () use ($user): void {
+            $userId = (int) $user->id;
+            $assessmentIds = $this->matchingIds('assessments', [
+                ['created_by', $userId],
+            ]);
+            $submissionIds = $this->matchingIds('assessment_submissions', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+            $progressIds = $this->matchingIds('assessment_progress', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+            $worksheetAttemptIds = $this->matchingIds('worksheet_attempts', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+                ['progress_id', $progressIds],
+            ]);
+            $practiceMissionIds = $this->matchingIds('practice_missions', [
+                ['teacher_id', $userId],
+                ['student_id', $userId],
+            ]);
+            $tutorChatIds = $this->matchingIds('tutor_chats', [
+                ['user_id', $userId],
+            ]);
+
+            // Remove dependents explicitly before deleting the account. This
+            // keeps the operation reliable even when an older deployment has
+            // foreign keys without the expected cascade rule.
+            $this->deleteMatching('tutor_turns', [['tutor_chat_id', $tutorChatIds]]);
+            $this->deleteMatching('tutor_chats', [['user_id', $userId]]);
+            $this->deleteMatching('practice_attempts', [['practice_mission_id', $practiceMissionIds]]);
+            $this->deleteMatching('practice_coin_transactions', [
+                ['user_id', $userId],
+                ['practice_mission_id', $practiceMissionIds],
+            ]);
+            $this->deleteMatching('practice_missions', [
+                ['teacher_id', $userId],
+                ['student_id', $userId],
+            ]);
+            $this->deleteMatching('assessment_answer_feedback', [['assessment_submission_id', $submissionIds]]);
+            $this->deleteMatching('intervention_plans', [['assessment_submission_id', $submissionIds]]);
+            $this->deleteMatching('ml_predictions', [
+                ['student_id', $userId],
+                ['assessment_submission_id', $submissionIds],
+            ]);
+            $this->deleteMatching('learning_recommendations', [
+                ['student_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+            $this->deleteMatching('worksheet_attempts', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+                ['progress_id', $progressIds],
+            ]);
+            $this->deleteMatching('assessment_retake_requests', [
+                ['user_id', $userId],
+                ['teacher_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+            $this->deleteMatching('assessment_progress', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+            $this->deleteMatching('assessment_submissions', [
+                ['user_id', $userId],
+                ['assessment_id', $assessmentIds],
+            ]);
+
+            if ($assessmentIds && Schema::hasTable('assessments')) {
+                Assessment::query()->whereIn('id', $assessmentIds)->get()->each->delete();
+            }
+
+            $this->deleteMatching('app_notifications', [['user_id', $userId]]);
+            $this->deleteMatching('profile_change_requests', [['user_id', $userId]]);
+            $this->deleteMatching('sessions', [['user_id', $userId]]);
+            $this->deleteMatching('password_reset_tokens', [['email', $user->email]]);
+
+            // These records are historical configuration/audit rows. Keep
+            // them, but clear references to the account being deleted.
+            $this->nullMatching('users', 'approved_by', $userId);
+            $this->nullMatching('profile_change_requests', 'reviewed_by', $userId);
+            $this->nullMatching('ai_model_evaluations', 'requested_by', $userId);
+            $this->nullMatching('ai_recommendation_evaluations', 'requested_by', $userId);
+            $this->nullMatching('ai_active_configurations', 'activated_by', $userId);
+            $this->nullMatching('ai_model_activation_logs', 'activated_by', $userId);
+
             if (Schema::hasTable('personal_access_tokens')) {
                 $user->tokens()->delete();
             }
@@ -353,6 +440,65 @@ class UserManagementController extends Controller
 
             $user->forceDelete();
         });
+    }
+
+    /**
+     * @param array<int, array{0: string, 1: mixed}> $conditions
+     */
+    private function matchingIds(string $table, array $conditions): array
+    {
+        $query = $this->matchingQuery($table, $conditions);
+
+        return $query ? $query->pluck('id')->all() : [];
+    }
+
+    /**
+     * @param array<int, array{0: string, 1: mixed}> $conditions
+     */
+    private function deleteMatching(string $table, array $conditions): void
+    {
+        $query = $this->matchingQuery($table, $conditions);
+
+        if ($query) {
+            $query->delete();
+        }
+    }
+
+    /**
+     * @param array<int, array{0: string, 1: mixed}> $conditions
+     */
+    private function matchingQuery(string $table, array $conditions)
+    {
+        if (! Schema::hasTable($table)) {
+            return null;
+        }
+
+        $available = array_values(array_filter($conditions, function (array $condition) use ($table): bool {
+            [$column, $value] = $condition;
+
+            return Schema::hasColumn($table, $column)
+                && (! is_array($value) || $value !== []);
+        }));
+
+        if ($available === []) {
+            return null;
+        }
+
+        return DB::table($table)->where(function ($query) use ($available): void {
+            foreach ($available as $index => [$column, $value]) {
+                $method = is_array($value)
+                    ? ($index === 0 ? 'whereIn' : 'orWhereIn')
+                    : ($index === 0 ? 'where' : 'orWhere');
+                $query->{$method}($column, $value);
+            }
+        });
+    }
+
+    private function nullMatching(string $table, string $column, int $value): void
+    {
+        if (Schema::hasTable($table) && Schema::hasColumn($table, $column)) {
+            DB::table($table)->where($column, $value)->update([$column => null]);
+        }
     }
 
     private function initials(string $name): string

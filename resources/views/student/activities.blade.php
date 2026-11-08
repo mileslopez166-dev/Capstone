@@ -154,7 +154,7 @@
                                         <div class="grid gap-0 lg:grid-cols-[18rem_1fr]">
                                             <div class="relative min-h-56 overflow-hidden bg-gradient-to-br from-primary to-primary-container lg:min-h-full">
                                                 @if ($coverUrl)
-                                                    <img class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" src="{{ $coverUrl }}" alt="{{ $assessment->title }} assessment image">
+                                                    <img class="absolute inset-0 h-full w-full bg-surface-container-low object-contain transition-transform duration-700 group-hover:scale-[1.02]" src="{{ $coverUrl }}" alt="{{ $assessment->title }} assessment image">
                                                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                                                 @else
                                                     <div class="absolute inset-0" style="background: radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 32%), linear-gradient(135deg, #005e9f, #44a5ff);"></div>
