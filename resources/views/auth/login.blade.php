@@ -1,5 +1,6 @@
 <x-guest-layout>
     <div class="login-page">
+        <audio class="hidden" data-background-music src="{{ asset('audio/student-background-ost.mp3') }}" autoplay loop preload="auto" aria-hidden="true"></audio>
         <canvas class="login-garden-canvas" aria-hidden="true"></canvas>
         <div class="login-playground" aria-hidden="true">
             <canvas class="login-playground-canvas"></canvas>
