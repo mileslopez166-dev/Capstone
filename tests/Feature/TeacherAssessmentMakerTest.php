@@ -270,7 +270,7 @@ class TeacherAssessmentMakerTest extends TestCase
             'submitted_at' => now(),
         ]);
 
-        $response = $this->actingAs($teacher)->get(route('assessments.index'));
+        $response = $this->actingAs($teacher)->get(route('assessments.results'));
 
         $response->assertOk()
             ->assertSeeText('Students Who Completed Assessments')
@@ -290,6 +290,13 @@ class TeacherAssessmentMakerTest extends TestCase
             return $rosters->get('literacy')->count() === 1
                 && $rosters->get('numeracy')->count() === 1;
         });
+
+        $this->actingAs($teacher)->get(route('assessments.index'))
+            ->assertOk()
+            ->assertSeeText('Created Assessments')
+            ->assertSeeText('Student Results')
+            ->assertDontSeeText('Lira Reader')
+            ->assertDontSeeText('Nico Number');
     }
 
     public function test_teacher_can_only_see_and_manage_assessments_they_created(): void

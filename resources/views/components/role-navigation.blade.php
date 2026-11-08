@@ -4,7 +4,7 @@
     $link = fn ($label, $href, $icon, $selected) => compact('label', 'href', 'icon', 'selected');
     if ($role === 'teacher') {
         $creating = request()->routeIs('assessments.create', 'worksheets.index', 'worksheets.create');
-        $listing = ! $creating && request()->routeIs('assessments.*', 'teacher.assessments.*', 'worksheets.reviews', 'worksheets.review');
+        $listing = ! $creating && request()->routeIs('assessments.index', 'assessments.show', 'teacher.assessments.*', 'worksheets.reviews', 'worksheets.review');
         $items = [
             $link('Dashboard', route('teacher.dashboard'), 'dashboard', request()->routeIs('teacher.dashboard', 'dashboard')),
             $link('Teachers AI Assistant', route('teacher.ai-assistant.index'), 'psychology', request()->routeIs('teacher.ai-assistant.*')),
@@ -17,6 +17,7 @@
             ['label' => 'Assessments', 'icon' => 'assignment', 'key' => 'assessments', 'children' => [
                 $link('Create Assessment', route('assessments.create'), 'add', $creating),
                 $link('Created Assessments', route('assessments.index'), 'inventory_2', $listing),
+                $link('Student Results', route('assessments.results'), 'fact_check', request()->routeIs('assessments.results')),
             ]],
             $link('Settings', route('profile.edit'), 'settings', request()->routeIs('profile.*')),
         ];

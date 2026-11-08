@@ -74,6 +74,7 @@ class SearchController extends Controller
             ['label' => 'Add Student', 'description' => 'Create a student account', 'href' => route('students.create'), 'keywords' => ['add student', 'new student', 'enroll', 'register']],
             ['label' => 'Create Assessment', 'description' => 'Prepare literacy assessments and numeracy worksheets', 'href' => route('assessments.create'), 'keywords' => ['assessment', 'quiz', 'question', 'create', 'new']],
             ['label' => 'Created Assessments', 'description' => 'Review, publish, lock, and delete your assessments', 'href' => route('assessments.index'), 'keywords' => ['assessment', 'assessments', 'saved', 'publish', 'lock']],
+            ['label' => 'Student Results', 'description' => 'View students who completed your assessments', 'href' => route('assessments.results'), 'keywords' => ['assessment', 'results', 'scores', 'completed', 'students']],
             ['label' => 'Worksheet Reviews', 'description' => 'Student worksheets awaiting a score', 'href' => route('worksheets.reviews'), 'keywords' => ['worksheet', 'review', 'grade', 'numeracy']],
             ['label' => 'Reports', 'description' => 'Saved assessment outputs and progress', 'href' => route('reports.index'), 'keywords' => ['report', 'reports', 'score', 'scores', 'output', 'results']],
             ['label' => 'Profile', 'description' => 'Teacher account settings', 'href' => route('profile.edit'), 'keywords' => ['profile', 'account', 'settings']],

@@ -749,6 +749,10 @@ Route::get('/teacher/assessments', [AssessmentController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('assessments.index');
 
+Route::get('/teacher/assessment-results', [AssessmentController::class, 'results'])
+    ->middleware(['auth', 'verified'])
+    ->name('assessments.results');
+
 Route::get('/teacher/assessments/create', [AssessmentController::class, 'create'])
     ->middleware(['auth', 'verified'])
     ->name('assessments.create');

@@ -47,6 +47,21 @@ class AssessmentController extends Controller
             ->latest()
             ->paginate(12)->withQueryString();
 
+        return view('assessments.index', compact('assessments', 'subject', 'search'));
+    }
+
+    public function results(Request $request, NumeracyAttemptScorer $numeracyAttemptScorer): View
+    {
+        abort_unless($request->user()?->isTeacher(), 403);
+        $numeracyAttemptScorer->backfillForTeacher($request->user());
+
+        return view('assessments.results', [
+            'completionRosters' => $this->completionRosters($request->user()),
+        ]);
+    }
+
+    private function completionRosters(User $teacher)
+    {
         $completedSubmissions = AssessmentSubmission::query()
             ->with([
                 'assessment:id,title,subject,created_by',
@@ -59,7 +74,7 @@ class AssessmentController extends Controller
             ->get()
             ->filter(fn (AssessmentSubmission $submission): bool => $submission->assessment !== null && $submission->student !== null);
 
-        $completionRosters = collect(['literacy', 'numeracy'])->mapWithKeys(function (string $rosterSubject) use ($completedSubmissions): array {
+        return collect(['literacy', 'numeracy'])->mapWithKeys(function (string $rosterSubject) use ($completedSubmissions): array {
             $rows = $completedSubmissions
                 ->filter(fn (AssessmentSubmission $submission): bool => $submission->assessment->subject === $rosterSubject)
                 ->groupBy(fn (AssessmentSubmission $submission): string => $submission->assessment_id.':'.$submission->user_id)
@@ -79,8 +94,6 @@ class AssessmentController extends Controller
 
             return [$rosterSubject => $rows];
         });
-
-        return view('assessments.index', compact('assessments', 'subject', 'search', 'completionRosters'));
     }
 
     public function create(Request $request): View|RedirectResponse
