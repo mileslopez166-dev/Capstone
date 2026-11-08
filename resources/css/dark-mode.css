@@ -320,6 +320,7 @@ html.dark .teacher-theme .teacher-roster tbody tr:hover { background: #132b43; }
 html.dark .teacher-theme .teacher-result > .material-symbols-outlined,
 html.dark .teacher-theme .teacher-metric-label .material-symbols-outlined { background: #143b32; border-color: #2e725f; color: #7ee0bd; }
 html.dark .teacher-theme .teacher-metric-dropdown-list { border-color: #31506c; }
+html.dark .teacher-theme .teacher-metric-dropdown-list { background: #0d1f31; box-shadow: 0 16px 30px #0008; }
 html.dark .teacher-theme .teacher-attention-student { border-color: #31506c; color: #f3f8fc; }
 html.dark .teacher-theme .teacher-attention-student:hover { color: #7ee0bd; }
 html.dark .teacher-theme .teacher-attention-student strong { color: #f0c077; }

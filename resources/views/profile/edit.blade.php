@@ -33,13 +33,13 @@
                     <span>Back to Dashboard</span>
                 </a>
             </div>
-            <section class="mb-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <section class="mb-8 {{ $isStudent ? '' : 'grid gap-6 lg:grid-cols-[0.95fr_1.05fr]' }}">
                 <div class="campus-profile-intro overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-container p-8 text-on-primary shadow-xl">
                     <p class="text-sm font-bold uppercase tracking-[0.25em] text-white/70">{{ $isStudent ? 'Student Profile' : 'Account Center' }}</p>
                     <h1 class="mt-4 font-headline text-4xl font-extrabold tracking-tight md:text-5xl">{{ $isStudent ? "Keep growing, {$firstName}" : $user->name }}</h1>
-                    <p class="mt-4 max-w-md text-lg text-white/85">
-                        {{ $isStudent ? 'Manage your identity, secure your account, and stay ready for every new mission.' : 'Update your account details and security settings in one place.' }}
-                    </p>
+                    @unless ($isStudent)
+                        <p class="mt-4 max-w-md text-lg text-white/85">Update your account details and security settings in one place.</p>
+                    @endunless
 
                     <div class="mt-8 flex items-center gap-4">
                         @if ($isStudent)
@@ -59,20 +59,22 @@
                     </div>
                 </div>
 
-                <div class="teacher-summary-metrics grid gap-4 sm:grid-cols-3">
-                    <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">{{ $isStudent ? 'Assigned Section' : 'Account Type' }}</p>
-                        <p class="mt-3 font-headline text-2xl font-bold text-primary">{{ $isStudent ? ($user->section ?: 'Not Assigned') : ucfirst($user->role ?? 'student') }}</p>
+                @unless ($isStudent)
+                    <div class="teacher-summary-metrics grid gap-4 sm:grid-cols-3">
+                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                            <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Account Type</p>
+                            <p class="mt-3 font-headline text-2xl font-bold text-primary">{{ ucfirst($user->role ?? 'student') }}</p>
+                        </div>
+                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                            <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Profile Status</p>
+                            <p class="mt-3 font-headline text-2xl font-bold text-secondary">{{ str($user->approval_status ?? 'approved')->title() }}</p>
+                        </div>
+                        <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
+                            <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Security</p>
+                            <p class="mt-3 font-headline text-2xl font-bold text-tertiary">Active</p>
+                        </div>
                     </div>
-                    <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Profile Status</p>
-                        <p class="mt-3 font-headline text-2xl font-bold text-secondary">{{ str($user->approval_status ?? 'approved')->title() }}</p>
-                    </div>
-                    <div class="rounded-lg bg-surface-container-lowest p-6 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
-                        <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Security</p>
-                        <p class="mt-3 font-headline text-2xl font-bold text-tertiary">Active</p>
-                    </div>
-                </div>
+                @endunless
             </section>
 
             <div class="teacher-profile-forms grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">

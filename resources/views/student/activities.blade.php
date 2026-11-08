@@ -163,18 +163,11 @@
                                             <div class="flex flex-col justify-between p-6 lg:p-8">
                                                 <div>
                                                     <x-teacher-identity :teacher="$assessment->teacher" />
-                                                    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
-                                                        {{ $assessment->instructions ?: 'Your teacher has prepared this assessment. Review the details, then open it when you are ready to begin.' }}
-                                                    </p>
 
                                                     <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-2">
                                                         <div class="rounded-xl bg-surface-container-low p-4">
                                                             <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Target</dt>
                                                             <dd class="mt-1 font-bold text-on-surface">{{ $targetLabel }}</dd>
-                                                        </div>
-                                                        <div class="rounded-xl bg-surface-container-low p-4">
-                                                            <dt class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Material</dt>
-                                                            <dd class="mt-1 font-bold text-on-surface">{{ $assetPath ? strtoupper($assetExtension) : 'Activity Screen' }}</dd>
                                                         </div>
                                                         @if ($gameNames)
                                                             <div class="min-w-0 border-t border-outline-variant/15 pt-3 sm:col-span-3" data-assessment-games>

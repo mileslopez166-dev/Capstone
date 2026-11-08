@@ -104,11 +104,13 @@
 .teacher-metric:nth-child(4) .material-symbols-outlined { color: #b96878; }
 .teacher-metric strong { font: 700 28px/1.3 'Plus Jakarta Sans', sans-serif; font-variant-numeric: tabular-nums; }
 .teacher-metric small { display: block; margin-top: 7px; color: #758078; font-size: 11px; }
+.teacher-metric-dropdown { position: relative; z-index: 1; }
+.teacher-metric-dropdown[open] { z-index: 30; }
 .teacher-metric-dropdown > summary { cursor: pointer; list-style: none; }
 .teacher-metric-dropdown > summary::-webkit-details-marker { display: none; }
 .teacher-metric-dropdown > summary .teacher-metric-label .material-symbols-outlined { transition: transform .2s ease; }
 .teacher-metric-dropdown[open] > summary .teacher-metric-label .material-symbols-outlined { transform: rotate(180deg); }
-.teacher-metric-dropdown-list { max-height: 210px; margin-top: 14px; overflow-y: auto; border-top: 1px solid #e6ece8; }
+.teacher-metric-dropdown-list { position: absolute; top: calc(100% - 1px); left: 50%; width: min(420px, calc(100vw - 32px)); max-height: 280px; margin: 0; padding: 8px 14px; overflow-y: auto; transform: translateX(-50%); border: 1px solid #d7e4dc; border-radius: 0 0 8px 8px; background: #fff; box-shadow: 0 16px 30px #1832252b; }
 .teacher-attention-student { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #e6ece8; color: inherit; font-size: 12px; text-decoration: none; }
 .teacher-attention-student:hover { color: #08765c; }
 .teacher-attention-student strong { font: 700 12px/1.3 'Plus Jakarta Sans', sans-serif; color: #b96832; }
