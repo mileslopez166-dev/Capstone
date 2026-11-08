@@ -64,6 +64,18 @@ class TeacherAssistedAssessmentTest extends TestCase
         $this->get(route('students.show', $student))->assertViewHas('assistedAssessments', fn ($rows) => $rows->isEmpty());
     }
 
+    public function test_owner_can_still_open_an_expired_assessment_for_teacher_assisted_work(): void
+    {
+        [$teacher, $student, $assessment] = $this->fixture([
+            'expiration_value' => 1,
+            'expiration_unit' => 'hours',
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $this->open($teacher, $student, $assessment);
+        $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertNotFound();
+    }
+
     public function test_teacher_saves_resumes_and_submits_under_student_without_switching_login(): void
     {
         [$teacher, $student, $assessment] = $this->fixture();

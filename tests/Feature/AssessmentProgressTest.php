@@ -91,6 +91,8 @@ class AssessmentProgressTest extends TestCase
         $this->get(route('student.assessments.show', $oral))->assertOk()
             ->assertDontSee('class="reading-paper"', false)
             ->assertDontSee('images/reading/reference-art.png', false)
+            ->assertSee('data-reading-theme="', false)
+            ->assertSee('data-reading-theme-choice="space"', false)
             ->assertSee('assessment-reading-panes', false)
             ->assertSee('Finish Assessment');
     }
@@ -179,6 +181,27 @@ class AssessmentProgressTest extends TestCase
         $student->update(['section' => 'Magalang']);
         $this->actingAs($student)->postJson(route('student.assessments.progress', $assessment), $payload)->assertNotFound();
         $this->assertDatabaseCount('assessment_submissions', 0);
+    }
+
+    public function test_expired_assessments_cannot_be_opened_or_submitted_by_students(): void
+    {
+        $assessment = $this->assessment([
+            'expiration_value' => 1,
+            'expiration_unit' => 'hours',
+            'expires_at' => now()->subMinute(),
+        ]);
+        $student = User::factory()->create();
+
+        $this->actingAs($student)->get(route('student.assessments.show', $assessment))->assertNotFound();
+        $this->postJson(route('student.assessments.progress', $assessment), [
+            'attempt_key' => '00000000-0000-0000-0000-000000000000',
+            'revision' => 1,
+            'state' => $this->state(),
+        ])->assertNotFound();
+        $this->postJson(route('student.assessments.submit', $assessment), [
+            'attempt_key' => '00000000-0000-0000-0000-000000000000',
+            'answers' => ['A'],
+        ])->assertNotFound();
     }
 
     public function test_progress_validation_rejects_invalid_questions_and_marks(): void

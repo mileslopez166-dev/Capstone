@@ -35,6 +35,7 @@ class SearchController extends Controller
             $assessments = Assessment::query()
                 ->inActivityCatalog()
                 ->where('status', 'published')
+                ->where(fn ($builder) => $builder->whereNull('expires_at')->orWhere('expires_at', '>', now()))
                 ->where(function ($builder) use ($targetSection): void {
                     $builder->where('target_section', 'all')
                         ->orWhereNull('target_section');

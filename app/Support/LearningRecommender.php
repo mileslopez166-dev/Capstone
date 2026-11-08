@@ -45,7 +45,7 @@ class LearningRecommender
     public function evaluate(int $requestedBy): void
     {
         $interactions = $this->interactions();
-        $catalog = Assessment::query()->where('status', 'published')->inActivityCatalog()->get();
+        $catalog = Assessment::query()->where('status', 'published')->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))->inActivityCatalog()->get();
         $students = User::where('role', 'student')->where('approval_status', 'approved')->get();
         $holdouts = collect();
         foreach ($students as $student) {
@@ -246,7 +246,7 @@ class LearningRecommender
     {
         $section = SectionCatalog::targetKeyForLabel($student->section);
 
-        return Assessment::query()->with('teacher')->where('status', 'published')->inActivityCatalog()
+        return Assessment::query()->with('teacher')->where('status', 'published')->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))->inActivityCatalog()
             ->where(fn ($query) => $query->where('target_section', 'all')->orWhereNull('target_section')
                 ->when($section, fn ($query) => $query->orWhere('target_section', $section)))->get();
     }

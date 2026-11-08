@@ -21,7 +21,8 @@
         ];
         $assessmentTypeLabel = $assessmentTypeLabels[$assessment->assessment_type ?? 'silent_reading'] ?? 'Silent Reading';
         $isPublished = $assessment->status === 'published';
-        $availabilityLabel = $isPublished ? 'Unlocked' : 'Locked';
+        $isExpired = $assessment->isExpired();
+        $availabilityLabel = $isExpired ? 'Expired' : ($isPublished ? 'Unlocked' : 'Locked');
         $nextAvailability = $isPublished ? 'draft' : 'published';
         $availabilityButtonLabel = $isPublished ? 'Lock Assessment' : 'Unlock Assessment';
         $availabilityIcon = $isPublished ? 'lock' : 'lock_open';
@@ -137,6 +138,33 @@
                     <p class="py-3 text-sm text-on-surface-variant">The game advances automatically when this time expires.</p>
                     @error('question_time_minutes')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
                     @error('question_time_seconds')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
+                </form>
+
+                <form class="mb-8 flex flex-wrap items-end gap-4 border-b border-outline-variant/20 pb-6" method="POST" action="{{ route('assessments.expiration', $assessment) }}">
+                    @csrf
+                    @method('PATCH')
+                    <fieldset>
+                        <legend class="mb-2 block text-sm font-bold">Assessment expiration</legend>
+                        <div class="flex gap-3">
+                            <label class="text-xs font-semibold text-on-surface-variant" for="expiration_value">Duration
+                                <input class="mt-1 block w-28 rounded-lg border-outline-variant/30 bg-white p-3 text-on-surface" id="expiration_value" name="expiration_value" type="number" min="1" max="3650" inputmode="numeric" value="{{ old('expiration_value', $assessment->expiration_value) }}" placeholder="None">
+                            </label>
+                            <label class="text-xs font-semibold text-on-surface-variant" for="expiration_unit">Unit
+                                <select class="mt-1 block rounded-lg border-outline-variant/30 bg-white p-3 text-on-surface" id="expiration_unit" name="expiration_unit">
+                                    <option value="hours" @selected(old('expiration_unit', $assessment->expiration_unit ?: 'hours') === 'hours')>Hours</option>
+                                    <option value="days" @selected(old('expiration_unit', $assessment->expiration_unit) === 'days')>Days</option>
+                                </select>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-on-primary" type="submit">
+                        <span class="material-symbols-outlined text-lg">schedule</span>Save Expiration
+                    </button>
+                    <p class="py-3 text-sm text-on-surface-variant">
+                        {{ $assessment->expirationLabel() ?? 'No expiration; lock it manually when needed.' }}
+                    </p>
+                    @error('expiration_value')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
+                    @error('expiration_unit')<p class="w-full text-sm text-error">{{ $message }}</p>@enderror
                 </form>
 
                 <section class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-lowest shadow-[0_24px_70px_rgba(0,94,159,0.08)]">

@@ -14,6 +14,7 @@ class WorksheetMission
         $worksheets = NumeracyWorksheets::gameEnabled();
         $section = SectionCatalog::targetKeyForLabel($student->section);
         $assignments = Assessment::with('teacher')->whereIn('worksheet_number', array_column($worksheets, 'number'))->where('status', 'published')
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->where(fn ($query) => $query->whereIn('target_section', ['all', $section])->orWhereNull('target_section'))
             ->latest()->orderByDesc('id')->get();
         $progress = AssessmentProgress::where('user_id', $student->id)->whereNull('submission_id')

@@ -75,6 +75,8 @@ class WorksheetController extends Controller
             'retry_limit' => ['required', Rule::in(array_map('strval', array_keys(Assessment::retryLimitOptions())))],
             'question_time_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:60'],
             'question_time_seconds' => ['sometimes', 'required', 'integer', 'min:0', 'max:59'],
+            'expiration_value' => ['nullable', 'integer', 'min:1', 'max:3650', 'required_with:expiration_unit'],
+            'expiration_unit' => ['nullable', 'required_with:expiration_value', Rule::in(['hours', 'days'])],
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
         $questionTimeLimitSeconds = ((int) ($data['question_time_minutes'] ?? 2) * 60) + (int) ($data['question_time_seconds'] ?? 0);
@@ -90,6 +92,11 @@ class WorksheetController extends Controller
             'focus_areas' => ['Problem Solving'], 'manual_questions' => [],
             'retry_limit' => Assessment::normalizeRetryLimit($data['retry_limit']),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
+            'expiration_value' => $data['expiration_value'] ?? null,
+            'expiration_unit' => $data['expiration_unit'] ?? null,
+            'expires_at' => $data['status'] === 'published'
+                ? Assessment::expirationAt($data['expiration_value'] ?? null, $data['expiration_unit'] ?? null)
+                : null,
         ]));
         NotificationSender::notifyAdminsAboutAssessmentCreated($assessment->loadMissing('teacher'));
         if ($assessment->status === 'published') {

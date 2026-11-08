@@ -174,7 +174,7 @@
 
         @endif
 
-        <main class="assessment-workspace {{ $assisted ? 'lg:ml-72' : '' }} {{ $isSilentReading && $hasReadingStage ? 'assessment-storybook' : '' }}" @if ($isSilentReading) data-reading-theme="{{ $readingTheme['key'] }}" @endif aria-labelledby="assessment-title">
+        <main class="assessment-workspace {{ $assisted ? 'lg:ml-72' : '' }} {{ $isSilentReading && $hasReadingStage ? 'assessment-storybook' : '' }}" @unless ($assisted) data-reading-theme="{{ $readingTheme['key'] }}" @endunless aria-labelledby="assessment-title">
             @if ($assisted)<x-assisted-assessment-banner :student="$student" :assessment="$assessment" />@endif
             @if ($assisted)
                 <x-teacher-answer-key :questions="$manualQuestions->all()" :context="$progress->selection_context ?? []" />
@@ -246,13 +246,13 @@
                 <div class="assessment-attempt">
                     <span class="material-symbols-outlined" aria-hidden="true">cloud_done</span>
                     <span id="assessment-save-status" role="status">Attempt {{ $progress->attempt_number ?? 1 }}</span>
-                    @if ($isSilentReading)
+                    @unless ($assisted)
                         <div class="assessment-theme-switch" role="group" aria-label="Assessment theme">
                             @foreach (['meadow' => ['park', 'Woodland theme'], 'space' => ['rocket_launch', 'Space theme'], 'crystal' => ['diamond', 'Crystal sky theme']] as $theme => [$icon, $label])
                                 <button type="button" data-reading-theme-choice="{{ $theme }}" aria-label="{{ $label }}" title="{{ $label }}" aria-pressed="{{ $readingTheme['key'] === $theme ? 'true' : 'false' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></button>
                             @endforeach
                         </div>
-                    @endif
+                    @endunless
                 </div>
             </header>
 

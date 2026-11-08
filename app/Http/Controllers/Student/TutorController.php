@@ -150,7 +150,8 @@ class TutorController extends Controller
     public function assessmentHelp(Request $request, Assessment $assessment, StudentTutor $tutor)
     {
         $student = $this->student($request);
-        abort_unless($assessment->status === 'published' && AssessmentParticipant::matchesSection($assessment, $student), 404);
+        abort_unless($assessment->status === 'published' && ! $assessment->isExpired()
+            && AssessmentParticipant::matchesSection($assessment, $student), 404);
         $assessment = clone $assessment;
         $active = \App\Models\AssessmentProgress::where('assessment_id', $assessment->id)
             ->where('user_id', $student->id)->whereNull('submission_id')->latest('attempt_number')->first();

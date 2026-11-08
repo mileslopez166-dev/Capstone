@@ -29,7 +29,10 @@ class AssessmentParticipant
             $student = $request->user();
         }
 
-        abort_unless($assessment->status === 'published' && self::matchesSection($assessment, $student), 404);
+        $teacherAssisted = $request->routeIs('teacher.assessments.*');
+        abort_unless($assessment->status === 'published'
+            && ($teacherAssisted || ! $assessment->isExpired())
+            && self::matchesSection($assessment, $student), 404);
 
         return $student;
     }

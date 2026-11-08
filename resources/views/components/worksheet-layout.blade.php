@@ -14,10 +14,17 @@
         @elseif (! $focus)
             <x-student-nav active="activities" />
         @endif
-        <main class="worksheet-page {{ $focus ? 'worksheet-focus-mode' : 'lg:ml-72' }}">
+        <main class="worksheet-page {{ $focus ? 'worksheet-focus-mode worksheet-galaxy-mode' : 'lg:ml-72' }}" @if ($focus) data-worksheet-theme="space" @endif>
             <header class="worksheet-heading">
                 @if ($back)<a href="{{ $back }}" class="worksheet-icon" title="Back to assessments" aria-label="Back to assessments"><span class="material-symbols-outlined">arrow_back</span></a>@endif
                 <div><p>NUMERACY / GRADE 6</p><h1>{{ $title }}</h1></div>
+                @if ($focus)
+                    <div class="worksheet-theme-switch" role="group" aria-label="Assessment theme">
+                        @foreach (['meadow' => ['park', 'Woodland theme'], 'space' => ['rocket_launch', 'Space theme'], 'crystal' => ['diamond', 'Crystal sky theme']] as $theme => [$icon, $label])
+                            <button type="button" data-worksheet-theme-choice="{{ $theme }}" aria-label="{{ $label }}" title="{{ $label }}" aria-pressed="{{ $theme === 'space' ? 'true' : 'false' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></button>
+                        @endforeach
+                    </div>
+                @endif
             </header>
             @if (session('status'))<p class="worksheet-notice" role="status">{{ session('status') }}</p>@endif
             @if ($errors->any())<div class="worksheet-error" role="alert">@foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif

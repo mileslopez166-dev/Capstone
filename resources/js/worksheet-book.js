@@ -486,4 +486,24 @@ function initMultiplicationTable(root, config) {
     find('form').addEventListener('submit', event => { event.preventDefault(); fetchTable(find('password').value); });
 }
 
-if (typeof document !== 'undefined') document.querySelectorAll('[data-worksheet-reader]').forEach(initWorksheetBook);
+export function initWorksheetTheme(page) {
+    const buttons = Array.from(page.querySelectorAll('[data-worksheet-theme-choice]'));
+    if (!buttons.length) return;
+    const key = 'pgaals-worksheet-theme';
+    const apply = theme => {
+        if (!['meadow', 'space', 'crystal'].includes(theme)) return;
+        page.dataset.worksheetTheme = theme;
+        buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.worksheetThemeChoice === theme)));
+    };
+    try { apply(localStorage.getItem(key) || page.dataset.worksheetTheme); } catch { apply(page.dataset.worksheetTheme); }
+    buttons.forEach(button => button.addEventListener('click', () => {
+        const theme = button.dataset.worksheetThemeChoice;
+        apply(theme);
+        try { localStorage.setItem(key, theme); } catch {}
+    }));
+}
+
+if (typeof document !== 'undefined') {
+    document.querySelectorAll('[data-worksheet-theme]').forEach(initWorksheetTheme);
+    document.querySelectorAll('[data-worksheet-reader]').forEach(initWorksheetBook);
+}

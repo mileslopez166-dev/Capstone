@@ -134,6 +134,8 @@ class AssessmentController extends Controller
             'retry_limit' => $this->retryLimitRules(false),
             'question_time_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:60'],
             'question_time_seconds' => ['sometimes', 'required', 'integer', 'min:0', 'max:59'],
+            'expiration_value' => ['nullable', 'integer', 'min:1', 'max:3650', 'required_with:expiration_unit'],
+            'expiration_unit' => ['nullable', 'required_with:expiration_value', Rule::in(['hours', 'days'])],
         ]);
 
         $questionTimeLimitSeconds = $this->questionTimeLimitSeconds($validated);
@@ -183,6 +185,11 @@ class AssessmentController extends Controller
             'status' => $validated['status'],
             'retry_limit' => Assessment::normalizeRetryLimit($validated['retry_limit'] ?? 0),
             'question_time_limit_seconds' => $questionTimeLimitSeconds,
+            'expiration_value' => $validated['expiration_value'] ?? null,
+            'expiration_unit' => $validated['expiration_unit'] ?? null,
+            'expires_at' => ($validated['status'] ?? 'draft') === 'published'
+                ? Assessment::expirationAt($validated['expiration_value'] ?? null, $validated['expiration_unit'] ?? null)
+                : null,
         ]);
 
         NotificationSender::notifyAdminsAboutAssessmentCreated($assessment->loadMissing('teacher'));
@@ -241,7 +248,12 @@ class AssessmentController extends Controller
         ]);
 
         if (! $wasPublished && $assessment->status === 'published') {
+            $assessment->update([
+                'expires_at' => Assessment::expirationAt($assessment->expiration_value, $assessment->expiration_unit),
+            ]);
             NotificationSender::notifyAssessmentPublished($assessment);
+        } elseif ($assessment->status !== 'published') {
+            $assessment->update(['expires_at' => null]);
         }
 
         $message = $validated['status'] === 'published'
@@ -280,6 +292,29 @@ class AssessmentController extends Controller
         ]);
 
         return back()->with('status', 'Question time limit updated.');
+    }
+
+    public function updateExpiration(Request $request, Assessment $assessment): RedirectResponse
+    {
+        abort_unless($request->user()?->isTeacher(), 403);
+        abort_unless($assessment->created_by === $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'expiration_value' => ['nullable', 'integer', 'min:1', 'max:3650', 'required_with:expiration_unit'],
+            'expiration_unit' => ['nullable', 'required_with:expiration_value', Rule::in(['hours', 'days'])],
+        ]);
+
+        $assessment->update([
+            'expiration_value' => $validated['expiration_value'] ?? null,
+            'expiration_unit' => $validated['expiration_unit'] ?? null,
+            'expires_at' => $assessment->status === 'published'
+                ? Assessment::expirationAt($validated['expiration_value'] ?? null, $validated['expiration_unit'] ?? null)
+                : null,
+        ]);
+
+        return back()->with('status', $assessment->expires_at
+            ? 'Assessment expiration updated and the countdown restarted.'
+            : 'Assessment expiration removed. It will remain available until you lock it.');
     }
 
     private function retryLimitRules(bool $required = true): array

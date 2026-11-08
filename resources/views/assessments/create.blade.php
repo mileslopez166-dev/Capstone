@@ -320,6 +320,24 @@
                                         @error('question_time_seconds')<p class="mt-2 text-sm text-error">{{ $message }}</p>@enderror
                                     </fieldset>
 
+                                    <fieldset>
+                                        <legend class="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Assessment expiration (optional)</legend>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <label class="text-sm font-semibold text-on-surface-variant" for="expiration_value">Duration
+                                                <input class="mt-1 w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" id="expiration_value" name="expiration_value" type="number" min="1" max="3650" inputmode="numeric" value="{{ old('expiration_value') }}" placeholder="No limit">
+                                            </label>
+                                            <label class="text-sm font-semibold text-on-surface-variant" for="expiration_unit">Unit
+                                                <select class="mt-1 w-full rounded-sm border border-outline-variant/20 bg-white p-3 font-medium focus:ring-primary" id="expiration_unit" name="expiration_unit">
+                                                    <option value="hours" @selected(old('expiration_unit', 'hours') === 'hours')>Hours</option>
+                                                    <option value="days" @selected(old('expiration_unit') === 'days')>Days</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <p class="mt-2 text-xs text-on-surface-variant">Starts when you publish. Leave the duration blank to keep the assessment available until you lock it.</p>
+                                        @error('expiration_value')<p class="mt-2 text-sm text-error">{{ $message }}</p>@enderror
+                                        @error('expiration_unit')<p class="mt-2 text-sm text-error">{{ $message }}</p>@enderror
+                                    </fieldset>
+
                                     <hr class="border-outline-variant/20">
 
                                     <div class="space-y-3" id="literacy-options">

@@ -15,6 +15,20 @@
 }
 .assessment-workspace[data-reading-theme='crystal'] .assessment-heading .assessment-attempt { color: #effcff; max-width: none; }
 .assessment-workspace[data-reading-theme='crystal'] .assessment-attempt > .material-symbols-outlined { color: #75f3ff; }
+.assessment-workspace[data-reading-theme='crystal'] :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) {
+    border-color: #28b8ef;
+    box-shadow: inset -3px -4px #aee8ff, 3px 4px #22549c;
+}
+.assessment-workspace[data-reading-theme='crystal'] .assessment-helper-toggle { background: #fff5bf; color: #704313; border-color: #dda94b; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-reader-oral {
+    border: 14px solid transparent;
+    border-image: var(--assessment-frame) 100 / 14px / 0 stretch;
+    background: #fffaf0;
+    color: #1b2c5b;
+}
+.assessment-workspace[data-reading-theme='crystal'] .assessment-reading-pane { border-color: #9bc7e8; background: #fffef9; }
+.assessment-workspace[data-reading-theme='crystal'] .assessment-legend,
+.assessment-workspace[data-reading-theme='crystal'] .assessment-mark-tools { background: #e9f5ff; border-color: #9bc7e8; }
 
 /* The fantasy artwork is decorative; controls retain the established assessment layout. */
 .assessment-workspace[data-reading-theme='crystal']:has(.assessment-reading:not([hidden])) .reading-header-banner {

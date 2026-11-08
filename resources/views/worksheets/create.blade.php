@@ -8,8 +8,13 @@
             <label>Retries after first attempt<select name="retry_limit">@foreach (\App\Models\Assessment::retryLimitOptions() as $value => $label)<option value="{{ $value }}" @selected((string) old('retry_limit', '0') === (string) $value)>{{ $label }}</option>@endforeach</select></label>
             <label>Minutes per question<input name="question_time_minutes" type="number" min="0" max="60" inputmode="numeric" value="{{ old('question_time_minutes', 2) }}" required></label>
             <label>Extra seconds<input name="question_time_seconds" type="number" min="0" max="59" inputmode="numeric" value="{{ old('question_time_seconds', 0) }}" required></label>
+            <label>Expiration duration (optional)<input name="expiration_value" type="number" min="1" max="3650" inputmode="numeric" value="{{ old('expiration_value') }}" placeholder="No limit"></label>
+            <label>Expiration unit<select name="expiration_unit"><option value="hours" @selected(old('expiration_unit', 'hours') === 'hours')>Hours</option><option value="days" @selected(old('expiration_unit') === 'days')>Days</option></select></label>
             @error('question_time_minutes')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
             @error('question_time_seconds')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
+            @error('expiration_value')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
+            @error('expiration_unit')<p class="worksheet-wide worksheet-error">{{ $message }}</p>@enderror
+            <p class="worksheet-wide worksheet-help">The countdown starts when you publish. Leave it blank to keep the assessment available until you lock it.</p>
             <label class="worksheet-wide">Teacher instructions<textarea name="instructions" maxlength="2000" rows="3">{{ old('instructions') }}</textarea></label>
         </div>
         <div class="worksheet-actions worksheet-creation-actions" aria-label="Save or publish worksheet">

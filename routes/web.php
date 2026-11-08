@@ -134,6 +134,7 @@ $visibleAssessmentsForStudent = function (User $student) use ($studentTargetSect
         ->with('teacher')
         ->inActivityCatalog()
         ->where('status', 'published')
+        ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
         ->whereDoesntHave('worksheetAttempts', fn ($query) => $query->where('user_id', $student->id)->whereNull('reviewed_at'))
         ->where(function ($query) use ($targetSection): void {
             $query->where('target_section', 'all')
@@ -763,6 +764,8 @@ Route::patch('/teacher/assessments/{assessment}/retries', [AssessmentController:
     ->middleware(['auth', 'verified'])->name('assessments.retries');
 Route::patch('/teacher/assessments/{assessment}/timing', [AssessmentController::class, 'updateTiming'])
     ->middleware(['auth', 'verified'])->name('assessments.timing');
+Route::patch('/teacher/assessments/{assessment}/expiration', [AssessmentController::class, 'updateExpiration'])
+    ->middleware(['auth', 'verified'])->name('assessments.expiration');
 
 Route::get('/teacher/assessments/{assessment}', [AssessmentController::class, 'show'])
     ->middleware(['auth', 'verified'])

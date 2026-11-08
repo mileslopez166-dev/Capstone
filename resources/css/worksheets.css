@@ -6,6 +6,151 @@
 .worksheet-focus-mode .worksheet-reader { min-height: calc(100dvh - 104px); }
 .worksheet-focus-mode .worksheet-reader[data-step=answer] { min-height: calc(100dvh - 104px); }
 .worksheet-focus-mode .worksheet-attribution { display: none; }
+
+/* Focused numeracy games use the same galaxy world as the silent-reading experience. */
+.worksheet-galaxy-mode {
+    position: relative;
+    isolation: isolate;
+    min-height: 100dvh;
+    color: #edf7ff;
+    background: #091954 url('../../public/images/reading/space-background.png') center bottom / cover no-repeat;
+}
+.worksheet-galaxy-mode::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(4, 16, 55, .12), rgba(4, 18, 58, .32));
+}
+.worksheet-galaxy-mode .worksheet-heading {
+    max-width: 1500px;
+    margin-bottom: 18px;
+}
+.worksheet-galaxy-mode .worksheet-heading h1 {
+    color: #fff;
+    font: 700 28px/1.15 'Pixelify Sans', sans-serif;
+    letter-spacing: .02em;
+    text-shadow: 2px 0 #102558, -2px 0 #102558, 0 3px #102558;
+}
+.worksheet-galaxy-mode .worksheet-heading p { color: #63e7ff; }
+.worksheet-galaxy-mode .worksheet-heading .worksheet-icon {
+    border: 3px solid #25c1f3;
+    background: #f3ffff;
+    color: #102554;
+    box-shadow: inset -3px -4px #b1d6e5, 3px 4px #0758a0;
+}
+.worksheet-galaxy-mode .worksheet-reader {
+    position: relative;
+    border: solid transparent;
+    border-width: 24px 18px 28px;
+    border-image: url('../../public/images/reading/space-frame.png') 120 100 160 / 24px 18px 28px / 0 stretch;
+    border-radius: 0;
+    background: rgba(8, 28, 73, .93);
+    box-shadow: 0 18px 42px rgba(2, 9, 35, .38);
+}
+.worksheet-galaxy-mode .worksheet-reader-heading h2,
+.worksheet-galaxy-mode .worksheet-area-title,
+.worksheet-galaxy-mode .worksheet-reader-progress,
+.worksheet-galaxy-mode .worksheet-reader-progress .worksheet-save-state,
+.worksheet-galaxy-mode .worksheet-reader-progress > span,
+.worksheet-galaxy-mode .numeracy-mode-label { color: #edf7ff; }
+.worksheet-galaxy-mode .worksheet-kicker,
+.worksheet-galaxy-mode .numeracy-mode-label .material-symbols-outlined,
+.worksheet-galaxy-mode .worksheet-area-title .material-symbols-outlined { color: #63e7ff; }
+.worksheet-galaxy-mode .worksheet-toolbar,
+.worksheet-galaxy-mode .worksheet-reader-progress { border-color: #2879b8; }
+.worksheet-galaxy-mode .worksheet-icon,
+.worksheet-galaxy-mode .worksheet-reader select {
+    border-color: #2b79b7;
+    background: #102e5b;
+    color: #f2fbff;
+}
+.worksheet-galaxy-mode .worksheet-icon:hover:not(:disabled),
+.worksheet-galaxy-mode .worksheet-icon[aria-pressed=true] {
+    border-color: #63e7ff;
+    background: #174d87;
+}
+.worksheet-galaxy-mode .worksheet-reader-progress progress { accent-color: #63edc9; }
+.worksheet-galaxy-mode .numeracy-guide,
+.worksheet-galaxy-mode .numeracy-game {
+    border-color: #2879b8;
+    background: #102e5b;
+    box-shadow: 0 8px 20px rgba(2, 9, 35, .26);
+}
+.worksheet-galaxy-mode .numeracy-guide-heading,
+.worksheet-galaxy-mode .numeracy-guide-content + .numeracy-guide-content,
+.worksheet-galaxy-mode .numeracy-guide-section + .numeracy-guide-section,
+.worksheet-galaxy-mode .numeracy-guide-actions { border-color: #2879b8; }
+.worksheet-galaxy-mode .numeracy-guide,
+.worksheet-galaxy-mode .numeracy-guide-content,
+.worksheet-galaxy-mode .numeracy-guide-page,
+.worksheet-galaxy-mode .numeracy-game { color: #edf7ff; }
+.worksheet-galaxy-mode .numeracy-guide-heading > .material-symbols-outlined { background: #173d78; color: #ffd75f; }
+.worksheet-galaxy-mode .numeracy-guide-heading p,
+.worksheet-galaxy-mode .numeracy-guide-part,
+.worksheet-galaxy-mode .numeracy-guide-instruction { color: #63e7ff; }
+.worksheet-galaxy-mode .numeracy-guide-actions p,
+.worksheet-galaxy-mode .numeracy-game-description { color: #b9d7ed; }
+
+.worksheet-theme-switch { display: flex; gap: 4px; margin-left: auto; }
+.worksheet-theme-switch button {
+    display: grid; place-items: center; width: 40px; height: 40px;
+    border: 2px solid #2875a5; border-radius: 4px; background: #f6fcff; color: #15466b; touch-action: manipulation;
+}
+.worksheet-theme-switch button[aria-pressed='true'] { background: #ffd750; color: #152450; border-color: #9b6c18; box-shadow: inset 0 -3px #e0a42c; }
+.worksheet-theme-switch button:focus-visible { outline: 3px solid #efb822; outline-offset: 3px; }
+
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] {
+    color: #102554;
+    background: #35bbf3 url('../../public/images/reading/sky-ground.png') center / 100% 100% no-repeat;
+}
+.worksheet-galaxy-mode[data-worksheet-theme='meadow']::before { background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(37, 144, 203, .12)); }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-heading h1 { color: #fff; text-shadow: 2px 0 #102558, -2px 0 #102558, 0 3px #102558; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-heading p { color: #e7fbff; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-reader { border-image: url('../../public/images/reading/parchment-frame.png') 120 100 160 / 24px 18px 28px / 0 stretch; background: rgba(255, 242, 207, .95); color: #203650; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] :is(.worksheet-reader-heading h2, .worksheet-area-title, .worksheet-reader-progress, .worksheet-reader-progress .worksheet-save-state, .worksheet-reader-progress > span, .numeracy-mode-label) { color: #203650; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-kicker,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-mode-label .material-symbols-outlined,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-area-title .material-symbols-outlined { color: #267969; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-toolbar,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-reader-progress { border-color: #8db8c5; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] :is(.worksheet-icon, .worksheet-reader select) { border-color: #7daaba; background: #f6fcff; color: #274d65; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-game { border-color: #7daaba; background: #fffef9; color: #203650; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-heading,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-content + .numeracy-guide-content,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-section + .numeracy-guide-section,
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-actions { border-color: #c2d9df; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .numeracy-guide-heading > .material-symbols-outlined { background: #dcefe9; color: #176759; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] :is(.numeracy-guide-heading p, .numeracy-guide-part, .numeracy-guide-instruction) { color: #267065; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] :is(.numeracy-guide-actions p, .numeracy-game-description) { color: #526b76; }
+
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] {
+    color: #f4fbff;
+    background: #337be0 url('../../public/images/reading/crystal-background.png') center bottom / cover no-repeat;
+}
+.worksheet-galaxy-mode[data-worksheet-theme='crystal']::before { background: linear-gradient(180deg, rgba(23, 46, 126, .08), rgba(19, 38, 115, .22)); }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-heading h1 { color: #fff; text-shadow: 2px 0 #172b68, -2px 0 #172b68, 0 3px #172b68; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-heading p { color: #dffcff; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-reader { border-image: url('../../public/images/reading/crystal-frame.png') 100 / 24px 18px 28px / 0 stretch; background: rgba(255, 250, 240, .95); color: #1b2c5b; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] :is(.worksheet-reader-heading h2, .worksheet-area-title, .worksheet-reader-progress, .worksheet-reader-progress .worksheet-save-state, .worksheet-reader-progress > span, .numeracy-mode-label) { color: #1b2c5b; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-kicker,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-mode-label .material-symbols-outlined,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-area-title .material-symbols-outlined { color: #2865a7; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-toolbar,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-reader-progress { border-color: #9bc7e8; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] :is(.worksheet-icon, .worksheet-reader select) { border-color: #9bc7e8; background: #f6fcff; color: #274d65; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-game { border-color: #9bc7e8; background: #fffef9; color: #1b2c5b; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-heading,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-content + .numeracy-guide-content,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-section + .numeracy-guide-section,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-actions { border-color: #c9e1f5; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .numeracy-guide-heading > .material-symbols-outlined { background: #fff0b3; color: #946817; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] :is(.numeracy-guide-heading p, .numeracy-guide-part, .numeracy-guide-instruction) { color: #2865a7; }
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] :is(.numeracy-guide-actions p, .numeracy-game-description) { color: #375b91; }
+
 .worksheet-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
 .worksheet-heading p { font-size: 12px; font-weight: 800; color: #267969; margin-bottom: 5px; }
 .worksheet-heading h1 { font-size: 28px; line-height: 1.25; font-weight: 800; overflow-wrap: break-word; }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\NumeracyWorksheets;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -48,6 +49,9 @@ class Assessment extends Model
         'status',
         'retry_limit',
         'question_time_limit_seconds',
+        'expiration_value',
+        'expiration_unit',
+        'expires_at',
         'created_by',
         'worksheet_number',
         'worksheet_total',
@@ -56,6 +60,8 @@ class Assessment extends Model
     protected $casts = [
         'retry_limit' => 'integer',
         'question_time_limit_seconds' => 'integer',
+        'expiration_value' => 'integer',
+        'expires_at' => 'datetime',
         'worksheet_number' => 'integer',
         'worksheet_total' => 'integer',
         'focus_areas' => 'array',
@@ -130,5 +136,30 @@ class Assessment extends Model
             'minutes' => intdiv($seconds, 60),
             'seconds' => $seconds % 60,
         ];
+    }
+
+    public static function expirationAt(?int $value, ?string $unit, ?Carbon $from = null): ?Carbon
+    {
+        if (! $value || ! in_array($unit, ['hours', 'days'], true)) {
+            return null;
+        }
+
+        $date = ($from ?? now())->copy();
+
+        return $unit === 'days' ? $date->addDays($value) : $date->addHours($value);
+    }
+
+    public function isExpired(?Carbon $at = null): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->lte($at ?? now());
+    }
+
+    public function expirationLabel(): ?string
+    {
+        if (! $this->expires_at) {
+            return null;
+        }
+
+        return 'Expires '.$this->expires_at->format('M j, Y g:i A');
     }
 }

@@ -10,6 +10,22 @@
 .assessment-workspace[data-reading-theme='space'] .assessment-heading .teacher-identity :is(strong, small) { color: #e9faff; }
 .assessment-workspace[data-reading-theme='space'] .assessment-heading .assessment-attempt { color: #b4eafa; max-width: none; }
 .assessment-workspace[data-reading-theme='space'] .assessment-attempt > .material-symbols-outlined { color: #63edc9; }
+.assessment-workspace[data-reading-theme='space'] :is(.assessment-back, .assessment-text-settings > button, .assessment-helper-toggle) {
+    border-color: #25c1f3;
+    box-shadow: inset -3px -4px #b1d6e5, 3px 4px #0758a0;
+}
+.assessment-workspace[data-reading-theme='space'] .assessment-helper-toggle { background: #ffe88b; color: #794200; border-color: #eebc35; }
+.assessment-workspace[data-reading-theme='space'] .assessment-reader-oral {
+    border: 14px solid transparent;
+    border-image: var(--assessment-frame) 120 / 14px / 0 stretch;
+    background: #142e68;
+    color: #e5f7ff;
+}
+.assessment-workspace[data-reading-theme='space'] .assessment-reading-pane { border-color: #2786c3; background: #f6fcff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-legend,
+.assessment-workspace[data-reading-theme='space'] .assessment-mark-tools { background: #142e68; border-color: #2786c3; color: #e5f7ff; }
+.assessment-workspace[data-reading-theme='space'] .assessment-legend :is(span, p),
+.assessment-workspace[data-reading-theme='space'] .assessment-mark-tools :is(span, button) { color: inherit; }
 .assessment-workspace[data-reading-theme='space'] .reading-art { mix-blend-mode: normal; clip-path: none; }
 .assessment-workspace[data-reading-theme='space'] .reading-art-banner { mix-blend-mode: screen; }
 .assessment-workspace[data-reading-theme='space']:has(.assessment-reading:not([hidden])) .assessment-heading { row-gap: 18px; padding-top: 8px; }
