@@ -20,10 +20,10 @@ Numeracy targets use documented project-defined bands from each completed assess
 
 ### Available features
 
-- Reading assessment score
-- Reading accuracy
+- Reading assessment score: Phil-IRI word-reading percentage (WRP) for oral reading; comprehension percentage for silent reading and listening
+- Reading accuracy: WRP for oral reading only
 - Reading speed in words per minute, when recorded
-- Comprehension score
+- Comprehension score for silent reading and listening; always missing for oral-reading ML records
 - Listening-comprehension score
 - Numeracy assessment score
 - Attempt number
@@ -31,7 +31,7 @@ Numeracy targets use documented project-defined bands from each completed assess
 - Completion time, when recorded
 - Number of recorded interventions
 
-Student identifiers are converted to keyed hashes before records leave Laravel. Names, email addresses, passwords, answer text, and story text are not sent to the training API. Missing measurements stay missing and are median-imputed inside each fitted pipeline.
+Student identifiers are converted to keyed hashes before records leave Laravel. Names, email addresses, passwords, answer text, and story text are not sent to the training API. Oral-reading records do not invent a comprehension score: their current reading score and accuracy both come from `(total words - miscues) / total words x 100`, while comprehension stays missing. Other missing measurements stay missing and are median-imputed inside each fitted pipeline.
 
 ## Training and evaluation method
 
