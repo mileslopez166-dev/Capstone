@@ -77,8 +77,14 @@
         </section>
     </div>
 
-    <button class="campus-companion-character" type="button" @click="openTutorPanel()"
-        aria-label="Open tutor chat with {{ $characterName }}" title="Ask {{ $characterName }} for help" data-no-click-sound>
-        <x-student-character :user="$user" :gender="$gender" />
-    </button>
+    @if ($placement === 'mobile')
+        <button class="campus-companion-character" type="button" @click="openTutorPanel()"
+            aria-label="Open tutor chat with {{ $characterName }}" title="Ask {{ $characterName }} for help" data-no-click-sound>
+            <x-student-character :user="$user" :gender="$gender" />
+        </button>
+    @else
+        <div class="campus-companion-character" aria-hidden="true">
+            <x-student-character :user="$user" :gender="$gender" />
+        </div>
+    @endif
 </div>
