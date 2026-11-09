@@ -182,6 +182,8 @@ class PhilIriScoringTest extends TestCase
         $this->assertSame(4, $snapshot['marked_miscues']);
         $this->get(route('student.activities'))->assertOk()
             ->assertSee('96%')
+            ->assertSee('data-phil-comprehension hidden', false)
+            ->assertSee('data-phil-confirmed hidden', false)
             ->assertSee('Word-reading score calculated from the red marks recorded during the assessment.')
             ->assertSeeText('Word reading')
             ->assertSeeText('(100 words - 4 red-marked words) / 100 x 100 = 96%')

@@ -87,7 +87,13 @@ document.addEventListener('assessment:graded', ({ detail }) => {
             const field = container.querySelector(`[data-phil-field="${key}"]`);
             if (field) field.textContent = value;
         });
+        const hasComprehension = Number(result.question_count || 0) > 0
+            && result.comprehension_percent !== null && result.comprehension_percent !== undefined;
         container.querySelectorAll('[data-phil-oral]').forEach(row => { row.hidden = result.assessment_type !== 'oral_reading'; });
+        container.querySelector('[data-phil-comprehension]').hidden = result.assessment_type === 'oral_reading' && !hasComprehension;
+        container.querySelector('[data-phil-confirmed]').hidden = result.assessment_type !== 'oral_reading'
+            || result.miscues === null || result.miscues === undefined;
+        container.querySelector('[data-phil-interpretation]').hidden = result.assessment_type === 'oral_reading' && !hasComprehension;
         container.querySelector('[data-phil-rate]').hidden = result.words_per_minute === null;
         container.querySelector('[data-phil-marked]').hidden = result.assessment_type !== 'oral_reading' || result.marked_miscues == null;
         container.querySelector('[data-phil-provisional]').hidden = result.word_reading_source !== 'red_marks';
