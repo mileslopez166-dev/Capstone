@@ -6,7 +6,7 @@ html.dark {
     --dark-line: #29435f;
     --dark-line-soft: #1f354d;
     --dark-ink: #ffffff;
-    --dark-muted: #ffffff;
+    --dark-muted: #c4d4e2;
     --dark-primary: #6ab8ff;
     --dark-primary-strong: #2d8bd8;
     --dark-success: #78e1b9;
@@ -83,6 +83,10 @@ html.dark .assessment-text-panel-heading {
     border-color: var(--dark-line);
 }
 html.dark .comfort-option:hover { color: #ffffff; }
+html.dark .comfort-teacher-ui { border-color: #2b4158; }
+html.dark .comfort-teacher-ui label { color: #dce8f6; }
+html.dark .comfort-teacher-ui select { border-color: #354c66; background: #0a1727; color: #edf4ff; }
+html.dark .comfort-teacher-ui small { color: #aebcd0; }
 
 :is(html.dark .login-page, .login-page.is-night) {
     --dark-ink: #f3f8fc;
@@ -724,8 +728,268 @@ html.dark .teacher-theme .teacher-section-label,
 html.dark :is(.campus-theme, .teacher-theme) .app-footer,
 html.dark .campus-results-heading { background: var(--dark-surface); color: var(--dark-ink); border-color: var(--dark-line); }
 
+/*
+ * Contrast safety net
+ *
+ * Component styles intentionally use light cards in the morning theme. This
+ * final layer is loaded after every component stylesheet (see app.js), so a
+ * dark-mode surface and readable ink always win without changing the morning
+ * theme. Keep component-specific rules below the utility rules because some
+ * cards use hard-coded colours instead of Tailwind utilities.
+ */
+html.dark :is(
+    .bg-gray-50, .bg-gray-100, .bg-gray-200,
+    .bg-slate-50, .bg-slate-100, .bg-slate-200,
+    .bg-zinc-50, .bg-zinc-100, .bg-zinc-200,
+    .bg-neutral-50, .bg-neutral-100, .bg-neutral-200,
+    .bg-stone-50, .bg-stone-100, .bg-stone-200,
+    .bg-white
+) {
+    background-color: var(--dark-surface);
+    color: var(--dark-ink);
+}
+html.dark :is(
+    [class~="bg-white/50"], [class~="bg-white/60"],
+    [class~="bg-white/70"], [class~="bg-white/80"],
+    [class~="bg-white/85"], [class~="bg-white/90"]
+) {
+    background-color: rgba(13, 31, 49, .94);
+    color: var(--dark-ink);
+}
+html.dark :is(
+    .text-black, .text-gray-950, .text-gray-900, .text-gray-800,
+    .text-gray-700, .text-slate-950, .text-slate-900, .text-slate-800,
+    .text-slate-700, .text-zinc-950, .text-zinc-900, .text-zinc-800,
+    .text-zinc-700
+) { color: #f3f8fc; }
+html.dark :is(
+    .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300,
+    .text-slate-600, .text-slate-500, .text-slate-400, .text-slate-300,
+    .text-zinc-600, .text-zinc-500, .text-zinc-400, .text-zinc-300
+) { color: var(--dark-muted); }
+html.dark :is(
+    .border-gray-100, .border-gray-200, .border-gray-300,
+    .border-slate-100, .border-slate-200, .border-slate-300,
+    .border-zinc-100, .border-zinc-200, .border-zinc-300
+) { border-color: var(--dark-line); }
+
+/* Teacher workspace cards and analytics. */
+html.dark .teacher-theme :is(
+    .teacher-metric, .teacher-section, .teacher-section-heading,
+    .teacher-results, .teacher-result, .teacher-empty, .teacher-roster,
+    .teacher-focus, .teacher-quicklinks, .class-comparison-row,
+    .teacher-summary-metrics > div, .teacher-report-overview > section,
+    .practice-summary, .practice-mission, .practice-source, .practice-empty,
+    .practice-story, .practice-stats, .practice-mission-card,
+    .assessment-list-item, .teacher-assessment-builder [data-question-card],
+    .worksheet-builder-advanced-card, .worksheet-subject-card,
+    .worksheet-mission-step
+) {
+    background: var(--dark-surface);
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .teacher-theme :is(
+    .teacher-metric, .teacher-section, .teacher-section-heading,
+    .teacher-results, .teacher-result, .teacher-empty, .teacher-roster,
+    .teacher-focus, .teacher-quicklinks, .class-comparison-row,
+    .teacher-summary-metrics > div, .teacher-report-overview > section,
+    .practice-summary, .practice-mission, .practice-source, .practice-empty,
+    .practice-story, .practice-stats, .practice-mission-card,
+    .assessment-list-item, .teacher-assessment-builder [data-question-card],
+    .worksheet-builder-advanced-card, .worksheet-subject-card,
+    .worksheet-mission-step
+) :is(h1, h2, h3, h4, p, small, strong, span:not(.material-symbols-outlined),
+     a, label, legend, dt, dd, li) { color: var(--dark-ink); }
+html.dark .teacher-theme :is(
+    .teacher-metric-label, .teacher-metric small, .teacher-section-heading p,
+    .teacher-result p, .teacher-roster small, .teacher-empty p,
+    .teacher-quicklinks a, .class-comparison-row p,
+    .class-comparison-row dt, .practice-mission p, .practice-source p,
+    .practice-source small, .practice-empty, .practice-selection small,
+    .worksheet-builder-panel-heading p, .worksheet-builder-help,
+    .worksheet-library-heading-row p, .worksheet-subject-card small
+) { color: var(--dark-muted); }
+html.dark .teacher-theme :is(
+    .class-comparison-row dl div, .teacher-metric-dropdown-list,
+    .teacher-profile-forms aside > div:first-child, .practice-secondary
+) { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .teacher-theme .teacher-result:nth-child(even),
+html.dark .teacher-theme .teacher-roster tbody tr:nth-child(even),
+html.dark .teacher-theme .teacher-result:hover,
+html.dark .teacher-theme .teacher-roster tbody tr:hover,
+html.dark .teacher-theme .class-comparison-row:hover { background: var(--dark-surface-2); }
+html.dark .teacher-theme .teacher-roster thead,
+html.dark .teacher-theme .teacher-section > .teacher-section-heading { background: var(--dark-surface-2); }
+html.dark .teacher-theme .teacher-roster :is(th, td),
+html.dark .teacher-theme .class-comparison-row :is(strong, dt, dd, p),
+html.dark .teacher-theme .teacher-quicklinks a { color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .teacher-theme .worksheet-subject-card.is-selected,
+html.dark .teacher-theme main label > .peer:checked + div { background: #4d3d16; color: #fff8df; border-color: #e0b53d; }
+html.dark .teacher-theme .worksheet-builder-input,
+html.dark .teacher-theme .teacher-assessment-builder [data-question-card] :is(input, select, textarea) { background: #0b1725; color: var(--dark-ink); border-color: var(--dark-line); }
+
+/* Admin cards, tables, management forms, and popovers. */
+html.dark .admin-theme :is(
+    .admin-overview-metrics, .admin-overview-metric, .admin-analytics > div,
+    .admin-distribution > div, #user-management > form,
+    #user-management > div, .admin-card, [role=dialog] section
+) {
+    background: var(--dark-surface);
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .admin-theme :is(.admin-overview-metric > div, .admin-overview-metric > small, .admin-page-label, .admin-distribution small) { color: var(--dark-muted); }
+html.dark .admin-theme :is(.admin-overview-metric, .admin-analytics > div, .admin-distribution > div) :is(h1, h2, h3, h4, p, strong, span:not(.material-symbols-outlined), label, td, th) { color: var(--dark-ink); }
+html.dark .admin-theme :is(.admin-overview-metrics, .admin-overview-metric) { border-color: var(--dark-line); }
+html.dark .admin-theme table :is(thead, thead tr) { background: var(--dark-surface-2); }
+html.dark .admin-theme table :is(th, td) { color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .admin-theme table tbody tr:nth-child(even) { background: #132b43; }
+html.dark .admin-theme table tbody tr:hover { background: #173d32; }
+
+/* Student pages, reports, recommendation/practice cards, and profile panels. */
+html.dark .campus-theme :is(
+    .practice-page, .practice-summary, .practice-mission, .practice-source,
+    .practice-empty, .practice-story, .practice-mission-card,
+    .student-profile-progress, .assessment-results, .assessment-result-panel,
+    .reading-progress-card, .home-next, .home-stats, .home-section,
+    .phil-formula, .phil-recommendation, .intervention-plan,
+    .intervention-queue, .campus-results, .campus-panel
+) {
+    background: var(--dark-surface);
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .campus-theme :is(
+    .practice-page, .practice-summary, .practice-mission, .practice-source,
+    .practice-empty, .practice-story, .practice-mission-card,
+    .student-profile-progress, .assessment-results, .assessment-result-panel,
+    .reading-progress-card, .home-next, .home-stats, .home-section,
+    .phil-formula, .phil-recommendation, .intervention-plan,
+    .intervention-queue, .campus-results, .campus-panel
+) :is(h1, h2, h3, h4, p, small, strong, span:not(.material-symbols-outlined), a, dt, dd, li, label) { color: var(--dark-ink); }
+html.dark .campus-theme :is(.practice-summary p, .practice-mission p, .practice-source p, .practice-source small, .practice-muted, .practice-empty, .practice-question legend > span, .campus-results small) { color: var(--dark-muted); }
+html.dark .practice-fields :is(input, textarea, select),
+html.dark .practice-answer { background: var(--dark-surface-2); color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .practice-answer:has(input:checked) { background: #173d32; border-color: #69cda6; }
+html.dark .practice-notice { background: #12352d; color: #d4f6e8; }
+html.dark .practice-errors { background: #321b20; color: #ffb4b9; }
+html.dark .practice-coins { background: #46361b; color: #ffd36b; }
+
+/* Assessment readers and game themes. */
+html.dark .assessment-workspace :is(
+    .assessment-reading-pane, .assessment-reader, .assessment-passage,
+    .reading-paper, .assessment-results, .assessment-result-panel,
+    .assessment-empty, .assessment-text-panel, .assessment-helper-panel,
+    .assessment-mark-tools, .assessment-timer, .reading-rally,
+    .assessment-reader-silent, .assessment-reader-silent .assessment-passage
+) {
+    background: var(--dark-surface);
+    border-color: var(--dark-line);
+    color: var(--dark-ink);
+}
+html.dark .assessment-workspace :is(
+    .assessment-reading-pane, .assessment-reader, .assessment-passage,
+    .reading-paper, .assessment-results, .assessment-result-panel,
+    .assessment-empty, .assessment-text-panel, .assessment-helper-panel,
+    .assessment-mark-tools, .assessment-timer, .reading-rally,
+    .assessment-reader-silent
+) :is(h1, h2, h3, h4, p, small, strong, span:not(.material-symbols-outlined), a, dt, dd, li, label, summary) { color: var(--dark-ink); }
+html.dark .assessment-workspace :is(.assessment-heading-copy > p, .assessment-eyebrow, .assessment-attempt, .assessment-helper-empty, .assessment-helper-form small, .assessment-size-option output, .reading-timer #reading-timer-status) { color: var(--dark-muted); }
+html.dark .assessment-workspace :is(.assessment-reader-silent .assessment-reader-heading h2, .assessment-reader-silent .assessment-eyebrow, .assessment-reader-silent .assessment-passage, .assessment-reader-silent .story-paragraph) { color: var(--dark-ink); }
+html.dark .assessment-workspace :is(.assessment-helper-heading, .assessment-helper-form, .assessment-reader-actions, .assessment-legend) { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .assessment-workspace :is(.assessment-helper-heading button, .assessment-secondary-action, .assessment-theme-switch button) { background: var(--dark-surface-2); color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .assessment-workspace[data-reading-theme='crystal'] .reading-paper,
+html.dark .assessment-workspace[data-reading-theme='meadow'] .assessment-reading-pane,
+html.dark .assessment-workspace[data-reading-theme='space'] .reading-paper { background: var(--dark-surface); color: var(--dark-ink); }
+html.dark .assessment-workspace .rally-passage > div,
+html.dark .assessment-workspace .rally-answers button { background: var(--dark-surface-2); color: var(--dark-ink); border-color: var(--dark-line); }
+
+/* Worksheet builder/review and numeracy guide text. */
+html.dark :is(
+    .worksheet-page, .worksheet-text-page, .worksheet-reader,
+    .worksheet-reading, .worksheet-paper, .worksheet-preview .worksheet-text-page,
+    .worksheet-table-dialog, .worksheet-settings-panel, .worksheet-answer-review,
+    .worksheet-answer-item, .numeracy-guide, .numeracy-game
+) { color: var(--dark-ink); }
+html.dark :is(.worksheet-text-page, .worksheet-reader, .worksheet-reading, .worksheet-paper, .worksheet-table-dialog, .worksheet-answer-review, .worksheet-answer-item, .numeracy-guide, .numeracy-game) :is(h1, h2, h3, h4, p, small, strong, span:not(.material-symbols-outlined), label, legend, dt, dd, li, a) { color: var(--dark-ink); }
+html.dark :is(.worksheet-answer-question strong, .worksheet-answer-item dt, .worksheet-answer-item dl > div, .worksheet-review-summary p, .worksheet-attribution, .worksheet-empty, .worksheet-original summary, .numeracy-game-description, .numeracy-guide-actions p) { color: var(--dark-muted); }
+html.dark :is(.worksheet-problems > li, .worksheet-question-head, .worksheet-table-scroll tbody th, .worksheet-table-scroll tbody td, .numeracy-guide-heading, .numeracy-guide-actions) { background: var(--dark-surface-2); color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark :is(.worksheet-builder-advanced-card, .worksheet-subject-card, .worksheet-mission-step) { background: var(--dark-surface); color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .worksheet-builder-input,
+html.dark :is(.worksheet-fields input, .worksheet-fields select, .worksheet-fields textarea, .worksheet-inline-form input, .worksheet-inline-form select) { background: #0b1725; color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .numeracy-guide { background: var(--dark-surface); border-color: var(--dark-line); }
+html.dark .numeracy-guide :is(.numeracy-guide-heading p, .numeracy-guide-part, .numeracy-guide-instruction) { color: #b9efd9; }
+
+/* Older assessment/review components use their own light-mode selectors. */
+html.dark .teacher-answer-key,
+html.dark .answer-feedback__panel { background: var(--dark-surface); color: var(--dark-ink); border-color: var(--dark-line); }
+html.dark .teacher-answer-key :is(h1, h2, h3, p, li, span, strong),
+html.dark .answer-feedback__panel p { color: var(--dark-ink); }
+
 @media (prefers-reduced-motion: reduce) {
     html.dark *, html.dark *::before, html.dark *::after {
         transition: none !important;
     }
 }
+
+/* Teacher refresh: preserve contrast for the new compact navigation and bento dashboard. */
+html.dark body.teacher-theme { --t-navy: #eaf1ff; --t-muted: #aab8ce; --t-line: #2c4059; --t-bg: #081321; --t-white: #0c1a2b; background: #081321; color: #eaf1ff; }
+html.dark body.teacher-theme > div:first-of-type { border-color: #263a52; background: #0c1a2b; box-shadow: 0 22px 75px #0005; }
+html.dark .teacher-theme .teacher-global-nav.campus-sidebar,
+html.dark .teacher-theme .teacher-toolbar { border-color: #263a52; background: #0d1c2e; }
+html.dark .teacher-theme .teacher-global-nav .teacher-brand,
+html.dark .teacher-theme .teacher-global-nav .teacher-brand strong,
+html.dark .teacher-theme .teacher-primary-nav > a,
+html.dark .teacher-theme .teacher-nav-more > summary,
+html.dark .teacher-theme .teacher-global-profile strong { color: #eaf1ff; }
+html.dark .teacher-theme .teacher-global-nav .teacher-brand small,
+html.dark .teacher-theme .teacher-global-profile small,
+html.dark .teacher-theme .teacher-section-chip,
+html.dark .teacher-theme .teacher-toolbar > p { color: #aab8ce; }
+html.dark .teacher-theme .teacher-primary-nav > a[aria-current=page],
+html.dark .teacher-theme .teacher-primary-nav > a:hover,
+html.dark .teacher-theme .teacher-nav-more > summary:hover { background: #1b2c43; color: #fff; }
+html.dark .teacher-theme :is(.teacher-nav-more-menu, .teacher-mobile-nav > nav) { border-color: #314860; background: #102238; }
+html.dark .teacher-theme :is(.teacher-nav-more-menu a, .teacher-nav-more-menu button, .teacher-mobile-nav > nav > a, .teacher-mobile-nav > nav button) { color: #dce8f6; }
+html.dark .teacher-theme :is(.teacher-nav-more-menu a:hover, .teacher-nav-more-menu button:hover, .teacher-mobile-nav > nav > a:hover, .teacher-mobile-nav > nav button:hover) { background: #1b3551; color: #fff; }
+html.dark .teacher-theme :is(.teacher-global-profile, .teacher-section-chip, .teacher-mobile-nav > summary, .teacher-global-actions .comfort-controls > button.ui-icon-button, .teacher-global-actions .campus-topbar-actions > details > summary) { border-color: #314860; background: #14263b; color: #eaf1ff; }
+html.dark .teacher-theme .teacher-toolbar .campus-search,
+html.dark .teacher-theme .teacher-global-actions .campus-topbar-actions > details > summary { border-color: #314860; background: #14263b; color: #eaf1ff; }
+html.dark .teacher-theme .teacher-toolbar .campus-search input { color: #eaf1ff; }
+html.dark .teacher-theme main:not(.worksheet-focus-mode) :is(section, article).bg-surface-container-lowest,
+html.dark .teacher-theme main:not(.worksheet-focus-mode) :is(section, article).bg-white,
+html.dark .teacher-theme :is(.teacher-section, .teacher-focus, .teacher-metric, .teacher-roster, .teacher-results, .teacher-empty, .student-profile-progress, .practice-mission, .practice-source, .practice-empty, .worksheet-builder-panel, .worksheet-builder-advanced-card, .assessment-list-item, .phil-formula, .phil-recommendation, .intervention-plan, .intervention-queue),
+html.dark .teacher-theme .teacher-dashboard-bento > section:not(.teacher-welcome-card):not(.teacher-station) { border-color: #2c4059; background: #102035; color: #eaf1ff; }
+html.dark .teacher-theme :is(.teacher-bento-heading h2, .teacher-summary-list > div strong, .teacher-recommendation-copy strong, .teacher-completion-value strong, .teacher-completion-counts strong, .teacher-insight-row strong, .teacher-recent-copy strong, .teacher-empty-state strong, .teacher-section-progress > div strong) { color: #f0f5ff; }
+html.dark .teacher-theme :is(.teacher-summary-list > div, .teacher-recommendation-item, .teacher-recent-row, .teacher-insight-row, .teacher-insights-note, .teacher-empty-state, .teacher-section-completion-head select) { border-color: #2d425b; background: #152940; color: #dce8f6; }
+html.dark .teacher-theme :is(.teacher-summary-list > div span, .teacher-completion-value span, .teacher-completion-counts span, .teacher-section-progress > div, .teacher-recommendation-copy p, .teacher-recommendation-copy small, .teacher-recent-copy small, .teacher-insight-row small, .teacher-empty-state p, .teacher-insights-note) { color: #afbdd0; }
+html.dark .teacher-theme .teacher-summary-list > .is-attention { background: #3a3118; }
+html.dark .teacher-theme .teacher-recommendation-icon,
+html.dark .teacher-theme .teacher-bento-icon,
+html.dark .teacher-theme .teacher-recent-icon { background: #1b3551; color: #8ccfff; }
+html.dark .teacher-theme .teacher-filter-field { border-color: #314860; background: #14263b; color: #aebcd0; }
+html.dark .teacher-theme .teacher-filter-field select,
+html.dark .teacher-theme .teacher-section-completion-head select { color: #eaf1ff !important; }
+html.dark .teacher-theme .teacher-level-badge.is-frustration { background: #452430; color: #ffb6c4; }
+html.dark .teacher-theme .teacher-level-badge.is-instructional { background: #403719; color: #ffe08a; }
+html.dark .teacher-theme .teacher-badge-frustration { background: #452430; color: #ffb6c4; }
+html.dark .teacher-theme .teacher-badge-instructional { background: #403719; color: #ffe08a; }
+html.dark .teacher-theme .teacher-badge-neutral { background: #1b2c43; color: #d4dfed; }
+html.dark .teacher-theme .teacher-count-pill { background: #1b2c43; color: #c4d3e5; }
+html.dark .teacher-theme .teacher-completion-track,
+html.dark .teacher-theme .teacher-section-progress-track { background: #26394f; }
+html.dark .teacher-theme .teacher-completion-counts { border-color: #2c4059; }
+html.dark .teacher-theme .teacher-level-summary > span { color: #afbdd0; }
+html.dark .teacher-theme .teacher-level-summary > span strong { color: #f0f5ff; }
+html.dark .teacher-theme .teacher-workspace-heading,
+html.dark .teacher-theme .teacher-page-heading,
+html.dark .teacher-theme .practice-heading,
+html.dark .teacher-theme .student-profile-heading { background: linear-gradient(125deg, #081c45, #102f69 58%, #075588); }
+html.dark .teacher-theme main:not(.worksheet-focus-mode) :is(input:not([type=checkbox]):not([type=radio]), select, textarea),
+html.dark .teacher-theme .practice-fields :is(input, select, textarea),
+html.dark .teacher-theme .worksheet-builder-input { border-color: #354c66; background: #0a1727; color: #edf4ff; }
+html.dark .teacher-theme main:not(.worksheet-focus-mode) table thead th { background: #152940; color: #aebcd0; }
+html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr:hover { background: #152940; }
+html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr + tr td,
+html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr + tr th { border-color: #2c4059; }

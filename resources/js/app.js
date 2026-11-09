@@ -25,7 +25,6 @@ import '../css/app-footer.css';
 import '../css/teacher-photo.css';
 import '../css/student-tutor.css';
 import '../css/teacher-ai-assistant.css';
-import '../css/dark-mode.css';
 import '../css/reading-rally.css';
 import { initReadingRally } from './reading-rally';
 import '../css/answer-key.css';

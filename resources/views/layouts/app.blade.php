@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @if (auth()->user()?->role === 'teacher') data-teacher-ui-key="pgaals-teacher-ui-{{ auth()->id() }}" @endif>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +11,11 @@
                 try { preferences = JSON.parse(localStorage.getItem('pgaals-comfort')) || {}; } catch {}
                 const motion = preferences.motion;
                 const theme = ['light', 'dark', 'system'].includes(preferences.theme) ? preferences.theme : 'light';
+                let teacherUi = 'current';
+                const teacherUiKey = document.documentElement.dataset.teacherUiKey || 'pgaals-teacher-ui';
+                try { teacherUi = localStorage.getItem(teacherUiKey) === 'classic' ? 'classic' : 'current'; } catch {}
                 const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.dataset.teacherUi = teacherUi;
                 document.documentElement.dataset.reducedMotion = String(motion === 'reduce' || matchMedia('(prefers-reduced-motion: reduce)').matches);
                 document.documentElement.dataset.theme = dark ? 'dark' : 'light';
                 document.documentElement.classList.toggle('dark', dark);
@@ -44,11 +48,27 @@
         <!-- Fonts -->
         <x-local-fonts />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @php
+            $campusRole = auth()->user()?->role;
+            $viteEntries = ['resources/css/app.css', 'resources/js/app.js'];
+            if ($campusRole === 'teacher') {
+                $viteEntries[] = 'resources/css/teacher-redesign.css';
+            }
+            $viteEntries[] = 'resources/css/dark-mode.css';
+        @endphp
+        <!-- Scripts and workspace styles -->
+        @vite($viteEntries)
+        @if ($campusRole === 'teacher')
+            <script>
+                if (document.documentElement.dataset.teacherUi === 'classic') {
+                    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                        if (link.href.includes('teacher-redesign')) link.disabled = true;
+                    });
+                }
+            </script>
+        @endif
     </head>
     @php
-        $campusRole = auth()->user()?->role;
         $hasCampusTheme = $campusRole === 'student';
         $workspaceTheme = in_array($campusRole, ['teacher', 'admin'], true) ? 'staff-theme '.$campusRole.'-theme' : '';
         $routeName = request()->route()?->getName();

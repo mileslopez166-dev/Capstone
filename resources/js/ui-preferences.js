@@ -1,4 +1,5 @@
 const key = 'pgaals-comfort';
+const teacherUiKey = document.documentElement.dataset.teacherUiKey || 'pgaals-teacher-ui';
 const systemMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
 const media = new Set();
@@ -11,9 +12,12 @@ const normalizeReadingSizes = value => Object.fromEntries(Object.entries(reading
 }));
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem(key)) || {}; } catch { /* Storage may be unavailable. */ }
+let savedTeacherUi = 'current';
+try { savedTeacherUi = localStorage.getItem(teacherUiKey) === 'classic' ? 'classic' : 'current'; } catch { /* Storage may be unavailable. */ }
 
 export const preferences = {
     sound: saved.sound !== false,
+    teacherUi: savedTeacherUi,
     motion: ['system', 'reduce'].includes(saved.motion) ? saved.motion : 'system',
     theme: ['system', 'light', 'dark'].includes(saved.theme) ? saved.theme : 'light',
     readingSizes: normalizeReadingSizes(saved.readingSizes),
@@ -38,6 +42,17 @@ export const preferences = {
         if (name === 'theme') this.theme = ['light', 'dark', 'system'].includes(value) ? value : 'light';
         this.save();
     },
+    setTeacherUi(value, persist = true) {
+        this.teacherUi = value === 'classic' ? 'classic' : 'current';
+        if (persist) {
+            try { localStorage.setItem(teacherUiKey, this.teacherUi); } catch { /* The selection still applies for this page. */ }
+        }
+        document.documentElement.dataset.teacherUi = this.teacherUi;
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            if (link.href.includes('teacher-redesign')) link.disabled = this.teacherUi === 'classic';
+        });
+        window.dispatchEvent(new CustomEvent('pgaals:teacher-ui', { detail: { teacherUi: this.teacherUi } }));
+    },
     setReadingSize(name, value) {
         if (!Object.hasOwn(readingDefaults, name)) return;
         this.readingSizes = normalizeReadingSizes({ ...this.readingSizes, [name]: Number(value) });
@@ -57,6 +72,10 @@ systemMotion.addEventListener('change', () => preferences.apply());
 systemTheme.addEventListener('change', () => preferences.apply());
 document.addEventListener('play', event => preferences.register(event.target), true);
 window.addEventListener('storage', event => {
+    if (event.key === teacherUiKey) {
+        preferences.setTeacherUi(event.newValue, false);
+        return;
+    }
     if (event.key !== key) return;
     try { saved = JSON.parse(event.newValue) || {}; } catch { saved = {}; }
     preferences.sound = saved.sound !== false;
@@ -69,6 +88,7 @@ window.addEventListener('storage', event => {
 export default () => ({
     open: false,
     sound: preferences.sound,
+    teacherUi: preferences.teacherUi,
     motion: preferences.motion,
     theme: preferences.theme,
     reduced: preferences.reducedMotion,
@@ -76,8 +96,9 @@ export default () => ({
     systemReduced: systemMotion.matches,
     systemDark: systemTheme.matches,
     readingSizes: { ...preferences.readingSizes },
-    refresh() { this.sound = preferences.sound; this.motion = preferences.motion; this.theme = preferences.theme; this.reduced = preferences.reducedMotion; this.darkMode = preferences.darkMode; this.systemReduced = systemMotion.matches; this.systemDark = systemTheme.matches; this.readingSizes = { ...preferences.readingSizes }; },
+    refresh() { this.sound = preferences.sound; this.teacherUi = preferences.teacherUi; this.motion = preferences.motion; this.theme = preferences.theme; this.reduced = preferences.reducedMotion; this.darkMode = preferences.darkMode; this.systemReduced = systemMotion.matches; this.systemDark = systemTheme.matches; this.readingSizes = { ...preferences.readingSizes }; },
     set(name, value) { preferences.set(name, value); this.refresh(); },
+    setTeacherUi(value) { preferences.setTeacherUi(value); this.refresh(); },
     setReadingSize(name, value) { preferences.setReadingSize(name, value); this.refresh(); },
     resetReadingSizes() { preferences.resetReadingSizes(); this.refresh(); },
     close() { this.open = false; this.$refs.trigger.focus(); },

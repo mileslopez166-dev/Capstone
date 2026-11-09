@@ -37,6 +37,10 @@
 .staff-theme main :where(button, a[class*="bg-primary"]), .teacher-create-button { min-height: 44px; border-radius: 6px; }
 .wardrobe-collections button { min-height: 44px; }
 .comfort-option input:disabled { opacity: .65; cursor: not-allowed; }
+.comfort-teacher-ui { display: grid; gap: 6px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--ui-line); }
+.comfort-teacher-ui label { color: #526579; font-size: 12px; font-weight: 750; }
+.comfort-teacher-ui select { width: 100%; min-height: 38px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #203347; font: inherit; font-size: 13px; }
+.comfort-teacher-ui small { color: #718096; font-size: 11px; }
 .wardrobe-save:disabled { cursor: not-allowed; }
 .campus-topbar-actions, .admin-topbar-actions { flex-shrink: 0; gap: 12px; }
 .campus-search { min-width: 0; }
@@ -312,4 +316,15 @@
     [class~="sm:min-w-[22rem]"] { grid-template-columns: minmax(0, 1fr); }
     [class~="sm:min-w-[22rem]"] > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
     [class~="sm:min-w-[22rem]"] > div > p:last-child { text-align: right; }
+}
+.teacher-classic-sidebar,
+.teacher-classic-toolbar,
+.teacher-dashboard-classic { display: none !important; }
+html[data-teacher-ui="classic"] .teacher-global-nav,
+html[data-teacher-ui="classic"] .teacher-toolbar,
+html[data-teacher-ui="classic"] .teacher-dashboard-current { display: none !important; }
+html[data-teacher-ui="classic"] .teacher-classic-toolbar { display: flex !important; }
+html[data-teacher-ui="classic"] .teacher-dashboard-classic { display: block !important; }
+@media (min-width: 1024px) {
+    html[data-teacher-ui="classic"] .teacher-classic-sidebar { display: flex !important; }
 }

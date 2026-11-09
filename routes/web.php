@@ -200,6 +200,7 @@ Route::get('/teacher/dashboard', function () use ($submissionAverage) {
         'assessmentCount' => $assessmentCount,
         'dashboardMetrics' => $dashboardMetrics,
         'focusAreas' => $focusAreas,
+        'submissions' => $submissions,
         'recentSubmissions' => $submissions->take(5),
     ]);
 })->middleware(['auth', 'verified'])->name('teacher.dashboard');

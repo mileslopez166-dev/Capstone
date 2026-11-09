@@ -9,14 +9,11 @@
     @endphp
 
     <div class="min-h-screen bg-background">
-        <div class="lg:ml-72">
-            <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search student by name..." />
-        </div>
-
         <div class="flex min-h-screen">
             <x-teacher-sidebar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" active="students" />
 
             <main class="flex-1 p-4 md:p-8 lg:ml-72 lg:p-12">
+                <x-teacher-topbar :teacher-name="$teacherName" :teacher-initials="$teacherInitials" search-placeholder="Search student by name..." />
                 <section class="student-profile-heading">
                     <div class="student-profile-identity">
                         <a class="mb-4 flex items-center gap-2 font-bold text-primary" href="{{ route('students.index') }}">

@@ -7,7 +7,7 @@
         </div>
     </header>
     @if (session('status'))<p class="mb-6 border-l-4 border-secondary bg-secondary-container/30 p-4" role="status">{{ session('status') }}</p>@endif
-    <div class="assessment-list-tools">
+    <x-teacher-filter-bar class="assessment-list-tools">
         <nav class="worksheet-subjects" aria-label="Assessment subject">
             @foreach (['' => 'All', 'literacy' => 'Literacy', 'numeracy' => 'Numeracy'] as $value => $label)
                 <a href="{{ route('assessments.index', array_filter(['subject' => $value, 'q' => $search])) }}" @if (($subject ?? '') === $value) aria-current="page" @endif>{{ $label }}</a>
@@ -19,7 +19,7 @@
             <button class="worksheet-icon" type="submit" title="Search" aria-label="Search"><span class="material-symbols-outlined" aria-hidden="true">search</span></button>
             @if ($search !== '')<a class="worksheet-icon" href="{{ route('assessments.index', array_filter(['subject' => $subject])) }}" title="Clear search" aria-label="Clear search"><span class="material-symbols-outlined" aria-hidden="true">close</span></a>@endif
         </form>
-    </div>
+    </x-teacher-filter-bar>
     <section aria-label="Created assessment list">
         @if ($assessments->isEmpty())
             <div class="py-16 text-center">

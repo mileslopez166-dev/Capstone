@@ -5,6 +5,7 @@ const positionKey = 'pgaals-background-music-position-v1';
 
 if (track) {
     let positionRestored = false;
+    let restorePending = false;
     let lastPositionSave = 0;
     track.loop = true;
     track.preload = 'auto';
@@ -33,6 +34,18 @@ if (track) {
 
     const play = () => {
         if (!preferences.sound || document.hidden) return;
+        if (!positionRestored && track.readyState < 1) {
+            if (!restorePending) {
+                restorePending = true;
+                track.addEventListener('loadedmetadata', () => {
+                    restorePending = false;
+                    restorePosition();
+                    play();
+                }, { once: true });
+            }
+            return;
+        }
+        restorePosition();
         track.play().catch(() => {
             // Browsers may require a user gesture before allowing background audio.
         });
@@ -42,15 +55,10 @@ if (track) {
         track.pause();
     };
 
-    const stop = () => {
-        pause();
-        track.currentTime = 0;
-    };
-
     const sync = event => {
         if (event?.detail?.sound === false || !preferences.sound) {
+            savePosition(true);
             track.pause();
-            track.currentTime = 0;
             return;
         }
 
@@ -76,6 +84,7 @@ if (track) {
     });
     window.addEventListener('blur', () => { savePosition(true); pause(); });
     window.addEventListener('focus', play);
-    window.addEventListener('pagehide', () => { savePosition(true); stop(); });
-    window.addEventListener('beforeunload', () => { savePosition(true); stop(); });
+    window.addEventListener('pageshow', play);
+    window.addEventListener('pagehide', () => { savePosition(true); pause(); });
+    window.addEventListener('beforeunload', () => { savePosition(true); });
 }
