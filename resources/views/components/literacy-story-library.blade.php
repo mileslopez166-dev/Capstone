@@ -10,8 +10,8 @@
         </select>
         <label class="block text-sm font-bold text-on-surface" for="question-selection">Question selection</label>
         <select id="question-selection" name="question_selection" class="w-full rounded border-outline-variant/20 bg-white px-3 py-3 text-sm">
-            <option value="fixed" @selected(old('question_selection', 'automatic') === 'fixed')>Fixed (same 8 moderate questions)</option>
-            <option value="automatic" @selected(old('question_selection', 'automatic') === 'automatic')>Automatic (8 personalized questions)</option>
+            <option value="fixed" @selected(old('question_selection', 'fixed') === 'fixed')>Fixed (use the questions below)</option>
+            <option value="automatic" @selected(old('question_selection', 'fixed') === 'automatic')>Automatic (requires a full 15-question story bank)</option>
         </select>
         @error('question_selection')<p class="text-sm text-error" role="alert">{{ $message }}</p>@enderror
         <button id="load-story-template" class="ui-button disabled:cursor-not-allowed disabled:opacity-50" type="button" disabled>

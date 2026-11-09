@@ -24,6 +24,17 @@
                         </div>
                     @endif
 
+                    @if ($errors->any())
+                        <div class="rounded-lg border border-error/30 bg-error-container/25 px-5 py-4 text-sm text-on-error-container" role="alert" tabindex="-1" data-assessment-error-summary>
+                            <p class="font-bold">The assessment was not created. Please correct the following:</p>
+                            <ul class="mt-2 list-disc space-y-1 pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                         <div class="contents lg:col-span-2 lg:block lg:space-y-6">
                             <div class="order-1 rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-6 shadow-sm sm:p-8 lg:order-none">

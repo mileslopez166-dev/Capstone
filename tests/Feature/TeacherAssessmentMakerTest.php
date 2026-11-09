@@ -33,7 +33,8 @@ class TeacherAssessmentMakerTest extends TestCase
         $response->assertSeeText('Question selection');
         $response->assertDontSeeText('Loaded question delivery');
         $this->assertSame(1, substr_count($response->getContent(), 'name="question_selection"'));
-        $response->assertSee('value="automatic" selected', false);
+        $response->assertSee('value="fixed" selected', false);
+        $response->assertSeeText('Automatic (requires a full 15-question story bank)');
         $response->assertSee('data-submit-status="draft"', false);
         $response->assertSee('data-submit-status="published"', false);
     }
@@ -55,6 +56,7 @@ class TeacherAssessmentMakerTest extends TestCase
         $response = $this->actingAs($teacher)->post(route('assessments.store'), $this->assessmentPayload([
             'title' => 'Reading Readiness Check',
             'subject' => 'literacy',
+            'question_selection' => 'fixed',
             'instructions' => 'Complete the reading tasks in order.',
             'status' => 'published',
         ]));
