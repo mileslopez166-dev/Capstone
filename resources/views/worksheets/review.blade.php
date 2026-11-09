@@ -35,6 +35,9 @@
             </article>
         </section>
     @endif
+    @if ($studentResultsOnly && $attempt->progress->submission)
+        <x-numeracy-ml-proficiency :submission="$attempt->progress->submission" />
+    @endif
     @if ($attempt->reviewed_at && $automaticReview)
         <section class="worksheet-answer-review" aria-labelledby="worksheet-answer-review-title">
             <header class="worksheet-answer-review-heading">

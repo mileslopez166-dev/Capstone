@@ -328,7 +328,13 @@ class WorksheetController extends Controller
         abort_unless($teacher || ($request->user()->isStudent() && $attempt->user_id === $request->user()->id), 404);
 
         $scorer->score($attempt);
-        $attempt->load(['assessment', 'student', 'progress.submission.coinReward', 'progress.administrator']);
+        $attempt->load([
+            'assessment',
+            'student',
+            'progress.submission.coinReward',
+            'progress.submission.mlPrediction',
+            'progress.administrator',
+        ]);
 
         return view('worksheets.review', ['attempt' => $attempt, 'assessment' => $attempt->assessment,
             'worksheet' => NumeracyWorksheets::find($attempt->assessment->worksheet_number), 'teacher' => $teacher]);

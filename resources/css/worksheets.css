@@ -346,6 +346,30 @@
 .worksheet-score small { font-size: 16px; display: block; text-align: right; }
 .worksheet-pending { color: #875811; }
 .worksheet-grade { border-top: 2px solid #78a69d; padding: 24px 0; }
+.worksheet-ml-proficiency { margin-block: 16px 24px; overflow: hidden; border: 1px solid #b7cbd5; border-radius: 8px; background: #fff; color: #26394a; }
+.worksheet-ml-proficiency-heading { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-bottom: 1px solid #c8d8df; background: #edf6fa; }
+.worksheet-ml-proficiency-heading > .material-symbols-outlined { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #dce8ff; color: #285ca8; font-size: 25px; }
+.worksheet-ml-proficiency-heading p { margin: 0 0 2px; color: #28637e; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.worksheet-ml-proficiency-heading h2 { margin: 0; font-size: 21px; font-weight: 800; }
+.worksheet-ml-proficiency-body { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 2fr); gap: 22px; align-items: center; padding: 20px; }
+.worksheet-ml-level { display: flex; min-height: 118px; flex-direction: column; justify-content: center; padding: 18px; border: 1px solid #a9c7ed; border-radius: 8px; background: #edf5ff; }
+.worksheet-ml-level.is-official { border-color: #b8d5ca; background: #eef8f3; }
+.worksheet-ml-level span { color: #557080; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.worksheet-ml-level strong { margin-block: 5px; color: #174f91; font-size: clamp(24px, 3vw, 34px); line-height: 1.1; overflow-wrap: anywhere; }
+.worksheet-ml-level.is-official strong { color: #176759; }
+.worksheet-ml-level small, .worksheet-ml-guidance small { color: #5d7380; font-size: 12px; line-height: 1.45; }
+.worksheet-ml-guidance { min-width: 0; }
+.worksheet-ml-guidance p { margin: 0 0 8px; line-height: 1.55; overflow-wrap: anywhere; }
+.worksheet-ml-guidance p:last-of-type { color: #3f5968; }
+.worksheet-galaxy-mode .worksheet-ml-proficiency { border-color: #2879b8; background: #102e5b; color: #edf7ff; }
+.worksheet-galaxy-mode .worksheet-ml-proficiency-heading { border-color: #2879b8; background: #173d78; }
+.worksheet-galaxy-mode .worksheet-ml-proficiency :is(.worksheet-ml-guidance p, .worksheet-ml-guidance small, .worksheet-ml-level span, .worksheet-ml-level small) { color: #c8dff0; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-ml-proficiency,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-ml-proficiency { border-color: #9bc7d8; background: #fffef9; color: #203650; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-ml-proficiency-heading,
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-ml-proficiency-heading { border-color: #c2d9df; background: #edf6fa; }
+.worksheet-galaxy-mode[data-worksheet-theme='meadow'] .worksheet-ml-proficiency :is(.worksheet-ml-guidance p, .worksheet-ml-guidance small, .worksheet-ml-level span, .worksheet-ml-level small),
+.worksheet-galaxy-mode[data-worksheet-theme='crystal'] .worksheet-ml-proficiency :is(.worksheet-ml-guidance p, .worksheet-ml-guidance small, .worksheet-ml-level span, .worksheet-ml-level small) { color: #526b76; }
 .worksheet-answer-review { margin-block: 24px; border: 1px solid #b7cbd5; border-radius: 8px; overflow: hidden; background: #fff; }
 .worksheet-answer-review-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border-bottom: 1px solid #c8d8df; background: #edf6fa; }
 .worksheet-answer-review-heading > div > p { color: #28637e; font-size: 11px; font-weight: 800; text-transform: uppercase; }
@@ -369,6 +393,7 @@
 .worksheet-answer-item dt { color: #607680; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .worksheet-answer-item dd { margin-top: 2px; font-weight: 700; overflow-wrap: anywhere; }
 @media (max-width: 560px) {
+    .worksheet-ml-proficiency-body { grid-template-columns: 1fr; }
     .worksheet-answer-review-heading { align-items: flex-start; flex-direction: column; }
     .worksheet-answer-item { padding-inline: 14px; }
     .worksheet-answer-item dl { grid-template-columns: 1fr; }
