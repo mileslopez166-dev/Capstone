@@ -1,12 +1,20 @@
 import { preferences } from './ui-preferences';
+import {
+    readBackgroundMusicPosition,
+    writeBackgroundMusicPosition,
+} from './background-music-state.js';
 
 const track = document.querySelector('[data-background-music]');
-const positionKey = 'pgaals-background-music-position-v1';
 
 if (track) {
     let positionRestored = false;
     let restorePending = false;
     let lastPositionSave = 0;
+    const storages = [];
+    try { storages.push(window.sessionStorage); } catch {}
+    try { storages.push(window.localStorage); } catch {}
+
+    track.autoplay = false;
     track.loop = true;
     track.preload = 'auto';
     track.volume = 0.22;
@@ -14,22 +22,19 @@ if (track) {
 
     const restorePosition = () => {
         if (positionRestored) return;
+        const position = readBackgroundMusicPosition(storages);
+        const duration = Number(track.duration);
+        const maximum = Number.isFinite(duration) && duration > 0 ? Math.max(0, duration - 0.1) : position;
+        try { track.currentTime = Math.min(position, maximum); } catch {}
         positionRestored = true;
-        try {
-            const position = Number(localStorage.getItem(positionKey));
-            if (Number.isFinite(position) && position >= 0) {
-                track.currentTime = track.duration > 0 ? Math.min(position, Math.max(0, track.duration - 0.1)) : position;
-            }
-        } catch {
-            // Playback still works when browser storage is unavailable.
-        }
     };
 
     const savePosition = (force = false) => {
+        if (!positionRestored) return;
         const now = Date.now();
         if (!force && now - lastPositionSave < 500) return;
         lastPositionSave = now;
-        try { localStorage.setItem(positionKey, String(track.currentTime || 0)); } catch {}
+        writeBackgroundMusicPosition(storages, track.currentTime || 0);
     };
 
     const play = () => {
@@ -82,8 +87,6 @@ if (track) {
         }
         else play();
     });
-    window.addEventListener('blur', () => { savePosition(true); pause(); });
-    window.addEventListener('focus', play);
     window.addEventListener('pageshow', play);
     window.addEventListener('pagehide', () => { savePosition(true); pause(); });
     window.addEventListener('beforeunload', () => { savePosition(true); });
