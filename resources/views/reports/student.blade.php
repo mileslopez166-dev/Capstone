@@ -78,6 +78,7 @@
                     </section>
 
                     <x-reading-progress-card :progress="$readingProgress" audience="teacher" />
+                    <x-reading-progress-card :progress="$numeracyProgress" audience="teacher" subject="numeracy" />
 
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         <div class="teacher-callout relative overflow-hidden rounded-sm bg-on-primary-container p-10 text-on-primary lg:col-span-2">

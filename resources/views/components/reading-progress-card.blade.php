@@ -1,6 +1,7 @@
-@props(['progress' => [], 'audience' => 'student'])
+@props(['progress' => [], 'audience' => 'student', 'subject' => 'literacy'])
 @php
     $hasData = (bool) ($progress['has_data'] ?? false);
+    $isNumeracy = $subject === 'numeracy';
     $tone = $progress['tone'] ?? 'empty';
     $trend = $progress['trend'] ?? 'none';
     $icon = match ($trend) {
@@ -9,13 +10,15 @@
         'steady' => 'trending_flat',
         default => 'timeline',
     };
-    $title = $audience === 'teacher' ? 'Reading Progress Over Time' : 'My Reading Progress';
+    $title = $audience === 'teacher'
+        ? ($isNumeracy ? 'Numeracy Progress Over Time' : 'Reading Progress Over Time')
+        : ($isNumeracy ? 'My Numeracy Progress' : 'My Reading Progress');
 @endphp
 
-<section {{ $attributes->class(['reading-progress-card']) }} data-trend="{{ $trend }}" data-tone="{{ $tone }}">
+<section {{ $attributes->class(['reading-progress-card']) }} data-subject="{{ $subject }}" data-trend="{{ $trend }}" data-tone="{{ $tone }}">
     <div class="reading-progress-head">
         <div>
-            <p>READING TRACKER</p>
+            <p>{{ $isNumeracy ? 'NUMERACY TRACKER' : 'READING TRACKER' }}</p>
             <h2>{{ $title }}</h2>
         </div>
         <span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span>
@@ -23,8 +26,8 @@
 
     @if (! $hasData)
         <div class="reading-progress-empty">
-            <strong>{{ $progress['headline'] ?? 'Complete a literacy assessment first' }}</strong>
-            <span>{{ $progress['summary'] ?? 'Progress will appear after a scored literacy assessment.' }}</span>
+            <strong>{{ $progress['headline'] ?? 'Complete a '.$subject.' assessment first' }}</strong>
+            <span>{{ $progress['summary'] ?? 'Progress will appear after a scored '.$subject.' assessment.' }}</span>
         </div>
     @else
         <div class="reading-progress-status">
@@ -61,7 +64,7 @@
         @endif
 
         @if (! empty($progress['series']))
-            <div class="reading-progress-series" aria-label="Recent literacy score history">
+            <div class="reading-progress-series" aria-label="Recent {{ $subject }} score history">
                 @foreach ($progress['series'] as $point)
                     <div>
                         <span style="height: {{ max(10, min(100, $point['score'])) }}%"></span>

@@ -71,6 +71,7 @@
 
                 <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <x-reading-progress-card :progress="$readingProgress" audience="teacher" class="md:col-span-2 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" />
+                    <x-reading-progress-card :progress="$numeracyProgress" audience="teacher" subject="numeracy" class="md:col-span-2 shadow-[0_20px_40px_rgba(0,94,159,0.06)]" />
 
                     <div class="flex flex-col justify-between rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-[0_20px_40px_rgba(0,94,159,0.06)]">
                         <div>
