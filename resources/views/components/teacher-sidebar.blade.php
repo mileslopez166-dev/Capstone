@@ -9,7 +9,7 @@
         ['label' => 'Home', 'icon' => 'home', 'url' => route('teacher.dashboard'), 'active' => request()->routeIs('teacher.dashboard', 'dashboard')],
         ['label' => 'Students', 'icon' => 'groups', 'url' => route('students.index'), 'active' => request()->routeIs('students.*')],
         ['label' => 'Approvals', 'icon' => 'how_to_reg', 'url' => route('students.index').'#enrollment-requests-title', 'active' => false],
-        ['label' => 'Assessments', 'icon' => 'assignment', 'url' => route('assessments.index'), 'active' => request()->routeIs('assessments.*', 'teacher.assessments.*', 'worksheets.*')],
+        ['label' => 'Assessments', 'icon' => 'assignment', 'url' => route('assessments.index'), 'active' => ! request()->routeIs('assessments.results') && request()->routeIs('assessments.*', 'teacher.assessments.*', 'worksheets.*')],
         ['label' => 'Performance', 'icon' => 'monitoring', 'url' => route('assessments.results'), 'active' => request()->routeIs('assessments.results', 'teacher.phil-iri.*')],
         ['label' => 'Reports', 'icon' => 'bar_chart', 'url' => route('reports.index'), 'active' => request()->routeIs('reports.*')],
     ];

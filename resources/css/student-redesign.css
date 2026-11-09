@@ -1,0 +1,326 @@
+/* Student workspace refresh: keeps the animated campus scene visible behind the UI. */
+body.student-redesign-active {
+    --s-navy: #102344;
+    --s-blue: #1368d4;
+    --s-cyan: #12a8e0;
+    --s-lime: #ddf43b;
+    --s-muted: #64748b;
+    --s-line: #e2e8f0;
+    --s-surface: rgb(255 255 255 / 94%);
+    color: var(--s-navy);
+    font-family: Inter, 'Nunito Sans', 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+body.student-redesign-active :is(button, input, select, textarea) { font: inherit; }
+body.student-redesign-active :is(a, button, input, select, textarea, summary):focus-visible { outline: 3px solid #58b7e9; outline-offset: 3px; }
+body.student-redesign-active > div.min-h-screen { background: transparent; }
+body.student-redesign-active main { color: var(--s-navy); }
+body.student-redesign-active main > .mx-auto { padding-bottom: 12px; }
+
+/* Compact, rounded navigation that lets the pixel landscape show around the content. */
+body.student-redesign-active .campus-sidebar {
+    border: 0;
+    border-right: 1px solid rgb(214 225 241 / 85%);
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 8px 0 30px rgb(19 36 75 / 5%);
+}
+body.student-redesign-active .campus-sidebar-brand { margin-bottom: 20px; }
+body.student-redesign-active .campus-brand { color: var(--s-navy); }
+body.student-redesign-active .campus-brand > span:last-child { text-shadow: none; }
+body.student-redesign-active .campus-sidebar-identity { margin-bottom: 18px; }
+body.student-redesign-active .campus-sidebar-links > a,
+body.student-redesign-active .campus-sidebar-footer :is(a, button) {
+    min-height: 44px;
+    border-radius: 12px;
+    color: #52617a;
+    font-weight: 650;
+    text-transform: none;
+    letter-spacing: 0;
+}
+body.student-redesign-active .campus-sidebar-links > a.border-r-4 {
+    border: 0;
+    background: #edf3ff;
+    color: var(--s-navy);
+    box-shadow: inset 3px 0 var(--s-blue);
+}
+body.student-redesign-active .campus-sidebar-links > a:hover,
+body.student-redesign-active .campus-sidebar-footer :is(a, button):hover { background: #f1f5fb; }
+body.student-redesign-active .campus-sidebar-footer { background: rgb(255 255 255 / 96%); }
+
+body.student-redesign-active .campus-topbar {
+    min-height: 72px;
+    gap: 16px;
+    padding: 12px clamp(16px, 2.4vw, 32px);
+    border-bottom: 1px solid rgb(226 232 240 / 90%);
+    background: rgb(255 255 255 / 88%);
+    box-shadow: 0 8px 28px rgb(22 38 80 / 6%);
+}
+body.student-redesign-active .campus-topbar .campus-search,
+body.student-redesign-active .campus-topbar .campus-account-link {
+    border: 1px solid var(--s-line);
+    border-radius: 999px;
+    background: #f8fafc;
+}
+body.student-redesign-active .campus-topbar .campus-search { min-height: 42px; }
+body.student-redesign-active .campus-topbar-actions > details > summary,
+body.student-redesign-active .campus-mobile-menu > summary {
+    border: 1px solid var(--s-line);
+    border-radius: 12px;
+    background: #fff;
+    color: #53617a;
+}
+body.student-redesign-active .campus-xp {
+    border: 1px solid #dbe4f2;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: none;
+}
+body.student-redesign-active .campus-mobile-menu > nav {
+    border: 1px solid var(--s-line);
+    border-radius: 16px;
+    box-shadow: 0 18px 45px rgb(14 27 58 / 14%);
+}
+body.student-redesign-active .campus-bottom-nav {
+    border: 1px solid rgb(226 232 240 / 90%);
+    border-bottom: 0;
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 0 -10px 35px rgb(19 36 75 / 9%);
+}
+
+/* Page width, headings and common content surfaces. */
+body.student-redesign-active main {
+    padding-top: clamp(20px, 3vw, 36px);
+}
+body.student-redesign-active main :is(h1, h2, h3, h4) {
+    color: var(--s-navy);
+    letter-spacing: -.025em;
+}
+body.student-redesign-active main :is(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-md) {
+    border-radius: 18px;
+}
+body.student-redesign-active main :is(.bg-surface-container-lowest, .bg-white) {
+    border: 1px solid var(--s-line);
+    background-color: var(--s-surface);
+    box-shadow: 0 10px 30px rgb(22 38 80 / 6%);
+}
+body.student-redesign-active main .bg-surface-container-low { background-color: #f3f6fb; }
+body.student-redesign-active main :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    border: 1px solid #d7deea;
+    border-radius: 12px;
+    background-color: #fff;
+    color: var(--s-navy);
+    box-shadow: none;
+}
+body.student-redesign-active main :is(input, textarea)::placeholder { color: #8a95a8; opacity: 1; }
+body.student-redesign-active main :is(button, a).bg-primary {
+    border-radius: 12px;
+    background-color: var(--s-blue);
+    box-shadow: 0 3px 0 #0b4fa5;
+}
+
+body.student-redesign-active .home-heading,
+body.student-redesign-active .activity-subject-heading,
+body.student-redesign-active .wardrobe-heading,
+body.student-redesign-active .tutor-heading {
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 65%);
+    border-radius: 22px;
+    background: linear-gradient(120deg, #fff 0%, #f3f6ff 72%, #e9f8ff 100%);
+    box-shadow: 0 12px 32px rgb(20 47 91 / 8%);
+}
+body.student-redesign-active .home-heading { padding: clamp(20px, 3vw, 34px); }
+body.student-redesign-active .home-heading-copy > p,
+body.student-redesign-active .activity-subject-heading > div > p {
+    color: var(--s-blue);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+body.student-redesign-active .home-heading h1,
+body.student-redesign-active .activity-subject-heading h1,
+body.student-redesign-active .wardrobe-heading h1,
+body.student-redesign-active .tutor-heading h1 {
+    color: var(--s-navy);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 850;
+    line-height: 1.2;
+}
+body.student-redesign-active .home-section-label {
+    border: 1px solid #dce5f2;
+    border-radius: 999px;
+    background: #fff;
+    color: #52617a;
+}
+body.student-redesign-active .home-next {
+    overflow: hidden;
+    border: 1px solid #dbe4f2;
+    border-radius: 22px;
+    background: linear-gradient(125deg, rgb(255 255 255 / 96%), rgb(241 247 255 / 93%));
+    box-shadow: 0 12px 35px rgb(22 38 80 / 8%);
+}
+body.student-redesign-active .home-next h2 { color: var(--s-navy); }
+body.student-redesign-active .home-next .home-eyebrow { color: var(--s-blue); }
+body.student-redesign-active .home-stats > :is(a, div) {
+    border: 1px solid var(--s-line);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 95%);
+    box-shadow: 0 8px 24px rgb(22 38 80 / 5%);
+}
+body.student-redesign-active .home-columns { gap: 20px; }
+body.student-redesign-active .home-section,
+body.student-redesign-active .campus-panel,
+body.student-redesign-active .campus-results,
+body.student-redesign-active .student-profile-progress,
+body.student-redesign-active .campus-avatar-card,
+body.student-redesign-active .tutor-workspace,
+body.student-redesign-active .wardrobe-panel {
+    border: 1px solid var(--s-line);
+    border-radius: 20px;
+    background: rgb(255 255 255 / 95%);
+    box-shadow: 0 10px 30px rgb(22 38 80 / 6%);
+}
+body.student-redesign-active .home-section { padding: 20px; }
+body.student-redesign-active .home-section > header { border-bottom-color: var(--s-line); }
+body.student-redesign-active .home-result,
+body.student-redesign-active .home-queue-item,
+body.student-redesign-active .home-practice-link {
+    border-color: #e8edf5;
+    border-radius: 13px;
+}
+
+body.student-redesign-active .activity-subject-heading { padding: 20px 24px; }
+body.student-redesign-active .activity-subjects { gap: 16px; }
+body.student-redesign-active .activity-subject {
+    min-height: 132px;
+    border: 1px solid #e0e6ef;
+    border-radius: 18px;
+    background: rgb(255 255 255 / 96%);
+    box-shadow: 0 8px 25px rgb(22 38 80 / 5%);
+    color: var(--s-navy);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+body.student-redesign-active .activity-subject:hover,
+body.student-redesign-active .activity-subject[aria-current=page] {
+    border-color: #a9c4f2;
+    background: #f5f8ff;
+    box-shadow: 0 12px 28px rgb(22 38 80 / 9%);
+    transform: translateY(-2px);
+}
+body.student-redesign-active .activity-subject-icon { border: 0; border-radius: 14px; background: #edf3ff; color: var(--s-blue); }
+body.student-redesign-active .activity-subject[data-activity-subject=numeracy] .activity-subject-icon { background: #eaf8f2; color: #16805d; }
+body.student-redesign-active .activity-subject-copy strong { font-size: 21px; }
+body.student-redesign-active .activity-subject-copy > span { color: var(--s-muted); }
+body.student-redesign-active .campus-activities .campus-panel,
+body.student-redesign-active .campus-activities .campus-stat { border-radius: 18px; }
+body.student-redesign-active .campus-activities .campus-stat { border: 0; box-shadow: 0 10px 28px rgb(22 38 80 / 12%); }
+body.student-redesign-active .campus-activities .campus-results { padding: 22px; }
+body.student-redesign-active .campus-results-heading { border-radius: 14px; }
+
+body.student-redesign-active .student-profile-progress { background: rgb(255 255 255 / 95%); }
+body.student-redesign-active .campus-profile-intro { border-radius: 22px; box-shadow: 0 14px 38px rgb(19 36 75 / 13%); }
+body.student-redesign-active .campus-avatar-card { border-radius: 18px; box-shadow: none; }
+body.student-redesign-active .wardrobe-heading { padding: 20px 24px; }
+body.student-redesign-active .tutor-workspace { overflow: hidden; }
+body.student-redesign-active .tutor-toolbar,
+body.student-redesign-active .tutor-compose { background: #fff; }
+body.student-redesign-active .tutor-chat,
+body.student-redesign-active .tutor-history { border-color: var(--s-line); }
+
+@media (max-width: 700px) {
+    body.student-redesign-active .campus-topbar { min-height: 64px; padding: 9px 12px; }
+    body.student-redesign-active .campus-topbar .campus-search { min-height: 40px; }
+    body.student-redesign-active .campus-topbar-actions { gap: 7px; }
+    body.student-redesign-active .campus-xp { max-width: 100%; gap: 5px; padding: 5px 8px; font-size: 10px; }
+    body.student-redesign-active main { padding-top: 18px; }
+    body.student-redesign-active .home-heading { gap: 14px; padding: 19px; }
+    body.student-redesign-active .home-stats { gap: 10px; }
+    body.student-redesign-active .home-section { padding: 16px; }
+    body.student-redesign-active .activity-subject-heading { padding: 18px; }
+    body.student-redesign-active .activity-subject { border-radius: 16px; }
+    body.student-redesign-active .campus-activities .campus-results { padding: 16px; }
+    body.student-redesign-active .campus-profile-intro { padding: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.student-redesign-active .activity-subject { transition: none; }
+}
+
+html.dark body.student-redesign-active,
+html.student-night body.student-redesign-active {
+    --s-navy: #edf4ff;
+    --s-muted: #b8c7d9;
+    --s-line: #29435b;
+    --s-surface: rgb(13 31 48 / 95%);
+    color: var(--s-navy);
+}
+html.dark body.student-redesign-active .campus-sidebar,
+html.student-night body.student-redesign-active .campus-sidebar,
+html.dark body.student-redesign-active .campus-sidebar-footer,
+html.student-night body.student-redesign-active .campus-sidebar-footer,
+html.dark body.student-redesign-active .campus-topbar,
+html.student-night body.student-redesign-active .campus-topbar,
+html.dark body.student-redesign-active .campus-bottom-nav,
+html.student-night body.student-redesign-active .campus-bottom-nav {
+    border-color: #29435b;
+    background: rgb(10 26 42 / 94%);
+    color: var(--s-navy);
+}
+html.dark body.student-redesign-active .campus-brand,
+html.student-night body.student-redesign-active .campus-brand,
+html.dark body.student-redesign-active .campus-sidebar-identity :is(p, span),
+html.student-night body.student-redesign-active .campus-sidebar-identity :is(p, span),
+html.dark body.student-redesign-active .campus-sidebar-links > a,
+html.student-night body.student-redesign-active .campus-sidebar-links > a,
+html.dark body.student-redesign-active .campus-sidebar-footer :is(a, button),
+html.student-night body.student-redesign-active .campus-sidebar-footer :is(a, button) { color: #d9e7f5; }
+html.dark body.student-redesign-active .campus-sidebar-links > a.border-r-4,
+html.student-night body.student-redesign-active .campus-sidebar-links > a.border-r-4 { background: #173653; color: #fff; }
+html.dark body.student-redesign-active main :is(.bg-surface-container-lowest, .bg-white),
+html.student-night body.student-redesign-active main :is(.bg-surface-container-lowest, .bg-white),
+html.dark body.student-redesign-active :is(.home-section, .home-stats > :is(a, div), .campus-panel, .campus-results, .student-profile-progress, .campus-avatar-card, .tutor-workspace, .wardrobe-panel),
+html.student-night body.student-redesign-active :is(.home-section, .home-stats > :is(a, div), .campus-panel, .campus-results, .student-profile-progress, .campus-avatar-card, .tutor-workspace, .wardrobe-panel) {
+    border-color: var(--s-line);
+    background: var(--s-surface);
+    color: var(--s-navy);
+}
+html.dark body.student-redesign-active main :is(h1, h2, h3, h4, p, label, dt, dd, strong),
+html.student-night body.student-redesign-active main :is(h1, h2, h3, h4, p, label, dt, dd, strong) { color: var(--s-navy); }
+html.dark body.student-redesign-active main :is(.text-on-surface, .text-on-surface-variant),
+html.student-night body.student-redesign-active main :is(.text-on-surface, .text-on-surface-variant) { color: var(--s-muted); }
+html.dark body.student-redesign-active .home-heading,
+html.student-night body.student-redesign-active .home-heading,
+html.dark body.student-redesign-active .activity-subject-heading,
+html.student-night body.student-redesign-active .activity-subject-heading,
+html.dark body.student-redesign-active .wardrobe-heading,
+html.student-night body.student-redesign-active .wardrobe-heading,
+html.dark body.student-redesign-active .tutor-heading,
+html.student-night body.student-redesign-active .tutor-heading {
+    border-color: #29435b;
+    background: linear-gradient(120deg, #10283e, #132d48 72%, #153751);
+}
+html.dark body.student-redesign-active .home-heading h1,
+html.student-night body.student-redesign-active .home-heading h1,
+html.dark body.student-redesign-active .activity-subject-heading h1,
+html.student-night body.student-redesign-active .activity-subject-heading h1,
+html.dark body.student-redesign-active .wardrobe-heading h1,
+html.student-night body.student-redesign-active .wardrobe-heading h1,
+html.dark body.student-redesign-active .tutor-heading h1,
+html.student-night body.student-redesign-active .tutor-heading h1 { color: #f3f7ff; }
+html.dark body.student-redesign-active .activity-subject,
+html.student-night body.student-redesign-active .activity-subject { border-color: var(--s-line); background: var(--s-surface); color: var(--s-navy); }
+html.dark body.student-redesign-active .activity-subject-copy > span,
+html.student-night body.student-redesign-active .activity-subject-copy > span { color: var(--s-muted); }
+html.dark body.student-redesign-active main :is(input:not([type=checkbox]):not([type=radio]), select, textarea),
+html.student-night body.student-redesign-active main :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    border-color: #3d5a72;
+    background: #10273b;
+    color: #f3f7ff;
+}
+html.dark body.student-redesign-active main :is(input, textarea)::placeholder,
+html.student-night body.student-redesign-active main :is(input, textarea)::placeholder { color: #b8c7d9; }
+html.dark body.student-redesign-active .campus-xp,
+html.student-night body.student-redesign-active .campus-xp,
+html.dark body.student-redesign-active .campus-topbar .campus-search,
+html.student-night body.student-redesign-active .campus-topbar .campus-search,
+html.dark body.student-redesign-active .campus-topbar .campus-account-link,
+html.student-night body.student-redesign-active .campus-topbar .campus-account-link { border-color: #29435b; background: #10273b; color: #eaf2fb; }

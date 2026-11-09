@@ -254,38 +254,6 @@
                             <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                         </a>
                     @endif
-                    <div class="rounded-lg bg-surface-container-low p-8">
-                        <h2 class="font-headline text-2xl font-bold text-on-surface">Account Summary</h2>
-                        <div class="mt-6 space-y-4">
-                            <div class="rounded-xl bg-surface-container-lowest p-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Name</p>
-                                <p class="mt-2 font-headline text-xl font-bold">{{ $user->name }}</p>
-                            </div>
-                            <div class="rounded-xl bg-surface-container-lowest p-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Primary Email</p>
-                                <p class="mt-2 text-sm font-medium text-on-surface">{{ $user->email }}</p>
-                            </div>
-                            <div class="rounded-xl bg-surface-container-lowest p-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Role Access</p>
-                                <p class="mt-2 text-sm font-bold text-primary">{{ ucfirst($user->role ?? 'student') }}</p>
-                            </div>
-                            @if ($isStudent)
-                                <div class="rounded-xl bg-surface-container-lowest p-4">
-                                    <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Section</p>
-                                    <p class="mt-2 text-sm font-bold text-primary">{{ $user->section ?: 'Not Assigned' }}</p>
-                                </div>
-                            @endif
-                        </div>
-
-                        <form method="post" action="{{ route('logout') }}" class="mt-6">
-                            @csrf
-                            <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-surface-container-highest px-6 py-3 font-bold text-on-surface transition-colors hover:bg-surface-variant active:scale-[0.98]" type="submit">
-                                <span class="material-symbols-outlined text-base">logout</span>
-                                <span>Log Out</span>
-                            </button>
-                        </form>
-                    </div>
-
                     <div class="rounded-lg border border-error/20 bg-error-container/10 p-8">
                         <h2 class="font-headline text-2xl font-bold text-error">Danger Zone</h2>
                         <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">Deleting your account permanently removes your access. Enter your password only if you really want to continue.</p>

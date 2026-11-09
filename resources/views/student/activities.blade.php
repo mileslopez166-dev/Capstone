@@ -228,6 +228,7 @@
                             @foreach ($completedSubmissions as $submission)
                                 @php
                                     $assessment = $submission->assessment;
+                                    $isNumeracyResult = $assessment?->subject === 'numeracy';
                                     $requestStatus = $submission->latest_retake_request?->status;
                                     $philResult = $assessment?->subject === 'literacy' ? \App\Support\PhilIri::forSubmission($submission) : null;
                                 @endphp
@@ -251,20 +252,43 @@
                                             <p class="mt-2 text-sm text-on-surface-variant">Submitted {{ $submission->submitted_at?->format('M d, Y h:i A') ?? 'recently' }} | {{ $submission->attempts_count }} total {{ Str::plural('attempt', $submission->attempts_count) }}</p>
                                         </div>
 
-                                        <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
-                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy === null ? 'Pending' : $submission->accuracy.'%' }}</p>
+                                        @if ($isNumeracyResult)
+                                            <details class="group mt-4 w-full lg:max-w-[26rem]">
+                                                <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-low px-4 py-3 font-bold text-on-surface">
+                                                    <span>Show score details</span>
+                                                    <span class="material-symbols-outlined transition-transform group-open:rotate-180" aria-hidden="true">expand_more</span>
+                                                </summary>
+                                                <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                                    <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
+                                                        <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy === null ? 'Pending' : $submission->accuracy.'%' }}</p>
+                                                    </div>
+                                                    <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
+                                                        <p class="mt-2 font-headline text-3xl font-black text-secondary-dim">{{ number_format($submission->points) }}</p>
+                                                    </div>
+                                                    <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
+                                                        <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'Phil-IRI' }}</p>
+                                                    </div>
+                                                </div>
+                                            </details>
+                                        @else
+                                            <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
+                                                <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                    <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Score</p>
+                                                    <p class="mt-2 font-headline text-3xl font-black text-primary">{{ $submission->accuracy === null ? 'Pending' : $submission->accuracy.'%' }}</p>
+                                                </div>
+                                                <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                    <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
+                                                    <p class="mt-2 font-headline text-3xl font-black text-secondary-dim">{{ number_format($submission->points) }}</p>
+                                                </div>
+                                                <div class="rounded-xl bg-surface-container-low p-4 text-center">
+                                                    <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
+                                                    <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'Phil-IRI' }}</p>
+                                                </div>
                                             </div>
-                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Points</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-secondary-dim">{{ number_format($submission->points) }}</p>
-                                            </div>
-                                            <div class="rounded-xl bg-surface-container-low p-4 text-center">
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Correct</p>
-                                                <p class="mt-2 font-headline text-3xl font-black text-on-surface">{{ $submission->question_count > 0 ? $submission->correct_count.'/'.$submission->question_count : 'Phil-IRI' }}</p>
-                                            </div>
-                                        </div>
+                                        @endif
                                     </div>
 
                                     <details class="student-output-details group mt-5 overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-low">

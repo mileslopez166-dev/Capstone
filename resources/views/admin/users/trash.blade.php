@@ -52,14 +52,14 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 bg-surface-container-low/50 p-4 rounded-full">
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1">
-                        <a href="{{ route('admin.users.trash') }}" class="px-5 py-2 rounded-full bg-primary text-on-primary text-sm font-bold">All Roles</a>
-                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'teacher'])) }}" class="px-5 py-2 rounded-full bg-surface-container-lowest text-sm">Teachers</a>
-                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'student'])) }}" class="px-5 py-2 rounded-full bg-surface-container-lowest text-sm">Students</a>
-                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'admin'])) }}" class="px-5 py-2 rounded-full bg-surface-container-lowest text-sm">Admins</a>
+                <div class="mb-6 flex flex-col gap-3 rounded-2xl bg-surface-container-low/50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                    <div class="flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1">
+                        <a href="{{ route('admin.users.trash') }}" class="shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-bold text-on-primary">All Roles</a>
+                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'teacher'])) }}" class="shrink-0 whitespace-nowrap rounded-full bg-surface-container-lowest px-4 py-2 text-sm text-on-surface">Teachers</a>
+                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'student'])) }}" class="shrink-0 whitespace-nowrap rounded-full bg-surface-container-lowest px-4 py-2 text-sm text-on-surface">Students</a>
+                        <a href="{{ route('admin.users.trash', array_merge(request()->query(), ['role' => 'admin'])) }}" class="shrink-0 whitespace-nowrap rounded-full bg-surface-container-lowest px-4 py-2 text-sm text-on-surface">Admins</a>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex min-w-0 items-center gap-3 text-sm">
                         <span class="text-on-surface-variant text-sm">Sorted by: <strong class="text-primary">Recently Deleted</strong></span>
                     </div>
                 </div>

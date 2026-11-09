@@ -12,4 +12,4 @@
     })();
 </script>
 <x-local-fonts />
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js'])

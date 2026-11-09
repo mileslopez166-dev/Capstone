@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/teacher-redesign.css',
+                'resources/css/student-redesign.css',
                 'resources/css/dark-mode.css',
                 'resources/js/app.js',
             ],

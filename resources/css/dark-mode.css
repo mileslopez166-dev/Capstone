@@ -246,9 +246,15 @@ html.dark .staff-theme {
     color: var(--workspace-ink);
 }
 html.dark .admin-theme {
+    --workspace-bg: #07131f;
+    --workspace-line: #29435f;
+    --workspace-muted: #a9bdd1;
+    --workspace-ink: #edf5ff;
     --workspace-accent: #8bb6ff;
     --workspace-hover: #6e9bed;
     --workspace-soft: #172b48;
+    background: var(--workspace-bg);
+    color: var(--workspace-ink);
 }
 html.dark .staff-theme :is(.bg-background, .bg-surface),
 html.dark .staff-theme #user-management > div:first-child { background-color: var(--workspace-bg); }
@@ -845,7 +851,7 @@ html.dark .admin-theme :is(.admin-overview-metrics, .admin-overview-metric) { bo
 html.dark .admin-theme table :is(thead, thead tr) { background: var(--dark-surface-2); }
 html.dark .admin-theme table :is(th, td) { color: var(--dark-ink); border-color: var(--dark-line); }
 html.dark .admin-theme table tbody tr:nth-child(even) { background: #132b43; }
-html.dark .admin-theme table tbody tr:hover { background: #173d32; }
+html.dark .admin-theme table tbody tr:hover { background: #1b3554; }
 
 /* Student pages, reports, recommendation/practice cards, and profile panels. */
 html.dark .campus-theme :is(
@@ -982,6 +988,59 @@ html.dark .teacher-theme .teacher-section-progress-track { background: #26394f; 
 html.dark .teacher-theme .teacher-completion-counts { border-color: #2c4059; }
 html.dark .teacher-theme .teacher-level-summary > span { color: #afbdd0; }
 html.dark .teacher-theme .teacher-level-summary > span strong { color: #f0f5ff; }
+html.dark .teacher-theme .teacher-builder-actions-dock { border-color: #354c66; background: rgb(10 23 39 / 95%); box-shadow: 0 12px 36px rgb(0 0 0 / 38%); }
+html.dark .teacher-theme .teacher-builder-actions-dock .teacher-builder-button-secondary { border-color: #405a74; background: #1a3048; color: #edf4ff; }
+html.dark .teacher-theme .campus-profile-intro {
+    border: 1px solid #2867a7;
+    background: linear-gradient(125deg, #0c2340 0%, #123c73 58%, #075b9e 100%);
+    color: #f2f7ff;
+}
+html.dark .teacher-theme .campus-profile-intro :is(h1, h2, p, span, a) { color: #f2f7ff; }
+html.dark .teacher-theme .teacher-profile-forms aside > div:first-child { background: #142d49; border-color: #315a83; }
+html.dark .teacher-theme .teacher-profile-forms aside .space-y-4 > div { border-color: #31506c; }
+html.dark .teacher-theme .teacher-mobile-nav > nav > a[aria-current=page] { background: #1d4f82; color: #fff; }
+html.dark .teacher-theme .teacher-mobile-nav > nav > a[aria-current=page] .material-symbols-outlined { color: #9bd2ff; }
+html.dark .teacher-theme .teacher-assessment-builder {
+    --builder-ink: #edf4ff;
+    --builder-blue: #64b5f6;
+    --builder-muted: #b8cadc;
+    --builder-line: #36516a;
+    color: var(--builder-ink);
+}
+html.dark .teacher-theme .teacher-assessment-builder :is(h1, h2, h3, h4, label, legend, dt, dd, p, li, small, th, td) { color: var(--builder-ink); }
+html.dark .teacher-theme .teacher-assessment-builder :is(.text-on-surface-variant, .text-outline, .text-outline-variant, .text-secondary-dim, .text-primary-dim) { color: var(--builder-muted) !important; }
+html.dark .teacher-theme .teacher-assessment-builder :is(.text-primary, [class*="text-primary/"]) { color: var(--builder-blue); }
+html.dark .teacher-theme .teacher-assessment-builder :is(.bg-surface, .bg-surface-container-low, .bg-surface-container-lowest, .bg-white) { background-color: #10273b; color: var(--builder-ink); }
+html.dark .teacher-theme .teacher-assessment-builder :is(input:not([type=radio]):not([type=checkbox]), select, textarea) { border-color: var(--builder-line); background: #0b1c2c; color: var(--builder-ink); }
+html.dark .teacher-theme .teacher-assessment-builder :is(input, textarea)::placeholder { color: #b8cadc; opacity: 1; }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-steps { border-color: var(--builder-line); background: #10273b; color: var(--builder-ink); }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-steps span { border-color: var(--builder-line); color: var(--builder-muted); }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-steps .is-current { color: var(--builder-blue); }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-button-secondary { border-color: var(--builder-line); background: #1a3048; color: var(--builder-ink); }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-button-primary { border-color: #287acb; background: #1368d4; color: #fff; box-shadow: 0 3px 0 #0b4fa5; }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-hero .ui-button-secondary { border-color: #36516a; background: #10273b; color: var(--builder-ink); box-shadow: none; }
+html.dark .teacher-theme .teacher-assessment-builder .teacher-builder-hero .ui-button-secondary .material-symbols-outlined { color: var(--builder-blue); }
+html.dark .teacher-theme .teacher-builder-actions-dock { border-color: #36516a; background: rgb(11 28 44 / 98%); }
+html.dark .notification-menu > .notification-trigger {
+    border: 1px solid #36516a;
+    background: #142b43;
+    color: #c8def3;
+}
+html.dark .notification-menu > .notification-trigger:hover { border-color: #4c83b4; background: #1a3a5a; color: #fff; }
+html.dark .notification-menu > .notification-trigger > .material-symbols-outlined { color: #c8def3; }
+html.dark .notification-menu .notification-panel { border-color: #36516a; background: #102238; color: #edf4ff; }
+html.dark .notification-menu .notification-panel > div { border-color: #2c455d; }
+html.dark .notification-menu .notification-panel .text-on-surface { color: #edf4ff; }
+html.dark .notification-menu .notification-panel .text-on-surface-variant,
+html.dark .notification-menu .notification-panel .text-outline { color: #bdccdc; }
+html.dark .notification-menu .notification-panel .bg-white { background: #102238; }
+html.dark .notification-menu .notification-panel .bg-surface-container-low { background: #17324c; }
+html.dark .notification-menu .notification-panel a.bg-primary-container\/10,
+html.dark .notification-menu .notification-panel div.bg-primary-container\/10 { background: #173b5a; }
+html.dark .notification-menu .notification-panel a:hover { background: #1b3c5b; }
+html.dark .notification-menu .notification-panel [data-phone-push] { color: #9bd2ff; }
+html.dark .notification-menu .notification-panel [data-phone-push]:hover { background: #173b5a; }
+html.dark .teacher-theme main label > .peer:checked + div { border-color: #287acb; background-color: #153a5d; color: #edf4ff; box-shadow: inset 0 0 0 1px #287acb; }
 html.dark .teacher-theme .teacher-workspace-heading,
 html.dark .teacher-theme .teacher-page-heading,
 html.dark .teacher-theme .practice-heading,
@@ -993,3 +1052,169 @@ html.dark .teacher-theme main:not(.worksheet-focus-mode) table thead th { backgr
 html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr:hover { background: #152940; }
 html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr + tr td,
 html.dark .teacher-theme main:not(.worksheet-focus-mode) table tbody tr + tr th { border-color: #2c4059; }
+
+/* Keep teacher primary actions blue in both workspace themes. */
+.teacher-theme {
+    --ui-accent: #1368d4;
+}
+.teacher-theme :is(.ui-button:not(.ui-button-secondary), .teacher-primary-action, .teacher-button-primary, .teacher-builder-button-primary, .teacher-ai-compose button, .assessment-submit-panel button.bg-primary, main :is(button, a).bg-primary) {
+    border-color: #1368d4;
+    background: #1368d4;
+    color: #fff;
+    box-shadow: 0 3px 0 #0b4fa5;
+}
+.teacher-theme :is(.ui-button:not(.ui-button-secondary), .teacher-primary-action, .teacher-button-primary, .teacher-builder-button-primary, .teacher-ai-compose button, .assessment-submit-panel button.bg-primary, main :is(button, a).bg-primary):hover {
+    border-color: #0b57b5;
+    background: #0b57b5;
+    color: #fff;
+}
+.teacher-theme .teacher-workspace-heading .ui-button-secondary,
+.teacher-theme .teacher-page-heading .teacher-primary-action {
+    border-color: #1368d4;
+    background: #1368d4;
+    color: #fff;
+    box-shadow: 0 3px 0 #0b4fa5;
+}
+.teacher-theme .teacher-workspace-heading .ui-button-secondary:hover,
+.teacher-theme .teacher-page-heading .teacher-primary-action:hover { background: #0b57b5; }
+.teacher-theme .worksheet-subjects a[aria-current=page] {
+    border-color: #1368d4;
+    background: #1368d4;
+    color: #fff;
+}
+html.dark .teacher-theme :is(.ui-button:not(.ui-button-secondary), .teacher-primary-action, .teacher-button-primary, .teacher-builder-button-primary, .teacher-ai-compose button, .assessment-submit-panel button.bg-primary, main :is(button, a).bg-primary),
+html.dark .teacher-theme :is(.teacher-workspace-heading .ui-button-secondary, .teacher-page-heading .teacher-primary-action),
+html.dark .teacher-theme .worksheet-subjects a[aria-current=page] {
+    border-color: #287acb;
+    background: #1368d4;
+    color: #fff;
+    box-shadow: 0 3px 0 #0b4fa5;
+}
+html.dark .teacher-theme :is(.ui-button:not(.ui-button-secondary), .teacher-primary-action, .teacher-button-primary, .teacher-builder-button-primary, .teacher-ai-compose button, .assessment-submit-panel button.bg-primary, main :is(button, a).bg-primary):hover,
+html.dark .teacher-theme :is(.teacher-workspace-heading .ui-button-secondary, .teacher-page-heading .teacher-primary-action):hover,
+html.dark .teacher-theme .worksheet-subjects a[aria-current=page]:hover { background: #287acb; color: #fff; }
+.teacher-theme .campus-sidebar-links > a.border-r-4,
+.teacher-theme .campus-sidebar-footer a.border-r-4 { background: #e8f1ff; color: #124b90; box-shadow: inset 3px 0 #1368d4; }
+html.dark .teacher-theme .campus-sidebar-links > a.border-r-4,
+html.dark .teacher-theme .campus-sidebar-footer a.border-r-4 { background: #17375a; color: #eaf4ff; box-shadow: inset 3px 0 #4e9cf0; }
+
+/* Profile accents use the same blue as the teacher workspace actions. */
+.teacher-theme .teacher-avatar,
+.teacher-theme .teacher-photo-preview > img { border-color: #78b7f4; }
+.teacher-theme .teacher-avatar { background: #e7f2ff; color: #15559a; }
+.teacher-theme .teacher-photo-editor { border-color: #a9cbed; }
+.teacher-theme .teacher-photo-status,
+.teacher-theme .teacher-profile-forms :is(.text-secondary, .text-tertiary),
+.teacher-theme .teacher-profile-forms .material-symbols-outlined { color: #1368d4; }
+.teacher-theme .teacher-summary-metrics > div:nth-child(2) { background-color: #e7f2ff; border-color: #9bc4ee; }
+.teacher-theme .teacher-profile-forms aside > div:first-child { border-color: #9bc4ee; }
+.teacher-theme .teacher-profile-forms aside .space-y-4 > div { border-bottom-color: #c5dcf5; }
+.teacher-theme .campus-sidebar-identity { border-color: #9bc4ee; }
+.teacher-theme .campus-sidebar-identity .bg-primary-container,
+.teacher-theme .campus-account-link > div { background: #e7f2ff; color: #15559a; }
+.teacher-theme .teacher-global-profile { border-color: #9bc4ee; }
+html.dark .teacher-theme .teacher-avatar { border-color: #4e9cf0; background: #17375a; color: #eaf4ff; }
+html.dark .teacher-theme .teacher-photo-preview > img { border-color: #4e9cf0; }
+html.dark .teacher-theme .teacher-photo-editor { border-color: #315a83; }
+html.dark .teacher-theme .teacher-photo-status,
+html.dark .teacher-theme .teacher-profile-forms :is(.text-secondary, .text-tertiary),
+html.dark .teacher-theme .teacher-profile-forms .material-symbols-outlined { color: #80bdff; }
+html.dark .teacher-theme .teacher-summary-metrics > div:nth-child(2) { background-color: #142d49; border-color: #315a83; }
+html.dark .teacher-theme .teacher-profile-forms aside > div:first-child { border-color: #315a83; }
+html.dark .teacher-theme .teacher-profile-forms aside .space-y-4 > div { border-bottom-color: #315a83; }
+html.dark .teacher-theme .campus-sidebar-identity { border-color: #315a83; }
+html.dark .teacher-theme .campus-sidebar-identity .bg-primary-container,
+html.dark .teacher-theme .campus-account-link > div { background: #17375a; color: #a9d6ff; }
+html.dark .teacher-theme .teacher-global-profile { border-color: #315a83; }
+
+/* Prevent intervention report text from touching or overflowing its card edge. */
+.teacher-theme .intervention-queue {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 18px;
+}
+.teacher-theme .intervention-queue > header {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+}
+.teacher-theme .intervention-queue > header h2 {
+    flex: 1 1 190px;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+}
+.teacher-theme .intervention-queue > header > span {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    text-align: right;
+}
+.teacher-theme .intervention-queue-empty {
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 0 2px;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+}
+
+/* Mobile teacher navigation opens on a light panel, so use dark readable ink. */
+.teacher-theme .role-mobile-menu > nav .role-navigation {
+    --nav-ink: #29445f;
+    --nav-accent: #1559a6;
+    --nav-selected: #e6f1ff;
+    --nav-hover: #f0f6ff;
+    --nav-line: #9bbce3;
+}
+.teacher-theme .role-mobile-menu > nav .role-navigation :is(.navigation-link, summary) { color: #29445f; }
+.teacher-theme .role-mobile-menu > nav .role-navigation .material-symbols-outlined { color: #2866a8; }
+.teacher-theme .role-mobile-menu > nav .role-navigation :is(.navigation-link, summary):hover { background: #f0f6ff; color: #124b90; }
+.teacher-theme .role-mobile-menu > nav .role-navigation .navigation-link[aria-current="page"] {
+    background: #e6f1ff;
+    color: #124b90;
+    box-shadow: inset 3px 0 #1368d4;
+}
+.teacher-theme .role-mobile-menu > nav .role-navigation .navigation-link[aria-current="page"] .material-symbols-outlined { color: #1368d4; }
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation {
+    --nav-ink: #dce9f8;
+    --nav-accent: #8cc5ff;
+    --nav-selected: #17375a;
+    --nav-hover: #142d49;
+    --nav-line: #315a83;
+}
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation :is(.navigation-link, summary) { color: #dce9f8; }
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation .material-symbols-outlined { color: #9bcfff; }
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation :is(.navigation-link, summary):hover { background: #142d49; color: #fff; }
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation .navigation-link[aria-current="page"] { background: #17375a; color: #eff7ff; box-shadow: inset 3px 0 #4e9cf0; }
+html.dark .teacher-theme .role-mobile-menu > nav .role-navigation .navigation-link[aria-current="page"] .material-symbols-outlined { color: #80bdff; }
+
+/* Keep the compact top navigation from clipping labels and use blue selection. */
+.teacher-theme .teacher-global-nav-inner { min-width: 0; }
+.teacher-theme .teacher-primary-nav > a[aria-current="page"] {
+    background: #eaf2ff;
+    color: #123b70;
+    box-shadow: inset 0 -2px #1368d4;
+}
+.teacher-theme .teacher-primary-nav > a[aria-current="page"] .material-symbols-outlined { color: #1368d4; }
+@media (max-width: 1100px) {
+    .teacher-theme .teacher-primary-nav {
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+    }
+    .teacher-theme .teacher-primary-nav::-webkit-scrollbar { display: none; }
+    .teacher-theme .teacher-primary-nav > a,
+    .teacher-theme .teacher-primary-nav > .teacher-nav-more { flex: 0 0 auto; }
+}
+html.dark .teacher-theme .teacher-primary-nav > a[aria-current="page"] {
+    background: #17375a;
+    color: #eff7ff;
+    box-shadow: inset 0 -2px #4e9cf0;
+}
+html.dark .teacher-theme .teacher-primary-nav > a[aria-current="page"] .material-symbols-outlined { color: #80bdff; }

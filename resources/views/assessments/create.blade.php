@@ -10,14 +10,6 @@
                             <h1 class="font-display text-4xl font-extrabold text-on-surface">Create New Assessment</h1>
                             <a class="ui-button ui-button-secondary mt-4" href="{{ route('assessments.index') }}"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>Created Assessments</a>
                         </div>
-                        <div class="teacher-builder-actions">
-                            <button class="teacher-builder-button teacher-builder-button-secondary" type="submit" data-submit-status="draft">
-                                <span class="material-symbols-outlined" aria-hidden="true">lock</span>Save locked
-                            </button>
-                            <button class="teacher-builder-button teacher-builder-button-primary" type="submit" data-submit-status="published">
-                                <span class="material-symbols-outlined" aria-hidden="true">publish</span>Publish assessment
-                            </button>
-                        </div>
                     </header>
 
                     <nav class="teacher-builder-steps" aria-label="Assessment creation steps">
@@ -363,6 +355,14 @@
                         </aside>
                     </section>
 
+                    <div class="teacher-builder-actions teacher-builder-actions-dock" aria-label="Save or publish assessment">
+                        <button class="teacher-builder-button teacher-builder-button-secondary" type="submit" data-submit-status="draft">
+                            <span class="material-symbols-outlined" aria-hidden="true">lock</span>Save locked
+                        </button>
+                        <button class="teacher-builder-button teacher-builder-button-primary" type="submit" data-submit-status="published">
+                            <span class="material-symbols-outlined" aria-hidden="true">publish</span>Publish assessment
+                        </button>
+                    </div>
                 </form>
 
 

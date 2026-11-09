@@ -55,6 +55,9 @@
                 $viteEntries[] = 'resources/css/teacher-redesign.css';
             }
             $viteEntries[] = 'resources/css/dark-mode.css';
+            if ($campusRole === 'student' && ! in_array(request()->route()?->getName(), ['student.assessments.show', 'student.practice.show'], true)) {
+                $viteEntries[] = 'resources/css/student-redesign.css';
+            }
         @endphp
         <!-- Scripts and workspace styles -->
         @vite($viteEntries)
@@ -74,7 +77,7 @@
         $routeName = request()->route()?->getName();
         $isAssessmentSession = $routeName === 'student.assessments.show' || $routeName === 'teacher.assessments.take';
     @endphp
-    <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }}">
+    <body class="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container {{ $hasCampusTheme ? 'campus-theme campus-'.$campusRole : $workspaceTheme }} {{ $hasCampusTheme && ! $isAssessmentSession && $routeName !== 'student.practice.show' ? 'student-redesign-active' : '' }}">
         @if ($campusRole === 'student' && ! $isAssessmentSession)
             <audio class="hidden" data-background-music src="{{ asset('audio/student-background-ost.mp3') }}" autoplay loop preload="auto" aria-hidden="true"></audio>
         @endif

@@ -8,7 +8,7 @@
 .teacher-theme .teacher-result:only-child { border-radius: var(--ui-panel-radius); }
 .campus-theme :is(.campus-panel, .campus-stat, .campus-avatar-card, .activity-subject) { border-width: 1px; border-radius: var(--ui-panel-radius); box-shadow: 0 2px 6px #17324b12; }
 .campus-theme .campus-avatar-card { padding: 18px; }
-.teacher-theme { --ui-accent: #166655; --ui-ink: #243b35; --ui-line: #d0dfd9; }
+.teacher-theme { --ui-accent: #1368d4; --ui-ink: #102344; --ui-line: #d7e0ed; }
 .admin-theme { --ui-accent: #285ca2; --ui-ink: #293442; --ui-line: #d6dfe9; }
 [x-cloak] { display: none !important; }
 :where(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 3px; }

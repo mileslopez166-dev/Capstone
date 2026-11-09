@@ -12,8 +12,8 @@
         : 0;
 @endphp
 
-<details class="group relative">
-    <summary class="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-surface-container-low hover:text-primary [&::-webkit-details-marker]:hidden">
+<details class="notification-menu group relative">
+    <summary class="notification-trigger relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-surface-container-low hover:text-primary [&::-webkit-details-marker]:hidden" aria-label="Notifications">
         <span class="material-symbols-outlined">notifications</span>
         @if ($unreadCount > 0)
             <span class="absolute right-1 top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold leading-none text-white">
@@ -22,7 +22,7 @@
         @endif
     </summary>
 
-    <div class="absolute right-0 z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-DEFAULT border border-surface-variant/50 bg-white text-left shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+    <div class="notification-panel absolute right-0 z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-DEFAULT border border-surface-variant/50 bg-white text-left shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
         <div class="flex items-center justify-between border-b border-surface-variant/40 px-4 py-3">
             <div>
                 <p class="font-headline text-sm font-bold text-on-surface">Notifications</p>

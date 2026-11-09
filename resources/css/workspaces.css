@@ -82,7 +82,7 @@
 .teacher-theme .campus-mobile-menu > summary { border-color: #d2e0d6; color: #24674d; box-shadow: none; }
 .teacher-theme .campus-mobile-menu > nav { border: 1px solid #d2e0d6; box-shadow: 0 10px 30px #18322520; }
 .teacher-theme .campus-mobile-menu nav :is(a, button):hover, .teacher-theme .campus-mobile-menu nav [aria-current] { background: #e6f3ec; color: #186346; }
-.teacher-theme .campus-profile-intro { background: #225d49; box-shadow: none; border-radius: 8px; }
+.teacher-theme .campus-profile-intro { background: linear-gradient(125deg, #102344 0%, #123f91 58%, #1368d4 100%); box-shadow: 0 12px 32px rgb(19 36 75 / 12%); border-radius: 18px; }
 .teacher-theme .campus-profile-intro h1 { font-size: 26px; }
 .teacher-theme .campus-profile-intro > p { font-size: 14px; }
 .teacher-content { width: 100%; max-width: 1400px; margin: auto; padding: 32px; }
@@ -454,8 +454,8 @@
 .teacher-theme main .teacher-callout { background-color: #245f4b; border: 1px solid #144f3c; border-radius: 8px; box-shadow: none; }
 .teacher-theme main .teacher-callout > div > .bg-white\/10 { background: transparent; padding-inline: 0; }
 .teacher-theme .teacher-profile-forms > :is(section, aside) > div { border-radius: 8px; box-shadow: none; }
-.teacher-theme .teacher-profile-forms aside > div:first-child { background-color: #dcebe3; border-block: 2px solid #9bbca9; }
-.teacher-theme .teacher-profile-forms aside .space-y-4 > div { background-color: transparent; border: 0; border-bottom: 1px solid #a8c3b4; padding-inline: 0; }
+.teacher-theme .teacher-profile-forms aside > div:first-child { background-color: #eaf2ff; border-block: 2px solid #c2d5f3; }
+.teacher-theme .teacher-profile-forms aside .space-y-4 > div { background-color: transparent; border: 0; border-bottom: 1px solid #d4e1f5; padding-inline: 0; }
 .teacher-theme .campus-profile-intro > div > div:first-child { flex-shrink: 0; }
 .teacher-theme .campus-profile-intro > div > div:last-child { min-width: 0; }
 .teacher-theme .practice-summary { padding: 20px; background-color: #dcebe3; border-color: #9bbca9; }
@@ -642,11 +642,54 @@
 }
 .teacher-theme .teacher-builder-hero { align-items: center; }
 .teacher-builder-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.teacher-builder-actions-dock {
+    position: fixed;
+    z-index: 45;
+    right: max(16px, calc((100vw - 1100px) / 2));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: max(16px, calc((100vw - 1100px) / 2));
+    justify-content: flex-end;
+    padding: 12px;
+    border: 1px solid #dfe5ee;
+    border-radius: 18px;
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 0 12px 36px rgb(16 35 68 / 18%);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+.teacher-builder-actions-dock .teacher-builder-button-secondary { border-color: #d8e0ea; background: #f1f5f9; color: #23344f; }
+.teacher-assessment-builder { padding-bottom: 100px; }
+.teacher-theme .teacher-assessment-builder {
+    --builder-ink: #102344;
+    --builder-blue: #1368d4;
+    --builder-muted: #53647b;
+    --builder-line: #d9e2ef;
+    color: var(--builder-ink);
+}
+.teacher-theme .teacher-assessment-builder :is(h1, h2, h3, h4, label, legend, dt, dd, p, li, small, th, td) { color: var(--builder-ink); }
+.teacher-theme .teacher-assessment-builder :is(.text-on-surface-variant, .text-outline, .text-outline-variant, .text-secondary-dim, .text-primary-dim) { color: var(--builder-muted) !important; }
+.teacher-theme .teacher-assessment-builder :is(.text-primary, [class*="text-primary/"]) { color: var(--builder-blue); }
+.teacher-theme .teacher-assessment-builder :is(.bg-surface, .bg-surface-container-low, .bg-surface-container-lowest, .bg-white) { color: var(--builder-ink); }
+.teacher-theme .teacher-assessment-builder :is(input:not([type=radio]):not([type=checkbox]), select, textarea) {
+    border-color: var(--builder-line);
+    background-color: #fff;
+    color: var(--builder-ink);
+}
+.teacher-theme .teacher-assessment-builder :is(input, textarea)::placeholder { color: #63738a; opacity: 1; }
+.teacher-theme .teacher-assessment-builder .teacher-builder-steps { color: var(--builder-ink); }
+.teacher-theme .teacher-assessment-builder .teacher-builder-steps span { color: var(--builder-muted); }
+.teacher-theme .teacher-assessment-builder .teacher-builder-steps .is-current { color: var(--builder-blue); }
+.teacher-theme .teacher-assessment-builder .teacher-builder-button-secondary { border-color: var(--builder-line); background: #f1f5f9; color: var(--builder-ink); }
+.teacher-theme .teacher-assessment-builder .teacher-builder-button-primary { border-color: var(--builder-blue); background: var(--builder-blue); color: #fff; box-shadow: 0 3px 0 #0b4fa5; }
+.teacher-theme .teacher-assessment-builder .teacher-builder-hero .ui-button-secondary { border: 1px solid #d9e2ef; border-radius: 999px; background: #fff; color: var(--builder-ink); box-shadow: 0 2px 0 #d9e2ef; }
+.teacher-theme .teacher-assessment-builder .teacher-builder-hero .ui-button-secondary .material-symbols-outlined { color: var(--builder-blue); }
+.teacher-theme .teacher-assessment-builder :is(.border-outline-variant\/10, .border-outline-variant\/20, .border-outline-variant\/30) { border-color: var(--builder-line); }
+.teacher-theme .teacher-builder-actions-dock { background: rgb(255 255 255 / 98%); }
 .teacher-builder-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 800; transition: transform .18s ease, filter .18s ease; }
 .teacher-builder-button:hover { filter: brightness(1.05); transform: translateY(-1px); }
 .teacher-builder-button .material-symbols-outlined { font-size: 18px; }
 .teacher-builder-button-secondary { background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.65); color: #fff; }
-.teacher-builder-button-primary { background: #ffd65a; border: 1px solid #e7aa22; color: #17354a; box-shadow: 0 3px 0 #b97513; }
+.teacher-builder-button-primary { background: #1368d4; border: 1px solid #1368d4; color: #fff; box-shadow: 0 3px 0 #0b4fa5; }
 .teacher-theme .teacher-builder-button.bg-primary,
 .teacher-theme .teacher-builder-button-primary { background: #ffd65a; border-color: #e7aa22; color: #17354a; }
 .teacher-theme .teacher-builder-button.bg-surface-container-high { background: rgba(255,255,255,.18); color: #fff; }
@@ -684,6 +727,7 @@
     .teacher-theme .teacher-metric { min-height: 132px; padding: 16px; }
     .teacher-theme .teacher-page-heading, .teacher-theme .teacher-workspace-heading { border-radius: 12px; }
     .teacher-builder-actions { width: 100%; justify-content: stretch; }
+    .teacher-builder-actions-dock { gap: 8px; padding: 9px; }
     .teacher-builder-button { flex: 1 1 0; }
     .teacher-builder-steps { gap: 8px; }
     .teacher-builder-steps span { padding-right: 10px; font-size: 11px; }
