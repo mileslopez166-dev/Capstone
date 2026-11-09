@@ -2,6 +2,8 @@
 @if ($result || $live)
     @php
         $oral = ($result['assessment_type'] ?? '') === 'oral_reading';
+        $hasComprehension = isset($result['comprehension_percent']) && (int) ($result['question_count'] ?? 0) > 0;
+        $hasConfirmedMiscues = $oral && isset($result['miscues']);
         $comprehension = isset($result['comprehension_percent']) ? $result['correct_count'].' / '.$result['question_count'].' ('.$result['comprehension_percent'].'%)' : 'Not recorded';
         $formulaRows = $result ? \App\Support\PhilIri::formulaRows($result, $submission) : [];
         $recommendation = $result['practice_recommendation'] ?? null;
@@ -31,13 +33,13 @@
             <strong class="phil-level" data-phil-field="label">{{ $result['label'] ?? '' }}</strong>
         </div>
         <dl class="phil-measures">
-            <div><dt>Comprehension</dt><dd data-phil-field="comprehension">{{ $comprehension }}</dd><small data-phil-field="comprehension_level">{{ $result['comprehension_level'] ?? '' }}</small></div>
+            <div data-phil-comprehension @if ($oral && !$hasComprehension) hidden @endif><dt>Comprehension</dt><dd data-phil-field="comprehension">{{ $comprehension }}</dd><small data-phil-field="comprehension_level">{{ $result['comprehension_level'] ?? '' }}</small></div>
             <div data-phil-oral @if (!$oral) hidden @endif><dt>Word reading</dt><dd data-phil-field="word_reading">{{ isset($result['word_reading_percent']) ? $result['word_reading_percent'].'%' : 'Reading marks not recorded' }}</dd><small data-phil-field="word_reading_level">{{ $result['word_reading_level'] ?? '' }}</small></div>
-            <div data-phil-oral @if (!$oral) hidden @endif><dt>Confirmed miscues</dt><dd data-phil-field="miscues">{{ $result['miscues'] ?? 'Not recorded' }}</dd></div>
+            <div data-phil-oral data-phil-confirmed @if (!$hasConfirmedMiscues) hidden @endif><dt>Confirmed miscues</dt><dd data-phil-field="miscues">{{ $result['miscues'] ?? '' }}</dd></div>
             <div data-phil-marked @if (!$oral || !isset($result['marked_miscues'])) hidden @endif><dt>Red-marked words</dt><dd data-phil-field="marked_miscues">{{ $result['marked_miscues'] ?? '' }}</dd></div>
             <div data-phil-rate @if (!isset($result['words_per_minute'])) hidden @endif><dt>Reading rate</dt><dd data-phil-field="rate">{{ $result['words_per_minute'] ?? '' }} WPM</dd></div>
         </dl>
-        <div class="phil-interpretation">
+        <div class="phil-interpretation" data-phil-interpretation @if ($oral && !$hasComprehension) hidden @endif>
             <h4 data-phil-field="interpretation_heading">{{ ($result['assessment_type'] ?? '') === 'group_screening' ? 'Screening interpretation' : 'Comprehension interpretation' }}</h4>
             <p data-phil-field="comprehension_interpretation">{{ $result['comprehension_interpretation'] ?? '' }}</p>
         </div>
