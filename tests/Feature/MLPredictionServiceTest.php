@@ -70,6 +70,59 @@ class MLPredictionServiceTest extends TestCase
         $this->assertDatabaseCount('ml_predictions', 0);
     }
 
+    public function test_oral_reading_prediction_uses_wrp_without_comprehension(): void
+    {
+        Http::fake(['*' => Http::response([
+            'prediction' => 'Frustration', 'confidence' => 0.91,
+            'model_name' => 'reading_level_random_forest_v1',
+        ])]);
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = Assessment::create([
+            'created_by' => $teacher->id,
+            'title' => 'Oral passage',
+            'subject' => 'literacy',
+            'quiz_type' => 'multiple_choice',
+            'delivery_method' => 'manual',
+            'target_section' => 'all',
+            'assessment_type' => 'oral_reading',
+            'focus_areas' => [],
+            'story_title' => 'Reading aloud',
+            'story_description' => implode(' ', array_fill(0, 104, 'word')),
+            'manual_questions' => [],
+            'status' => 'published',
+        ]);
+        $philIri = \App\Support\PhilIri::initial($assessment, 0, 0, [
+            'word_marks' => array_merge(array_fill(0, 19, 2), array_fill(0, 85, 0)),
+        ]);
+        $submission = AssessmentSubmission::create([
+            'assessment_id' => $assessment->id,
+            'user_id' => $student->id,
+            'attempt_number' => 1,
+            'answers' => [],
+            'correct_count' => 0,
+            'question_count' => 0,
+            'points' => 0,
+            'possible_points' => 0,
+            'phil_iri' => $philIri,
+            'submitted_at' => now(),
+        ]);
+
+        $features = app(MLPredictionService::class)->features($submission);
+        $this->assertSame(81.73, $features['reading_score']);
+        $this->assertSame(81.73, $features['reading_accuracy']);
+        $this->assertNull($features['comprehension_score']);
+        $this->assertNull($features['listening_score']);
+
+        $prediction = app(MLPredictionService::class)->predictForSubmission($submission);
+        $this->assertSame('Frustration', $prediction->prediction);
+        $this->assertSame(81.73, $prediction->input_data['reading_score']);
+        $this->assertNull($prediction->input_data['comprehension_score']);
+        Http::assertSent(fn ($request) => $request['reading_score'] === 81.73
+            && $request['reading_accuracy'] === 81.73
+            && $request['comprehension_score'] === null);
+    }
+
     public function test_teacher_dashboard_displays_saved_ai_learning_insights(): void
     {
         $teacher = User::factory()->teacher()->create();
@@ -202,7 +255,7 @@ class MLPredictionServiceTest extends TestCase
             ->assertJsonPath('prediction.prediction', 'Instructional')
             ->assertJsonPath('prediction.confidence', 0.84);
         Http::assertSent(fn ($request) => $request['reading_score'] == 50
-            && $request['comprehension_score'] == 50 && $request['reading_accuracy'] == 50
+            && $request['comprehension_score'] == 50 && $request['reading_accuracy'] === null
             && $request['numeracy_score'] === null && $request['assessment_attempts'] == 1.5
             && ! str_contains($request->body(), $student->email));
         $this->getJson($url)->assertOk();

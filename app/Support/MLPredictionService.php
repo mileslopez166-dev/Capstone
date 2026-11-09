@@ -147,14 +147,22 @@ class MLPredictionService
         $score = AssessmentScores::percentage($submission);
         $subject = $assessment?->subject;
         $type = $assessment?->assessment_type;
+        $wordReadingPercentage = $type === 'oral_reading'
+            ? $this->number($philIri['word_reading_percent'] ?? null)
+            : null;
+        $literacyScore = $subject === 'literacy'
+            ? ($type === 'oral_reading' ? $wordReadingPercentage : $score)
+            : null;
 
         return [
-            'reading_score' => $subject === 'literacy' ? $score : null,
-            'reading_accuracy' => $type === 'oral_reading'
-                ? $this->number($philIri['word_reading_percent'] ?? null)
-                : ($subject === 'literacy' ? $score : null),
+            // Oral reading has no required comprehension questions. Its ML score is the
+            // Phil-IRI word-reading percentage, and comprehension remains genuinely absent.
+            'reading_score' => $literacyScore,
+            'reading_accuracy' => $wordReadingPercentage,
             'reading_speed' => $this->number($philIri['words_per_minute'] ?? null),
-            'comprehension_score' => $this->number($philIri['comprehension_percent'] ?? ($subject === 'literacy' ? $score : null)),
+            'comprehension_score' => $type === 'oral_reading'
+                ? null
+                : $this->number($philIri['comprehension_percent'] ?? $literacyScore),
             'listening_score' => $type === 'listening_comprehension' ? $score : null,
             'numeracy_score' => $subject === 'numeracy' ? $score : null,
             'completion_time' => $this->number($philIri['reading_seconds'] ?? null),

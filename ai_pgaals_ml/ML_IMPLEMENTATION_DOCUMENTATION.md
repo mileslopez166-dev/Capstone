@@ -24,10 +24,10 @@ Planned sources:
 
 The model uses tabular educational indicators:
 
-- reading score
-- reading accuracy
+- reading score (oral reading uses the Phil-IRI word-reading percentage)
+- reading accuracy (oral word-reading percentage only)
 - reading speed
-- comprehension score
+- comprehension score (silent reading and listening only; absent for oral reading)
 - listening score
 - numeracy score
 - assessment attempts
