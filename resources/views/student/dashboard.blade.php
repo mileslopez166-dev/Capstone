@@ -37,6 +37,7 @@
             <a href="{{ route('student.leaderboard') }}"><span class="material-symbols-outlined" aria-hidden="true">stars</span><div><strong>{{ number_format($studentMetrics['total_points']) }}</strong><span>Best-score points</span></div></a>
         </section>
         <x-reading-progress-card :progress="$readingProgress" audience="student" />
+        <x-reading-progress-card :progress="$numeracyProgress" audience="student" subject="numeracy" />
         <div class="home-columns">
             <section class="home-section" aria-labelledby="recent-results">
                 <header><h2 id="recent-results">Recent Results</h2><a href="{{ route('student.activities') }}#recorded-outputs">View all<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></header>

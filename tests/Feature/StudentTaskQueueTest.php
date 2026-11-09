@@ -67,6 +67,24 @@ class StudentTaskQueueTest extends TestCase
             ->assertSeeText('Frustration to Independent');
     }
 
+    public function test_dashboard_shows_numeracy_progress_with_numeracy_levels(): void
+    {
+        $student = User::factory()->create();
+        $first = $this->assessment(['title' => 'First Math Check', 'subject' => 'numeracy']);
+        $latest = $this->assessment(['title' => 'Latest Math Check', 'subject' => 'numeracy']);
+        $this->submission($first, $student, 1, 2)->update(['submitted_at' => now()->subDay()]);
+        $this->submission($latest, $student, 1, 3)->update(['submitted_at' => now()]);
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk()
+            ->assertViewHas('numeracyProgress', fn ($progress) => $progress['latest_score'] === 75
+                && $progress['previous_score'] === 50
+                && $progress['change'] === 25
+                && $progress['status_label'] === 'Improved'
+                && $progress['level_transition'] === 'Beginning to Proficient')
+            ->assertSeeText('My Numeracy Progress')
+            ->assertSeeText('Beginning to Proficient');
+    }
+
     public function test_dashboard_heading_shows_the_students_section(): void
     {
         $student = User::factory()->create(['name' => 'Miles Learner', 'section' => 'Magalang']);

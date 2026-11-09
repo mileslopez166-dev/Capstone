@@ -9,21 +9,32 @@ class StudentProgress
 {
     public static function literacy(iterable $submissions): array
     {
+        return self::forSubject($submissions, 'literacy');
+    }
+
+    public static function numeracy(iterable $submissions): array
+    {
+        return self::forSubject($submissions, 'numeracy');
+    }
+
+    private static function forSubject(iterable $submissions, string $subject): array
+    {
+        $isNumeracy = $subject === 'numeracy';
         $history = collect($submissions)
-            ->filter(fn (AssessmentSubmission $submission): bool => ($submission->assessment?->subject ?? null) === 'literacy')
-            ->map(function (AssessmentSubmission $submission): ?array {
+            ->filter(fn (AssessmentSubmission $submission): bool => ($submission->assessment?->subject ?? null) === $subject)
+            ->map(function (AssessmentSubmission $submission) use ($isNumeracy): ?array {
                 $score = AssessmentScores::percentage($submission);
                 if ($score === null) {
                     return null;
                 }
 
-                $result = PhilIri::forSubmission($submission);
-
                 return [
                     'id' => $submission->id,
                     'title' => $submission->assessment?->title ?? 'Assessment',
                     'score' => $score,
-                    'level' => $result['level'] ?? null,
+                    'level' => $isNumeracy
+                        ? NumeracyProficiency::forPercentage($score)
+                        : (PhilIri::forSubmission($submission)['level'] ?? null),
                     'submitted_at' => $submission->submitted_at,
                     'attempt_number' => $submission->attempt_number,
                 ];
@@ -38,9 +49,9 @@ class StudentProgress
                 'has_comparison' => false,
                 'trend' => 'none',
                 'tone' => 'empty',
-                'status_label' => 'No reading data yet',
-                'headline' => 'Complete a literacy assessment first',
-                'summary' => 'Reading progress will appear after the student finishes a scored literacy assessment.',
+                'status_label' => $isNumeracy ? 'No numeracy data yet' : 'No reading data yet',
+                'headline' => 'Complete a '.$subject.' assessment first',
+                'summary' => ($isNumeracy ? 'Numeracy' : 'Reading').' progress will appear after the student finishes a scored '.$subject.' assessment.',
                 'latest_score' => null,
                 'previous_score' => null,
                 'best_score' => null,
@@ -73,8 +84,8 @@ class StudentProgress
             'trend' => $trend,
             'tone' => self::tone($trend),
             'status_label' => self::statusLabel($trend),
-            'headline' => self::headline($latest, $previous, $change),
-            'summary' => self::summary($latest, $previous, $change),
+            'headline' => self::headline($latest, $previous, $change, $isNumeracy),
+            'summary' => self::summary($latest, $previous, $change, $isNumeracy),
             'latest_score' => $latest['score'],
             'latest_title' => $latest['title'],
             'latest_level' => $latest['level'],
@@ -124,10 +135,10 @@ class StudentProgress
         };
     }
 
-    private static function headline(array $latest, ?array $previous, ?int $change): string
+    private static function headline(array $latest, ?array $previous, ?int $change, bool $isNumeracy): string
     {
         if (! $previous) {
-            return 'Latest reading score is '.$latest['score'].'%';
+            return 'Latest '.($isNumeracy ? 'numeracy' : 'reading').' score is '.$latest['score'].'%';
         }
 
         if ($change > 0) {
@@ -141,21 +152,23 @@ class StudentProgress
         return 'No score change yet';
     }
 
-    private static function summary(array $latest, ?array $previous, ?int $change): string
+    private static function summary(array $latest, ?array $previous, ?int $change, bool $isNumeracy): string
     {
+        $subject = $isNumeracy ? 'numeracy' : 'literacy';
+
         if (! $previous) {
-            return 'This is the first scored literacy result. Complete another literacy assessment to see a trend.';
+            return 'This is the first scored '.$subject.' result. Complete another '.$subject.' assessment to see a trend.';
         }
 
         if ($change > 0) {
-            return 'The latest literacy score moved up from '.$previous['score'].'% to '.$latest['score'].'%. Keep building from the recommended practice.';
+            return 'The latest '.$subject.' score moved up from '.$previous['score'].'% to '.$latest['score'].'%. Keep building from the recommended practice.';
         }
 
         if ($change < 0) {
-            return 'The latest literacy score moved from '.$previous['score'].'% to '.$latest['score'].'%. Use the support recommendation before the next assessment.';
+            return 'The latest '.$subject.' score moved from '.$previous['score'].'% to '.$latest['score'].'%. Use the support recommendation before the next assessment.';
         }
 
-        return 'The latest literacy score matched the previous result at '.$latest['score'].'%. Continue practice to move the trend forward.';
+        return 'The latest '.$subject.' score matched the previous result at '.$latest['score'].'%. Continue practice to move the trend forward.';
     }
 
     private static function changeLabel(?int $change): string

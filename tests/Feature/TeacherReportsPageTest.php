@@ -127,6 +127,29 @@ class TeacherReportsPageTest extends TestCase
             ->assertSeeText('Frustration to Instructional');
     }
 
+    public function test_individual_report_shows_numeracy_progress_over_time(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['name' => 'Numeracy Progress Learner']);
+        $first = $this->createAssessment($teacher, ['title' => 'First Math Check', 'subject' => 'numeracy']);
+        $latest = $this->createAssessment($teacher, ['title' => 'Latest Math Check', 'subject' => 'numeracy']);
+        $this->createSubmission($first, $student, [
+            'correct_count' => 2, 'question_count' => 4, 'submitted_at' => now()->subDays(2),
+        ]);
+        $this->createSubmission($latest, $student, [
+            'correct_count' => 3, 'question_count' => 4, 'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($teacher)->get(route('reports.student', ['student' => $student]))
+            ->assertOk()
+            ->assertViewHas('numeracyProgress', fn ($progress) => $progress['latest_score'] === 75
+                && $progress['previous_score'] === 50
+                && $progress['change'] === 25
+                && $progress['level_transition'] === 'Beginning to Proficient')
+            ->assertSeeText('Numeracy Progress Over Time')
+            ->assertSeeText('Beginning to Proficient');
+    }
+
     public function test_teacher_cannot_open_report_for_student_without_teacher_owned_answers(): void
     {
         $teacher = User::factory()->teacher()->create();

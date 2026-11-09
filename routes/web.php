@@ -321,6 +321,7 @@ Route::get('/student/dashboard', function () use ($visibleAssessmentsForStudent,
         'recentSubmissions' => $submissions->unique('assessment_id')->take(3),
         'studentMetrics' => $studentMetrics,
         'readingProgress' => StudentProgress::literacy($submissions),
+        'numeracyProgress' => StudentProgress::numeracy($submissions),
         'nextTask' => \App\Support\StudentTaskQueue::next($pendingAssessments, $student),
         'practiceCount' => \App\Models\PracticeMission::where('student_id', $student->id)->where('status', 'assigned')->count(),
         'coinBalance' => $student->practiceCoinBalance(),
@@ -626,6 +627,7 @@ Route::get('/teacher/students/{student}', function (User $student) use ($submiss
         'studentMetrics' => $studentMetrics,
         'subjectBreakdown' => $subjectBreakdown,
         'readingProgress' => StudentProgress::literacy($submissions),
+        'numeracyProgress' => StudentProgress::numeracy($submissions),
         'studentIsOnline' => $studentIsOnline,
         'assessmentRequests' => $assessmentRequests,
         'assistedAssessments' => $student->isApproved() ? $teacher->createdAssessments()->where('status', 'published')->latest()->get()
@@ -753,6 +755,7 @@ Route::get('/teacher/reports/students/{student?}', function (?User $student = nu
         'studentMetrics' => $studentMetrics,
         'subjectBreakdown' => $subjectBreakdown,
         'readingProgress' => StudentProgress::literacy($submissions),
+        'numeracyProgress' => StudentProgress::numeracy($submissions),
     ]);
 })->middleware(['auth', 'verified'])->name('reports.student');
 
