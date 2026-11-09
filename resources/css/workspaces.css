@@ -642,6 +642,7 @@
 }
 .teacher-theme .teacher-builder-hero { align-items: center; }
 .teacher-builder-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.teacher-builder-actions-sidebar { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--builder-line, #d9e2ef); }
 .teacher-builder-actions-dock {
     position: fixed;
     z-index: 45;
@@ -718,7 +719,12 @@
 .teacher-theme .teacher-assessment-builder [data-question-card] { border: 1px solid #b4d5e6; border-left: 5px solid #087fc4; border-radius: 10px; background: #fff; box-shadow: 0 4px 0 #d3e9f4; }
 .teacher-theme .teacher-assessment-builder [data-question-card] .question-number { background: #e4f5fc; border-color: #9bcce4; color: #0878b9; }
 
+@media (min-width: 1024px) {
+    .teacher-builder-actions-mobile { display: none; }
+    .teacher-assessment-builder { padding-bottom: 0; }
+}
 @media (max-width: 1023px) {
+    .teacher-builder-actions-sidebar { display: none; }
     .teacher-theme .teacher-assessment-builder > section > aside > div:first-child { position: static; }
 }
 @media (max-width: 767px) {

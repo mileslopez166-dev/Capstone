@@ -349,13 +349,22 @@
                                     <div class="space-y-3">
                                         <x-phil-iri-rubric />
                                     </div>
+
+                                    <div class="teacher-builder-actions teacher-builder-actions-sidebar" aria-label="Save or publish assessment">
+                                        <button class="teacher-builder-button teacher-builder-button-secondary" type="submit" data-submit-status="draft">
+                                            <span class="material-symbols-outlined" aria-hidden="true">lock</span>Save locked
+                                        </button>
+                                        <button class="teacher-builder-button teacher-builder-button-primary" type="submit" data-submit-status="published">
+                                            <span class="material-symbols-outlined" aria-hidden="true">publish</span>Publish assessment
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                         </aside>
                     </section>
 
-                    <div class="teacher-builder-actions teacher-builder-actions-dock" aria-label="Save or publish assessment">
+                    <div class="teacher-builder-actions teacher-builder-actions-dock teacher-builder-actions-mobile" aria-label="Save or publish assessment">
                         <button class="teacher-builder-button teacher-builder-button-secondary" type="submit" data-submit-status="draft">
                             <span class="material-symbols-outlined" aria-hidden="true">lock</span>Save locked
                         </button>
