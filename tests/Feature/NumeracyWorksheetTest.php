@@ -297,13 +297,28 @@ class NumeracyWorksheetTest extends TestCase
             ->assertOk();
 
         $attempt = WorksheetAttempt::firstOrFail();
+        $submission = AssessmentSubmission::firstOrFail();
+        $submission->mlPrediction()->create([
+            'student_id' => $student->id,
+            'model_name' => 'numeracy-test-model',
+            'prediction' => 'Proficient',
+            'confidence_score' => .87,
+            'input_data' => ['numeracy_score' => 80],
+            'recommendation' => 'Practice mixed problem-solving activities.',
+        ]);
 
         $this->get(route('worksheets.review', $attempt))
             ->assertOk()
             ->assertSee('data-results-learning-guide', false)
+            ->assertSee('data-worksheet-ml-proficiency', false)
             ->assertSeeText('Rules & Examples')
             ->assertSeeText('Divisibility Rules Review')
             ->assertSeeText('By 2: All even numbers are divisible by 2.')
+            ->assertSeeText('Numeracy Proficiency Level')
+            ->assertSeeText('Proficient')
+            ->assertSeeText('87% confidence')
+            ->assertSeeText('Practice mixed problem-solving activities.')
+            ->assertSeeInOrder(['Rules &amp; Examples', 'Numeracy Proficiency Level', 'Complete Answer Review'], false)
             ->assertSeeText('Complete Answer Review')
             ->assertDontSeeText('For each number, give all its divisors from this list: 2, 3, 5, 9, 10.')
             ->assertDontSee('data-worksheet-reader', false);

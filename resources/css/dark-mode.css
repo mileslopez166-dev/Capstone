@@ -517,6 +517,12 @@ html.dark .worksheet-icon[aria-pressed=true] {
 html.dark .worksheet-item-response :disabled { background: #132338; color: var(--dark-ink); }
 html.dark .worksheet-answer-review { background: var(--dark-surface); border-color: var(--dark-line); }
 html.dark .worksheet-answer-review-heading { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .worksheet-ml-proficiency { background: var(--dark-surface); border-color: var(--dark-line); color: var(--dark-ink); }
+html.dark .worksheet-ml-proficiency-heading { background: var(--dark-surface-2); border-color: var(--dark-line); }
+html.dark .worksheet-ml-proficiency-heading :is(h2, p),
+html.dark .worksheet-ml-proficiency :is(.worksheet-ml-guidance p, .worksheet-ml-guidance small, .worksheet-ml-level span, .worksheet-ml-level small) { color: var(--dark-ink); }
+html.dark .worksheet-ml-level { border-color: #466b91; background: #172c45; }
+html.dark .worksheet-ml-level.is-official { border-color: #3f7462; background: #17332d; }
 html.dark .worksheet-answer-review-heading > dl > div,
 html.dark .worksheet-answer-item { background: var(--dark-surface); color: var(--dark-ink); }
 html.dark .worksheet-answer-list { background: var(--dark-line); }
