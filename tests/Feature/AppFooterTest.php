@@ -46,7 +46,13 @@ class AppFooterTest extends TestCase
             $this->assertSame(route('support.developing'), $links->item(0)->getAttribute('href'));
             $this->assertStringNotContainsString('Dashboard', $footer->textContent);
             $this->assertSame(1, substr_count($footer->textContent, 'AI-PGAALS'));
-            $this->assertSame(1, $xpath->query('preceding::main', $footer)->length);
+            $variants = $xpath->query('//*[@data-teacher-dashboard]');
+            $expectedMains = $variants->length > 0 ? $variants->length : 1;
+            $this->assertSame($expectedMains, $xpath->query('preceding::main', $footer)->length, $page.' has one main per layout.');
+            foreach ($variants as $variant) {
+                $this->assertSame(1, $xpath->query('.//main', $variant)->length);
+                $this->assertSame(0, $xpath->query('.//footer[@aria-label="Site footer"]', $variant)->length);
+            }
             if (getenv('CAPTURE_FOOTER_FIXTURES') && in_array($page, ['student.activities', 'students.index'])) {
                 file_put_contents(storage_path('app/footer-'.$user->role.'.html'), $response->getContent());
             }

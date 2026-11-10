@@ -180,14 +180,22 @@ class PhilIriScoringTest extends TestCase
         $submission = AssessmentSubmission::firstOrFail();
         $snapshot = $submission->phil_iri;
         $this->assertSame(4, $snapshot['marked_miscues']);
-        $this->get(route('student.activities'))->assertOk()
+        $activities = $this->get(route('student.activities'))->assertOk()
             ->assertSee('96%')
-            ->assertSee('data-phil-comprehension hidden', false)
-            ->assertSee('data-phil-confirmed hidden', false)
             ->assertSee('Word-reading score calculated from the red marks recorded during the assessment.')
             ->assertSeeText('Word reading')
             ->assertSeeText('(100 words - 4 red-marked words) / 100 x 100 = 96%')
             ->assertDontSeeText('(100 words - 0 miscues) / 100 x 100 = 96%');
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($activities->getContent());
+        $xpath = new \DOMXPath($dom);
+        foreach (['data-phil-comprehension', 'data-phil-confirmed'] as $attribute) {
+            $elements = $xpath->query('//*[@'.$attribute.']');
+            $this->assertGreaterThan(0, $elements->length);
+            foreach ($elements as $element) {
+                $this->assertTrue($element->hasAttribute('hidden'), $attribute.' remains hidden for oral-only scoring.');
+            }
+        }
         $this->actingAs($teacher)->get(route('teacher.phil-iri.show', $submission))->assertOk()
             ->assertSee('name="miscues" type="number" min="0" max="10000" value="4"', false);
         // Subsequent content edits must not regrade the already submitted marks.

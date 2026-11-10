@@ -247,6 +247,100 @@ class AiAlgorithmManagementTest extends TestCase
         );
     }
 
+    public function test_collaborative_and_hybrid_scores_change_the_ranking_and_keep_peer_reasons(): void
+    {
+        config(['ai_models.collaborative_minimum' => ['students' => 2, 'activities' => 4, 'interactions' => 6]]);
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $peer = User::factory()->create(['section' => 'Magalang']);
+        $sharedOne = $this->assessment($teacher, ['target_section' => 'all']);
+        $sharedTwo = $this->assessment($teacher, ['target_section' => 'all']);
+        $contentTarget = $this->assessment($teacher, ['target_section' => 'all', 'title' => 'Content match',
+            'manual_questions' => [['difficulty' => 'independent']]]);
+        $peerTarget = $this->assessment($teacher, ['target_section' => 'all', 'title' => 'Peer match', 'focus_areas' => []]);
+        $source = $this->submission($student, $sharedOne, 10, 10);
+        $this->submission($student, $sharedTwo, 10, 10);
+        $this->submission($peer, $sharedOne, 10, 10);
+        $this->submission($peer, $sharedTwo, 10, 10);
+        $this->submission($peer, $contentTarget, 2, 10);
+        $this->submission($peer, $peerTarget, 9, 10);
+        $service = app(LearningRecommender::class);
+
+        $content = $service->recommend($student, $source, 'content_based', false);
+        $collaborative = $service->recommend($student, $source, 'collaborative', false);
+        $hybrid = $service->recommend($student, $source, 'hybrid:0.25', true);
+        $contentWeighted = $service->recommend($student, $source, 'hybrid:0.75', false);
+
+        $this->assertSame($contentTarget->id, $content['items']->first()['assessment']->id);
+        $this->assertSame($peerTarget->id, $collaborative['items']->first()['assessment']->id);
+        $this->assertFalse($hybrid['fallback']);
+        $this->assertSame($peerTarget->id, $hybrid['items']->first()['assessment']->id);
+        $this->assertEquals(.75, $hybrid['items']->first()['score']);
+        $this->assertEquals(.25, $hybrid['items']->last()['score']);
+        $this->assertSame($contentTarget->id, $contentWeighted['items']->first()['assessment']->id);
+        $this->assertContains('Helpful to learners with similar activity results', $hybrid['items']->first()['reasons']);
+        $this->assertDatabaseHas('learning_recommendations', [
+            'student_id' => $student->id, 'assessment_id' => $peerTarget->id, 'approach' => 'hybrid', 'score' => .75,
+        ]);
+    }
+
+    public function test_numeracy_recommendations_use_the_official_numeracy_level(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create(['section' => 'Magalang']);
+        $sourceAssessment = $this->assessment($teacher, ['subject' => 'numeracy', 'target_section' => 'all']);
+        $source = $this->submission($student, $sourceAssessment, 4, 10);
+        // Use literacy candidates only to verify that numeracy cannot grant a reading-level bonus.
+        $candidate = $this->assessment($teacher, ['target_section' => 'all',
+            'manual_questions' => [['difficulty' => 'frustration']]]);
+        $ranked = app(LearningRecommender::class)->recommend($student, $source, 'content_based', false);
+        $item = $ranked['items']->firstWhere('assessment.id', $candidate->id);
+        $this->assertNotContains('Difficulty fits the current proficiency evidence', $item['reasons']);
+
+        // The numeracy source's operational band maps to the internal easier-question band.
+        $reflection = new \ReflectionMethod(LearningRecommender::class, 'contentScores');
+        $reflection->setAccessible(true);
+        $numeracyCandidate = new Assessment(['subject' => 'numeracy', 'manual_questions' => [['difficulty' => 'frustration']]]);
+        $numeracyCandidate->id = -1;
+        $scores = $reflection->invoke(app(LearningRecommender::class), $student, $source,
+            collect([$numeracyCandidate]), collect([['id' => $source->id, 'user_id' => $student->id]]));
+        $this->assertContains('Difficulty fits the current proficiency evidence', $scores->first()['reasons']);
+    }
+
+    public function test_evaluation_placement_cannot_read_held_out_submissions(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $first = $this->assessment($teacher);
+        $second = $this->assessment($teacher);
+        $training = $this->submission($student, $first, 2, 10);
+        $this->submission($student, $second, 10, 10);
+
+        $restricted = \App\Support\AdaptiveQuestions::placement($first, $student, [$training->id]);
+        $empty = \App\Support\AdaptiveQuestions::placement($first, $student, []);
+        $full = \App\Support\AdaptiveQuestions::placement($first, $student);
+        $this->assertSame('support', $restricted['plan']);
+        $this->assertSame(1, $restricted['evidence_assessments']);
+        $this->assertSame('balanced', $empty['plan']);
+        $this->assertSame(0, $empty['evidence_assessments']);
+        $this->assertSame('developing', $full['plan']);
+    }
+
+    public function test_recommendation_history_uses_percentage_instead_of_question_points(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $assessment = $this->assessment($teacher);
+        $this->submission($student, $assessment, 9, 10);
+        $better = $this->submission($student, $assessment, 1, 1);
+        $method = new \ReflectionMethod(LearningRecommender::class, 'interactions');
+        $method->setAccessible(true);
+        $history = $method->invoke(app(LearningRecommender::class));
+        $this->assertCount(1, $history);
+        $this->assertSame($better->id, $history->first()['id']);
+        $this->assertSame(100, $history->first()['score']);
+    }
+
     public function test_only_evaluated_recommendation_approach_can_be_activated(): void
     {
         $admin = User::factory()->admin()->create();

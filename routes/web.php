@@ -201,6 +201,7 @@ Route::get('/teacher/dashboard', function () use ($submissionAverage) {
         'dashboardMetrics' => $dashboardMetrics,
         'focusAreas' => $focusAreas,
         'submissions' => $submissions,
+        'proficiencyCounts' => \App\Support\TeacherProficiencySummary::fromSubmissions($submissions),
         'recentSubmissions' => $submissions->take(5),
     ]);
 })->middleware(['auth', 'verified'])->name('teacher.dashboard');
