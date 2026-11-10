@@ -68,6 +68,30 @@ class AssessmentScoreReportingTest extends TestCase
             ->assertSeeText('Reading marks needed');
     }
 
+    public function test_teacher_dashboard_uses_owned_subject_results_for_proficiency_counts(): void
+    {
+        $teacher = User::factory()->teacher()->create();
+        $student = User::factory()->create();
+        $oral = $this->oralAssessment($teacher);
+        $this->oralSubmission($oral, $student, ['marked_miscues' => 19]);
+        $math = Assessment::create(['created_by' => $teacher->id, 'title' => 'Math result',
+            'subject' => 'numeracy', 'assessment_type' => 'worksheet', 'status' => 'published']);
+        AssessmentSubmission::create(['assessment_id' => $math->id, 'user_id' => $student->id,
+            'correct_count' => 19, 'question_count' => 20, 'answers' => [], 'points' => 950,
+            'submitted_at' => now()]);
+        $foreign = $this->oralAssessment(User::factory()->teacher()->create());
+        $this->oralSubmission($foreign, User::factory()->create(), ['marked_miscues' => 0]);
+
+        $this->actingAs($teacher)->get(route('teacher.dashboard'))->assertOk()
+            ->assertSee('aria-label="Literacy reading levels"', false)
+            ->assertSee('aria-label="Numeracy proficiency levels"', false)
+            ->assertViewHas('proficiencyCounts', fn (array $counts): bool =>
+                $counts['literacy']['Frustration'] === 1
+                && $counts['literacy']['Independent'] === 0
+                && $counts['numeracy']['Advanced'] === 1
+                && array_sum($counts['literacy']) === 1);
+    }
+
     private function oralAssessment(User $teacher): Assessment
     {
         return Assessment::query()->create([

@@ -7,9 +7,6 @@
         $completionPercent = $students->isEmpty() ? 0 : (int) round(($studentsWithResults / $students->count()) * 100);
         $needsAttentionStudents = $students->filter(fn (\App\Models\User $student): bool => $student->average_accuracy !== null && $student->average_accuracy < 75)
             ->sortBy(fn (\App\Models\User $student): int => $student->average_accuracy)->values();
-        $frustrationCount = $students->filter(fn (\App\Models\User $student): bool => $student->average_accuracy !== null && $student->average_accuracy < 60)->count();
-        $instructionalCount = $students->filter(fn (\App\Models\User $student): bool => $student->average_accuracy !== null && $student->average_accuracy >= 60 && $student->average_accuracy < 85)->count();
-        $independentCount = $students->filter(fn (\App\Models\User $student): bool => $student->average_accuracy !== null && $student->average_accuracy >= 85)->count();
         $sectionStats = $students->groupBy(fn (\App\Models\User $student): string => $student->section ?: 'Unassigned')
             ->map(function ($sectionStudents, string $section) use ($submissions): array {
                 $ids = $sectionStudents->pluck('id');
@@ -44,10 +41,17 @@
                             <div><span>With assessment results</span><strong>{{ number_format($studentsWithResults) }}</strong></div>
                             <div class="is-attention"><span>Need support</span><strong>{{ number_format($needsAttentionStudents->count()) }}</strong></div>
                         </div>
-                        <div class="teacher-level-summary" aria-label="Student performance levels">
-                            <span><i class="is-frustration"></i>Frustration <strong>{{ $frustrationCount }}</strong></span>
-                            <span><i class="is-instructional"></i>Instructional <strong>{{ $instructionalCount }}</strong></span>
-                            <span><i class="is-independent"></i>Independent <strong>{{ $independentCount }}</strong></span>
+                        <p class="teacher-dashboard-kicker">Literacy - latest reading level</p>
+                        <div class="teacher-level-summary" aria-label="Literacy reading levels">
+                            @foreach ($proficiencyCounts['literacy'] as $level => $count)
+                                <span><i class="is-{{ strtolower($level) }}"></i>{{ $level }} <strong>{{ $count }}</strong></span>
+                            @endforeach
+                        </div>
+                        <p class="teacher-dashboard-kicker">Numeracy - latest proficiency</p>
+                        <div class="teacher-level-summary" aria-label="Numeracy proficiency levels">
+                            @foreach ($proficiencyCounts['numeracy'] as $level => $count)
+                                <span>{{ $level }} <strong>{{ $count }}</strong></span>
+                            @endforeach
                         </div>
                         <a class="teacher-card-link" href="{{ route('students.index') }}">Open student list <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
                     </section>
@@ -68,7 +72,7 @@
                                 @endphp
                                 <article class="teacher-recommendation-item" data-teacher-section="{{ $student->section ?: 'Unassigned' }}" x-show="section === 'all' || section === $el.dataset.teacherSection">
                                     <span class="teacher-recommendation-icon material-symbols-outlined" aria-hidden="true">{{ $student->average_accuracy < 60 ? 'support' : 'lightbulb' }}</span>
-                                    <div class="teacher-recommendation-copy"><div><strong>{{ $student->name }}</strong><x-teacher-badge :tone="$student->average_accuracy < 60 ? 'frustration' : 'instructional'">{{ $student->average_accuracy < 60 ? 'Frustration' : 'Instructional' }}</x-teacher-badge></div><p>{{ $supportTitle }} · {{ $supportCopy }}</p><small>{{ $student->section ?: 'Section not assigned' }} · Average {{ $student->average_accuracy }}%</small></div>
+                                    <div class="teacher-recommendation-copy"><div><strong>{{ $student->name }}</strong><x-teacher-badge :tone="$student->average_accuracy < 60 ? 'frustration' : 'instructional'">{{ $student->average_accuracy < 60 ? 'Priority support' : 'Guided review' }}</x-teacher-badge></div><p>{{ $supportTitle }} · {{ $supportCopy }}</p><small>{{ $student->section ?: 'Section not assigned' }} · Average {{ $student->average_accuracy }}%</small></div>
                                     <a class="teacher-icon-action" href="{{ route('students.show', $student) }}" aria-label="View {{ $student->name }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
                                 </article>
                             @empty

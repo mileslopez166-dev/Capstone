@@ -142,7 +142,7 @@ class LearningRecommender
 
     private function rank(User $student, ?AssessmentSubmission $source, Collection $candidates, Collection $interactions, string $approach, float $alpha): array
     {
-        $content = $this->contentScores($student, $source, $candidates);
+        $content = $this->contentScores($student, $source, $candidates, $interactions);
         $collaborative = $this->collaborativeScores($student, $candidates, $interactions);
         $actual = $approach;
         if ($approach !== 'content_based' && (! $this->collaborativeReady($interactions)
@@ -161,26 +161,32 @@ class LearningRecommender
                 default => $contentScore,
             };
 
-            return $item + ['score' => round($score, 6), 'reasons' => array_values(array_filter([
+            return array_merge($item, ['score' => round($score, 6), 'reasons' => array_values(array_filter([
                 ...$item['reasons'], $actual !== 'content_based' && $collaborativeScore > 0 ? 'Helpful to learners with similar activity results' : null,
-            ]))];
+            ]))]);
         })->sortByDesc('score')->values();
 
         return ['approach' => $actual, 'requested_approach' => $approach, 'fallback' => $actual !== $approach, 'items' => $items];
     }
 
-    private function contentScores(User $student, ?AssessmentSubmission $source, Collection $candidates): Collection
+    private function contentScores(User $student, ?AssessmentSubmission $source, Collection $candidates, Collection $interactions): Collection
     {
         $sourceAssessment = $source?->assessment;
-        $level = $source ? (PhilIri::forSubmission($source)['level'] ?? $source->mlPrediction?->prediction) : null;
+        $level = $sourceAssessment?->subject === 'numeracy'
+            ? NumeracyProficiency::forSubmission($source)
+            : ($source ? (PhilIri::forSubmission($source)['level'] ?? null) : null);
         $preferredDifficulty = match ($level) {
-            'Frustration' => 'frustration', 'Instructional' => 'instructional', 'Independent' => 'independent', default => null,
+            'Frustration' => 'frustration', 'Instructional' => 'instructional', 'Independent' => 'independent',
+            'Beginning' => 'frustration', 'Developing' => 'instructional', 'Proficient' => 'independent', 'Advanced' => 'advanced',
+            default => null,
         };
         $sourceFocus = collect($sourceAssessment?->focus_areas ?? [])->map(fn ($value) => strtolower((string) $value));
 
         $placements = [];
 
-        return $candidates->map(function (Assessment $assessment) use ($student, $sourceAssessment, $preferredDifficulty, $sourceFocus, &$placements): array {
+        $submissionIds = $interactions->where('user_id', $student->id)->pluck('id')->all();
+
+        return $candidates->map(function (Assessment $assessment) use ($student, $sourceAssessment, $preferredDifficulty, $sourceFocus, $submissionIds, &$placements): array {
             $score = .15;
             $reasons = ['Not completed yet'];
             if ($sourceAssessment && $assessment->subject === $sourceAssessment->subject) {
@@ -193,15 +199,14 @@ class LearningRecommender
                 $reasons[] = 'Practices a related competency';
             }
             $difficulties = collect($assessment->manual_questions ?? [])->pluck('difficulty')->filter();
-            if ($preferredDifficulty && $difficulties->contains($preferredDifficulty)) {
+            if ($assessment->subject === $sourceAssessment?->subject && $preferredDifficulty && $difficulties->contains($preferredDifficulty)) {
                 $score += .2;
                 $reasons[] = 'Difficulty fits the current proficiency evidence';
             }
 
-            // Use the student's complete subject history to select a story whose
-            // question bank can serve the learner's current level. The selected
-            // story is then passed to AdaptiveQuestions when the student opens it.
-            $placement = $placements[$assessment->subject] ??= AdaptiveQuestions::placement($assessment, $student);
+            // Restrict placement to the supplied history so evaluation cannot
+            // read the held-out answers from the database.
+            $placement = $placements[$assessment->subject] ??= AdaptiveQuestions::placement($assessment, $student, $submissionIds);
             $recommendedDifficulty = AdaptiveQuestions::preferredDifficulty($placement['plan']);
             $recommendedQuestions = $difficulties->filter(fn ($difficulty) => $difficulty === $recommendedDifficulty)->count();
             if ($assessment->subject === 'literacy' && $assessment->question_selection === 'automatic') {
@@ -255,10 +260,11 @@ class LearningRecommender
     private function interactions(): Collection
     {
         return AssessmentSubmission::with('assessment')->whereNotNull('submitted_at')->get()
-            ->sortByDesc('points')->unique(fn ($submission) => $submission->user_id.':'.$submission->assessment_id)
             ->map(fn ($submission) => ['id' => $submission->id, 'user_id' => $submission->user_id,
-                'assessment_id' => $submission->assessment_id, 'score' => AssessmentScores::percentage($submission) ?? 0,
-                'submitted_at' => $submission->submitted_at])->values();
+                'assessment_id' => $submission->assessment_id, 'score' => AssessmentScores::percentage($submission),
+                'submitted_at' => $submission->submitted_at])
+            ->filter(fn ($row) => $row['score'] !== null)
+            ->sortByDesc('score')->unique(fn ($row) => $row['user_id'].':'.$row['assessment_id'])->values();
     }
 
     private function eligible(User $student): Collection

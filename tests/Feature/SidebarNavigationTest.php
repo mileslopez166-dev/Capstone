@@ -25,22 +25,26 @@ class SidebarNavigationTest extends TestCase
         $dom = new \DOMDocument();
         @$dom->loadHTML($response->getContent());
         $xpath = new \DOMXPath($dom);
-        $menus = $xpath->query('//*[@data-role-navigation="'.$role.'"]');
-        $this->assertSame(2, $menus->length, 'Desktop and mobile share the same menu.');
-        $accordionNames = [];
-        foreach ($menus as $menu) {
-            $groups = $xpath->query('.//details[@data-navigation-group]', $menu);
-            $name = $groups->item(0)->getAttribute('name');
-            $this->assertNotEmpty($name);
-            foreach ($groups as $details) $this->assertSame($name, $details->getAttribute('name'));
-            $accordionNames[] = $name;
-            $this->assertSame($group ? 1 : 0, $xpath->query('.//details[@open]', $menu)->length);
-            $current = $xpath->query('.//a[@aria-current="page"]', $menu);
-            $this->assertSame(1, $current->length);
-            $this->assertSame($href, $current->item(0)->getAttribute('href'));
-            if ($group) $this->assertSame(1, $xpath->query('.//details[@data-navigation-group="'.$group.'"][@open]', $menu)->length);
+        $variants = $xpath->query('//*[@data-teacher-dashboard]');
+        $scopes = $variants->length > 0 ? iterator_to_array($variants) : [$dom->documentElement];
+        foreach ($scopes as $scope) {
+            $menus = $xpath->query('.//*[@data-role-navigation="'.$role.'"]', $scope);
+            $this->assertSame(2, $menus->length, 'Each layout has desktop and mobile navigation.');
+            $accordionNames = [];
+            foreach ($menus as $menu) {
+                $groups = $xpath->query('.//details[@data-navigation-group]', $menu);
+                $name = $groups->item(0)->getAttribute('name');
+                $this->assertNotEmpty($name);
+                foreach ($groups as $details) $this->assertSame($name, $details->getAttribute('name'));
+                $accordionNames[] = $name;
+                $this->assertSame($group ? 1 : 0, $xpath->query('.//details[@open]', $menu)->length);
+                $current = $xpath->query('.//a[@aria-current="page"]', $menu);
+                $this->assertSame(1, $current->length);
+                $this->assertSame($href, $current->item(0)->getAttribute('href'));
+                if ($group) $this->assertSame(1, $xpath->query('.//details[@data-navigation-group="'.$group.'"][@open]', $menu)->length);
+            }
+            $this->assertCount(2, array_unique($accordionNames), 'Desktop and mobile accordions must open independently.');
         }
-        $this->assertCount(2, array_unique($accordionNames), 'Desktop and mobile accordions must open independently.');
     }
 
     public function test_related_teacher_pages_share_the_classroom_dropdown(): void

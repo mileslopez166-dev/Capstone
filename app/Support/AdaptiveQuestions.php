@@ -75,12 +75,13 @@ class AdaptiveQuestions
         });
     }
 
-    public static function placement(Assessment $assessment, User $student): array
+    public static function placement(Assessment $assessment, User $student, ?array $submissionIds = null): array
     {
         $bands = array_fill_keys(['frustration', 'instructional', 'independent'], ['correct' => 0, 'total' => 0]);
         $overall = ['correct' => 0, 'total' => 0, 'percentage' => null];
         // Build one subject-wide learner profile. The latest retake of each assessment counts once.
         $history = AssessmentSubmission::where('user_id', $student->id)
+            ->when($submissionIds !== null, fn ($query) => $query->whereIn('id', $submissionIds))
             ->whereHas('assessment', fn ($query) => $query->where('subject', $assessment->subject))
             ->where('question_count', '>', 0)->orderByDesc('submitted_at')->orderByDesc('id')->get()
             ->unique('assessment_id');
